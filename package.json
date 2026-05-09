@@ -1,0 +1,13 @@
+{
+    "name": "Mozu-Plugin",
+    "version": "1.0.0",
+    "author": "魔族陌",
+    "main": "index.js",
+    "type": "module",
+    "dependencies": {
+        "ioredis": "^5.10.0"
+    },
+    "imports": {
+        "#Redis": "./lib/Redis.js"
+    }
+}
