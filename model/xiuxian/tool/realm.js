@@ -26,21 +26,22 @@ export default new class {
     }
 
     async realmUp(id) {
-        const cult = parseInt(await Redis.hget('Mozu:xiuxian:playerInfo:' + id, '修为'), 10)
-        const realm = parseInt(await Redis.hget('Mozu:xiuxian:playerInfo:' + id, '境界'), 10)
+        const [ cultStr, realmStr ] = await Redis.hmget('Mozu:xiuxian:playerInfo:' + id,'修为', '境界')
+        const cult = parseInt(cultStr, 10)
+        const realm = parseInt(realmStr, 10)
         if (realm === 44) {
             return false
         } else {
             for (let item of realms) {
                 if (item.id === realm + 1) {
                     if (cult >= item.value) {
-                        if (randomInt(1, 100) <= item.success) {
+                        if (randomInt(1, 100, id) <= item.success) {
                             Redis.hset('Mozu:xiuxian:playerInfo:' + id, '境界', realm + 1)
                             return true
                         } else {
                             const cultFailed = cult - item.failed
                             Redis.hset('Mozu:xiuxian:playerInfo:' + id, '修为', cultFailed)
-                            return cultFailed
+                            return item.failed
                         }
                     } else {
                         return false

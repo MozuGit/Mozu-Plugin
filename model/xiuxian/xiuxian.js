@@ -86,8 +86,7 @@ export default new class {
     }
 
     async realmUp(id) {
-        const state = await Realm.realmUp(id)
-        return state
+        return await Realm.realmUp(id)
     }
 }
 
