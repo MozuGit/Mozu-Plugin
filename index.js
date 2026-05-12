@@ -7,7 +7,7 @@ const _filename = fileURLToPath(import.meta.url);
 const pluginRoot = path.dirname(_filename);
 
 if (!global.segment) {
-    global.segment = (await import("oicq")).segment;
+  global.segment = (await import("oicq")).segment;
 }
 
 let ret = [];
@@ -15,43 +15,43 @@ let ret = [];
 logger.info(logger.yellow("- [Mozu-Plugin] 正在载入"));
 
 async function getFiles(dir) {
-    const dirs = await fs.promises.readdir(dir, { withFileTypes: true });
-    const files = await Promise.all(
-        dirs.map((each) => {
-            const res = path.resolve(dir, each.name);
-            return each.isDirectory() ? getFiles(res) : res;
-        })
-    );
-    return Array.prototype.concat(...files);
+  const dirs = await fs.promises.readdir(dir, { withFileTypes: true });
+  const files = await Promise.all(
+    dirs.map((each) => {
+      const res = path.resolve(dir, each.name);
+      return each.isDirectory() ? getFiles(res) : res;
+    })
+  );
+  return Array.prototype.concat(...files);
 }
 
 const appFiles = await getFiles(path.join(pluginRoot, "apps")).then((files) =>
-    files.filter((file) => file.endsWith(".js"))
+  files.filter((file) => file.endsWith(".js"))
 );
 
 
 const files = [...appFiles];
 
 files.forEach((file) => {
-    file = pathToFileURL(file).href; 
-    ret.push(import(file));
+  file = pathToFileURL(file).href;
+  ret.push(import(file));
 });
 
 ret = await Promise.allSettled(ret);
 
 let apps = {};
 for (let i in files) {
-    let name = files[i].replace(".js", "");
-    const appName = path.basename(name);
+  let name = files[i].replace(".js", "");
+  const appName = path.basename(name);
 
-    if (ret[i].status !== "fulfilled") {
-        logger.error(`载入插件错误：${logger.red(name)}`);
-        logger.error(ret[i].reason);
-        continue;
-    }
-    const keys = Object.keys(ret[i].value);
-    const validKey = keys.find(key => key.toLowerCase() === appName.toLowerCase()) || keys[0]; // 如果没有同名的键，默认取第一个
-    apps[name] = ret[i].value[validKey];
+  if (ret[i].status !== "fulfilled") {
+    logger.error(`载入插件错误：${logger.red(name)}`);
+    logger.error(ret[i].reason);
+    continue;
+  }
+  const keys = Object.keys(ret[i].value);
+  const validKey = keys.find(key => key.toLowerCase() === appName.toLowerCase()) || keys[0]; // 如果没有同名的键，默认取第一个
+  apps[name] = ret[i].value[validKey];
 }
 
 logger.info(logger.green("- [Mozu-Plugin] 载入成功"));

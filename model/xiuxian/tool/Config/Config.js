@@ -9,7 +9,7 @@ import { YamlReader } from '../../../Config/YamlReader.js'
 import { Version } from '../../../Config/Version.js'
 
 class Cfg {
-  constructor () {
+  constructor() {
     this.config = {}
     this.watcher = {}
 
@@ -20,7 +20,7 @@ class Cfg {
   }
 
   /** 初始化配置 */
-  initCfg () {
+  initCfg() {
     if (!fs.existsSync(this.dirCfgPath)) fs.mkdirSync(this.dirCfgPath, { recursive: true })
 
     fs.readdirSync(this.defCfgPath)
@@ -34,22 +34,22 @@ class Cfg {
   }
 
   /** 读取默认或用户配置 */
-  getDefOrConfig (name) {
+  getDefOrConfig(name) {
     return { ...this.getDefSet(name), ...this.getConfig(name) }
   }
 
   /** 默认配置 */
-  getDefSet (name) {
+  getDefSet(name) {
     return this.getYaml('default', name)
   }
 
   /** 用户配置 */
-  getConfig (name) {
+  getConfig(name) {
     return this.getYaml('config', name)
   }
 
   /** 获取 YAML 配置 */
-  getYaml (type, name) {
+  getYaml(type, name) {
     let filePath = path.join(Version.Plugin_Path, 'config/xiuxian', type, `${name}.yaml`)
     let key = `${type}.${name}`
 
@@ -62,7 +62,7 @@ class Cfg {
   }
 
   /** 监听配置文件 */
-  watch (file, name, type = 'config') {
+  watch(file, name, type = 'config') {
     let key = `${type}.${name}`
     if (this.watcher[key]) return
 
@@ -92,7 +92,7 @@ class Cfg {
   }
 
   /** 获取所有配置 */
-  getCfg () {
+  getCfg() {
     return fs.readdirSync(this.defCfgPath)
       .filter((file) => file.endsWith('.yaml'))
       .reduce((configData, file) => {
@@ -104,14 +104,14 @@ class Cfg {
 
 
   /** 修改配置 */
-  modify (name, key, value, type = 'config') {
+  modify(name, key, value, type = 'config') {
     let filePath = path.join('../../../../', 'config', type, `${name}.yaml`)
     new YamlReader(filePath).set(key, value)
     delete this.config[`${type}.${name}`]
   }
 
   /** 对比两个对象的不同值 */
-  findDifference (obj1, obj2) {
+  findDifference(obj1, obj2) {
     return _.reduce(
       obj1,
       (result, value, key) => {
@@ -131,7 +131,7 @@ class Cfg {
 }
 
 export const Config = new Proxy(new Cfg(), {
-  get (target, prop) {
+  get(target, prop) {
     if (prop === 'masterQQ') return cfg.masterQQ
     if (prop in target) return target[prop]
     return target.getDefOrConfig(prop)
