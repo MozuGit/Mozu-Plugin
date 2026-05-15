@@ -23,7 +23,7 @@ git clone https://gitee.com/MozuGit/Mozu-Plugin
 pnpm install
 ```
 
-##功能介绍
+## 功能介绍
 
 <details>
   <summary>魔族陌修仙</summary>
