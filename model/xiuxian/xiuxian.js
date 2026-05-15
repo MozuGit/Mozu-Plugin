@@ -26,18 +26,59 @@ export default new class {
   }
 
   async getUserInfo(id) {
-    const cult = parseInt(await Redis.hget('Mozu:xiuxian:playerInfo:' + id, '修为'), 10)
-    const ls = parseInt(await Redis.hget('Mozu:xiuxian:playerInfo:' + id, '灵石'), 10)
-    const realm = parseInt(await Redis.hget('Mozu:xiuxian:playerInfo:' + id, '境界'), 10)
-    const signNum = parseInt(await Redis.hget('Mozu:xiuxian:playerInfo:' + id, '签到次数'), 10)
-    const realmName = await Realm.getRealmName(realm)
-    const realmName2 = await Realm.getRealmName(realm + 1)
-    const realmNeedExp = await Realm.getNextExp(cult, realm)
-    const sex = await Redis.hget('Mozu:xiuxian:playerInfo:' + id, '性别')
-    const title = await Redis.hget('Mozu:xiuxian:playerInfo:' + id, '称号')
-    const sectId = await Redis.hget('Mozu:xiuxian:playerInfo:' + id, '宗门ID') || "无"
+    const key = `Mozu:xiuxian:playerInfo:${id}`
+    const [cult, ls, realm, signNum, retreatStartTime, sex, title, sectId] = await Redis.hmget(key, '修为', '灵石', '境界', '签到次数', '闭关时间', '性别', '称号', '宗门ID')
+    const cultNum = parseInt(cult, 10) || 0
+    const lsNum = parseInt(ls, 10) || 0
+    const realmNum = parseInt(realm, 10) || 0
+    const signNumVal = parseInt(signNum, 10) || 0
+    const retreatStartTimeNum = parseInt(retreatStartTime, 10) || 0
+    
+    const realmName = await Realm.getRealmName(realmNum)
+    const realmName2 = await Realm.getRealmName(realmNum + 1)
+    const realmNeedExp = await Realm.getNextExp(cultNum, realmNum)
+    const retreatRunTime = getStringTime(Math.floor(Date.now() / 1000) - retreatStartTimeNum)
+    const power = await this.getPower(id)
+
+    const sectInfo = await this.getSectInfo(sectId)
+    const realms = {
+      realm: realmNum, 
+      realmName, 
+      realmName2, 
+      realmNeedExp, 
+    }
+    const retreat = {
+      startTime: retreatStartTimeNum, 
+      runTime: retreatRunTime,
+      profit: getProfit(Math.floor(Date.now() / 1000) - retreatStartTimeNum)
+    }
+    
+    return { 
+        cult: cultNum, 
+        ls: lsNum, 
+        signNum: signNumVal, 
+        realm: realms,
+        sex: sex || '未设置', 
+        title: title || '无', 
+        sectInfo,
+        retreat,
+        power
+    }
+  }
+
+  async getSectInfo(sectId) {
     const sectName = await Redis.hget(`Mozu:xiuxian:sectInfo:${sectId}`, '宗门名称') || '无'
-    return { cult, ls, signNum, realm, realmName, realmName2, realmNeedExp, sex, title, sectId, sectName }
+    return {
+      sectId,
+      sectName: sectName || "无"
+    }
+  }
+
+  async getPower(id) {
+    const key = `Mozu:xiuxian:playerInfo:${id}`
+    const [cult, realm] = await Redis.hmget(key, '修为', '境界')
+    const power = Math.floor(parseInt(realm ?? "0.5", 10) * (parseInt(cult, 10) / 100))
+    return power
   }
 
   async xiulian(id) {
@@ -88,6 +129,39 @@ export default new class {
   async realmUp(id) {
     return await Realm.realmUp(id)
   }
+
+  async startRetreat(id) {
+    const retreatStart = parseInt(await Redis.hget(`Mozu:xiuxian:playerInfo:${id}`, '闭关时间')) || 0
+    if (retreatStart === 0) {
+      const time = Math.floor(Date.now() / 1000)
+      Redis.hset(`Mozu:xiuxian:playerInfo:${id}`, '闭关时间', time)
+      return time
+    } else {
+      return false
+    }
+  }
+
+  async stopRetreat(id) {
+    let [ cult, retreatStart ] = await Redis.hmget(`Mozu:xiuxian:playerInfo:${id}`, '修为', '闭关时间') || 0
+    cult = parseInt(cult, 10)
+    retreatStart = parseInt(retreatStart, 10) || 0
+    const time = Math.floor(Date.now() / 1000) - retreatStart
+    if (retreatStart === 0) {
+      return false
+    } else {
+      cult = cult + getProfit(time)
+      Redis.hmset(`Mozu:xiuxian:playerInfo:${id}`, {
+        修为: cult,
+        闭关时间: 0
+      })
+      return {
+        cult: getProfit(time).cult,
+        retreatStart,
+        retreatRunTime: getStringTime(time)
+      }
+    }
+  }
+
 }
 
 function randomInt(min, max, id) {
@@ -104,4 +178,24 @@ function gettoday() {
   const day = currentDate.getDate().toString().padStart(2, '0')
   const date_time = `${year}-${month}-${day}`
   return date_time
+}
+
+function getStringTime(time) {
+  const hours = Math.floor(time / 3600)
+  const minutes = Math.floor((time % 3600) / 60)
+  const seconds = time % 60
+  const timeText = `${hours}小时${minutes}分${seconds}秒`
+  return timeText
+}
+
+function getProfit(time) {
+  let hours = Math.floor(time / 3600)
+  const hoursMax = parseInt(Config.xiuxian.retreat.max, 10)
+  if (hoursMax !== 0) {
+    if (hours > hoursMax) {
+      hours = hoursMax
+    }
+  }
+  const cult = hours * parseInt(Config.xiuxian.retreat.cult, 10)
+  return { cult }
 }
