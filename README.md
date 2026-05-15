@@ -1,6 +1,3 @@
-# Mozu-Plugin
-
-***
 > [!TIP]
 > 如果您觉得我们的项目有帮助，请给我们一个星星（Starred）！您的支持对我们非常重要，将激励我们不断改进和提供更好的内容。谢谢！🙏
 
@@ -26,13 +23,11 @@ git clone https://gitee.com/MozuGit/Mozu-Plugin
 pnpm install
 ```
 
-***
-
 ##功能介绍
 
 <details>
   <summary>魔族陌修仙</summary>
 
-  喵
+  **喵**
 
 </details>
