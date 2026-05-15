@@ -1,5 +1,7 @@
 # Mozu-Plugin
+
 ***
+
 ## 安装教程
 
 - 使用 github
@@ -20,10 +22,12 @@ git clone https://gitee.com/MozuGit/Mozu-Plugin
 pnpm install
 ```
 
+***
+
 ##功能介绍
 
 <details>
-  <summary>**魔族陌修仙**</summary>
+  <summary>魔族陌修仙</summary>
 
   喵
 
