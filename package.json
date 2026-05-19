@@ -5,9 +5,11 @@
   "main": "index.js",
   "type": "module",
   "dependencies": {
-    "ioredis": "^5.10.0"
+    "ioredis": "^5.10.0",
+    "seedrandom": "^3.0.5"
   },
   "imports": {
-    "#Redis": "./lib/Redis.js"
+    "#Redis": "./lib/Redis.js",
+    "#randomInt": "./lib/randomInt.js"
   }
 }

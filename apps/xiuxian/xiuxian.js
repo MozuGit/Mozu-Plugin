@@ -1,11 +1,8 @@
 import Redis from '#Redis'
 
-import { xxRegExp, Button } from "../../model/xiuxian/index.js"
+import { RegExp, Button } from "../../model/xiuxian/index.js"
 import { Config } from "../../model/xiuxian/tool/Config/Config.js"
 import { xiuxianText } from "../../model/xiuxian/tool/xiuxianText.js"
-
-const prefix = Config.setting.forceSharp ? '^#' : '^#?'
-const xiuxianRegExp = new RegExp(`${prefix}${await xxRegExp.getRegExp()}$`)
 
 export class MozuXiuxian extends plugin {
   constructor() {
@@ -17,7 +14,7 @@ export class MozuXiuxian extends plugin {
     })
     this.rule.push(
       {
-        reg: xiuxianRegExp,
+        reg: RegExp.xiuxian,
         fnc: 'xiuxian'
       },
       {
@@ -29,7 +26,24 @@ export class MozuXiuxian extends plugin {
 
   async xiuxian(e) {
     if (!['QQBot'].includes(e?.bot?.adapter?.name)) return false
-    return await this.e.reply([await xiuxianText(this.e.msg, this.e.user_id, this.e.self_id), Button.xiuxian])
+    const message = await xiuxianText(this.e.msg, this.e.user_id, this.e.self_id)
+    let lastText = null
+    for (let msg of message) {
+      if (msg.type && msg.type === "button") {
+        if (lastText !== null) {
+          await this.e.reply([lastText, msg])
+          lastText = null
+        }
+      } else {
+        if (lastText !== null) {
+          await this.e.reply(lastText)
+        }
+        lastText = msg
+      }
+    }
+    if (lastText !== null) {
+      await this.e.reply(lastText)
+    }
   }
 
   async clear(e) {

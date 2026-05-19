@@ -24,10 +24,33 @@ const Button = {
       ]
     )
   },
-  get zongmen() {
+  get startRetreat() {
     return segment.button(
       [
-        { text: "测试", input: "测试" }
+        { text: "确认开始闭关", input: "确认开始闭关" }
+      ], [
+        { text: "结束闭关", input: "结束闭关" },
+        { text: "查询修仙者", input: "查询修仙者" }
+      ], [
+        { text: "修炼", input: "修炼" },
+        { text: "开采", input: "开采" },
+        { text: "信息", input: "修仙个人信息" },
+        { text: "签到", input: "修仙签到" }
+      ]
+    )
+  },
+  get stopRetreat() {
+    return segment.button(
+      [
+        { text: "确认结束闭关", input: "确认结束闭关" }
+      ], [
+        { text: "开始闭关", input: "开始闭关" },
+        { text: "查询修仙者", input: "查询修仙者" }
+      ], [
+        { text: "修炼", input: "修炼" },
+        { text: "开采", input: "开采" },
+        { text: "信息", input: "修仙个人信息" },
+        { text: "签到", input: "修仙签到" }
       ]
     )
   }

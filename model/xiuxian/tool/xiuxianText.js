@@ -1,14 +1,23 @@
-import { xiuxian } from "../index.js"
+import { Button, xiuxian } from "../index.js"
 import { Config } from "./Config/Config.js"
+
+
+const retreatText = [
+  '***',
+  '**当前正在闭关中...**',
+  '>如需取消闭关请点击',
+  '**[结束闭关](mqqapi://aio/inlinecmd?command=结束闭关)**',
+  '***',
+].join('\n')
 
 async function xiuxianText(msg, user_id, self_id) {
   const id = await xiuxian.init(user_id)
-  let Text
+  let Text = []
   if (msg === '修炼') {
     const value = await xiuxian.xiulian(id)
     const userInfo = await xiuxian.getUserInfo(id)
     if (value.cult && value.addcult) {
-      Text = [
+      Text.push([
         '<@' + user_id.replace(`${self_id}:`, '') + '>',
         '***',
         '**ID：' + id + '**',
@@ -26,21 +35,24 @@ async function xiuxianText(msg, user_id, self_id) {
         '下一境界：' + userInfo.realm.realmName2,
         '距离下一境界：' + ((userInfo.realm.realmNeedExp === 0) ? '已满足[突破](mqqapi://aio/inlinecmd?command=突破)条件' : '还需' + userInfo.realm.realmNeedExp + '点修为'),
         '***'
-      ].join('\n')
-    } else {
-      Text = [
+      ].join('\n'))
+    } else if (value.outTime) {
+      Text.push([
         '<@' + user_id.replace(`${self_id}:`, '') + '>',
         '***',
         '**当前正在CD中...**',
         '>剩余：' + value.outTime + '秒',
         '***',
-      ].join('\n')
+      ].join('\n'))
+    } else if (value.retreat) {
+      Text.push(retreatText)
     }
+    Text.push(Button.xiuxian)
   } else if (msg === '开采') {
     const value = await xiuxian.kaicai(id)
     const userInfo = await xiuxian.getUserInfo(id)
     if (value.ls && value.addls) {
-      Text = [
+      Text.push([
         '<@' + user_id.replace(`${self_id}:`, '') + '>',
         '***',
         '**ID：' + id + '**',
@@ -53,21 +65,24 @@ async function xiuxianText(msg, user_id, self_id) {
         '>**[性别：' + userInfo.sex + '](mqqapi://aio/inlinecmd?command=设置性别)**',
         '>**[宗门：' + userInfo.sectInfo.sectName + '    ID：' + userInfo.sectInfo.sectId + '](mqqapi://aio/inlinecmd?command=我的宗门)**',
         '***'
-      ].join('\n')
-    } else {
-      Text = [
+      ].join('\n'))
+    } else if (value.outTime) {
+      Text.push([
         '<@' + user_id.replace(`${self_id}:`, '') + '>',
         '***',
         '**当前正在CD中...**',
         '>剩余：' + value.outTime + '秒',
         '***',
-      ].join('\n')
+      ].join('\n'))
+    } else if (value.retreat) {
+      Text.push(retreatText)
     }
+    Text.push(Button.xiuxian)
   } else if (msg === '修仙签到') {
     const value = await xiuxian.sign(id)
     const userInfo = await xiuxian.getUserInfo(id)
     if (value) {
-      Text = [
+      Text.push([
         '<@' + user_id.replace(`${self_id}:`, '') + '>',
         '***',
         '**ID：' + id + '**',
@@ -82,9 +97,9 @@ async function xiuxianText(msg, user_id, self_id) {
         '>修为' + value.addcult,
         '灵石' + value.addls,
         '***'
-      ].join('\n')
+      ].join('\n'))
     } else {
-      Text = [
+      Text.push([
         '<@' + user_id.replace(`${self_id}:`, '') + '>',
         '***',
         '**今天已经签到过了，明天再来吧**',
@@ -92,14 +107,15 @@ async function xiuxianText(msg, user_id, self_id) {
         '**签到情况**',
         '>签到次数：' + userInfo.signNum + '天',
         '***',
-      ].join('\n')
+      ].join('\n'))
     }
+    Text.push(Button.xiuxian)
   } else if (msg === "突破") {
     const value = await xiuxian.realmUp(id)
     const userInfo = await xiuxian.getUserInfo(id)
     if (value) {
       if (value === true) {
-        Text = [
+        Text.push([
           '<@' + user_id.replace(`${self_id}:`, '') + '>',
           '***',
           '**突破成功**',
@@ -110,9 +126,11 @@ async function xiuxianText(msg, user_id, self_id) {
           '下一境界：' + userInfo.realm.realmName2,
           '距离下一境界：' + ((userInfo.realm.realmNeedExp === 0) ? '已满足[突破](mqqapi://aio/inlinecmd?command=突破)条件' : '还需' + userInfo.realm.realmNeedExp + '点修为'),
           '***',
-        ].join('\n')
+        ].join('\n'))
+      } else if (value.retreat) {
+        Text.push(retreatText)
       } else {
-        Text = [
+        Text.push([
           '<@' + user_id.replace(`${self_id}:`, '') + '>',
           '***',
           '**突破失败**',
@@ -123,10 +141,10 @@ async function xiuxianText(msg, user_id, self_id) {
           '下一境界：' + userInfo.realmName2,
           '距离下一境界：' + '还需' + userInfo.realm.realmNeedExp + '点修为',
           '***',
-        ].join('\n')
+        ].join('\n'))
       }
     } else {
-      Text = [
+      Text.push([
         '<@' + user_id.replace(`${self_id}:`, '') + '>',
         '***',
         '**突破失败**',
@@ -137,11 +155,12 @@ async function xiuxianText(msg, user_id, self_id) {
         '下一境界：' + userInfo.realm.realmName2,
         '距离下一境界：' + '还需' + userInfo.realm.realmNeedExp + '点修为',
         '***',
-      ].join('\n')
+      ].join('\n'))
     }
+    Text.push(Button.xiuxian)
   } else if (msg === "修仙个人信息") {
     const userInfo = await xiuxian.getUserInfo(id)
-    Text = [
+    Text.push([
       '<@' + user_id.replace(`${self_id}:`, '') + '>',
       '***',
       '**ID：' + id + '**',
@@ -160,11 +179,12 @@ async function xiuxianText(msg, user_id, self_id) {
       '灵根加成：0%',
       '功法加成：0%',
       '***'
-    ].join('\n')
+    ].join('\n'))
+    Text.push(Button.xiuxian)
   } else if (msg === "开始闭关") {
     const userInfo = await xiuxian.getUserInfo(id)
     if (userInfo.retreat.startTime === 0) {
-      Text = [
+      Text.push([
         '<@' + user_id.replace(`${self_id}:`, '') + '>',
         '***',
         '**闭关说明**',
@@ -173,21 +193,22 @@ async function xiuxianText(msg, user_id, self_id) {
         '闭关上限' + Config.xiuxian.retreat.max + '小时',
         '闭关上限后时间仍会累计，但收益不会计算',
         '***'
-      ].join('\n')
+      ].join('\n'))
     } else {
-      Text = [
+      Text.push([
         '<@' + user_id.replace(`${self_id}:`, '') + '>',
         '***',
         '**你当前正在闭关中**',
         '>开始时间：' + formatTime(userInfo.retreat.startTime),
         '闭关时长：' + userInfo.retreat.runTime,
         '***'
-      ].join('\n')
+      ].join('\n'))
     }
+    Text.push(Button.startRetreat)
   } else if (msg === "结束闭关") {
     const userInfo = await xiuxian.getUserInfo(id)
     if (userInfo.retreat.startTime === 0) {
-      Text = [
+      Text.push([
         '<@' + user_id.replace(`${self_id}:`, '') + '>',
         '***',
         '**你还没开始闭关呢**',
@@ -196,9 +217,9 @@ async function xiuxianText(msg, user_id, self_id) {
         '闭关上限' + Config.xiuxian.retreat.max + '小时',
         '闭关上限后时间仍会累计，但收益不会计算',
         '***'
-      ].join('\n')
+      ].join('\n'))
     } else {
-      Text = [
+      Text.push([
         '<@' + user_id.replace(`${self_id}:`, '') + '>',
         '***',
         '**闭关说明**',
@@ -208,34 +229,36 @@ async function xiuxianText(msg, user_id, self_id) {
         '**现在闭关收益**',
         '>修为：' + userInfo.retreat.profit.cult,
         '***'
-      ].join('\n')
+      ].join('\n'))
     }
+    Text.push(Button.stopRetreat)
   } else if (msg === "确认开始闭关") {
     const value = await xiuxian.startRetreat(id)
     const userInfo = await xiuxian.getUserInfo(id)
     if (value) {
-      Text = [
+      Text.push([
         '<@' + user_id.replace(`${self_id}:`, '') + '>',
         '***',
         '**开始闭关**',
         '>开始时间：' + formatTime(userInfo.retreat.startTime),
         '***'
-      ].join('\n')
+      ].join('\n'))
     } else {
-      Text = [
+      Text.push([
         '<@' + user_id.replace(`${self_id}:`, '') + '>',
         '***',
         '**你当前正在闭关中**',
         '>开始时间：' + formatTime(userInfo.retreat.startTime),
         '闭关时长：' + userInfo.retreat.runTime,
         '***'
-      ].join('\n')
+      ].join('\n'))
     }
+    Text.push(Button.startRetreat)
   } else if (msg === "确认结束闭关") {
     const value = await xiuxian.stopRetreat(id)
     const userInfo = await xiuxian.getUserInfo(id)
     if (value) {
-      Text = [
+      Text.push([
         '<@' + user_id.replace(`${self_id}:`, '') + '>',
         '***',
         '**结束闭关**',
@@ -246,9 +269,9 @@ async function xiuxianText(msg, user_id, self_id) {
         '**闭关收益**',
         '>修为：' + value.cult,
         '***'
-      ].join('\n')
+      ].join('\n'))
     } else {
-      Text = [
+      Text.push([
         '<@' + user_id.replace(`${self_id}:`, '') + '>',
         '***',
         '**你还没开始闭关呢**',
@@ -257,16 +280,71 @@ async function xiuxianText(msg, user_id, self_id) {
         '闭关上限' + Config.xiuxian.retreat.max + '小时',
         '闭关上限后时间仍会累计，但收益不会计算',
         '***'
-      ].join('\n')
+      ].join('\n'))
     }
-  } else {
-    Text = [
-      '<@' + user_id.replace(`${self_id}:`, '') + '>',
-      '***',
-      '**待更新**',
-      '>**[聊天群：976719017](mqqapi://aio/inlinecmd?command=976719017)**',
-      '***'
-    ].join('\n')
+    Text.push(Button.stopRetreat)
+  } else if (msg.startsWith('切磋')) {
+    const id2 = (msg.match(/\d+/g) || []).join('')
+    const value = await xiuxian.pvp(id, id2)
+    if (value) {
+      if (value.event) {
+        switch (value.event) {
+          case 'in_retreat':
+            Text.push([
+              '<@' + user_id.replace(`${self_id}:`, '') + '>',
+              '***',
+              '**' + ((value.data.event_id === id) ? '' : '对方') + '当前正在闭关**',
+              '>暂时无法切磋',
+              '***'
+            ].join('\n'))
+            break
+          case 'cult_lack':
+            Text.push([
+              '<@' + user_id.replace(`${self_id}:`, '') + '>',
+              '***',
+              '**' + ((value.data.event_id === id) ? '你的' : '对方') + '修为不足5000**',
+              '>暂时无法切磋',
+              '***'
+            ].join('\n'))
+            break
+          case 'pvp_cd':
+            Text.push([
+              '<@' + user_id.replace(`${self_id}:`, '') + '>',
+              '***',
+              '**' + ((value.data.event_id === id) ? '当前' : '对方') + '正在CD中...**',
+              '>**剩余' + value.data.pvp_cd + '秒**',
+              '***'
+            ].join('\n'))
+            break
+        }
+      } else {
+        Text.push([
+          '<@' + user_id.replace(`${self_id}:`, '') + '>',
+          '***',
+          '**切磋开始**',
+          '>**你对ID: [' + id2 + '](mqqapi://aio/inlinecmd?command=查询修仙者' + id2 + ')发起切磋**',
+          '***',
+          '**切磋信息**',
+          '>你的战力：' + value.powerA,
+          '对方战力：' + value.powerB,
+          '切磋成功概率：' + (value.finalWinRate * 100).toFixed(2) + '%',
+          '***'
+        ].join('\n'))
+        Text.push([
+          '<@' + user_id.replace(`${self_id}:`, '') + '>',
+          '***',
+          '**切磋结果**',
+          '>**你的ID：[' + id + '](mqqapi://aio/inlinecmd?command=查询修仙者' + id + ')**',
+          '**对方ID：[' + id2 + '](mqqapi://aio/inlinecmd?command=查询修仙者' + id2 + ')**',
+          '***',
+          '**切磋结算**',
+          '>你' + (value.winner ? '胜利：+' : '失败：-') + value.cultA + '点修为',
+          '对方' + (value.winner ? '失败：-' : '胜利：+') + value.cultB + '点修为',
+          '***'
+        ].join('\n'))
+      }
+    }
+    Text.push(Button.xiuxian)
   }
   return Text
 }
