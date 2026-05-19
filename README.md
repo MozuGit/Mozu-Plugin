@@ -8,13 +8,13 @@
 - 使用 github
 
 ```sh
-git clone https://github.com/MozuGit/Mozu-Plugin
+git clone https://github.com/MozuGit/Mozu-Plugin ./plugins/Mozu-Plugin
 ```
 
 - 使用 gitee
 
 ```sh
-git clone https://gitee.com/MozuGit/Mozu-Plugin
+git clone https://gitee.com/MozuGit/Mozu-Plugin ./plugins/Mozu-Plugin
 ```
 
 2. 安装依赖
