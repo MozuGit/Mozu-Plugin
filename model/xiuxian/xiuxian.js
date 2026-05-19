@@ -153,7 +153,7 @@ export default new class {
   }
 
   async realmUp(id) {
-    const retreatStart = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '闭关时间'), 10)
+    const retreatStart = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '闭关时间'), 10) || 0
     if (retreatStart !== 0) {
       return { retreat: true }
     }

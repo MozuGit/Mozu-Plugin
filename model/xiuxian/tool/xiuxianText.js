@@ -335,7 +335,6 @@ const prefixHandlers = [
                 '<@' + user_id + '>',
                 '***',
                 '**未找到该玩家**',
-                value.data.event_id,
                 '>请确认该玩家是否存在或注册',
                 '***'
               ].join('\n'))
