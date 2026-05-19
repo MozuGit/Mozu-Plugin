@@ -27,8 +27,16 @@ export default new class {
     return exists
   }
 
+  async hasPlayer(openid) {
+    const exists = await Redis.hget('Mozu:xiuxian:openid:forward', openid)
+    return !!exists
+  }
+  
   async getUserInfo(id) {
     const key = `${PLAYER_INFO_KEY}:${id}`
+    if ((await Redis.exists(`${PLAYER_INFO_KEY}:${id}`)) === 0) {
+      return false
+    }
     const [cult, ls, realm, signNum, retreatStartTime, sex, title, sectId] = await Redis.hmget(key, '修为', '灵石', '境界', '签到次数', '闭关时间', '性别', '称号', '宗门ID')
     const cultNum = parseInt(cult, 10) || 0
     const lsNum = parseInt(ls, 10) || 0
@@ -193,7 +201,10 @@ export default new class {
     }
     if ((await Redis.exists(`${PLAYER_INFO_KEY}:${id2}`)) === 0) {
       return {
-        event: "not_id"
+        event: "not_id",
+        data: {
+          event_id: id2
+        }
       }
     }
     let [cult, retreatStart, pvp_cd] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '闭关时间', '切磋冷却')
