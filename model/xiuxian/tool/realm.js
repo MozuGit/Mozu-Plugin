@@ -1,4 +1,5 @@
 import Redis from "#Redis"
+import randomInt from "#randomInt"
 import { Config } from "./Config/Config.js"
 
 const realms = Config.Realm.Realms
@@ -50,11 +51,4 @@ export default new class {
       }
     }
   }
-}
-
-function randomInt(min, max, id) {
-  let random = (Date.now() * id * 9301 + 49297) % 233280
-  min = Math.ceil(min)
-  max = Math.floor(max)
-  return Math.floor(random / 233280 * (max - min + 1)) + min
 }

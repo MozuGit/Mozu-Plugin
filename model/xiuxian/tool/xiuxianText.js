@@ -316,6 +316,22 @@ async function xiuxianText(msg, user_id, self_id) {
               '***'
             ].join('\n'))
             break
+          case 'self_pvp':
+            Text.push([
+              '<@' + user_id.replace(`${self_id}:`, '') + '>',
+              '***',
+              '**不能和自己切磋**',
+              '***'
+            ].join('\n'))
+            break
+          case 'not_id':
+            Text.push([
+              '<@' + user_id.replace(`${self_id}:`, '') + '>',
+              '***',
+              '**找不到该玩家**',
+              '>请确认该玩家是否存在',
+              '***'
+            ].join('\n'))
         }
       } else {
         Text.push([

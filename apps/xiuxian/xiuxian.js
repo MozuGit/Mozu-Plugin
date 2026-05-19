@@ -1,7 +1,6 @@
 import Redis from '#Redis'
 
 import { RegExp, Button } from "../../model/xiuxian/index.js"
-import { Config } from "../../model/xiuxian/tool/Config/Config.js"
 import { xiuxianText } from "../../model/xiuxian/tool/xiuxianText.js"
 
 export class MozuXiuxian extends plugin {

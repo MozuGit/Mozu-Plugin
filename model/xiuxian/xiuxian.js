@@ -186,8 +186,15 @@ export default new class {
   }
 
   async pvp(id, id2) {
+    if (id === id2) {
+      return {
+        event: "self_pvp"
+      }
+    }
     if ((await Redis.exists(`${PLAYER_INFO_KEY}:${id2}`)) === 0) {
-      return false
+      return {
+        event: "not_id"
+      }
     }
     let [cult, retreatStart, pvp_cd] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '闭关时间', '切磋冷却')
     cult = parseInt(cult, 10)
