@@ -33,12 +33,6 @@ pnpm install
 ### 插件功能实现
 
 - [x] 魔族陌修仙 （开发中）
-
-<details>
-  <summary>魔族陌修仙</summary>
-  
-  **命令列表**
-  
   - [ ] 修仙基础
     - [x] 修炼
     - [x] 开采
@@ -80,5 +74,3 @@ pnpm install
     - [ ] 宗门管理
     - [ ] 供奉宗门
     - [ ] 宗门商店
-
-</details>
