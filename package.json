@@ -1,0 +1,15 @@
+{
+  "name": "Mozu-Plugin",
+  "version": "1.0.1",
+  "author": "魔族陌",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "ioredis": "^5.10.0",
+    "seedrandom": "^3.0.5"
+  },
+  "imports": {
+    "#Redis": "./lib/Redis.js",
+    "#randomInt": "./lib/randomInt.js"
+  }
+}
