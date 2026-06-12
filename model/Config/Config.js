@@ -4,7 +4,6 @@ import path from 'node:path'
 import chokidar from 'chokidar'
 import _ from 'lodash'
 
-import cfg from '../../../../lib/config/config.js'
 import { Version } from './Version.js'
 import { YamlReader } from './YamlReader.js'
 
@@ -132,7 +131,6 @@ class Cfg {
 
 export const Config = new Proxy(new Cfg(), {
   get(target, prop) {
-    if (prop === 'masterQQ') return cfg.masterQQ
     if (prop in target) return target[prop]
     return target.getDefOrConfig(prop)
   }
