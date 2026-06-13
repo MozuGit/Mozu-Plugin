@@ -578,6 +578,11 @@ export default new class {
 
   async signSect(id) {
     let [cult, ls, lastDay, sectId] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, ['修为', '灵石', '宗门上次签到时间', '宗门ID'])
+    if ((await Redis.exists(`Mozu:xiuxian:sectInfo:${sectId}`)) === 0) {
+      return {
+        event: "no_sect"
+      }
+    }
     let [exp, level] = await Redis.hmget(`Mozu:xiuxian:sectInfo:${sectId}`, '宗门经验', '宗门等级')
     exp = parseInt(exp, 10)
     level = parseInt(level, 10)

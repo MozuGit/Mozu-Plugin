@@ -489,12 +489,22 @@ const commandHandlers = {
           '获得宗门经验：' + value.data.exp,
           '***'
         ].join('\n'))
-      case 'in_signed':
+        break
+      case 'is_signed':
         Text.push([
           '<@' + user_id + '>',
           '***',
           '**今天已经签到过了，明天再来吧**',
           '***',
+        ].join('\n'))
+        break
+      case 'no_sect':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**你还没加入宗门呢**',
+          '>点击[加入宗门](mqqapi://aio/inlinecmd?command=加入宗门)',
+          '***'
         ].join('\n'))
         break
     }
