@@ -543,8 +543,8 @@ export default new class {
       }
     }
     let [members, memberMax, noAudit] = await Redis.hmget(`Mozu:xiuxian:sectInfo:${joinID}`, '宗门成员', '宗门人数上限', '无需审核状态')
+    const memberNum = members.length
     members = JSON.parse(members)
-    memberNum = members.length
     memberMax = parseInt(memberMax, 10)
     noAudit = parseInt(noAudit, 10) || 0
     if (memberNum >= memberMax) {
@@ -557,13 +557,6 @@ export default new class {
       }
     }
     if (noAudit) {
-      members = JSON.parse(await Redis.hget(`Mozu:xiuxian:sectInfo:${joinID}`, '待审核成员') || [])
-      members.push(id)
-      await Redis.hset(`Mozu:xiuxian:sectInfo:${joinID}`, '待审核成员', JSON.stringify(members))
-      return {
-        event: "join_sect_audit"
-      }
-    } else {
       members.push(id)
       await Redis.hset(`Mozu:xiuxian:sectInfo:${joinID}`, '宗门成员', JSON.stringify(members))
       await Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '宗门ID', joinID)
@@ -572,6 +565,13 @@ export default new class {
         data: {
           sectId: joinID
         }
+      }
+    } else {
+      members = JSON.parse(await Redis.hget(`Mozu:xiuxian:sectInfo:${joinID}`, '待审核成员') || [])
+      members.push(id)
+      await Redis.hset(`Mozu:xiuxian:sectInfo:${joinID}`, '待审核成员', JSON.stringify(members))
+      return {
+        event: "join_sect_audit"
       }
     }
   }

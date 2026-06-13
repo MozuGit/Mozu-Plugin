@@ -507,7 +507,7 @@ const prefixHandlers = [
     prefix: '切磋',
     handler: async (id, user_id, Text, msg, at) => {
       let id2 = 0
-      if (at) {
+      if (at && !Array.isArray(at)) {
         if (await xiuxian.hasPlayer(at)) {
           id2 = await xiuxian.init(at)
         }
@@ -593,7 +593,7 @@ const prefixHandlers = [
     prefix: '查询修仙者',
     handler: async (id, user_id, Text, msg, at) => {
       let query_id
-      if (at) {
+      if (at && !Array.isArray(at)) {
         if (await xiuxian.hasPlayer(at)) {
           query_id = await xiuxian.init(at)
         } else {
@@ -634,7 +634,7 @@ const prefixHandlers = [
     prefix: '加入宗门',
     handler: async (id, user_id, Text, msg, at) => {
       let join_id
-      if (at) {
+      if (at && !Array.isArray(at)) {
         if (await xiuxian.hasPlayer(at)) {
           const atID = await xiuxian.init(at)
           const userInfo = await xiuxian.getUserInfo(atID)
@@ -750,6 +750,7 @@ function buildSectList(sectInfos) {
       '>宗主：' + item.owner + '  等级：' + item.level,
       '人数：' + item.memberNum + '/' + item.memberMax,
       '简介：' + item.desc,
+      '[点击加入宗门](mqqapi://aio/inlinecmd?command=加入宗门 ' + item.id + ')',
       '***'
     ].join('\n'))
   }
