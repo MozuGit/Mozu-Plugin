@@ -451,7 +451,6 @@ export default new class {
         }
         break
     }
-
     players.sort((a, b) => b.value - a.value)
     const top10Players = players.slice(0, 10)
     const allRanks = top10Players.map((player, index) => ({
@@ -573,6 +572,76 @@ export default new class {
         data: {
           sectId: joinID
         }
+      }
+    }
+  }
+
+  async signSect(id) {
+    let [cult, ls, lastDay, sectId] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, ['修为', '灵石', '宗门上次签到时间', '宗门ID'])
+    let [exp, level] = await Redis.hmget(`Mozu:xiuxian:sectInfo:${sectId}`, '宗门经验', '宗门等级')
+    exp = parseInt(exp, 10)
+    level = parseInt(level, 10)
+    let { cult: addcult, ls: addls, sect_exp } = Config.sect.sect_sign[level - 1]
+    const today = gettoday()
+    if (lastDay && lastDay === today) {
+      return {
+        event: "is_signed"
+      }
+    }
+    cult = parseInt(cult, 10) + addcult
+    ls = parseInt(ls, 10) + addls
+    exp = exp + sect_exp
+    await Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
+      修为: cult,
+      灵石: ls,
+      宗门上次签到时间: today
+    })
+    await Redis.hset(`Mozu:xiuxian:sectInfo:${sectId}`, '宗门经验', exp)
+    return {
+      event: "sign_in_success",
+      data: {
+        addcult,
+        addls,
+        exp
+      }
+    }
+  }
+
+  async listSect(id) {
+    const sectCount = parseInt(await Redis.get('Mozu:xiuxian:sectid:counter'), 10) || 0
+    let sectList = []
+    const sectNum = (sectCount > 10) ? 10 : sectCount
+    const sectArr = Array.from({ length: sectCount }, (_, i) => i + 1)
+    for (let i = 0; i < sectNum; i++) {
+      const ran = randomInt(sectCount - 1 - i, 0, id)
+      sectList.push(sectArr.splice(ran, 1)[0])
+    }
+    if (sectList.length === 0) {
+      return {
+        event: "not_sects"
+      }
+    }
+    const pipeline = Redis.pipeline()
+    for (let sectId of sectList) {
+      pipeline.hmget(`Mozu:xiuxian:sectInfo:${sectId}`, '宗门名称', '宗门简介', '宗门成员', '宗门宗主', '宗门等级', '宗门人数上限')
+    }
+    const results = await pipeline.exec()
+    let sectInfos = []
+    for (let i = 0; i < sectNum; i++) {
+      sectInfos.push({
+        id: sectList[i],
+        name: results[i][1][0],
+        desc: results[i][1][1],
+        memberNum: JSON.parse(results[i][1][2]).length,
+        owner: results[i][1][3],
+        level: results[i][1][4],
+        memberMax: results[i][1][5]
+      })
+    }
+    return {
+      event: "get_list_sect_success",
+      data: {
+        sectInfos
       }
     }
   }

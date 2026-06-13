@@ -386,10 +386,10 @@ const commandHandlers = {
         '宗门名称：' + userInfo.sectInfo.name,
         '宗门简介：' + userInfo.sectInfo.desc,
         '***',
-        '>宗门人数：' + userInfo.sectInfo.member.length + '/' + userInfo.sectInfo.max,
+        '>宗门人数：' + userInfo.sectInfo.member + '/' + userInfo.sectInfo.max,
         '宗主ID：' + userInfo.sectInfo.owner,
         '***',
-        '>宗门等级：' + userInfo.sectInfo.level + '/' + Config.sect.sect_up_exp.length,
+        '>宗门等级：' + userInfo.sectInfo.level + '/' + (Config.sect.sect_up_exp.length + 1),
         '宗门经验：' + userInfo.sectInfo.exp + '/' + userInfo.sectInfo.nextExp,
         '>' + ((userInfo.sectInfo.nextExp - userInfo.sectInfo.exp > 0)
           ? '距离下一级还需' + (userInfo.sectInfo.nextExp - userInfo.sectInfo.exp) + '点经验'
@@ -404,6 +404,32 @@ const commandHandlers = {
         '>点击[加入宗门](mqqapi://aio/inlinecmd?command=加入宗门)',
         '***'
       ].join('\n'))
+    }
+    Text.push(Button.sect)
+  },
+
+  '宗门列表': async (id, user_id, Text) => {
+    const value = await xiuxian.listSect(id)
+    switch (value.event) {
+      case 'get_list_sect_success':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**宗门列表**',
+          '>最多随机显示10个宗门',
+          '***',
+          ...buildSectList(value.data.sectInfos)
+        ].join('\n'))
+        break
+      case 'not_sects':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**当前没有任何宗门**',
+          '>[点击创建宗门](mqqapi://aio/inlinecmd?command=创建宗门)',
+          '***'
+        ].join('\n'))
+        break
     }
     Text.push(Button.sect)
   },
@@ -434,6 +460,41 @@ const commandHandlers = {
           '***',
           ...buildUserInfo(userInfo),
           '***'
+        ].join('\n'))
+        break
+      case 'in_sect':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**你已经有宗门了**',
+          '***'
+        ].join('\n'))
+        break
+    }
+    Text.push(Button.sect)
+  },
+
+  '宗门签到': async (id, user_id, Text) => {
+    const value = await xiuxian.signSect(id)
+    switch (value.event) {
+      case 'sign_in_success':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**宗门签到成功**',
+          '***',
+          '**宗门签到奖励**',
+          '>获得修为：' + value.data.addcult,
+          '获得灵石：' + value.data.addls,
+          '获得宗门经验：' + value.data.exp,
+          '***'
+        ].join('\n'))
+      case 'in_signed':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**今天已经签到过了，明天再来吧**',
+          '***',
         ].join('\n'))
         break
     }
@@ -679,6 +740,20 @@ function buildRank(ranks, index) {
     ].join('\n'))
   }
   return rankText
+}
+
+function buildSectList(sectInfos) {
+  let sectList = []
+  for (let item of sectInfos) {
+    sectList.push([
+      '**宗门：' + item.name + '  ID：' + item.id + '**',
+      '>宗主：' + item.owner + '  等级：' + item.level,
+      '人数：' + item.memberNum + '/' + item.memberMax,
+      '简介：' + item.desc,
+      '***'
+    ].join('\n'))
+  }
+  return sectList
 }
 
 const retreatText = [

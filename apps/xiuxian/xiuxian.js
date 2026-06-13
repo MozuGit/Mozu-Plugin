@@ -1,7 +1,5 @@
 import Redis from '#Redis'
 
-import at_func from '../../model/xiuxian/tool/at.js'
-
 import { RegExp, Button } from "../../model/xiuxian/index.js"
 import { Config } from "../../model/xiuxian/tool/Config/Config.js"
 import { xiuxianText } from "../../model/xiuxian/tool/xiuxianText.js"
@@ -25,7 +23,7 @@ export class MozuXiuxian extends plugin {
   async xiuxian(e) {
     if (!['QQBot'].includes(e?.bot?.adapter?.name)) return false
     const user_id = this.e.user_id.replace(`${this.e.self_id}:`, '')
-    const at = this.e.at?.replace(`${this.e.self_id}:`, '') || at_func(this.e.msg, this.e.self_id)?.replace(`${this.e.self_id}:`, '')
+    const at = (Array.isArray(this.e.at)) ? this.e.at.map(s => s.replaceAll(`${self_id}:`, '')) : this.e.at.replace(`${self_id}:`, '')
     const message = await xiuxianText(this.e.msg, user_id, at)
     let lastText = null
     for (let msg of message) {

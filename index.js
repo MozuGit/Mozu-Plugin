@@ -6,10 +6,6 @@ import { Version } from './model/Config/Version.js'
 const _filename = fileURLToPath(import.meta.url);
 const pluginRoot = path.dirname(_filename);
 
-if (!global.segment) {
-  global.segment = (await import("oicq")).segment;
-}
-
 let ret = [];
 
 logger.info(logger.yellow("- [Mozu-Plugin] 正在载入"));
