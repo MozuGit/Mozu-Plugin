@@ -1,6 +1,7 @@
 import Redis from "#Redis"
 import randomInt from "#randomInt"
 import Realm from "./tool/realm.js"
+import crypto from 'crypto'
 import { Config } from "./tool/Config/Config.js"
 
 const PLAYER_INFO_KEY = "Mozu:xiuxian:playerInfo"
@@ -650,6 +651,138 @@ export default new class {
       }
     }
   }
+
+  async genCdkey(user_id, msg) {
+    if (!Config.setting.master.includes(user_id)) {
+      return {
+        event: "no_auth"
+      }
+    }
+    const quantities = [...msg.matchAll(/数量:(\d+)/g)].map(m => parseInt(m[1], 10))
+    const quantity = quantities.length === 0 ? 1 : quantities.reduce((a, b) => a + b, 0)
+    const value = {
+      genera: msg.includes("通用"),
+      forceSetting: msg.includes("强制设置"),
+      cultList: [...msg.matchAll(/修为:(\d+)/g)].map(m => parseInt(m[1], 10)),
+      lsList: [...msg.matchAll(/灵石:(\d+)/g)].map(m => parseInt(m[1], 10))
+    }
+    const cdkSet = new Set()
+    while (cdkSet.size < quantity) {
+      cdkSet.add(genCdkString())
+    }
+    const cdks = [...cdkSet]
+    const pipeline = Redis.pipeline()
+    for (let cdk of cdks) {
+      pipeline.hset(`Mozu:xiuxian:cdk:${cdk}`, 'value', JSON.stringify(value))
+    }
+    await pipeline.exec()
+    return {
+      event: "gen_cdk_success",
+      data: {
+        cdks
+      }
+    }
+  }
+
+  async useCdkey(id, user_id, cdk) {
+    if ((await Redis.exists(`Mozu:xiuxian:cdk:${cdk}`)) === 0) {
+      return {
+        event: "no_cdk"
+      }
+    }
+    let [value, used, useId, useTime] = await Redis.hmget(`Mozu:xiuxian:cdk:${cdk}`, 'value', '使用状态', '使用ID', '使用时间')
+    value = JSON.parse(value)
+    used = !!parseInt(used, 10)
+    let addcult = value.cultList.reduce((a, b) => a + b, 0)
+    let addls = value.lsList.reduce((a, b) => a + b, 0)
+    let [cult, ls] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '灵石')
+    cult = parseInt(cult, 10)
+    ls = parseInt(ls, 10)
+    if (!value.genera && used) {
+      return {
+        event: "cdk_used",
+        data: {
+          useId,
+          useTime
+        }
+      }
+    } else if (value.genera) {
+      useId = JSON.parse(useId) || []
+      useTime = JSON.parse(useTime) || []
+      const index = useId.indexOf(user_id)
+      if (index !== -1) {
+        return {
+          event: "cdk_used",
+          data: {
+            useTime: useTime[index]
+          }
+        }
+      } else {
+        useId.push(user_id)
+        useTime.push(Math.floor(Date.now() / 1000))
+        Redis.hmset(`Mozu:xiuxian:cdk:${cdk}`, {
+          使用ID: JSON.stringify(useId),
+          使用时间: JSON.stringify(useTime)
+        })
+        if (value.forceSetting) {
+          Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
+            修为: addcult || cult,
+            灵石: addls || ls
+          })
+          return {
+            event: "cdk_use_force_success",
+            data: {
+              cult: addcult || cult,
+              ls: addls || ls
+            }
+          }
+        } else {
+          Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
+            修为: addcult + cult,
+            灵石: addls + ls
+          })
+          return {
+            event: "cdk_use_success",
+            data: {
+              cult: value.cultList,
+              ls: value.lsList
+            }
+          }
+        }
+      }
+    } else {
+      Redis.hmset(`Mozu:xiuxian:cdk:${cdk}`, {
+        使用状态: 1,
+        使用ID: user_id,
+        使用时间: Math.floor(Date.now() / 1000)
+      })
+      if (value.forceSetting) {
+        Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
+          修为: addcult || cult,
+          灵石: addls || ls
+        })
+        return {
+          event: "cdk_use_force_success",
+          data: {
+            cult: addcult || cult,
+            ls: addls || ls
+          }
+        }
+      } else {
+        Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
+          修为: addcult + cult,
+          灵石: addls + ls
+        })
+        return {
+          event: "cdk_use_success",
+          data: {
+            cult: value.cultList,
+            ls: value.lsList
+          }
+        }
+      }
+    }
+  }
 }
 
 function gettoday() {
@@ -679,4 +812,14 @@ function getProfit(time) {
   }
   const cult = hours * parseInt(Config.xiuxian.retreat.cult, 10)
   return { cult }
+}
+
+function genCdkString(length = 16) {
+  const cdk = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  let result = ''
+  const bytes = crypto.randomBytes(16)
+  for (let i = 0; i < length; i++) {
+    result += cdk[bytes[i] % cdk.length]
+  }
+  return result
 }

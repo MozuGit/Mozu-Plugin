@@ -519,7 +519,7 @@ const prefixHandlers = [
       let id2 = 0
       if (at && !Array.isArray(at)) {
         if (await xiuxian.hasPlayer(at)) {
-          id2 = await xiuxian.init(at)
+          id2 = (await xiuxian.init(at)).data.id
         }
       } else {
         id2 = (msg.match(/\d+/g) || []).join('')
@@ -605,7 +605,7 @@ const prefixHandlers = [
       let query_id
       if (at && !Array.isArray(at)) {
         if (await xiuxian.hasPlayer(at)) {
-          query_id = await xiuxian.init(at)
+          query_id = (await xiuxian.init(at)).data.id
         } else {
           query_id = 0
         }
@@ -646,7 +646,7 @@ const prefixHandlers = [
       let join_id
       if (at && !Array.isArray(at)) {
         if (await xiuxian.hasPlayer(at)) {
-          const atID = await xiuxian.init(at)
+          const atID = (await xiuxian.init(at)).data.id
           const userInfo = await xiuxian.getUserInfo(atID)
           join_id = userInfo.sectInfo.id
         } else {
@@ -701,6 +701,91 @@ const prefixHandlers = [
             '**找不到该宗门**',
             '>请确认该宗门是否存在或创建',
             '***'
+          ].join('\n'))
+          break
+      }
+      Text.push(Button.sect)
+    }
+  },
+  {
+    prefix: '生成',
+    handler: async (id, user_id, Text, msg, at) => {
+      const value = await xiuxian.genCdkey(user_id, msg)
+      switch (value.event) {
+        case 'gen_cdk_success':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**兑换码生成成功**',
+            '***',
+            '\`\`\` 兑换码列表',
+            value.data.cdks.join('\n'),
+            '\`\`\`',
+            '***'
+          ].join('\n'))
+          break
+        case 'no_auth':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**权限不足**',
+            '>请确认你是否有足够的权限',
+            '***'
+          ].join('\n'))
+          break
+      }
+      Text.push(Button.cdk)
+    }
+  },
+  {
+    prefix: '使用兑换码',
+    handler: async (id, user_id, Text, msg, at) => {
+      const value = await xiuxian.useCdkey(id, user_id, msg.replace(/#?使用兑换码/, '').trim())
+      switch (value.event) {
+        case 'cdk_use_force_success':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**兑换码使用成功**',
+            '***',
+            '**使用结果**',
+            '>**已被强制设置为以下数值**',
+            '修为：' + value.data.cult,
+            '灵石：' + value.data.ls,
+            '***'
+          ].join('\n'))
+          break
+        case 'cdk_use_success':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**兑换码使用成功**',
+            '***',
+            '\`\`\` 使用结果',
+            ...(value.data.cult.length !== 0 ? ['修为+' + value.data.cult.join('\n修为+')] : []),
+            ...(value.data.ls.length !== 0 ? ['灵石+' + value.data.ls.join('\n灵石+')] : []),
+            ((value.data.cult.length === 0 && value.data.ls.length === 0) ? '奖励被小草神吃掉了喵~' : []),
+            '\`\`\`',
+            '***'
+          ].join('\n'))
+          break
+        case 'cdk_used':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            value.data.useId ? '**兑换码已被使用**' : '**兑换码不可重复使用**',
+            ...(value.data.useId ? ['>使用ID：' + (await xiuxian.init(value.data.useId)).data.id] : []),
+            ...(value.data.useId ? [] : ['>']) + '使用时间：' + formatTime(value.data.useTime),
+            '***',
+          ].join('\n'))
+          break
+        case 'no_cdk':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**兑换码不存在**',
+            '>请确认兑换码是否存在',
+            '***',
           ].join('\n'))
           break
       }

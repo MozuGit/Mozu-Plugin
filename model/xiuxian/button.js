@@ -113,6 +113,14 @@ const Button = {
         { text: "签到", input: "修仙签到" }
       ]
     )
+  },
+  get cdk() {
+    return segment.button(
+      [
+        { text: "生成", input: "生成兑换码" },
+        { text: "使用", input: "使用兑换码", style: 4 }
+      ]
+    )
   }
 }
 export default Button
