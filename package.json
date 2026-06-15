@@ -1,15 +1,22 @@
 {
   "name": "Mozu-Plugin",
   "version": "1.0.1",
-  "author": "魔族陌",
+  "description": "TRSS-Yunzai插件",
   "main": "index.js",
   "type": "module",
+  "icon": "./Mo.png",
+  "author": "魔族陌",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MozuGit/Mozu-Plugin.git"
+  },
   "dependencies": {
-    "chokidar": "^5.0.0",
     "ioredis": "^5.10.0",
     "lodash": "^4.18.1",
-    "seedrandom": "^3.0.5",
-    "yaml": "^2.9.0"
+    "yaml": "^2.9.0",
+    "chokidar": "^5.0.0",
+    "seedrandom": "^3.0.5"
   },
   "imports": {
     "#Redis": "./lib/Redis.js",
