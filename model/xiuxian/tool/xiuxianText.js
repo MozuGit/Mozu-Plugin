@@ -775,7 +775,7 @@ const prefixHandlers = [
             '***',
             value.data.useId ? '**兑换码已被使用**' : '**兑换码不可重复使用**',
             ...(value.data.useId ? ['>使用ID：' + (await xiuxian.init(value.data.useId)).data.id] : []),
-            ...(value.data.useId ? [] : ['>']) + '使用时间：' + formatTime(value.data.useTime),
+            (value.data.useId ? '' : '>') + '使用时间：' + formatTime(value.data.useTime),
             '***',
           ].join('\n'))
           break
