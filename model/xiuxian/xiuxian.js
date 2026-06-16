@@ -506,7 +506,8 @@ export default new class {
         宗门宗主: id,
         宗门经验: 0,
         宗门等级: 1,
-        宗门人数上限: 20
+        宗门人数上限: 20,
+        宗门成员等级: JSON.stringify([{ id: id, permission: 10 }])
       })
       Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
         灵石: ls - Config.sect.create_sect_ls,
@@ -543,9 +544,10 @@ export default new class {
         event: "not_sectid"
       }
     }
-    let [members, memberMax, noAudit] = await Redis.hmget(`Mozu:xiuxian:sectInfo:${joinID}`, '宗门成员', '宗门人数上限', '无需审核状态')
+    let [members, memberMax, memberPermission, noAudit] = await Redis.hmget(`Mozu:xiuxian:sectInfo:${joinID}`, '宗门成员', '宗门人数上限', '宗门成员等级', '无需审核状态')
     const memberNum = members.length
     members = JSON.parse(members)
+    memberPermission = JSON.parse(memberPermission)
     memberMax = parseInt(memberMax, 10)
     noAudit = parseInt(noAudit, 10) || 0
     if (memberNum >= memberMax) {
@@ -559,7 +561,11 @@ export default new class {
     }
     if (noAudit) {
       members.push(id)
-      await Redis.hset(`Mozu:xiuxian:sectInfo:${joinID}`, '宗门成员', JSON.stringify(members))
+      memberPermission.push({ id: id, level: 1 })
+      await Redis.hmset(`Mozu:xiuxian:sectInfo:${joinID}`, {
+        宗门成员: JSON.stringify(members),
+        宗门成员等级: JSON.stringify(memberPermission)
+      })
       await Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '宗门ID', joinID)
       return {
         event: "join_sect_success",
@@ -568,7 +574,7 @@ export default new class {
         }
       }
     } else {
-      members = JSON.parse(await Redis.hget(`Mozu:xiuxian:sectInfo:${joinID}`, '待审核成员') || [])
+      members = JSON.parse(await Redis.hget(`Mozu:xiuxian:sectInfo:${joinID}`, '待审核成员') || '[]')
       members.push(id)
       await Redis.hset(`Mozu:xiuxian:sectInfo:${joinID}`, '待审核成员', JSON.stringify(members))
       return {
@@ -652,10 +658,49 @@ export default new class {
     }
   }
 
+  async auditSect(id) {
+    const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
+    let [members, memberMax, membersPermission, memberAudit] = await Redis.hmget(`Mozu:xiuxian:sectInfo:${sectId}`, '宗门成员', '宗门人数上限', '宗门成员等级', '待审核成员')
+    const memberNum = JSON.parse(members).length
+    memberMax = parseInt(memberMax, 10)
+    membersPermission = JSON.parse(membersPermission)
+    memberAudit = JSON.parse(memberAudit || '[]')
+    if (membersPermission.find(item => item.id === id)?.permission < 7) {
+      return {
+        event: "no_permission"
+      }
+    }
+    if (memberNum >= memberMax) {
+      return {
+        event: "member_max"
+      }
+    }
+    const pipeline = Redis.pipeline()
+    for (let member of memberAudit) {
+      pipeline.hmget(`${PLAYER_INFO_KEY}:${member}`, '修为', '境界')
+    }
+    const result = await pipeline.exec()
+    let membersList = []
+    for (let i = 0; i < result.length; i++) {
+      const values = result[i][1]
+      membersList.push({
+        id: memberAudit[i],
+        cult: values[0],
+        realm: await Realm.getRealmName(values[1])
+      })
+    }
+    return {
+      event: "audit_list",
+      data: {
+        membersList: membersList || []
+      }
+    }
+  }
+
   async genCdkey(user_id, msg) {
     if (!Config.setting.master.includes(user_id)) {
       return {
-        event: "no_auth"
+        event: "no_permissions"
       }
     }
     const quantities = [...msg.matchAll(/数量:(\d+)/g)].map(m => parseInt(m[1], 10))

@@ -55,6 +55,34 @@ const Button = {
       ]
     )
   },
+  get sectAdmin() {
+    return segment.button(
+      [
+        { text: "成员", input: "宗门成员" },
+        { text: "宗门", input: "我的宗门" },
+        { text: "审核", input: "宗门审核" },
+        { text: "转让", input: "转让宗门" }
+      ],
+      [
+        { text: "商店", input: "宗门商店" },
+        { text: "改名字", input: "宗门设置名称" },
+        { text: "改简介", input: "宗门设置简介" },
+        { text: "解散", input: "解散宗门" }
+      ],
+      [
+        { text: "设副宗", input: "宗门设置副宗主" },
+        { text: "设长老", input: "宗门设置长老" },
+        { text: "设成员", input: "宗门设置成员" },
+        { text: "设精英", input: "宗门设置精英" }
+      ],
+      [
+        { text: "修炼", input: "修炼" },
+        { text: "开采", input: "开采" },
+        { text: "信息", input: "修仙个人信息" },
+        { text: "签到", input: "修仙签到" }
+      ]
+    )
+  },
   get startRetreat() {
     return segment.button(
       [

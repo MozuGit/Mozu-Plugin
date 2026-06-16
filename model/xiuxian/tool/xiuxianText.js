@@ -509,6 +509,58 @@ const commandHandlers = {
         break
     }
     Text.push(Button.sect)
+  },
+
+  '宗门审核': async (id, user_id, Text) => {
+    const value = await xiuxian.auditSect(id)
+    switch (value.event) {
+      case 'no_permission':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**你的宗门权限不足**',
+          '>需长老及以上可操作',
+          '***'
+        ].join('\n'))
+        break
+      case 'member_max':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**当前宗门人数已满**',
+          '>请先[升级宗门](mqqapi://aio/inlinecmd?command=宗门升级)或移除宗门成员',
+          '***'
+        ].join('\n'))
+        break
+      case 'audit_list':
+        if (value.data.membersList.length === 0) {
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**当前没有人申请加入宗门**',
+            '***'
+          ].join('\n'))
+        } else {
+          let membersList = []
+          for (let member of value.data.membersList) {
+            membersList.push([
+              '>**ID：' + member.id + '     [[同意]](mqqapi://aio/inlinecmd?command=同意宗门成员' + member.id + ')     [[拒绝]](mqqapi://aio/inlinecmd?command=拒绝宗门成员' + member.id + ')**',
+              '**修为：' + member.cult + '**',
+              '**境界：' + member.realm + '**',
+              '***'
+            ].join('\n'))
+          }
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门待审核成员列表**',
+            '***',
+            membersList.join('\n')
+          ].join('\n'))
+        }
+        break
+    }
+    Text.push(Button.sectAdmin)
   }
 }
 
