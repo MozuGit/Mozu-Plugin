@@ -1,13 +1,13 @@
 #修仙全局开关
-xiuxian: true
+enable: true
 
 #主人不受冷却限制
-mastercd: false
+master_no_cd: false
 
 #是否强制用#触发
 forceSharp: false
 
-#是否启用黑白群名单 0 - 无   1 - 黑名单   2 - 白名单
+#是否启用群黑白名单 0 - 无   1 - 黑名单   2 - 白名单
 group: 0
 
 #黑名单群
@@ -17,7 +17,7 @@ blackGroup: []
 whiteGroup: []
 
 #输出文本样式 0 - 普通文本   1 - Markdown
-TextStyle: 0
+TextStyle: 1
 
 #修仙权限
 master: []

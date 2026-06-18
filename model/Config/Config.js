@@ -104,7 +104,7 @@ class Cfg {
 
   /** 修改配置 */
   modify(name, key, value, type = 'config') {
-    let filePath = path.join('../', 'config', type, `${name}.yaml`)
+    let filePath = path.join(Version.Plugin_Path, 'config/Config', type, `${name}.yaml`)
     new YamlReader(filePath).set(key, value)
     delete this.config[`${type}.${name}`]
   }
