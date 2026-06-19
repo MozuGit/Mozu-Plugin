@@ -21,7 +21,7 @@ export class MozuXiuxian extends plugin {
   }
 
   async xiuxian(e) {
-    if (Config.setting.enable === false) return false
+    if (!Config.setting.enable) return false
     if (!['QQBot'].includes(e?.bot?.adapter?.name)) return false
     const user_id = this.e.user_id.replace(`${this.e.self_id}:`, '')
     const message = await xiuxianText(this.e.msg.replace(/^#/, ''), user_id, this.e.at)
