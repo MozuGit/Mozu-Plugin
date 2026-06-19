@@ -63,7 +63,7 @@ export function setConfigData(data, { Result }) {
   const nested = unflatten(data)
   redisConfig(nested)
   xiuxianConfig(nested)
-  return Result.ok({}, "保存成功~")
+  return Result.ok({}, "保存成功喵~")
 }
 
 function redisConfig(data) {
