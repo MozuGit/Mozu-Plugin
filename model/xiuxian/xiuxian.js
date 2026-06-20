@@ -136,7 +136,7 @@ export default new class {
         event: "in_retreat"
       }
     }
-    if (Math.floor(Date.now() / 1000) - last <= Config.xiuxian.xiulian && !isMaster) {
+    if (Math.floor(Date.now() / 1000) - last <= Config.xiuxian.xiulian && !(isMaster && Config.setting.master_no_cd)) {
       const outTime = Config.xiuxian.xiulian - (Math.floor(Date.now() / 1000) - last)
       return {
         event: "xiulian_cd",
@@ -170,7 +170,7 @@ export default new class {
         event: "in_retreat"
       }
     }
-    if (Math.floor(Date.now() / 1000) - last <= Config.xiuxian.kaicai && !isMaster) {
+    if (Math.floor(Date.now() / 1000) - last <= Config.xiuxian.kaicai && !(isMaster && Config.setting.master_no_cd)) {
       const outTime = Config.xiuxian.kaicai - (Math.floor(Date.now() / 1000) - last)
       return {
         event: "kaicai_cd",
@@ -309,7 +309,7 @@ export default new class {
           cult: cult
         }
       }
-    } else if ((Math.floor(Date.now() / 1000) - pvp_cd) <= Config.xiuxian.pvp.atk_cd && !isMaster) {
+    } else if ((Math.floor(Date.now() / 1000) - pvp_cd) <= Config.xiuxian.pvp.atk_cd && !(isMaster && Config.setting.master_no_cd)) {
       return {
         event: "pvp_cd",
         data: {
@@ -337,7 +337,7 @@ export default new class {
           cult: cult
         }
       }
-    } else if ((Math.floor(Date.now() / 1000) - pvp_cd) <= Config.xiuxian.pvp.def_cd && !isMaster) {
+    } else if ((Math.floor(Date.now() / 1000) - pvp_cd) <= Config.xiuxian.pvp.def_cd && !(isMaster && Config.setting.master_no_cd)) {
       return {
         event: "pvp_cd",
         data: {
