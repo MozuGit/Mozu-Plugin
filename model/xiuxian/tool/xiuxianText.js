@@ -1,7 +1,7 @@
 import { Button, xiuxian } from "../index.js"
 import { Config } from "./Config/Config.js"
 
-async function xiuxianText(msg, user_id, at) {
+async function xiuxianText(msg, user_id, at, isMaster) {
   msg = msg.trim()
   let Text = []
   try {
@@ -16,9 +16,9 @@ async function xiuxianText(msg, user_id, at) {
     }
     const id = userData.data.id
     const handler = commandHandlers[msg] ||
-      prefixHandlers.find(h => msg.startsWith(h.prefix))?.handler
+      prefixHandlers.find(h => h.prefix.test(msg))?.handler
     if (handler) {
-      await handler(id, user_id, Text, msg, at)
+      await handler(id, user_id, Text, msg, at, isMaster)
     }
   } catch (err) {
     logger.error(err)
@@ -33,8 +33,8 @@ async function xiuxianText(msg, user_id, at) {
 }
 
 const commandHandlers = {
-  '修炼': async (id, user_id, Text) => {
-    const value = await xiuxian.xiulian(id)
+  '修炼': async (id, user_id, Text, msg, at, isMaster) => {
+    const value = await xiuxian.xiulian(id, isMaster)
     const userInfo = await xiuxian.getUserInfo(id)
     switch (value.event) {
       case 'xiulian_end':
@@ -65,8 +65,8 @@ const commandHandlers = {
     Text.push(Button.xiuxian)
   },
 
-  '开采': async (id, user_id, Text) => {
-    const value = await xiuxian.kaicai(id)
+  '开采': async (id, user_id, Text, msg, at, isMaster) => {
+    const value = await xiuxian.kaicai(id, isMaster)
     const userInfo = await xiuxian.getUserInfo(id)
     switch (value.event) {
       case 'kaicai_end':
@@ -566,8 +566,8 @@ const commandHandlers = {
 
 const prefixHandlers = [
   {
-    prefix: '切磋',
-    handler: async (id, user_id, Text, msg, at) => {
+    prefix: /^切磋/,
+    handler: async (id, user_id, Text, msg, at, isMaster) => {
       let id2 = 0
       if (at && !Array.isArray(at)) {
         if (await xiuxian.hasPlayer(at)) {
@@ -576,7 +576,7 @@ const prefixHandlers = [
       } else {
         id2 = (msg.match(/\d+/g) || []).join('')
       }
-      const value = await xiuxian.pvp(id, id2)
+      const value = await xiuxian.pvp(id, id2, isMaster)
       switch (value.event) {
         case 'in_retreat':
           Text.push([
@@ -652,7 +652,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: '查询修仙者',
+    prefix: /^查询修仙者/,
     handler: async (id, user_id, Text, msg, at) => {
       let query_id
       if (at && !Array.isArray(at)) {
@@ -693,7 +693,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: '加入宗门',
+    prefix: /^加入宗门/,
     handler: async (id, user_id, Text, msg, at) => {
       let join_id
       if (at && !Array.isArray(at)) {
@@ -760,9 +760,9 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: '生成',
-    handler: async (id, user_id, Text, msg, at) => {
-      const value = await xiuxian.genCdkey(user_id, msg)
+    prefix: /生成(通用)?兑换码/,
+    handler: async (id, user_id, Text, msg, at, isMaster) => {
+      const value = await xiuxian.genCdkey(user_id, msg, isMaster)
       switch (value.event) {
         case 'gen_cdk_success':
           Text.push([
@@ -790,7 +790,47 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: '使用兑换码',
+    prefix: /删除(全部)?兑换码/,
+    handler: async (id, user_id, Text, msg, at, isMaster) => {
+      const value = await xiuxian.delCdkey(user_id, msg.replace(/#?使用兑换码/, '').trim(), isMaster)
+      logger.info(value)
+      switch (value.event) {
+        case 'del_cdks':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**删除成功**',
+            '***',
+            '\`\`\` 兑换码列表',
+            value.data.cdkList.join('\n'),
+            '\`\`\`',
+            '***'
+          ].join('\n'))
+          break
+        case 'no_permissions':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**权限不足**',
+            '>请确认你是否有足够的权限',
+            '***'
+          ].join('\n'))
+          break
+        case 'invalid_cdks':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**删除失败**',
+            '>格式错误',
+            '正确格式：删除兑换码xxx',
+            '***'
+          ].join('\n'))
+          break
+      }
+    }
+  },
+  {
+    prefix: /^使用兑换码/,
     handler: async (id, user_id, Text, msg, at) => {
       const value = await xiuxian.useCdkey(id, user_id, msg.replace(/#?使用兑换码/, '').trim())
       switch (value.event) {
@@ -799,6 +839,7 @@ const prefixHandlers = [
             '<@' + user_id + '>',
             '***',
             '**兑换码使用成功**',
+            '>兑换码：' + msg.replace(/#?使用兑换码/, '').trim(),
             '***',
             '**使用结果**',
             '>**已被强制设置为以下数值**',
@@ -812,6 +853,7 @@ const prefixHandlers = [
             '<@' + user_id + '>',
             '***',
             '**兑换码使用成功**',
+            '>兑换码：' + msg.replace(/#?使用兑换码/, '').trim(),
             '***',
             '\`\`\` 使用结果',
             ...(value.data.cult.length !== 0 ? ['修为+' + value.data.cult.join('\n修为+')] : []),
@@ -831,7 +873,7 @@ const prefixHandlers = [
             '***',
           ].join('\n'))
           break
-        case 'no_cdk':
+        case 'invalid_cdk':
           Text.push([
             '<@' + user_id + '>',
             '***',

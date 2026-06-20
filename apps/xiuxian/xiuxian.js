@@ -1,6 +1,6 @@
 import Redis from '#Redis'
 
-import { RegExp, Button } from "../../model/xiuxian/index.js"
+import { RegExp } from "../../model/xiuxian/index.js"
 import { Config } from "../../model/xiuxian/tool/Config/Config.js"
 import { xiuxianText } from "../../model/xiuxian/tool/xiuxianText.js"
 
@@ -21,10 +21,14 @@ export class MozuXiuxian extends plugin {
   }
 
   async xiuxian(e) {
-    if (!Config.setting.enable) return false
-    if (!['QQBot'].includes(e?.bot?.adapter?.name)) return false
+    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.setting.enable) return false
+    if (Config.setting.group === 1) {
+      if (Config.setting.blackGroup.includes(this.e.group_id)) return false
+    } else if (Config.setting.group === 2) {
+      if (!Config.setting.whiteGroup.includes(this.e.group_id)) return false
+    }
     const user_id = this.e.user_id.replace(`${this.e.self_id}:`, '')
-    const message = await xiuxianText(this.e.msg.replace(/^#/, ''), user_id, this.e.at)
+    const message = await xiuxianText(this.e.msg.replace(/^#/, ''), user_id, this.e.at, this.e.isMaster)
     let lastText = null
     for (let msg of message) {
       if (msg.type && msg.type === "button") {
@@ -42,5 +46,6 @@ export class MozuXiuxian extends plugin {
     if (lastText !== null) {
       await this.e.reply(segment.markdown(lastText))
     }
+    return false
   }
 }

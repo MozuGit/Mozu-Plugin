@@ -32,8 +32,7 @@ export function getConfigData() {
         group: xxConfig.setting.group,
         blackGroup: xxConfig.setting.blackGroup,
         whiteGroup: xxConfig.setting.whiteGroup,
-        TextStyle: xxConfig.setting.TextStyle,
-        master: xxConfig.setting.master
+        TextStyle: xxConfig.setting.TextStyle
       },
       xiuxian: {
         xiulian: xxConfig.xiuxian.xiulian,

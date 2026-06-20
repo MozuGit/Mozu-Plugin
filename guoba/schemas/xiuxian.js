@@ -23,15 +23,6 @@ export default [
     component: "Switch"
   },
   {
-    field: "xiuxian.setting.master",
-    label: "修仙主人",
-    component: "GTags",
-    componentProps: {
-      allowAdd: true,
-      allowDel: true
-    }
-  },
-  {
     field: "xiuxian.setting.master_no_cd",
     label: "主人不受冷却限制",
     bottomHelpMessage: "主人不受任何冷却限制",

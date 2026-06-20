@@ -18,6 +18,3 @@ whiteGroup: []
 
 #输出文本样式 0 - 普通文本   1 - Markdown
 TextStyle: 1
-
-#修仙权限
-master: []

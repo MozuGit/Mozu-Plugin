@@ -5,6 +5,7 @@ import crypto from 'crypto'
 import { Config } from "./tool/Config/Config.js"
 
 const PLAYER_INFO_KEY = "Mozu:xiuxian:playerInfo"
+const SECT_INFO_KEY = "Mozu:xiuxian:sectInfo"
 
 export default new class {
   async init(openid) {
@@ -97,10 +98,10 @@ export default new class {
   }
 
   async getSectInfo(sectId) {
-    if ((await Redis.exists(`Mozu:xiuxian:sectInfo:${sectId}`)) === 0) {
+    if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return false
     }
-    const [name, desc, members, owner, exp, level, max] = await Redis.hmget(`Mozu:xiuxian:sectInfo:${sectId}`, '宗门名称', '宗门简介', '宗门成员', '宗门宗主', '宗门经验', '宗门等级', '宗门人数上限')
+    const [name, desc, members, owner, exp, level, max] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', '宗门简介', '宗门成员', '宗门宗主', '宗门经验', '宗门等级', '宗门人数上限')
     const sectUpExp = Config.sect.sect_up_exp
     const nextExp = (sectUpExp.length <= level) ? sectUpExp[sectUpExp.length - 1] : sectUpExp[level - 1]
     return {
@@ -125,7 +126,7 @@ export default new class {
     return power
   }
 
-  async xiulian(id) {
+  async xiulian(id, isMaster) {
     let [cult, last, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '上次修炼时间', '闭关时间')
     cult = parseInt(cult, 10)
     last = parseInt(last, 10)
@@ -135,7 +136,7 @@ export default new class {
         event: "in_retreat"
       }
     }
-    if (Math.floor(Date.now() / 1000) - last <= Config.xiuxian.xiulian) {
+    if (Math.floor(Date.now() / 1000) - last <= Config.xiuxian.xiulian && !isMaster) {
       const outTime = Config.xiuxian.xiulian - (Math.floor(Date.now() / 1000) - last)
       return {
         event: "xiulian_cd",
@@ -159,7 +160,7 @@ export default new class {
     }
   }
 
-  async kaicai(id) {
+  async kaicai(id, isMaster) {
     let [ls, last, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '上次开采时间', '闭关时间')
     ls = parseInt(ls, 10)
     last = parseInt(last, 10)
@@ -169,7 +170,7 @@ export default new class {
         event: "in_retreat"
       }
     }
-    if (Math.floor(Date.now() / 1000) - last <= Config.xiuxian.kaicai) {
+    if (Math.floor(Date.now() / 1000) - last <= Config.xiuxian.kaicai && !isMaster) {
       const outTime = Config.xiuxian.kaicai - (Math.floor(Date.now() / 1000) - last)
       return {
         event: "kaicai_cd",
@@ -275,7 +276,7 @@ export default new class {
     }
   }
 
-  async pvp(id, id2) {
+  async pvp(id, id2, isMaster) {
     if (id === id2) {
       return {
         event: "self_pvp"
@@ -308,7 +309,7 @@ export default new class {
           cult: cult
         }
       }
-    } else if ((Math.floor(Date.now() / 1000) - pvp_cd) <= Config.xiuxian.pvp.atk_cd) {
+    } else if ((Math.floor(Date.now() / 1000) - pvp_cd) <= Config.xiuxian.pvp.atk_cd && !isMaster) {
       return {
         event: "pvp_cd",
         data: {
@@ -336,7 +337,7 @@ export default new class {
           cult: cult
         }
       }
-    } else if ((Math.floor(Date.now() / 1000) - pvp_cd) <= Config.xiuxian.pvp.def_cd) {
+    } else if ((Math.floor(Date.now() / 1000) - pvp_cd) <= Config.xiuxian.pvp.def_cd && !isMaster) {
       return {
         event: "pvp_cd",
         data: {
@@ -499,7 +500,7 @@ export default new class {
     }
     if (ls >= Config.sect.create_sect_ls) {
       const sectCount = await Redis.incr('Mozu:xiuxian:sectid:counter')
-      Redis.hmset(`Mozu:xiuxian:sectInfo:${sectCount}`, {
+      Redis.hmset(`${SECT_INFO_KEY}:${sectCount}`, {
         宗门名称: "修仙宗门",
         宗门简介: "未设置",
         宗门成员: JSON.stringify([id]),
@@ -539,12 +540,12 @@ export default new class {
         }
       }
     }
-    if ((await Redis.exists(`Mozu:xiuxian:sectInfo:${joinID}`)) === 0) {
+    if ((await Redis.exists(`${SECT_INFO_KEY}:${joinID}`)) === 0) {
       return {
         event: "not_sectid"
       }
     }
-    let [members, memberMax, memberPermission, noAudit] = await Redis.hmget(`Mozu:xiuxian:sectInfo:${joinID}`, '宗门成员', '宗门人数上限', '宗门成员等级', '无需审核状态')
+    let [members, memberMax, memberPermission, noAudit] = await Redis.hmget(`${SECT_INFO_KEY}:${joinID}`, '宗门成员', '宗门人数上限', '宗门成员等级', '无需审核状态')
     const memberNum = members.length
     members = JSON.parse(members)
     memberPermission = JSON.parse(memberPermission)
@@ -562,7 +563,7 @@ export default new class {
     if (noAudit) {
       members.push(id)
       memberPermission.push({ id: id, level: 1 })
-      await Redis.hmset(`Mozu:xiuxian:sectInfo:${joinID}`, {
+      await Redis.hmset(`${SECT_INFO_KEY}:${joinID}`, {
         宗门成员: JSON.stringify(members),
         宗门成员等级: JSON.stringify(memberPermission)
       })
@@ -574,9 +575,9 @@ export default new class {
         }
       }
     } else {
-      members = JSON.parse(await Redis.hget(`Mozu:xiuxian:sectInfo:${joinID}`, '待审核成员') || '[]')
+      members = JSON.parse(await Redis.hget(`${SECT_INFO_KEY}:${joinID}`, '待审核成员') || '[]')
       members.push(id)
-      await Redis.hset(`Mozu:xiuxian:sectInfo:${joinID}`, '待审核成员', JSON.stringify(members))
+      await Redis.hset(`${SECT_INFO_KEY}:${joinID}`, '待审核成员', JSON.stringify(members))
       return {
         event: "join_sect_audit"
       }
@@ -585,12 +586,12 @@ export default new class {
 
   async signSect(id) {
     let [cult, ls, lastDay, sectId] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, ['修为', '灵石', '宗门上次签到时间', '宗门ID'])
-    if ((await Redis.exists(`Mozu:xiuxian:sectInfo:${sectId}`)) === 0) {
+    if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return {
         event: "no_sect"
       }
     }
-    let [exp, level] = await Redis.hmget(`Mozu:xiuxian:sectInfo:${sectId}`, '宗门经验', '宗门等级')
+    let [exp, level] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门经验', '宗门等级')
     exp = parseInt(exp, 10)
     level = parseInt(level, 10)
     let { cult: addcult, ls: addls, sect_exp } = Config.sect.sect_sign[level - 1]
@@ -608,7 +609,7 @@ export default new class {
       灵石: ls,
       宗门上次签到时间: today
     })
-    await Redis.hset(`Mozu:xiuxian:sectInfo:${sectId}`, '宗门经验', exp)
+    await Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门经验', exp)
     return {
       event: "sign_in_success",
       data: {
@@ -635,7 +636,7 @@ export default new class {
     }
     const pipeline = Redis.pipeline()
     for (let sectId of sectList) {
-      pipeline.hmget(`Mozu:xiuxian:sectInfo:${sectId}`, '宗门名称', '宗门简介', '宗门成员', '宗门宗主', '宗门等级', '宗门人数上限')
+      pipeline.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', '宗门简介', '宗门成员', '宗门宗主', '宗门等级', '宗门人数上限')
     }
     const results = await pipeline.exec()
     let sectInfos = []
@@ -660,7 +661,7 @@ export default new class {
 
   async auditSect(id) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
-    let [members, memberMax, membersPermission, memberAudit] = await Redis.hmget(`Mozu:xiuxian:sectInfo:${sectId}`, '宗门成员', '宗门人数上限', '宗门成员等级', '待审核成员')
+    let [members, memberMax, membersPermission, memberAudit] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员', '宗门人数上限', '宗门成员等级', '待审核成员')
     const memberNum = JSON.parse(members).length
     memberMax = parseInt(memberMax, 10)
     membersPermission = JSON.parse(membersPermission)
@@ -697,8 +698,8 @@ export default new class {
     }
   }
 
-  async genCdkey(user_id, msg) {
-    if (!Config.setting.master.includes(user_id)) {
+  async genCdkey(user_id, msg, isMaster) {
+    if (!isMaster) {
       return {
         event: "no_permissions"
       }
@@ -729,10 +730,63 @@ export default new class {
     }
   }
 
+  async delCdkey(user_id, msg, isMaster) {
+    if (!isMaster) {
+      return {
+        event: "no_permissions"
+      }
+    }
+    if (msg.includes("全部")) {
+      const stream = Redis.scanStream({
+        match: "Mozu:xiuxian:cdk:*",
+        count: 100
+      })
+      let cdks = []
+      for await (const keys of stream) {
+        if (keys.length) {
+          keys.forEach(key => cdks.push(key.replace("Mozu:xiuxian:cdk:", "")))
+          const pipeline = Redis.pipeline()
+          keys.forEach(key => pipeline.del(key))
+          await pipeline.exec()
+        }
+      }
+      return {
+        event: "del_cdks",
+        data: {
+          cdkList: cdks
+        }
+      }
+    } else {
+      let cdkText = msg.replace(/删除兑换码\s*/i, '').trim()
+      if (!cdkText) {
+        return {
+          event: "invalid_cdks"
+        }
+      }
+      let cdkList = cdkText.split(/\n/).map(cdk => cdk.trim()).filter(cdk => cdk.length > 0)
+      if (!cdkList.length) {
+        return {
+          event: "invalid_cdks"
+        }
+      }
+      cdkList = [...new Set(cdkList)]
+      const keysToDelete = cdkList.map(cdk => `Mozu:xiuxian:cdk:${cdk}`)
+      const pipeline = Redis.pipeline()
+      keysToDelete.forEach(key => pipeline.del(key))
+      await pipeline.exec()
+      return {
+        event: "del_cdks",
+        data: {
+          cdkList
+        }
+      }
+    }
+  }
+
   async useCdkey(id, user_id, cdk) {
     if ((await Redis.exists(`Mozu:xiuxian:cdk:${cdk}`)) === 0) {
       return {
-        event: "no_cdk"
+        event: "invalid_cdk"
       }
     }
     let [value, used, useId, useTime] = await Redis.hmget(`Mozu:xiuxian:cdk:${cdk}`, 'value', '使用状态', '使用ID', '使用时间')
