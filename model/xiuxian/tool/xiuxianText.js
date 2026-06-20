@@ -793,7 +793,6 @@ const prefixHandlers = [
     prefix: /删除(全部)?兑换码/,
     handler: async (id, user_id, Text, msg, at, isMaster) => {
       const value = await xiuxian.delCdkey(user_id, msg.replace(/#?使用兑换码/, '').trim(), isMaster)
-      logger.info(value)
       switch (value.event) {
         case 'del_cdks':
           Text.push([
