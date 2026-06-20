@@ -146,7 +146,8 @@ const Button = {
     return segment.button(
       [
         { text: "生成", input: "生成兑换码" },
-        { text: "使用", input: "使用兑换码", style: 4 }
+        { text: "使用", input: "使用兑换码" },
+        { text: "删除", input: "删除兑换码" }
       ]
     )
   }
