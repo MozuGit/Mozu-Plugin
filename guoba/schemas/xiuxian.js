@@ -23,6 +23,20 @@ export default [
     component: "Switch"
   },
   {
+    field: 'xiuxian.setting.priority',
+    label: '指令优先级',
+    helpMessage: '修改后需要重启才能生效',
+    bottomHelpMessage: '数字越小，优先级越大',
+    component: 'InputNumber',
+    componentProps: {
+      placeholder: '5000',
+      step: 1000,
+      style: {
+        width: '150px'
+      }
+    }
+  },
+  {
     field: "xiuxian.setting.master_no_cd",
     label: "主人不受冷却限制",
     bottomHelpMessage: "主人不受任何冷却限制",
@@ -329,6 +343,7 @@ export default [
   {
     field: "xiuxian.realm",
     label: "修仙境界配置",
+    helpMessage: '修改后需要重启才能生效',
     component: "GSubForm",
     componentProps: {
       multiple: true,

@@ -6,6 +6,7 @@ export default [
   {
     field: 'redis.host',
     label: '服务器地址',
+    helpMessage: '修改后需要重启才能生效',
     bottomHelpMessage: 'Redis服务器IP地址',
     component: 'Input',
     componentProps: {
@@ -41,6 +42,7 @@ export default [
   {
     field: 'redis.connectTimeout',
     label: '连接超时时间',
+    helpMessage: '修改后需要重启才能生效',
     bottomHelpMessage: '连接超过时间重连',
     component: 'InputNumber',
     componentProps: {
@@ -55,6 +57,7 @@ export default [
   {
     field: 'redis.keepAlive',
     label: '心跳间隔',
+    helpMessage: '修改后需要重启才能生效',
     bottomHelpMessage: '心跳间隔',
     component: 'InputNumber',
     componentProps: {
@@ -69,6 +72,7 @@ export default [
   {
     field: 'redis.noDelay',
     label: '禁用Nagle算法',
+    helpMessage: '修改后需要重启才能生效',
     bottomHelpMessage: '禁用Nagle算法，降低延迟',
     component: 'Switch'
   }
