@@ -8,7 +8,7 @@ export class MozuXiuxian extends plugin {
   constructor() {
     super({
       name: '魔族陌修仙',
-      dsc: '魔族陌修仙--官机小游戏',
+      dsc: '魔族陌修仙',
       event: 'message',
       priority: Config.setting.priority,
     })
