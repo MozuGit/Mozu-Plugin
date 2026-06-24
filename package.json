@@ -1,6 +1,6 @@
 {
   "name": "Mozu-Plugin",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "TRSS-Yunzai插件",
   "main": "index.js",
   "type": "module",
