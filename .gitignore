@@ -1,3 +1,2 @@
 /node_modules/
-/config/xiuxian/config
-/config/Config/config
+/config/*/config
