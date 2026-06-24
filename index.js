@@ -2,6 +2,7 @@ import fs, { appendFile } from "fs";
 import path from "path";
 import { fileURLToPath, pathToFileURL } from 'url';
 import { Version } from './model/Config/Version.js'
+import chalk from 'chalk'
 
 const _filename = fileURLToPath(import.meta.url);
 const pluginRoot = path.dirname(_filename);
@@ -50,6 +51,9 @@ for (let i in files) {
   apps[name] = ret[i].value[validKey];
 }
 
-logger.info(logger.green("- [Mozu-Plugin] 载入成功"));
+logger.info(chalk.rgb(82, 242, 255)("━━━━━━━━━━━━━━━━━━━━"))
+logger.info(chalk.rgb(82, 242, 255)("Mozu-Plugin 载入成功"))
+logger.info(chalk.rgb(82, 242, 255)("喵喵喵：976719017"))
+logger.info(chalk.rgb(82, 242, 255)("━━━━━━━━━━━━━━━━━━━━"))
 
 export { apps };
