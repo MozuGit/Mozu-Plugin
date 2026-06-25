@@ -130,11 +130,6 @@ const Button = {
         { text: "闭关榜", input: "闭关榜" }
       ],
       [
-        { text: "双修榜", input: "双修榜" },
-        { text: "查询榜", input: "查询榜" },
-        { text: "榜", input: "榜" }
-      ],
-      [
         { text: "修炼", input: "修炼" },
         { text: "开采", input: "开采" },
         { text: "信息", input: "修仙个人信息" },
