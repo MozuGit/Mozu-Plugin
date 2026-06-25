@@ -10,7 +10,7 @@ export class MozuXiuxian extends plugin {
       name: '魔族陌修仙',
       dsc: '魔族陌修仙',
       event: 'message',
-      priority: Config.setting.priority,
+      priority: Config.setting.priority || 5000,
     })
     this.rule.push(
       {
