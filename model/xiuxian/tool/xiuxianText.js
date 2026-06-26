@@ -1,5 +1,6 @@
 import { Button, xiuxian } from "../index.js"
 import { Config } from "./Config/Config.js"
+import mqqapi from "./mqqapi.js"
 
 async function xiuxianText(msg, user_id, at, isMaster) {
   msg = msg.trim()
@@ -39,13 +40,13 @@ const commandHandlers = {
     switch (value.event) {
       case 'xiulian_end':
         Text.push([
-          ...buildHeader(user_id, id),
-          '**[修炼完成](mqqapi://aio/inlinecmd?command=修炼)**',
+          ...(await buildHeader(user_id, id)),
+          '**' + (await mqqapi.command('修炼完成', '修炼', true)) + '**',
           '>获得修为' + value.data.addcult + '点',
           '***',
-          ...buildUserInfo(userInfo),
+          ...(await buildUserInfo(userInfo)),
           '***',
-          ...buildRealmInfo(userInfo),
+          ...(await buildRealmInfo(userInfo)),
           '***'
         ].join('\n'))
         break
@@ -59,7 +60,7 @@ const commandHandlers = {
         ].join('\n'))
         break
       case 'in_retreat':
-        Text.push(retreatText)
+        Text.push(await retreatText())
         break
     }
     Text.push(Button.xiuxian)
@@ -71,11 +72,11 @@ const commandHandlers = {
     switch (value.event) {
       case 'kaicai_end':
         Text.push([
-          ...buildHeader(user_id, id),
-          '**[开采完成](mqqapi://aio/inlinecmd?command=开采)**',
+          ...(await buildHeader(user_id, id)),
+          '**' + (await mqqapi.command('开采完成', '开采', true)) + '**',
           '>获得' + value.data.addls + '灵石',
           '***',
-          ...buildUserInfo(userInfo),
+          ...(await buildUserInfo(userInfo)),
           '***'
         ].join('\n'))
         break
@@ -89,7 +90,7 @@ const commandHandlers = {
         ].join('\n'))
         break
       case 'in_retreat':
-        Text.push(retreatText)
+        Text.push(await retreatText())
         break
     }
     Text.push(Button.xiuxian)
@@ -104,9 +105,9 @@ const commandHandlers = {
           '<@' + user_id + '>',
           '***',
           '**ID：' + id + '**',
-          '**[切磋](mqqapi://aio/inlinecmd?command=切磋 ' + id + ')' + '**',
+          '**' + (await mqqapi.command('切磋', '切磋' + id)) + '**',
           '***',
-          '**[今日签到成功](mqqapi://aio/inlinecmd?command=修仙签到)**',
+          '**' + (await mqqapi.command('今日签到成功', '修仙签到', true)) + '**',
           '***',
           '**签到情况**',
           '>签到次数：' + userInfo.signNum + '天',
@@ -151,7 +152,7 @@ const commandHandlers = {
             '**突破成功**',
             '>成功突破到：**' + userInfo.realm.realmName + '**',
             '***',
-            ...buildRealmInfo(userInfo),
+            ...(await buildRealmInfo(userInfo)),
             '***',
           ].join('\n'))
         } else if (value.data.state === "failed") {
@@ -161,7 +162,7 @@ const commandHandlers = {
             '**突破失败**',
             '>**修为-' + value.data.cult + '**',
             '***',
-            ...buildRealmInfo(userInfo),
+            ...(await buildRealmInfo(userInfo)),
             '***',
           ].join('\n'))
         }
@@ -173,12 +174,12 @@ const commandHandlers = {
           '**突破失败**',
           '>**你的修为还不足以突破**',
           '***',
-          ...buildRealmInfo(userInfo),
+          ...(await buildRealmInfo(userInfo)),
           '***',
         ].join('\n'))
         break
       case 'in_retreat':
-        Text.push(retreatText)
+        Text.push(await retreatText())
         break
     }
     Text.push(Button.xiuxian)
@@ -187,13 +188,13 @@ const commandHandlers = {
   '修仙个人信息': async (id, user_id, Text) => {
     const userInfo = await xiuxian.getUserInfo(id)
     Text.push([
-      ...buildHeader(user_id, id),
-      ...buildUserInfo(userInfo),
+      ...(await buildHeader(user_id, id)),
+      ...(await buildUserInfo(userInfo)),
       '***',
       '**战力：' + userInfo.power + '**',
-      '>**[境界：' + userInfo.realm.realmName + '](mqqapi://aio/inlinecmd?command=突破)**',
-      '**[修为：' + userInfo.cult + '](mqqapi://aio/inlinecmd?command=修炼)**',
-      '**[灵石：' + userInfo.ls + '](mqqapi://aio/inlinecmd?command=开采)**',
+      '>**' + (await mqqapi.command('境界：' + userInfo.realm.realmName), '突破') + '**',
+      '**' + (await mqqapi.command('修为：' + userInfo.cult, '修炼', true)) + '**',
+      '**' + (await mqqapi.command('灵石：' + userInfo.ls, '修炼', true)) + '**',
       '***',
       '>灵根：无',
       '灵根加成：0%',
@@ -338,7 +339,7 @@ const commandHandlers = {
       '**修为榜**',
       '>排行榜仅展示前10名',
       '***',
-      ...buildRank(value.data.ranks, '修为'),
+      ...(await buildRank(value.data.ranks, '修为')),
       (value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n修为：${value.data.cult}\n***` : ``)
     ].join('\n'))
     Text.push(Button.rank)
@@ -352,7 +353,7 @@ const commandHandlers = {
       '**灵石榜**',
       '>排行榜仅展示前10名',
       '***',
-      ...buildRank(value.data.ranks, '灵石'),
+      ...(await buildRank(value.data.ranks, '灵石')),
       (value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n灵石：${value.data.cult}\n***` : ``)
     ].join('\n'))
     Text.push(Button.rank)
@@ -366,7 +367,7 @@ const commandHandlers = {
       '**战力榜**',
       '>排行榜仅展示前10名',
       '***',
-      ...buildRank(value.data.ranks, '战力'),
+      ...(await buildRank(value.data.ranks, '战力')),
       (value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n战力：${value.data.cult}\n***` : ``)
     ].join('\n'))
     Text.push(Button.rank)
@@ -380,7 +381,7 @@ const commandHandlers = {
       '**闭关时间榜**',
       '>排行榜仅展示前10名',
       '***',
-      ...buildRank(value.data.ranks, '闭关时间'),
+      ...(await buildRank(value.data.ranks, '闭关时间')),
       (value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n闭关时间：${value.data.cult}\n***` : ``)
     ].join('\n'))
     Text.push(Button.rank)
@@ -404,7 +405,7 @@ const commandHandlers = {
         '宗门经验：' + userInfo.sectInfo.exp + '/' + userInfo.sectInfo.nextExp,
         '>' + ((userInfo.sectInfo.nextExp - userInfo.sectInfo.exp > 0)
           ? '距离下一级还需' + (userInfo.sectInfo.nextExp - userInfo.sectInfo.exp) + '点经验'
-          : '已满足[升级](mqqapi://aio/inlinecmd?command=宗门升级)要求'),
+          : '已满足' + (await mqqapi.command('升级', '宗门升级')) + '要求'),
         '***'
       ].join('\n'))
     } else {
@@ -412,7 +413,7 @@ const commandHandlers = {
         '<@' + user_id + '>',
         '***',
         '**你还没加入宗门呢**',
-        '>点击[加入宗门](mqqapi://aio/inlinecmd?command=加入宗门)',
+        '>点击' + (await mqqapi.command('加入宗门')),
         '***'
       ].join('\n'))
     }
@@ -429,7 +430,7 @@ const commandHandlers = {
           '**宗门列表**',
           '>最多随机显示10个宗门',
           '***',
-          ...buildSectList(value.data.sectInfos)
+          ...(await buildSectList(value.data.sectInfos))
         ].join('\n'))
         break
       case 'not_sects':
@@ -437,7 +438,7 @@ const commandHandlers = {
           '<@' + user_id + '>',
           '***',
           '**当前没有任何宗门**',
-          '>[点击创建宗门](mqqapi://aio/inlinecmd?command=创建宗门)',
+          '>' + (await mqqapi.command('点击创建宗门', '创建宗门')) + '',
           '***'
         ].join('\n'))
         break
@@ -450,7 +451,7 @@ const commandHandlers = {
     const userInfo = await xiuxian.getUserInfo(id)
     switch (value.event) {
       case 'in_retreat':
-        Text.push(retreatText)
+        Text.push(await retreatText())
         break
       case 'lack_ls':
         Text.push([
@@ -469,7 +470,7 @@ const commandHandlers = {
           '**创建宗门成功**',
           '>恭喜，宗门创建成功',
           '***',
-          ...buildUserInfo(userInfo),
+          ...(await buildUserInfo(userInfo)),
           '***'
         ].join('\n'))
         break
@@ -514,7 +515,7 @@ const commandHandlers = {
           '<@' + user_id + '>',
           '***',
           '**你还没加入宗门呢**',
-          '>点击[加入宗门](mqqapi://aio/inlinecmd?command=加入宗门)',
+          '>点击' + (await mqqapi.command('加入宗门')),
           '***'
         ].join('\n'))
         break
@@ -555,7 +556,7 @@ const commandHandlers = {
           let membersList = []
           for (let member of value.data.membersList) {
             membersList.push([
-              '>**ID：' + member.id + '     [[同意]](mqqapi://aio/inlinecmd?command=同意宗门成员' + member.id + ')     [[拒绝]](mqqapi://aio/inlinecmd?command=拒绝宗门成员' + member.id + ')**',
+              '>**ID：' + member.id + '     ' + (await mqqapi.command('[同意]', '同意宗门成员' + member.id)) + '     ' + (await mqqapi.command('拒绝', '拒绝宗门成员' + member.id)) + '**',
               '**修为：' + member.cult + '**',
               '**境界：' + member.realm + '**',
               '***'
@@ -638,7 +639,7 @@ const prefixHandlers = [
             '<@' + user_id + '>',
             '***',
             '**切磋开始**',
-            '>**你对ID: [' + id2 + '](mqqapi://aio/inlinecmd?command=查询修仙者' + id2 + ')发起切磋**',
+            '>**你对ID: ' + (await mqqapi.command(id2, '查询修仙者' + id2)) + '发起切磋**',
             '***',
             '**切磋信息**',
             '>你的战力：' + value.data.powerA,
@@ -650,8 +651,8 @@ const prefixHandlers = [
             '<@' + user_id + '>',
             '***',
             '**切磋结果**',
-            '>**你的ID：[' + id + '](mqqapi://aio/inlinecmd?command=查询修仙者' + id + ')**',
-            '**对方ID：[' + id2 + '](mqqapi://aio/inlinecmd?command=查询修仙者' + id2 + ')**',
+            '>**你的ID：' + (await mqqapi.command(id, '查询修仙者' + id)) + '**',
+            '**对方ID：' + (await mqqapi.command(id2, '查询修仙者' + id2)) + '**',
             '***',
             '**切磋结算**',
             '>你' + (value.data.winner ? '胜利：+' : '失败：-') + value.data.cultA + '点修为',
@@ -678,13 +679,13 @@ const prefixHandlers = [
       const userInfo = await xiuxian.getUserInfo(query_id)
       if (userInfo) {
         Text.push([
-          ...buildHeader(user_id, query_id),
-          ...buildUserInfo(userInfo),
+          ...(await buildHeader(user_id, query_id)),
+          ...(await buildUserInfo(userInfo)),
           '***',
           '**战力：' + userInfo.power + '**',
-          '>**[境界：' + userInfo.realm.realmName + '](mqqapi://aio/inlinecmd?command=突破)**',
-          '**[修为：' + userInfo.cult + '](mqqapi://aio/inlinecmd?command=修炼)**',
-          '**[灵石：' + userInfo.ls + '](mqqapi://aio/inlinecmd?command=开采)**',
+          '>**' + (await mqqapi.command('境界：' + userInfo.realm.realmName)) + '**',
+          '**' + (await mqqapi.command('修为：' + userInfo.cult, '修炼', true)) + '**',
+          '**' + (await mqqapi.command('灵石：' + userInfo.ls, '开采', true)) + '**',
           '***',
           '>灵根：无',
           '灵根加成：0%',
@@ -899,49 +900,49 @@ const prefixHandlers = [
 
 export { xiuxianText }
 
-function buildHeader(user_id, id) {
+async function buildHeader(user_id, id) {
   return [
     '<@' + user_id + '>',
     '***',
     '**ID：' + id + '**',
-    '**[切磋](mqqapi://aio/inlinecmd?command=切磋 ' + id + ')' + '**',
+    '**' + (await mqqapi.command('切磋', '切磋' + id)) + '**',
     '***'
   ]
 }
 
-function buildUserInfo(userInfo) {
+async function buildUserInfo(userInfo) {
   return [
-    '>**[称号：' + userInfo.title + '](mqqapi://aio/inlinecmd?command=我的称号)**',
-    '>**[性别：' + userInfo.sex + '](mqqapi://aio/inlinecmd?command=设置性别)**',
-    '>**' + ((userInfo.sectInfo.id !== 0) ? '[宗门：' + userInfo.sectInfo.name + '    ID：' + userInfo.sectInfo.id + '](mqqapi://aio/inlinecmd?command=我的宗门)' : '未加入宗门') + '**'
+    '>**' + (await mqqapi.command('称号：' + userInfo.title, '我的称号', true)) + '**',
+    '>**' + (await mqqapi.command('性别：' + userInfo.sex, '设置性别')) + '**',
+    '>**' + ((userInfo.sectInfo.id !== 0) ? (await mqqapi.command('宗门：' + userInfo.sectInfo.name + '    ID：' + userInfo.sectInfo.id, '我的宗门', true)) : (await mqqapi.command('未加入宗门', '加入宗门'))) + '**'
   ]
 }
 
-function buildRealmInfo(userInfo) {
+async function buildRealmInfo(userInfo) {
   return [
-    '>[境界：' + userInfo.realm.realmName + '](mqqapi://aio/inlinecmd?command=突破)',
+    '>' + (await mqqapi.command('境界：' + userInfo.realm.realmName, '突破')),
     '当前修为：' + userInfo.cult,
     '下一境界：' + userInfo.realm.realmName2,
     '距离下一境界：' + ((userInfo.realm.realmNeedExp === 0)
-      ? '已满足[突破](mqqapi://aio/inlinecmd?command=突破)条件'
+      ? '已满足' + (await mqqapi.command('突破')) + '条件'
       : '还需' + userInfo.realm.realmNeedExp + '点修为'),
   ]
 }
 
-function buildRank(ranks, index) {
+async function buildRank(ranks, index) {
   let rankText = []
   for (let item of ranks) {
     rankText.push([
-      '>**[No.' + item.rank + ' => ' + 'ID：' + item.id + '](mqqapi://aio/inlinecmd?command=查询修仙者' + item.id + ')**',
+      '>**' + (await mqqapi.command('No.' + item.rank + ' => ' + 'ID：' + item.id, '查询修仙者' + item.id)) + '**',
       '**' + index + '：' + ((index === "闭关时间") ? secondsToTimeText(item.value) : item.value) + '**',
-      '**[切磋](mqqapi://aio/inlinecmd?command=切磋' + item.id + ')**',
+      '**' + (await mqqapi.command('切磋', '切磋' + item.id)) + '**',
       '***'
     ].join('\n'))
   }
   return rankText
 }
 
-function buildSectList(sectInfos) {
+async function buildSectList(sectInfos) {
   let sectList = []
   for (let item of sectInfos) {
     sectList.push([
@@ -949,20 +950,23 @@ function buildSectList(sectInfos) {
       '>宗主：' + item.owner + '  等级：' + item.level,
       '人数：' + item.memberNum + '/' + item.memberMax,
       '简介：' + item.desc,
-      '[点击加入宗门](mqqapi://aio/inlinecmd?command=加入宗门 ' + item.id + ')',
+      (await mqqapi.command('点击加入宗门', '加入宗门' + item.id)),
       '***'
     ].join('\n'))
   }
   return sectList
 }
 
-const retreatText = [
-  '***',
-  '**当前正在闭关中...**',
-  '>如需取消闭关请点击',
-  '**[结束闭关](mqqapi://aio/inlinecmd?command=结束闭关)**',
-  '***',
-].join('\n')
+async function retreatText() {
+  return [
+    '***',
+    '**当前正在闭关中...**',
+    '>如需取消闭关请点击',
+    '**' + (await mqqapi.command('结束闭关', '结束闭关', true)) + '**',
+    '***',
+  ].join('\n')
+}
+
 
 /**
  * 时间戳转 2026-01-01 08:00:00 格式

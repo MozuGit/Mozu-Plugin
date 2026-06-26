@@ -45,6 +45,7 @@ export default [
   {
     field: "xiuxian.setting.forceSharp",
     label: "强制用#触发",
+    helpMessage: '修改后需要重启才能生效',
     bottomHelpMessage: "前缀必须有#或/才能触发指令",
     component: "Switch"
   },
