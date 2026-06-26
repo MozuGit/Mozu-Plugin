@@ -128,12 +128,6 @@ const Button = {
         { text: "切磋榜", input: "切磋榜" },
         { text: "签到榜", input: "签到榜" },
         { text: "闭关榜", input: "闭关榜" }
-      ],
-      [
-        { text: "修炼", input: "修炼" },
-        { text: "开采", input: "开采" },
-        { text: "信息", input: "修仙个人信息" },
-        { text: "签到", input: "修仙签到" }
       ]
     )
   },

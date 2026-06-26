@@ -319,6 +319,17 @@ const commandHandlers = {
     Text.push(Button.stopRetreat)
   },
 
+  '修仙排行': async (id, user_id, Text) => {
+    Text.push([
+      '<@' + user_id + '>',
+      '***',
+      '**请选择你需要查看的排行榜**',
+      '>排行榜仅展示前10名',
+      '***'
+    ].join('\n'))
+    Text.push(Button.rank)
+  },
+
   '修为榜': async (id, user_id, Text) => {
     const value = await xiuxian.getRank(id, "修为")
     Text.push([
