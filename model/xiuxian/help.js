@@ -8,12 +8,12 @@ const help = {
       '修炼',
       '开采',
       '突破',
+      '切磋',
       '修仙签到',
-      '修仙个人信息',
       '开始闭关',
       '结束闭关',
-      '切磋',
-      '查询修仙者'
+      '查询修仙者',
+      '修仙个人信息'
     ]
     const result = commands.map(item => `${prefix}${item}`)
     return result
