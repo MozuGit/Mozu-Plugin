@@ -1,3 +1,14 @@
+<div align="center">
+
+<img src="./Mo.png" /><br>
+# Mozu-Plugin
+
+[![Stars](https://img.shields.io/github/stars/MozuGit/Mozu-Plugin?style=flat)](../../stargazers)
+[![Version](https://img.shields.io/github/package-json/v/MozuGit/Mozu-Plugin?style=flat)](package.json)
+[![License](https://img.shields.io/github/license/MozuGit/Mozu-Plugin?style=flat)](LICENSE)
+
+</div>
+
 > [!TIP]
 > 如果您觉得我们的项目有帮助，请给我们一个星星（Starred）！您的支持对我们非常重要，将激励我们不断改进和提供更好的内容。谢谢！🙏
 
@@ -31,49 +42,13 @@ pnpm install
 ## 功能介绍
 
 ### 插件功能实现
-- [x] 魔族陌修仙 （开发中）
-  - [ ] 修仙基础
-    - [x] 修炼
-    - [x] 开采
-    - [x] 突破
-    - [x] 切磋
-    - [x] 修仙签到
-    - [x] 开始闭关
-    - [x] 结束闭关
-    - [x] 确认开始闭关
-    - [x] 确认结束闭关
-    - [ ] ~~渡劫~~
-    - [ ] 储物袋
-    - [ ] 妖兽列表
-    - [ ] 猎杀妖兽
-    - [ ] 秘境列表
-    - [ ] 探索秘境
-  - [ ] 玩家信息
-    - [x] 查询修仙者
-    - [x] 修仙个人信息
-    - [ ] 我的称号
-    - [ ] 称号列表
-    - [ ] 设置称号
-    - [ ] 设置性别
-  - [ ] 排行榜
-    - [x] 修为榜
-    - [x] 灵石榜
-    - [x] 战力榜
-    - [x] 闭关榜
-    - [ ] 宗门榜
-  - [ ] 宗门系统
-    - [x] 我的宗门
-    - [x] 创建宗门
-    - [x] 加入宗门
-    - [ ] 退出宗门
-    - [x] 宗门签到
-    - [ ] 查询宗门
-    - [x] 宗门列表
-    - [x] 宗门成员
-    - [x] 宗门审核
-    - [ ] 宗门管理
-    - [ ] 供奉宗门
-    - [ ] 宗门商店
-  - [x] 兑换码系统
-    - [x] 生成兑换码
-    - [x] 使用兑换码
+
+**魔族陌修仙**
+ - 具体指令发送`修仙帮助`获取
+ - 当前修仙还在开发中
+    
+## 联系方式
+
+ - **QQ：** [3343712589](https://qm.qq.com/q/5fKlztbHHG)
+ - **QQ群：** [976719017](https://qun.qq.com/universal-share/share?ac=1&authKey=13%2FWEfX0G3PO77HgYt3w8yg8K%2BCSE3fYXzuA%2FOH0Vnzv5HDrENZctaRM1qkC07eD&busi_data=eyJncm91cENvZGUiOiI5NzY3MTkwMTciLCJ0b2tlbiI6Inl0NHY2b01BRTlMeHR4MXBYbWJqYWxpbmU5Wk9kT3VqZE1nM0dNYVZET1pBcjVPTVZ5WDVLMnVCaFpHNTFWVUgiLCJ1aW4iOiIzMzQzNzEyNTg5In0%3D&data=uDBsYAg-ZA2RbnkK_3yJFYKmiPRZg-XmEhn6iJ1tWmOfRPEeEIiA6N1o1e5p9-dqSJDSxCk44qnx92h62ZlrmQ&svctype=4&tempid=h5_group_info)
+ - **GitHub：** [MozuGit](https://github.com/MozuGit/Mozu-Plugin)
