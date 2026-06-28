@@ -21,12 +21,23 @@ async function xiuxianText(msg, user_id, at, isMaster) {
     if (handler) {
       await handler(id, user_id, Text, msg, at, isMaster)
     }
+    if (Text.length === 0) {
+      Text.push([
+        '<@' + user_id + '>',
+        '***',
+        '**功能开发中，即将上线**',
+        '>催一催作者：' + (await mqqapi.qagent('u_KX6qPA4vv-EbmUhf0enyNg', '魔族陌', '3343712589')),
+        '***',
+      ].join('\n'))
+      Text.push(Button.author)
+    }
   } catch (err) {
     logger.error(err)
     Text.push([
       '<@' + user_id + '>',
       '***',
       '**系统错误，请稍后重试**',
+      '>联系主人：' + (await mqqapi.qagent('u_KX6qPA4vv-EbmUhf0enyNg', '魔族陌', '3343712589')),
       '***',
     ].join('\n'))
   }
@@ -192,7 +203,7 @@ const commandHandlers = {
       ...(await buildUserInfo(userInfo)),
       '***',
       '**战力：' + userInfo.power + '**',
-      '>**' + (await mqqapi.command('境界：' + userInfo.realm.realmName), '突破') + '**',
+      '>**' + (await mqqapi.command('境界：' + userInfo.realm.realmName, '突破')) + '**',
       '**' + (await mqqapi.command('修为：' + userInfo.cult, '修炼', true)) + '**',
       '**' + (await mqqapi.command('灵石：' + userInfo.ls, '修炼', true)) + '**',
       '***',

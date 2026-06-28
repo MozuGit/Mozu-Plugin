@@ -37,7 +37,7 @@ const Button = {
       ],
       [
         { text: "签到", input: "宗门签到" },
-        { text: "查询", input: "宗门查询" },
+        { text: "查询", input: "查询宗门" },
         { text: "列表", input: "宗门列表" },
         { text: "成员", input: "宗门成员" }
       ],
