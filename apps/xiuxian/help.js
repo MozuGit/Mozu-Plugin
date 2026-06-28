@@ -1,5 +1,7 @@
 import help from '../../model/xiuxian/help.js'
+import mqqapi from "../../model/xiuxian/tool/mqqapi.js"
 import { Config } from "../../model/xiuxian/tool/Config/Config.js"
+import { Button } from "../../model/xiuxian/index.js"
 
 export class MozuXiuxianHelp extends plugin {
   constructor() {
@@ -24,26 +26,38 @@ export class MozuXiuxianHelp extends plugin {
       if (!Config.setting.whiteGroup.includes(this.e.group_id)) return false
     }
     const message = [
-      '#✨修仙帮助',
+      '##✨修仙帮助',
+      '>联系主人：' + (await mqqapi.qagent('u_KX6qPA4vv-EbmUhf0enyNg', '魔族陌', '3343712589')),
+      '修仙指令帮助，bug反馈请联系主人',
       '***',
       '**🎉基础指令**',
-      commands(help.xiuxian),
+      (await commands(help.xiuxian)),
       '***',
       '**🎄宗门指令**',
-      commands(help.sect),
+      (await commands(help.sect)),
       '***',
       '**⭐️排行指令**',
-      commands(help.rank),
+      (await commands(help.rank)),
       '***',
       '**🌈兑换指令**',
-      commands(help.cdk),
+      (await commands(help.cdk)),
       '***'
     ].join('\n')
-    this.e.reply(message)
+    this.e.reply([message, Button.author])
   }
 }
 
-function commands(commands) {
-  const result = commands.map(item => `[${item.replace('/', '')}](mqqapi://aio/inlinecmd?command=${item})`)
-  return result.join('  |  ')
+async function commands(commands) {
+  let result = ''
+  let index = 0
+  for (const item of commands) {
+    const cmd = await mqqapi.command(item);
+    if (index % 2 === 0 && index > 0) {
+      result += '\n'
+    }
+    result += cmd
+    index % 2 === 0 ? result += '  |  ' : ''
+    index++
+  }
+  return result
 }

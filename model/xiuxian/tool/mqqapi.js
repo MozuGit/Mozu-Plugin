@@ -3,14 +3,33 @@ import { Config } from "./Config/Config.js"
 const prefix = Config.setting.forceSharp ? '/' : ''
 
 export default new class {
+  /**
+   * 
+   * @param {string} text 显示文本
+   * @param {string} command 点击回复文本
+   * @param {boolean} ender 是否直接发送，由于mqqapi限制 该方法可能在未来某一时间失效
+   * @returns 返回mqqapi
+   */
   async command(text, command = text, ender = false) {
     command = `${prefix}${command}`
-    let message
-    if (ender) {    //由于mqqapi限制，该方法可能在未来某一时间失效
-      message = `[](mqqapi://aio/inlinecmd?command=${command}&ender=false)[${text}](mqqapi://aio/inlinecmd?command=${command}&ender=false1)`
+    let result
+    if (ender) {
+      result = `[](mqqapi://aio/inlinecmd?command=${command}&ender=false)[${text}](mqqapi://aio/inlinecmd?command=${command}&ender=false1)`
     } else {
-      message = `[${text}](mqqapi://aio/inlinecmd?command=${command}&ender=false)`
+      result = `[${text}](mqqapi://aio/inlinecmd?command=${command}&ender=false)`
     }
-    return message
+    return result
+  }
+
+  /**
+   * 
+   * @param {string} peerUid QQ的Uid
+   * @param {string} peerName 显示文本
+   * @param {string} text Markdown不支持该渲染默认显示
+   * @returns 返回qagent
+   */
+  async qagent(peerUid, peerName, text = peerName) {
+    const result = `[${peerName}](qagent://markdown/node?type=quser&peerUid=${peerUid}&peerName=${peerName})`
+    return result
   }
 }
