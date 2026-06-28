@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./Mo.png" /><br>
+<img src="./Mo.png" width="256" height="256" /><br>
 # Mozu-Plugin
 
 [![Stars](https://img.shields.io/github/stars/MozuGit/Mozu-Plugin?style=flat)](../../stargazers)
@@ -51,4 +51,4 @@ pnpm install
 
  - **QQ：** [3343712589](https://qm.qq.com/q/5fKlztbHHG)
  - **QQ群：** [976719017](https://qun.qq.com/universal-share/share?ac=1&authKey=13%2FWEfX0G3PO77HgYt3w8yg8K%2BCSE3fYXzuA%2FOH0Vnzv5HDrENZctaRM1qkC07eD&busi_data=eyJncm91cENvZGUiOiI5NzY3MTkwMTciLCJ0b2tlbiI6Inl0NHY2b01BRTlMeHR4MXBYbWJqYWxpbmU5Wk9kT3VqZE1nM0dNYVZET1pBcjVPTVZ5WDVLMnVCaFpHNTFWVUgiLCJ1aW4iOiIzMzQzNzEyNTg5In0%3D&data=uDBsYAg-ZA2RbnkK_3yJFYKmiPRZg-XmEhn6iJ1tWmOfRPEeEIiA6N1o1e5p9-dqSJDSxCk44qnx92h62ZlrmQ&svctype=4&tempid=h5_group_info)
- - **GitHub：** [MozuGit](https://github.com/MozuGit/Mozu-Plugin)
+ - **GitHub：** [MozuGit](https://github.com/MozuGit)
