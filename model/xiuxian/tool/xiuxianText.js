@@ -592,12 +592,13 @@ const prefixHandlers = [
     prefix: /^切磋/,
     handler: async (id, user_id, Text, msg, at, isMaster) => {
       let id2 = 0
-      if (at && !Array.isArray(at)) {
+      const _id = (msg.match(/\d+/g) || []).join('')
+      if (at && !Array.isArray(at) && !_id) {
         if (await xiuxian.hasPlayer(at)) {
           id2 = (await xiuxian.init(at)).data.id
         }
       } else {
-        id2 = (msg.match(/\d+/g) || []).join('')
+        id2 = parseInt(_id, 10)
       }
       const value = await xiuxian.pvp(id, id2, isMaster)
       switch (value.event) {
@@ -678,14 +679,15 @@ const prefixHandlers = [
     prefix: /^查询修仙者/,
     handler: async (id, user_id, Text, msg, at) => {
       let query_id
-      if (at && !Array.isArray(at)) {
+      const _id = (msg.match(/\d+/g) || []).join('')
+      if (at && !Array.isArray(at) && !_id) {
         if (await xiuxian.hasPlayer(at)) {
           query_id = (await xiuxian.init(at)).data.id
         } else {
           query_id = 0
         }
       } else {
-        query_id = (msg.match(/\d+/g) || []).join('')
+        query_id = parseInt(_id, 10)
       }
       const userInfo = await xiuxian.getUserInfo(query_id)
       if (userInfo) {
@@ -719,7 +721,8 @@ const prefixHandlers = [
     prefix: /^加入宗门/,
     handler: async (id, user_id, Text, msg, at) => {
       let join_id
-      if (at && !Array.isArray(at)) {
+      const _id = (msg.match(/\d+/g) || []).join('')
+      if (at && !Array.isArray(at) && !_id) {
         if (await xiuxian.hasPlayer(at)) {
           const atID = (await xiuxian.init(at)).data.id
           const userInfo = await xiuxian.getUserInfo(atID)
@@ -728,7 +731,7 @@ const prefixHandlers = [
           join_id = 0
         }
       } else {
-        join_id = (msg.match(/\d+/g) || []).join('')
+        join_id = parseInt(_id, 10)
       }
       const value = await xiuxian.joinSect(id, join_id)
       const userInfo = await xiuxian.getUserInfo(id)
