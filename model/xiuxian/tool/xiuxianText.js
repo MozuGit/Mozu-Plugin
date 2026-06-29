@@ -21,7 +21,7 @@ async function xiuxianText(msg, user_id, at, isMaster) {
     if (handler) {
       await handler(id, user_id, Text, msg, at, isMaster)
     }
-    if (Text.length === 0) {
+    if (Text.length === 0 || (Text.length === 1 && userData.event === "user_init")) {
       Text.push([
         '<@' + user_id + '>',
         '***',
@@ -589,7 +589,7 @@ const commandHandlers = {
 
 const prefixHandlers = [
   {
-    prefix: /^切磋/,
+    prefix: /^切磋\s*\d*/,
     handler: async (id, user_id, Text, msg, at, isMaster) => {
       let id2 = 0
       const _id = (msg.match(/\d+/g) || []).join('')
@@ -676,7 +676,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /^查询修仙者/,
+    prefix: /^查询修仙者\s*\d*/,
     handler: async (id, user_id, Text, msg, at) => {
       let query_id
       const _id = (msg.match(/\d+/g) || []).join('')
@@ -718,7 +718,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /^加入宗门/,
+    prefix: /^加入宗门\s*\d*/,
     handler: async (id, user_id, Text, msg, at) => {
       let join_id
       const _id = (msg.match(/\d+/g) || []).join('')
@@ -786,7 +786,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /生成(通用)?兑换码/,
+    prefix: /生成(通用)?兑换码(.*)/,
     handler: async (id, user_id, Text, msg, at, isMaster) => {
       const value = await xiuxian.genCdkey(user_id, msg, isMaster)
       switch (value.event) {
@@ -802,7 +802,7 @@ const prefixHandlers = [
             '***'
           ].join('\n'))
           break
-        case 'no_auth':
+        case 'no_permissions':
           Text.push([
             '<@' + user_id + '>',
             '***',
@@ -855,7 +855,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /^使用兑换码/,
+    prefix: /^使用兑换码(.*)/,
     handler: async (id, user_id, Text, msg, at) => {
       const value = await xiuxian.useCdkey(id, user_id, msg.replace(/#?使用兑换码/, '').trim())
       switch (value.event) {
@@ -874,6 +874,8 @@ const prefixHandlers = [
           ].join('\n'))
           break
         case 'cdk_use_success':
+          const cultList = value.data.cult.map(item => item < 0 ? `${item}` : `+${item}`)
+          const lsList = value.data.ls.map(item => item < 0 ? `${item}` : `+${item}`)
           Text.push([
             '<@' + user_id + '>',
             '***',
@@ -881,9 +883,9 @@ const prefixHandlers = [
             '>兑换码：' + msg.replace(/#?使用兑换码/, '').trim(),
             '***',
             '\`\`\` 使用结果',
-            ...(value.data.cult.length !== 0 ? ['修为+' + value.data.cult.join('\n修为+')] : []),
-            ...(value.data.ls.length !== 0 ? ['灵石+' + value.data.ls.join('\n灵石+')] : []),
-            ((value.data.cult.length === 0 && value.data.ls.length === 0) ? '奖励被小草神吃掉了喵~' : []),
+            ...(cultList.length !== 0 ? ['修为' + cultList.join('\n修为')] : []),
+            ...(lsList.length !== 0 ? ['灵石' + lsList.join('\n灵石')] : []),
+            ((cultList.length === 0 && lsList.length === 0) ? '奖励被小草神吃掉了喵~' : []),
             '\`\`\`',
             '***'
           ].join('\n'))
@@ -905,6 +907,52 @@ const prefixHandlers = [
             '**兑换码不存在**',
             '>请确认兑换码是否存在',
             '***',
+          ].join('\n'))
+          break
+      }
+    }
+  },
+  {
+    prefix: /^切换ID/,
+    handler: async (id, user_id, Text, msg, at, isMaster) => {
+      let switch_id
+      const _id = (msg.match(/\d+/g) || []).join('')
+      if (at && !Array.isArray(at) && !_id) {
+        if (await xiuxian.hasPlayer(at)) {
+          switch_id = (await xiuxian.init(at)).data.id
+        } else {
+          switch_id = 0
+        }
+      } else {
+        switch_id = parseInt(_id, 10)
+      }
+      const value = await xiuxian.switchId(id, switch_id, isMaster)
+      switch (value.event) {
+        case 'switch_success':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**切换ID成功**',
+            '>**ID：' + (await mqqapi.command(id, "查询修仙者" + id)) + '  <==>  ' + (await mqqapi.command(switch_id, "查询修仙者" + switch_id)) + '**',
+            '***'
+          ].join('\n'))
+          break
+        case 'not_switch_id':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**未找到该玩家**',
+            '>请确认该玩家是否存在或注册',
+            '***'
+          ].join('\n'))
+          break
+        case 'no_permissions':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**权限不足**',
+            '>请确认你是否有足够的权限',
+            '***'
           ].join('\n'))
           break
       }

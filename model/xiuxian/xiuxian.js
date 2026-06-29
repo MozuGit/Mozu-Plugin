@@ -20,7 +20,7 @@ export default new class {
         境界: 0,
         称号: "无",
         性别: "未设置",
-        宗门ID: "",
+        宗门ID: 0,
         签到次数: 0,
         注册时间: Math.floor(Date.now() / 1000)
       })
@@ -61,7 +61,7 @@ export default new class {
     const realmName2 = await Realm.getRealmName(realm + 1)
     const realmNeedExp = await Realm.getNextExp(cult, realm)
     const retreatRunTime = getStringTime(Math.floor(Date.now() / 1000) - retreatStartTime)
-    const power = await this.getPower(id)
+    const power = await this.getPower(id) || 0
 
     let sectInfo
     if (sectId !== 0) {
@@ -709,8 +709,8 @@ export default new class {
     const value = {
       genera: msg.includes("通用"),
       forceSetting: msg.includes("强制设置"),
-      cultList: [...msg.matchAll(/修为:(\d+)/g)].map(m => parseInt(m[1], 10)),
-      lsList: [...msg.matchAll(/灵石:(\d+)/g)].map(m => parseInt(m[1], 10))
+      cultList: [...msg.matchAll(/修为:(-?\d+)/g)].map(m => parseInt(m[1], 10)),
+      lsList: [...msg.matchAll(/灵石:(-?\d+)/g)].map(m => parseInt(m[1], 10))
     }
     const cdkSet = new Set()
     while (cdkSet.size < quantity) {
@@ -879,6 +879,38 @@ export default new class {
             ls: value.lsList
           }
         }
+      }
+    }
+  }
+
+  async switchId(id, switch_id, isMaster) {
+    if (!isMaster) {
+      return {
+        event: "no_permissions"
+      }
+    }
+    if ((await Redis.exists(`${PLAYER_INFO_KEY}:${switch_id}`)) !== 0) {
+      const open_id = await Redis.hget('Mozu:xiuxian:openid:reverse', id)
+      const open_switchid = await Redis.hget('Mozu:xiuxian:openid:reverse', switch_id)
+
+      const multi = Redis.multi()
+      const tempKey = `Mozu:xiuxian:temp:${Date.now()}`
+      multi.rename(`${PLAYER_INFO_KEY}:${id}`, tempKey)
+      multi.rename(`${PLAYER_INFO_KEY}:${switch_id}`, `${PLAYER_INFO_KEY}:${id}`)
+      multi.rename(tempKey, `${PLAYER_INFO_KEY}:${switch_id}`)
+
+      multi.hset('Mozu:xiuxian:openid:forward', open_id, switch_id)
+      multi.hset('Mozu:xiuxian:openid:forward', open_switchid, id)
+      multi.hset('Mozu:xiuxian:openid:reverse', switch_id, open_id)
+      multi.hset('Mozu:xiuxian:openid:reverse', id, open_switchid)
+
+      await multi.exec()
+      return {
+        event: "switch_success"
+      }
+    } else {
+      return {
+        event: "not_switch_id"
       }
     }
   }
