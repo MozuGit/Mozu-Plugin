@@ -166,6 +166,14 @@ const Button = {
         { text: "魔族陌", link: "https://qm.qq.com/q/5fKlztbHHG" }
       ]
     )
+  },
+  get backup() {
+    return segment.button(
+      [
+        { text: "修仙备份", input: "修仙备份" },
+        { text: "备份恢复", input: "备份恢复" }
+      ]
+    )
   }
 }
 export default Button

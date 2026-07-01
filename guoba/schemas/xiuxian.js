@@ -23,17 +23,27 @@ export default [
     component: "Switch"
   },
   {
-    field: 'xiuxian.setting.priority',
-    label: '指令优先级',
-    helpMessage: '修改后需要重启才能生效',
-    bottomHelpMessage: '数字越小，优先级越大',
-    component: 'InputNumber',
+    field: "xiuxian.setting.priority",
+    label: "指令优先级",
+    helpMessage: "修改后需要重启才能生效",
+    bottomHelpMessage: "数字越小，优先级越大",
+    component: "InputNumber",
     componentProps: {
-      placeholder: '5000',
+      placeholder: "5000",
       step: 1000,
       style: {
-        width: '150px'
+        width: "150px"
       }
+    }
+  },
+  {
+    field: "xiuxian.setting.cronBackup",
+    label: "定时备份cron",
+    helpMessage: "修改后需要重启才能生效",
+    bottomHelpMessage: "修仙定时备份",
+    component: "EasyCron",
+    componentProps: {
+      placeholder: "*表示任意，?表示不指定（月日和星期互斥）"
     }
   },
   {
@@ -45,7 +55,7 @@ export default [
   {
     field: "xiuxian.setting.forceSharp",
     label: "强制用#触发",
-    helpMessage: '修改后需要重启才能生效',
+    helpMessage: "修改后需要重启才能生效",
     bottomHelpMessage: "前缀必须有#或/才能触发指令",
     component: "Switch"
   },
@@ -102,23 +112,23 @@ export default [
     }
   },
   {
-    field: 'xiuxian.xiuxian.xiulian',
-    label: '修炼CD',
-    bottomHelpMessage: '修炼冷却时间（单位：秒）',
-    component: 'InputNumber',
+    field: "xiuxian.xiuxian.xiulian",
+    label: "修炼CD",
+    bottomHelpMessage: "修炼冷却时间（单位：秒）",
+    component: "InputNumber",
     componentProps: {
-      placeholder: '请输入修炼冷却时间（单位：秒）',
+      placeholder: "请输入修炼冷却时间（单位：秒）",
       min: 0,
       step: 10
     }
   },
   {
-    field: 'xiuxian.xiuxian.kaicai',
-    label: '开采CD',
-    bottomHelpMessage: '开采冷却时间（单位：秒）',
-    component: 'InputNumber',
+    field: "xiuxian.xiuxian.kaicai",
+    label: "开采CD",
+    bottomHelpMessage: "开采冷却时间（单位：秒）",
+    component: "InputNumber",
     componentProps: {
-      placeholder: '请输入开采冷却时间（单位：秒）',
+      placeholder: "请输入开采冷却时间（单位：秒）",
       min: 0,
       step: 10
     }
@@ -132,17 +142,17 @@ export default [
         title: "修为&灵石的上限下限"
       },
       style: {
-        maxHeight: '200px',
-        overflowY: 'auto'
+        maxHeight: "200px",
+        overflowY: "auto"
       },
       schemas: [
         {
-          field: 'maxcult',
-          label: '修为上限',
-          bottomHelpMessage: '修炼单次随机修为上限',
-          component: 'InputNumber',
+          field: "maxcult",
+          label: "修为上限",
+          bottomHelpMessage: "修炼单次随机修为上限",
+          component: "InputNumber",
           componentProps: {
-            placeholder: '请输入修为上限',
+            placeholder: "请输入修为上限",
             min: 0,
             step: 100,
             style: {
@@ -151,12 +161,12 @@ export default [
           }
         },
         {
-          field: 'mincult',
-          label: '修为下限',
-          bottomHelpMessage: '修炼单次随机修为下限',
-          component: 'InputNumber',
+          field: "mincult",
+          label: "修为下限",
+          bottomHelpMessage: "修炼单次随机修为下限",
+          component: "InputNumber",
           componentProps: {
-            placeholder: '请输入修为下限',
+            placeholder: "请输入修为下限",
             min: 0,
             step: 100,
             style: {
@@ -165,12 +175,12 @@ export default [
           }
         },
         {
-          field: 'maxls',
-          label: '灵石上限',
-          bottomHelpMessage: '开采单次随机灵石上限',
-          component: 'InputNumber',
+          field: "maxls",
+          label: "灵石上限",
+          bottomHelpMessage: "开采单次随机灵石上限",
+          component: "InputNumber",
           componentProps: {
-            placeholder: '请输入灵石上限',
+            placeholder: "请输入灵石上限",
             min: 0,
             step: 100,
             style: {
@@ -179,12 +189,12 @@ export default [
           }
         },
         {
-          field: 'minls',
-          label: '灵石下限',
-          bottomHelpMessage: '开采单次随机灵石下限',
-          component: 'InputNumber',
+          field: "minls",
+          label: "灵石下限",
+          bottomHelpMessage: "开采单次随机灵石下限",
+          component: "InputNumber",
           componentProps: {
-            placeholder: '请输入灵石下限',
+            placeholder: "请输入灵石下限",
             min: 0,
             step: 100,
             style: {
@@ -204,17 +214,17 @@ export default [
         title: "闭关配置"
       },
       style: {
-        maxHeight: '100px',
-        overflowY: 'auto'
+        maxHeight: "100px",
+        overflowY: "auto"
       },
       schemas: [
         {
-          field: 'cult',
-          label: '每小时闭关修为',
-          bottomHelpMessage: '每小时闭关获得的修为',
-          component: 'InputNumber',
+          field: "cult",
+          label: "每小时闭关修为",
+          bottomHelpMessage: "每小时闭关获得的修为",
+          component: "InputNumber",
           componentProps: {
-            placeholder: '请输入每小时闭关获得的修为',
+            placeholder: "请输入每小时闭关获得的修为",
             min: 0,
             step: 100,
             style: {
@@ -223,12 +233,12 @@ export default [
           }
         },
         {
-          field: 'max',
-          label: '闭关上限',
-          bottomHelpMessage: '单次闭关时间上限（上限后奖励不能再叠加）',
-          component: 'InputNumber',
+          field: "max",
+          label: "闭关上限",
+          bottomHelpMessage: "单次闭关时间上限（上限后奖励不能再叠加）",
+          component: "InputNumber",
           componentProps: {
-            placeholder: '请输入闭关时间上限（单位：时）',
+            placeholder: "请输入闭关时间上限（单位：时）",
             min: 0,
             step: 1,
             style: {
@@ -248,17 +258,17 @@ export default [
         title: "修仙签到配置"
       },
       style: {
-        maxHeight: '100px',
-        overflowY: 'auto'
+        maxHeight: "100px",
+        overflowY: "auto"
       },
       schemas: [
         {
-          field: 'cult',
-          label: '修为',
-          bottomHelpMessage: '每天签到获得的修为',
-          component: 'InputNumber',
+          field: "cult",
+          label: "修为",
+          bottomHelpMessage: "每天签到获得的修为",
+          component: "InputNumber",
           componentProps: {
-            placeholder: '请输入每天签到的修为',
+            placeholder: "请输入每天签到的修为",
             min: 0,
             step: 100,
             style: {
@@ -267,12 +277,12 @@ export default [
           }
         },
         {
-          field: 'ls',
-          label: '灵石',
-          bottomHelpMessage: '每天签到获得的灵石',
-          component: 'InputNumber',
+          field: "ls",
+          label: "灵石",
+          bottomHelpMessage: "每天签到获得的灵石",
+          component: "InputNumber",
           componentProps: {
-            placeholder: '请输入每天签到的灵石',
+            placeholder: "请输入每天签到的灵石",
             min: 0,
             step: 100,
             style: {
@@ -292,17 +302,17 @@ export default [
         title: "修仙切磋配置"
       },
       style: {
-        maxHeight: '100px',
-        overflowY: 'auto'
+        maxHeight: "100px",
+        overflowY: "auto"
       },
       schemas: [
         {
-          field: 'atk_cd',
-          label: '发起方CD',
-          bottomHelpMessage: '发起方CD内只能发起一次切磋',
-          component: 'InputNumber',
+          field: "atk_cd",
+          label: "发起方CD",
+          bottomHelpMessage: "发起方CD内只能发起一次切磋",
+          component: "InputNumber",
           componentProps: {
-            placeholder: '请输入发起方CD',
+            placeholder: "请输入发起方CD",
             min: 0,
             step: 10,
             style: {
@@ -311,12 +321,12 @@ export default [
           }
         },
         {
-          field: 'def_cd',
-          label: '被动方CD',
-          bottomHelpMessage: '被动方CD内只能被切磋一次',
-          component: 'InputNumber',
+          field: "def_cd",
+          label: "被动方CD",
+          bottomHelpMessage: "被动方CD内只能被切磋一次",
+          component: "InputNumber",
           componentProps: {
-            placeholder: '请输入被动方CD',
+            placeholder: "请输入被动方CD",
             min: 0,
             step: 10,
             style: {
@@ -344,18 +354,18 @@ export default [
   {
     field: "xiuxian.realm",
     label: "修仙境界配置",
-    helpMessage: '修改后需要重启才能生效',
+    helpMessage: "修改后需要重启才能生效",
     component: "GSubForm",
     componentProps: {
       multiple: true,
       schemas: [
         {
-          field: 'id',
-          label: '境界ID',
-          bottomHelpMessage: '境界ID需要唯一',
-          component: 'InputNumber',
+          field: "id",
+          label: "境界ID",
+          bottomHelpMessage: "境界ID需要唯一",
+          component: "InputNumber",
           componentProps: {
-            placeholder: '请输入境界ID',
+            placeholder: "请输入境界ID",
             min: 0,
             style: {
               width: "100px"
@@ -364,31 +374,31 @@ export default [
           required: true
         },
         {
-          field: 'name',
-          label: '境界名称',
-          component: 'Input',
-          bottomHelpMessage: '修仙境界名称',
+          field: "name",
+          label: "境界名称",
+          component: "Input",
+          bottomHelpMessage: "修仙境界名称",
           componentProps: {
-            placeholder: '请输入境界名称'
+            placeholder: "请输入境界名称"
           },
           required: true
         },
         {
-          field: 'name2',
-          label: '境界名称2',
-          component: 'Input',
-          bottomHelpMessage: '修仙境界名称2（另类境界名称）',
+          field: "name2",
+          label: "境界名称2",
+          component: "Input",
+          bottomHelpMessage: "修仙境界名称2（另类境界名称）",
           componentProps: {
-            placeholder: '请输入境界名称'
+            placeholder: "请输入境界名称"
           }
         },
         {
-          field: 'value',
-          label: '修为',
-          bottomHelpMessage: '突破境界所需的修为',
-          component: 'InputNumber',
+          field: "value",
+          label: "修为",
+          bottomHelpMessage: "突破境界所需的修为",
+          component: "InputNumber",
           componentProps: {
-            placeholder: '请输入突破境界所需修为',
+            placeholder: "请输入突破境界所需修为",
             min: 0,
             step: 100,
             style: {
@@ -398,24 +408,24 @@ export default [
           required: true
         },
         {
-          field: 'success',
-          label: '成功概率',
-          bottomHelpMessage: '突破境界的概率（0-100）',
-          component: 'InputNumber',
+          field: "success",
+          label: "成功概率",
+          bottomHelpMessage: "突破境界的概率（0-100）",
+          component: "InputNumber",
           componentProps: {
-            placeholder: '请输入突破境界的概率',
+            placeholder: "请输入突破境界的概率",
             min: 0,
             max: 100
           },
           required: true
         },
         {
-          field: 'failed',
-          label: '突破失败',
-          bottomHelpMessage: '突破失败扣除的修为',
-          component: 'InputNumber',
+          field: "failed",
+          label: "突破失败",
+          bottomHelpMessage: "突破失败扣除的修为",
+          component: "InputNumber",
           componentProps: {
-            placeholder: '请输入扣除的修为',
+            placeholder: "请输入扣除的修为",
             min: 0,
             step: 100,
             style: {
@@ -442,18 +452,18 @@ export default [
     }
   },
   {
-    field: 'xiuxian.sect.sect_up_reset',
-    label: '宗门升级经验重置',
-    component: 'Switch',
-    bottomHelpMessage: '宗门升级后经验设置为0'
+    field: "xiuxian.sect.sect_up_reset",
+    label: "宗门升级经验重置",
+    component: "Switch",
+    bottomHelpMessage: "宗门升级后经验设置为0"
   },
   {
-    field: 'xiuxian.sect.create_sect_ls',
-    label: '创建宗门需要灵石',
-    component: 'InputNumber',
-    bottomHelpMessage: '创建宗门需要的灵石',
+    field: "xiuxian.sect.create_sect_ls",
+    label: "创建宗门需要灵石",
+    component: "InputNumber",
+    bottomHelpMessage: "创建宗门需要的灵石",
     componentProps: {
-      placeholder: '请输入创建宗门需要的灵石',
+      placeholder: "请输入创建宗门需要的灵石",
       min: 0,
       step: 1000,
       style: {
@@ -463,10 +473,10 @@ export default [
     required: true
   },
   {
-    field: 'xiuxian.sect.sect_up_exp',
-    label: '宗门升级经验',
-    component: 'GTags',
-    bottomHelpMessage: '宗门升级经验等级',
+    field: "xiuxian.sect.sect_up_exp",
+    label: "宗门升级经验",
+    component: "GTags",
+    bottomHelpMessage: "宗门升级经验等级",
     componentProps: {
       allowAdd: true,
       allowDel: true
@@ -481,12 +491,12 @@ export default [
       multiple: true,
       schemas: [
         {
-          field: 'cult',
-          label: '宗门签到修为',
-          bottomHelpMessage: '宗门签到获取的修为',
-          component: 'InputNumber',
+          field: "cult",
+          label: "宗门签到修为",
+          bottomHelpMessage: "宗门签到获取的修为",
+          component: "InputNumber",
           componentProps: {
-            placeholder: '请输入宗门签到修为',
+            placeholder: "请输入宗门签到修为",
             min: 0,
             step: 100,
             style: {
@@ -496,12 +506,12 @@ export default [
           required: true
         },
         {
-          field: 'ls',
-          label: '宗门签到灵石',
-          component: 'InputNumber',
-          bottomHelpMessage: '宗门签到获取的灵石',
+          field: "ls",
+          label: "宗门签到灵石",
+          component: "InputNumber",
+          bottomHelpMessage: "宗门签到获取的灵石",
           componentProps: {
-            placeholder: '请输入宗门签到灵石',
+            placeholder: "请输入宗门签到灵石",
             min: 0,
             step: 100,
             style: {
@@ -511,12 +521,12 @@ export default [
           required: true
         },
         {
-          field: 'sect_exp',
-          label: '宗门签到经验',
-          component: 'InputNumber',
-          bottomHelpMessage: '宗门签到获取的宗门经验',
+          field: "sect_exp",
+          label: "宗门签到经验",
+          component: "InputNumber",
+          bottomHelpMessage: "宗门签到获取的宗门经验",
           componentProps: {
-            placeholder: '请输入宗门签到经验',
+            placeholder: "请输入宗门签到经验",
             min: 0,
             step: 100,
             style: {
