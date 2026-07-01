@@ -3,7 +3,7 @@ import { Config } from "../../model/xiuxian/tool/Config/Config.js"
 import { Version } from "../../model/Config/Version.js"
 import { Button } from "../../model/xiuxian/index.js"
 
-export class MozuXiuxianHelp extends plugin {
+export class MozuXiuxianBackup extends plugin {
   constructor() {
     super({
       name: "魔族陌修仙备份",
@@ -17,9 +17,9 @@ export class MozuXiuxianHelp extends plugin {
       ],
       task: [
         {
-          cron: Config.setting.backupCron || "0 0 * * * *",
+          cron: Config.setting.cronBackup || "0 0 * * * *",
           name: "修仙定时备份",
-          fnc: "cronBackup"
+          fnc: () => this.cronBackup()
         }
       ]
     })
