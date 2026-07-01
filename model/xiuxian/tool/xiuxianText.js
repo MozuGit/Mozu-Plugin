@@ -497,6 +497,57 @@ const commandHandlers = {
     Text.push(Button.sect)
   },
 
+  '宗门成员': async (id, user_id, Text) => {
+    const value = await xiuxian.sectMember(id)
+    switch (value.event) {
+      case 'members_list':
+        const members = value.data.members
+        const missionMap = new Map([
+          [1, '新人'],
+          [2, '成员'],
+          [3, '精英'],
+          [4, '资深'],
+          [5, '执事'],
+          [6, '未命名'],
+          [7, '长老'],
+          [8, '大长老'],
+          [9, '副宗主'],
+          [10, '宗主']
+        ])
+        let memberList = await Promise.all(members.map(async (item, index) => {
+          if (index) {
+            return [
+              '>**' + await mqqapi.command('成员ID：' + item.id, '查询修仙者' + item.id) + '**',
+              '职位：' + missionMap.get(item.permission)
+            ].join('\n')
+          } else {
+            return [
+              '**' + await mqqapi.command('宗主ID：' + item.id, '查询修仙者' + item.id) + '**',
+              '>职位：' + missionMap.get(item.permission)
+            ].join('\n')
+          }
+        }))
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**宗门成员列表**',
+          '***',
+          memberList.join('\n'),
+          '***'
+        ].join('\n'))
+        break
+      case 'no_sect':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**你还没加入宗门呢**',
+          '>点击' + (await mqqapi.command('加入宗门')),
+          '***'
+        ].join('\n'))
+        break
+    }
+  },
+
   '宗门签到': async (id, user_id, Text) => {
     const value = await xiuxian.signSect(id)
     switch (value.event) {

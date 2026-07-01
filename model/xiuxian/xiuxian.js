@@ -530,6 +530,23 @@ export default new class {
     }
   }
 
+  async sectMember(id) {
+    let sectId = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID'), 10) || 0
+    if (sectId === 0) {
+      return {
+        event: "no_sect"
+      }
+    }
+    let memberPermission = JSON.parse(await Redis.hget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员等级'))
+    memberPermission = memberPermission.sort((a, b) => b.permission - a.permission)
+    return {
+      event: "members_list",
+      data: {
+        members: memberPermission
+      }
+    }
+  }
+
   async joinSect(id, joinID) {
     let sectId = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID'), 10) || 0
     if (sectId !== 0) {
