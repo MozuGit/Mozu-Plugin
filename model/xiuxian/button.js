@@ -83,6 +83,24 @@ const Button = {
       ]
     )
   },
+  get sectMember() {
+    return segment.button(
+      [
+        { text: "同意宗门成员", input: "同意宗门成员" },
+        { text: "拒绝宗门成员", input: "拒绝宗门成员" }
+      ],
+      [
+        { text: "全部同意", input: "全部同意宗门成员" },
+        { text: "全部拒绝", input: "全部拒绝宗门成员" }
+      ],
+      [
+        { text: "设副宗", input: "宗门设置副宗主" },
+        { text: "设长老", input: "宗门设置长老" },
+        { text: "设成员", input: "宗门设置成员" },
+        { text: "设精英", input: "宗门设置精英" }
+      ]
+    )
+  },
   get startRetreat() {
     return segment.button(
       [

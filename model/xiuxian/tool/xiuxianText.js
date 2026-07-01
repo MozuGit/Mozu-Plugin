@@ -546,28 +546,19 @@ const commandHandlers = {
           '***'
         ].join('\n'))
         break
-      case 'member_max':
-        Text.push([
-          '<@' + user_id + '>',
-          '***',
-          '**当前宗门人数已满**',
-          '>请先[升级宗门](mqqapi://aio/inlinecmd?command=宗门升级)或移除宗门成员',
-          '***'
-        ].join('\n'))
-        break
       case 'audit_list':
         if (value.data.membersList.length === 0) {
           Text.push([
             '<@' + user_id + '>',
             '***',
-            '**当前没有人申请加入宗门**',
+            '**当前没有玩家申请加入宗门**',
             '***'
           ].join('\n'))
         } else {
           let membersList = []
           for (let member of value.data.membersList) {
             membersList.push([
-              '>**ID：' + member.id + '     ' + (await mqqapi.command('[同意]', '同意宗门成员' + member.id)) + '     ' + (await mqqapi.command('拒绝', '拒绝宗门成员' + member.id)) + '**',
+              '>**ID：' + member.id + '     ' + (await mqqapi.command('[同意]', '同意宗门成员' + member.id)) + '     ' + (await mqqapi.command('[拒绝]', '拒绝宗门成员' + member.id)) + '**',
               '**修为：' + member.cult + '**',
               '**境界：' + member.realm + '**',
               '***'
@@ -581,6 +572,15 @@ const commandHandlers = {
             membersList.join('\n')
           ].join('\n'))
         }
+        break
+      case 'no_sect':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**你还没加入宗门呢**',
+          '>点击' + (await mqqapi.command('加入宗门')),
+          '***'
+        ].join('\n'))
         break
     }
     Text.push(Button.sectAdmin)
@@ -783,6 +783,125 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.sect)
+    }
+  },
+  {
+    prefix: /^(全部)?(同意|拒绝)宗门成员\s*\d*/,
+    handler: async (id, user_id, Text, msg, at) => {
+      let audit_id
+      const _id = (msg.match(/\d+/g) || []).join('')
+      if (at && !Array.isArray(at) && !_id) {
+        if (await xiuxian.hasPlayer(at)) {
+          const atID = (await xiuxian.init(at)).data.id
+          const userInfo = await xiuxian.getUserInfo(atID)
+          audit_id = userInfo.sectInfo.id
+        } else {
+          audit_id = 0
+        }
+      } else {
+        audit_id = parseInt(_id, 10)
+      }
+      const value = await xiuxian.auditSectMember(id, audit_id, msg.includes('同意'), msg.includes('全部'))
+      switch (value.event) {
+        case 'sect_audit_all_agreed':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**同意全部待审核成员完成**',
+            '>详细信息如下',
+            '***',
+            '\`\`\` 同意成员列表',
+            '同意玩家ID：' + value.data.addMembers.join('\n同意玩家ID：'),
+            '\`\`\`',
+            '***'
+          ].join('\n'))
+          break
+        case 'sect_audit_all_refused':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**拒绝全部待审核成员完成**',
+            '>详细信息如下',
+            '***',
+            '\`\`\` 拒绝成员列表',
+            '拒绝玩家ID：' + value.data.refusedMembers.join('\n拒绝玩家ID：'),
+            '\`\`\`',
+            '***'
+          ].join('\n'))
+          break
+        case 'member_has_sect':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**同意宗门成员失败**',
+            '>对方已加入其他宗门',
+            '***'
+          ].join('\n'))
+          break
+        case 'member_agreed':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**同意宗门成员成功**',
+            '>玩家加入宗门成功',
+            '***'
+          ].join('\n'))
+          break
+        case 'member_refused':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**拒绝宗门成员成功**',
+            '>已拒绝玩家加入宗门',
+            '***'
+          ].join('\n'))
+          break
+        case 'not_member':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**待审核列表没有该玩家**',
+            '>请确认玩家是否申请加入宗门或存在',
+            '***',
+          ].join('\n'))
+          break
+        case 'no_member_audit':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**当前没有玩家申请加入宗门**',
+            '***',
+          ].join('\n'))
+          break
+        case 'member_max':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门人数已满**',
+            '>请先' + (await mqqapi.command('升级宗门')) + '或' + (await mqqapi.command('移除玩家', '踢出宗门')),
+            '***',
+          ].join('\n'))
+          break
+        case 'no_permission':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**你的宗门权限不足**',
+            '>需长老及以上可操作',
+            '***'
+          ].join('\n'))
+          break
+        case 'no_sect':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**你还没加入宗门呢**',
+            '>点击' + (await mqqapi.command('加入宗门')),
+            '***'
+          ].join('\n'))
+          break
+      }
+      Text.push(Button.sectMember)
     }
   },
   {

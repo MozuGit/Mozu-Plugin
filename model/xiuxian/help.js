@@ -25,7 +25,11 @@ const help = {
       '加入宗门',
       '宗门列表',
       '宗门签到',
-      '宗门审核'
+      '宗门审核',
+      '同意宗门成员',
+      '拒绝宗门成员',
+      '全部同意宗门成员',
+      '全部拒绝宗门成员'
     ]
     const result = commands.map(item => `${prefix}${item}`)
     return result
@@ -35,7 +39,8 @@ const help = {
       '修为榜',
       '灵石榜',
       '战力榜',
-      '闭关榜'
+      '闭关榜',
+      '修仙排行'
     ]
     const result = commands.map(item => `${prefix}${item}`)
     return result

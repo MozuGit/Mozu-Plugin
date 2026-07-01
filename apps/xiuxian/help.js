@@ -51,12 +51,12 @@ async function commands(commands) {
   let result = ''
   let index = 0
   for (const item of commands) {
-    const cmd = await mqqapi.command(item);
-    if (index % 2 === 0 && index > 0) {
+    const cmd = await mqqapi.command(item)
+    if ((index % 2 === 0 && index > 0) || item.length + commands[commands.length >= index ? index : index + 1].length >= 12) {
       result += '\n'
     }
     result += cmd
-    index % 2 === 0 ? result += '  |  ' : ''
+    index % 2 === 0 && item.length + commands[commands.length >= index ? index : index + 1].length < 12 ? result += '  |  ' : ''
     index++
   }
   return result

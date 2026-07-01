@@ -561,10 +561,11 @@ export default new class {
       }
     }
     if (noAudit) {
-      members.push(id)
+      members = new Set(members)
+      members.add(id)
       memberPermission.push({ id: id, level: 1 })
       await Redis.hmset(`${SECT_INFO_KEY}:${joinID}`, {
-        宗门成员: JSON.stringify(members),
+        宗门成员: JSON.stringify([...members]),
         宗门成员等级: JSON.stringify(memberPermission)
       })
       await Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '宗门ID', joinID)
@@ -575,9 +576,9 @@ export default new class {
         }
       }
     } else {
-      members = JSON.parse(await Redis.hget(`${SECT_INFO_KEY}:${joinID}`, '待审核成员') || '[]')
-      members.push(id)
-      await Redis.hset(`${SECT_INFO_KEY}:${joinID}`, '待审核成员', JSON.stringify(members))
+      memberAudit = new Set(JSON.parse(await Redis.hget(`${SECT_INFO_KEY}:${joinID}`, '待审核成员') || '[]'))
+      memberAudit.add(id)
+      await Redis.hset(`${SECT_INFO_KEY}:${joinID}`, '待审核成员', JSON.stringify([...memberAudit]))
       return {
         event: "join_sect_audit"
       }
@@ -661,19 +662,17 @@ export default new class {
 
   async auditSect(id) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
-    let [members, memberMax, membersPermission, memberAudit] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员', '宗门人数上限', '宗门成员等级', '待审核成员')
-    const memberNum = JSON.parse(members).length
-    memberMax = parseInt(memberMax, 10)
+    if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
+      return {
+        event: "no_sect"
+      }
+    }
+    let [membersPermission, memberAudit] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员等级', '待审核成员')
     membersPermission = JSON.parse(membersPermission)
     memberAudit = JSON.parse(memberAudit || '[]')
     if (membersPermission.find(item => item.id === id)?.permission < 7) {
       return {
         event: "no_permission"
-      }
-    }
-    if (memberNum >= memberMax) {
-      return {
-        event: "member_max"
       }
     }
     const pipeline = Redis.pipeline()
@@ -694,6 +693,121 @@ export default new class {
       event: "audit_list",
       data: {
         membersList: membersList || []
+      }
+    }
+  }
+
+  async auditSectMember(id, auditId, approved, auditAll = false) {
+    const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
+    if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
+      return {
+        event: "no_sect"
+      }
+    }
+    let [members, memberMax, membersPermission, memberAudit] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员', '宗门人数上限', '宗门成员等级', '待审核成员')
+    let memberNum = JSON.parse(members).length
+    members = JSON.parse(members)
+    membersPermission = JSON.parse(membersPermission)
+    memberAudit = JSON.parse(memberAudit || '[]')
+    if (membersPermission.find(item => item.id === id)?.permission < 7) {
+      return {
+        event: "no_permission"
+      }
+    }
+    if (memberNum >= memberMax && approved) {
+      return {
+        event: "member_max"
+      }
+    }
+    if (auditAll) {
+      if (memberAudit.length === 0) {
+        return {
+          event: "no_member_audit"
+        }
+      }
+      if (approved) {
+        const pipeline = Redis.pipeline()
+        for (let member of memberAudit) {
+          pipeline.hget(`${PLAYER_INFO_KEY}:${member}`, '宗门ID')
+        }
+        const results = await pipeline.exec()
+        let hasSect = []
+        const sectIds = results.map(([err, sectId]) => sectId)
+        memberAudit = memberAudit.filter((_, index) => {
+          const _sectId = sectIds[index]
+          if (_sectId && _sectId !== '0') hasSect.push(_sectId)
+          return !_sectId || _sectId === '0'
+        })
+        let addMembers = []
+        while (memberAudit.length > 0 && memberNum < memberMax) {
+          const member = memberAudit.shift()
+          addMembers.push(member)
+          members.push(member)
+          memberNum++
+        }
+        for (let member of addMembers) {
+          pipeline.hset(`${PLAYER_INFO_KEY}:${member}`, '宗门ID', sectId)
+          membersPermission.push({ id: member, permission: 1 })
+        }
+        pipeline.hmset(`${SECT_INFO_KEY}:${sectId}`, {
+          宗门成员: JSON.stringify(members),
+          待审核成员: JSON.stringify(memberAudit),
+          宗门成员等级: JSON.stringify(membersPermission)
+        })
+        await pipeline.exec()
+        return {
+          event: "sect_audit_all_agreed",
+          data: {
+            addMembers: addMembers,
+            hasSect: hasSect.length
+          }
+        }
+      } else {
+        await Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '待审核成员', '[]')
+        return {
+          event: "sect_audit_all_refused",
+          data: {
+            refusedMembers: memberAudit
+          }
+        }
+      }
+    } else {
+      if (approved) {
+        if (memberAudit.includes(auditId)) {
+          const _sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${auditId}`, '宗门ID')
+          if (_sectId && _sectId !== '0') {
+            await Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '待审核成员', JSON.stringify(memberAudit.filter(item => item !== auditId)))
+            return {
+              event: "member_has_sect"
+            }
+          }
+          members.push(auditId)
+          membersPermission.push({ id: auditId, permission: 1 })
+          await Redis.hset(`${PLAYER_INFO_KEY}:${auditId}`, '宗门ID', sectId)
+          await Redis.hmset(`${SECT_INFO_KEY}:${sectId}`, {
+            宗门成员: JSON.stringify(members),
+            待审核成员: JSON.stringify(memberAudit.filter(item => item !== auditId)),
+            宗门成员等级: JSON.stringify(membersPermission)
+          })
+          return {
+            event: "member_agreed"
+          }
+        } else {
+          return {
+            event: "not_member"
+          }
+        }
+      } else {
+        if (memberAudit.includes(auditId)) {
+          await Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '待审核成员', JSON.stringify(memberAudit.filter(item => item !== auditId)))
+          return {
+            event: "member_refused"
+          }
+        } else {
+          return {
+            event: "not_member"
+          }
+        }
       }
     }
   }
