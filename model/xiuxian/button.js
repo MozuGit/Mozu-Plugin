@@ -171,7 +171,7 @@ const Button = {
     return segment.button(
       [
         { text: "修仙备份", input: "修仙备份" },
-        { text: "备份恢复", input: "备份恢复" }
+        { text: "备份还原", input: "修仙备份还原" }
       ]
     )
   }

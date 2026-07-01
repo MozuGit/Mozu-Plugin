@@ -13,7 +13,7 @@ export const Version = {
     return Plugin_Path
   },
   get Plugin_Name() {
-    return basename(Path)
+    return pkg.name
   },
   get Plugin_Version() {
     return pkg.version

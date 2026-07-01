@@ -1,3 +1,7 @@
+import fs from "node:fs"
+import { readdir } from "node:fs/promises"
+
+import mqqapi from "../../model/xiuxian/tool/mqqapi.js"
 import { backupKeys, restoreKeys } from "../../scripts/backup.js"
 import { Config } from "../../model/xiuxian/tool/Config/Config.js"
 import { Version } from "../../model/Config/Version.js"
@@ -8,10 +12,10 @@ export class MozuXiuxianBackup extends plugin {
     super({
       name: "魔族陌修仙备份",
       event: "message",
-      priority: 2000,
+      priority: Config.setting.priority,
       rule: [
         {
-          reg: "#?(魔族陌)?修仙备份",
+          reg: "#?(?:魔族陌)?修仙备份(?:还原(.*))?$",
           fnc: "xiuxianBackup"
         }
       ],
@@ -32,25 +36,59 @@ export class MozuXiuxianBackup extends plugin {
     } else if (Config.setting.group === 2) {
       if (!Config.setting.whiteGroup.includes(this.e.group_id)) return false
     }
-    const filename = "/backup/xiuxian/" + formatTime(Math.floor(Date.now() / 1000)) + ".json"
-    const data = await backupKeys("Mozu:xiuxian:*", Version.Plugin_Path + filename)
-    const message = [
-      '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
-      '***',
-      '**修仙备份成功**',
-      '>备份' + data + '个键到：',
-      Version.Plugin_Name + filename,
-      '***'
-    ].join('\n')
-    this.e.reply([message, Button.backup])
+    if (this.e.msg.includes("还原")) {
+      const match = this.e.msg.match(/#?(?:魔族陌)?修仙备份(?:还原(.*))?$/)
+      const raw = match?.[1]?.trim()
+      const filename = raw ? (raw.endsWith('.json') ? raw : raw + '.json') : null
+      if (fs.existsSync(Version.Plugin_Path + "/backup/xiuxian/" + filename)) {
+        const result = await restoreKeys(Version.Plugin_Path + "/backup/xiuxian/" + filename)
+        const message = [
+          '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
+          '***',
+          '**修仙备份还原成功**',
+          '>还原' + result + '个键',
+          '来自文件' + Version.Plugin_Name + '/' + filename,
+          '***'
+        ].join('\n')
+        this.e.reply([message, Button.backup])
+      } else {
+        const files = (await readdir(Version.Plugin_Path + "/backup/xiuxian")).filter(item => item.endsWith('.json'))
+        const backupItems = await Promise.all(files.map(async (item) => {
+          return item + '\n' + (await mqqapi.command('[点击还原]', '修仙备份还原' + item, true))
+        }))
+        const message = [
+          '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
+          '***',
+          '**文件不存在**',
+          '>请确认文件是否存在',
+          '***',
+          '**还原备份文件**',
+          '>**' + backupItems.reverse().slice(0, 10).join("**\n>**") + '**',
+          '***'
+        ].join('\n')
+        this.e.reply([message, Button.backup])
+      }
+    } else {
+      const filename = "/backup/xiuxian/" + formatTime(Math.floor(Date.now() / 1000)) + ".json"
+      const result = await backupKeys("Mozu:xiuxian:*", Version.Plugin_Path + filename)
+      const message = [
+        '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
+        '***',
+        '**修仙备份成功**',
+        '>备份' + result + '个键到：',
+        Version.Plugin_Name + filename,
+        '***'
+      ].join('\n')
+      this.e.reply([message, Button.backup])
+    }
     return true
   }
 
   async cronBackup() {
     const filename = "/backup/xiuxian/" + formatTime(Math.floor(Date.now() / 1000)) + ".json"
-    const data = await backupKeys("Mozu:xiuxian:*", Version.Plugin_Path + filename)
+    const result = await backupKeys("Mozu:xiuxian:*", Version.Plugin_Path + filename)
     logger.info("[魔族陌修仙] 定时备份成功")
-    logger.info("[魔族陌修仙] 备份" + data + "个键到" + Version.Plugin_Name + filename)
+    logger.info("[魔族陌修仙] 备份" + result + "个键到" + Version.Plugin_Name + filename)
     return false
   }
 }

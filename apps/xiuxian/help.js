@@ -8,7 +8,7 @@ export class MozuXiuxianHelp extends plugin {
     super({
       name: "魔族陌修仙帮助",
       event: "message",
-      priority: 2000,
+      priority: Config.setting.priority,
       rule: [
         {
           reg: "#?(魔族陌)?修仙帮助",

@@ -546,8 +546,8 @@ export default new class {
       }
     }
     let [members, memberMax, memberPermission, noAudit] = await Redis.hmget(`${SECT_INFO_KEY}:${joinID}`, '宗门成员', '宗门人数上限', '宗门成员等级', '无需审核状态')
-    const memberNum = members.length
     members = JSON.parse(members)
+    const memberNum = members.length
     memberPermission = JSON.parse(memberPermission)
     memberMax = parseInt(memberMax, 10)
     noAudit = parseInt(noAudit, 10) || 0
@@ -576,7 +576,7 @@ export default new class {
         }
       }
     } else {
-      memberAudit = new Set(JSON.parse(await Redis.hget(`${SECT_INFO_KEY}:${joinID}`, '待审核成员') || '[]'))
+      let memberAudit = new Set(JSON.parse(await Redis.hget(`${SECT_INFO_KEY}:${joinID}`, '待审核成员') || '[]'))
       memberAudit.add(id)
       await Redis.hset(`${SECT_INFO_KEY}:${joinID}`, '待审核成员', JSON.stringify([...memberAudit]))
       return {
