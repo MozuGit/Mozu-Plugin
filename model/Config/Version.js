@@ -6,6 +6,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 const Path = process.cwd().replace(/\\/g, '/')
 const Plugin_Path = join(__dirname, '../..').replace(/\\/g, '/')
+const Plugin_Name = basename(join(import.meta.url, '../../../'))
 const pkg = JSON.parse(await fs.promises.readFile(join(__dirname, '../../package.json'), 'utf8'))
 
 export const Version = {
@@ -13,7 +14,7 @@ export const Version = {
     return Plugin_Path
   },
   get Plugin_Name() {
-    return pkg.name
+    return Plugin_Name
   },
   get Plugin_Version() {
     return pkg.version

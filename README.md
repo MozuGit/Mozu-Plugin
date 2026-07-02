@@ -3,7 +3,7 @@
 <img src="./Mo.png" width="256" height="256" /><br>
 # Mozu-Plugin
 
-[![Stars](https://img.shields.io/github/stars/MozuGit/Mozu-Plugin?style=flat)](../../stargazers)
+[![Stars](https://img.shields.io/github/stars/MozuGit/Mozu-Plugin?style=flat)](https://github.com/MozuGit/Mozu-Plugin/stargazers)
 [![Version](https://img.shields.io/github/package-json/v/MozuGit/Mozu-Plugin?style=flat)](package.json)
 [![License](https://img.shields.io/github/license/MozuGit/Mozu-Plugin?style=flat)](LICENSE)
 
@@ -15,9 +15,7 @@
 <br><img src="https://count.getloli.com/get/@:Mozu-Plugin?theme=rule34" /><br>
 
 一个适用于 [TRSS-Yunzai 框架](https://github.com/TimeRainStarSky/Yunzai) 的 **自用** 机器人娱乐插件
-
-> [!WARNING]
-> 目前仅支持QQBot协议（官方机器人）后续可能会适配其他机器人协议与框架
+可用 **锅巴面板** 进行配置
 
 ## 安装教程
 
