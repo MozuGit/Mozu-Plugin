@@ -1,12 +1,12 @@
 {
   "name": "Mozu-Plugin",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "TRSS-Yunzai插件",
   "main": "index.js",
   "type": "module",
   "icon": "./Mo.png",
   "author": "魔族陌",
-  "license": "Apache-2.0",
+  "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
     "url": "https://github.com/MozuGit/Mozu-Plugin.git"
