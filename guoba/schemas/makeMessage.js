@@ -24,6 +24,7 @@ export default [
     label: '默认复读次数',
     bottomHelpMessage: '伪造复读时未填写参数默认次数',
     component: 'InputNumber',
+    required: true,
     componentProps: {
       placeholder: '请输入默认复读次数',
       min: 0,

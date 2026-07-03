@@ -100,13 +100,10 @@ export class MozuMakeMessage extends plugin {
     if (!e.group) return e.reply("私聊暂不支持此操作", true)
     let match = e.msg.match(/^#?伪(造|装)复读\s*(.+?)(?:\s+(\d+))?$/)
     let text = match[2]
-    let number = match[3] ? parseInt(match[3]) : Config.makeMessage.repeatCount
-    let QQListdata = await Redis.hgetall(`Mozu:username:group:${this.e.group_id}`)
-    if (!QQListdata || Object.keys(QQListdata).length === 0) {
-      return false
-    }
-    let userIds = Object.keys(QQListdata)
-    let userNames = Object.values(QQListdata)
+    let number = match[3] ? parseInt(match[3]) : Config.makeMessage.repeatCount || 10
+    const QQListdata = await this.e.group.getMemberArray()
+    let userIds = QQListdata.map(member => member.user_id)
+    let userNames = QQListdata.map(member => member.nickname)
     for (let i = 0; i < number; i++) {
       if (userIds.length === 0) break
       const randomIndex = Math.floor(Math.random() * userIds.length)
