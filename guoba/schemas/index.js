@@ -24,7 +24,8 @@ export function getConfigData() {
       database: Config.Redis.database,
       connectTimeout: Config.Redis.connectTimeout,
       keepAlive: Config.Redis.keepAlive,
-      noDelay: Config.Redis.noDelay
+      noDelay: Config.Redis.noDelay,
+      global: Config.Redis.global
     },
     makeMessage: {
       enable: Config.makeMessage.enable,

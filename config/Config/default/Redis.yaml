@@ -7,3 +7,6 @@ database: 0  #数据库编号（0-15）
 connectTimeout: 10000  #连接超时时间（毫秒）
 keepAlive: 3000  #心跳间隔（毫秒）
 noDelay: true #禁用Nagle算法，降低延迟
+
+#特殊功能
+gloabl: false #将Redis挂载到云崽global上

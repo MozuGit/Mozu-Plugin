@@ -40,11 +40,7 @@ export class MozuMakeMessage extends plugin {
     let data = text.split("|")
     if (data.length === 1) { data[0] = text }
     for (let i = 0; i < data.length; i++) {
-      let a = []
-      let b = []
-      let ifmsg = false
-      let msg = data[i].split(/,\s*/)
-      let date
+      let msgContent = [], imgs = [], ifmsg = false, msg = data[i].split(/,\s*/), date
       if (msg.length > 2) {
         ifmsg = true
         if (msg[2] && msg[2].trim() !== "") {
@@ -71,18 +67,18 @@ export class MozuMakeMessage extends plugin {
           msg[1] = text
         }
       }
-      a.push(msg[1].replace(/=img=/g, ""))
-      b = msg[1].match(/=img=/g)
-      if (b?.length > 0) {
-        for (let j = 0; j < b.length; j++) {
+      msgContent.push(msg[1].replace(/=img=/g, ""))
+      imgs = msg[1].match(/=img=/g)
+      if (imgs?.length > 0) {
+        for (let j = 0; j < imgs.length; j++) {
           if (imgUrls.length === 0) break
-          a.push(segment.image(imgUrls[imgUrls.length - 1]))
+          msgContent.push(segment.image(imgUrls[imgUrls.length - 1]))
           if (imgUrls.length !== 1) imgUrls.pop()
         }
       }
       if (Config.makeMessage.whiteQQList.includes(Number(msg[0])) && !e.isMaster) continue
       msgList.push({
-        message: a,
+        message: msgContent,
         user_id: Number(msg[0]),
         nickname: await (await Bot.pickUser(Number(msg[0])).getInfo()).nickname,
         time: ifmsg ? Number(date) / 1000 : e.time

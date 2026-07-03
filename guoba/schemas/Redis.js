@@ -4,6 +4,13 @@ export default [
     component: 'SOFT_GROUP_BEGIN'
   },
   {
+    field: 'redis.global',
+    label: '全局Redis',
+    helpMessage: '修改后需要重启才能生效',
+    bottomHelpMessage: '挂载到云崽global.Redis不和global.redis冲突',
+    component: 'Switch'
+  },
+  {
     field: 'redis.host',
     label: '服务器地址',
     helpMessage: '修改后需要重启才能生效',

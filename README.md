@@ -15,7 +15,7 @@
 <br><img src="https://count.getloli.com/get/@:Mozu-Plugin?theme=rule34" /><br>
 
 一个适用于 [TRSS-Yunzai 框架](https://github.com/TimeRainStarSky/Yunzai) 的 **自用** 机器人娱乐插件
-可用 **锅巴面板** 进行配置
+  - 可用 **锅巴面板** 进行配置
 
 ## 安装教程
 
@@ -42,14 +42,16 @@ pnpm install
 ### 插件功能实现
 
 **小功能**
- - [伪造聊天](apps/makeMessage.js)
+  - [伪造聊天](apps/makeMessage.js)
+    1. 伪造聊天  示例：#伪造聊天123456789,喵喵喵,2026|114514,喵喵喵
+    2. 伪造复读  示例：#伪造复读喵喵喵 10
 
 **魔族陌修仙**
- - 具体指令发送`修仙帮助`获取
- - 当前修仙还在开发中
+  - 具体指令发送`修仙帮助`获取
+  - 当前修仙还在开发中
     
 ## 联系方式
 
- - **QQ：** [3343712589](https://qm.qq.com/q/5fKlztbHHG)
- - **QQ群：** [976719017](https://qun.qq.com/universal-share/share?ac=1&authKey=13%2FWEfX0G3PO77HgYt3w8yg8K%2BCSE3fYXzuA%2FOH0Vnzv5HDrENZctaRM1qkC07eD&busi_data=eyJncm91cENvZGUiOiI5NzY3MTkwMTciLCJ0b2tlbiI6Inl0NHY2b01BRTlMeHR4MXBYbWJqYWxpbmU5Wk9kT3VqZE1nM0dNYVZET1pBcjVPTVZ5WDVLMnVCaFpHNTFWVUgiLCJ1aW4iOiIzMzQzNzEyNTg5In0%3D&data=uDBsYAg-ZA2RbnkK_3yJFYKmiPRZg-XmEhn6iJ1tWmOfRPEeEIiA6N1o1e5p9-dqSJDSxCk44qnx92h62ZlrmQ&svctype=4&tempid=h5_group_info)
- - **GitHub：** [MozuGit](https://github.com/MozuGit)
+  - **QQ：** [3343712589](https://qm.qq.com/q/5fKlztbHHG)
+  - **QQ群：** [976719017](https://qun.qq.com/universal-share/share?ac=1&authKey=13%2FWEfX0G3PO77HgYt3w8yg8K%2BCSE3fYXzuA%2FOH0Vnzv5HDrENZctaRM1qkC07eD&busi_data=eyJncm91cENvZGUiOiI5NzY3MTkwMTciLCJ0b2tlbiI6Inl0NHY2b01BRTlMeHR4MXBYbWJqYWxpbmU5Wk9kT3VqZE1nM0dNYVZET1pBcjVPTVZ5WDVLMnVCaFpHNTFWVUgiLCJ1aW4iOiIzMzQzNzEyNTg5In0%3D&data=uDBsYAg-ZA2RbnkK_3yJFYKmiPRZg-XmEhn6iJ1tWmOfRPEeEIiA6N1o1e5p9-dqSJDSxCk44qnx92h62ZlrmQ&svctype=4&tempid=h5_group_info)
+  - **GitHub：** [MozuGit](https://github.com/MozuGit)
