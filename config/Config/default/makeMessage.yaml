@@ -1,0 +1,11 @@
+#伪造聊天开关
+enable: true
+
+#是否仅主人使用
+onlyMaster: false
+
+#伪造白名单QQ  防止伪造（主人无效）
+whiteQQList: []
+
+#默认复读次数  使用伪造复读时随机成员人数
+repeatCount: 10

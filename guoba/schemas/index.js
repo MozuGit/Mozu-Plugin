@@ -8,10 +8,12 @@ import { Config as xxConfig } from '../../model/xiuxian/tool/Config/Config.js'
 
 import Redis from './Redis.js'
 import xiuxian from './xiuxian.js'
+import makeMessage from './makeMessage.js'
 
 export const schemas = [
   ...Redis,
-  ...xiuxian
+  ...xiuxian,
+  ...makeMessage
 ]
 
 export function getConfigData() {
@@ -23,6 +25,12 @@ export function getConfigData() {
       connectTimeout: Config.Redis.connectTimeout,
       keepAlive: Config.Redis.keepAlive,
       noDelay: Config.Redis.noDelay
+    },
+    makeMessage: {
+      enable: Config.makeMessage.enable,
+      onlyMaster: Config.makeMessage.onlyMaster,
+      whiteQQList: Config.makeMessage.whiteQQList,
+      repeatCount: Config.makeMessage.repeatCount
     },
     xiuxian: {
       setting: {
@@ -63,6 +71,7 @@ export function getConfigData() {
 export function setConfigData(data, { Result }) {
   const nested = unflatten(data)
   redisConfig(nested)
+  makeMessageConfig(nested)
   xiuxianConfig(nested)
   return Result.ok({}, "保存成功喵~")
 }
@@ -70,6 +79,12 @@ export function setConfigData(data, { Result }) {
 function redisConfig(data) {
   Object.keys(data.redis).forEach(key => {
     Config.modify('Redis', key, data.redis[key])
+  })
+}
+
+function makeMessageConfig(data) {
+  Object.keys(data.makeMessage).forEach(key => {
+    Config.modify('makeMessage', key, data.makeMessage[key])
   })
 }
 
