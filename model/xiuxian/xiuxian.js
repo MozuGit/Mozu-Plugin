@@ -1,6 +1,7 @@
 import Redis from "#Redis"
 import randomInt from "#randomInt"
 import crypto from 'crypto'
+import { evaluate } from "mathjs"
 import { Config } from "./tool/Config/Config.js"
 
 const PLAYER_INFO_KEY = "Mozu:xiuxian:playerInfo"
@@ -121,7 +122,7 @@ export default new class {
     let [cult, realm] = await Redis.hmget(key, '修为', '境界')
     cult = parseInt(cult, 10)
     realm = parseInt(realm, 10) || 0.75
-    const power = Math.floor(realm * (cult / 100))
+    const power = Math.floor(evaluate(Config.xiuxian.powerFormula, { cult: cult, realm: realm }))
     return power
   }
 
@@ -463,9 +464,9 @@ export default new class {
         break
       case '战力':
         for (let i = 0; i < idNum; i++) {
-          const cult = parseInt(results[i][1], 10)
-          const realm = parseInt(results[i][2], 10) || 0.75
-          const value = Math.floor(realm * (cult / 100))
+          const cult = parseInt(results[i][1][0], 10)
+          const realm = parseInt(results[i][1][1], 10) || 0.75
+          const value = Math.floor(evaluate(Config.xiuxian.powerFormula, { cult: cult, realm: realm }))
           if (value > 0) {
             players.push({
               id: i,

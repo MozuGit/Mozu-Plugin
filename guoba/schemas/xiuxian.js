@@ -134,6 +134,15 @@ export default [
     }
   },
   {
+    field: 'xiuxian.xiuxian.powerFormula',
+    label: '战力计算公式',
+    bottomHelpMessage: '变量：修为cult 境界realm',
+    component: 'Input',
+    componentProps: {
+      placeholder: '请输入战力计算公式'
+    }
+  },
+  {
     field: "xiuxian.xiuxian.range",
     label: "上限下限",
     component: "GSubForm",

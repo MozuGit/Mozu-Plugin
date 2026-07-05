@@ -56,7 +56,8 @@ export function getConfigData() {
         },
         retreat: xxConfig.xiuxian.retreat,
         sign: xxConfig.xiuxian.sign,
-        pvp: xxConfig.xiuxian.pvp
+        pvp: xxConfig.xiuxian.pvp,
+        powerFormula: xxConfig.xiuxian.powerFormula
       },
       realm: xxConfig.Realm.Realms,
       sect: {

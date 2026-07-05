@@ -30,3 +30,6 @@ sign:
 pvp:
   atk_cd: 60   #发起方切磋冷却（单位：秒）
   def_cd: 120  #接受方切磋冷却（单位：秒）
+
+#战力计算公式（修为：cult，境界：realm）
+powerFormula: "realm / 10 * cult / 100"
