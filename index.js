@@ -51,7 +51,8 @@ for (let i in files) {
 
 logger.info(chalk.rgb(82, 242, 255)("━━━━━━━━━━━━━━━━━━━━"))
 logger.info(chalk.rgb(82, 242, 255)("Mozu-Plugin 载入成功"))
-logger.info(chalk.rgb(82, 242, 255)("喵喵喵：976719017"))
+logger.info(chalk.rgb(82, 242, 255)("版本：v" + Version.Plugin_Version))
+logger.info(chalk.rgb(82, 242, 255)("神秘群号：976719017"))
 logger.info(chalk.rgb(82, 242, 255)("━━━━━━━━━━━━━━━━━━━━"))
 
 export { apps }

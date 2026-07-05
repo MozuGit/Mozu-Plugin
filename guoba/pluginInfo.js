@@ -8,7 +8,7 @@ export default {
   link: "https://github.com/MozuGit/Mozu-Plugin",
   isV3: true,
   isV2: false,
-  description: "适用于trss官机的修仙游戏插件",
+  description: "适用于TRSS-Yunzai的插件",
   showInMenu: 'true',
   iconPath: `${Version.Plugin_Path}/Mo.png`
 }

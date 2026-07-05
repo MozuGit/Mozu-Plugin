@@ -1,6 +1,5 @@
 import Redis from "#Redis"
 import randomInt from "#randomInt"
-import Realm from "./tool/realm.js"
 import crypto from 'crypto'
 import { Config } from "./tool/Config/Config.js"
 
@@ -57,9 +56,9 @@ export default new class {
     retreatStartTime = parseInt(retreatStartTime, 10) || 0
     sectId = parseInt(sectId, 10) || 0
 
-    const realmName = await Realm.getRealmName(realm)
-    const realmName2 = await Realm.getRealmName(realm + 1)
-    const realmNeedExp = await Realm.getNextExp(cult, realm)
+    const realmName = (Config.Realm.Realms.length >= realm) ? Config.Realm.Realms[realm - 1]?.name || '无' : Config.Realm.Realms[Config.Realm.Realms.length].name || '未命名'
+    const realmName2 = Config.Realm.Realms[realm]?.name
+    const realmNeedExp = Config.Realm.Realms[realm]?.value ? Math.max(0, (Config.Realm.Realms[realm].value || 0) - cult) : -1
     const retreatRunTime = getStringTime(Math.floor(Date.now() / 1000) - retreatStartTime)
     const power = await this.getPower(id) || 0
 
@@ -228,7 +227,43 @@ export default new class {
         event: "in_retreat"
       }
     }
-    return await Realm.realmUp(id)
+    let [cult, realm] = await Redis.hmget('Mozu:xiuxian:playerInfo:' + id, '修为', '境界')
+    cult = parseInt(cult, 10)
+    realm = parseInt(realm, 10)
+    const Realms = Config.Realm.Realms
+    if (realm >= Realms.length - 1) {
+      return {
+        event: "realm_max"
+      }
+    }
+    if (cult >= Realms[realm].value) {
+      if (randomInt(1, 100, id) <= Realms[realm].success) {
+        Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '境界', realm + 1)
+        return {
+          event: "realm_up",
+          data: {
+            state: "success",
+            rate: Realms[realm].success,
+            cult: Realms[realm].failed
+          }
+        }
+      } else {
+        const cultFailed = cult - Realms[realm].failed
+        Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '修为', cultFailed)
+        return {
+          event: "realm_up",
+          data: {
+            state: "failed",
+            rate: Realms[realm].success,
+            cult: Realms[realm].failed
+          }
+        }
+      }
+    } else {
+      return {
+        event: "cult_lack"
+      }
+    }
   }
 
   async startRetreat(id) {
@@ -703,7 +738,7 @@ export default new class {
       membersList.push({
         id: memberAudit[i],
         cult: values[0],
-        realm: await Realm.getRealmName(values[1])
+        realm: Config.Realm.Realms[values[1] - 1]
       })
     }
     return {

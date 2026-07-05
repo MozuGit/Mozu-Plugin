@@ -360,20 +360,6 @@ export default [
       multiple: true,
       schemas: [
         {
-          field: "id",
-          label: "境界ID",
-          bottomHelpMessage: "境界ID需要唯一",
-          component: "InputNumber",
-          componentProps: {
-            placeholder: "请输入境界ID",
-            min: 0,
-            style: {
-              width: "100px"
-            }
-          },
-          required: true
-        },
-        {
           field: "name",
           label: "境界名称",
           component: "Input",
@@ -382,15 +368,6 @@ export default [
             placeholder: "请输入境界名称"
           },
           required: true
-        },
-        {
-          field: "name2",
-          label: "境界名称2",
-          component: "Input",
-          bottomHelpMessage: "修仙境界名称2（另类境界名称）",
-          componentProps: {
-            placeholder: "请输入境界名称"
-          }
         },
         {
           field: "value",

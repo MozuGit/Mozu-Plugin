@@ -192,6 +192,17 @@ const commandHandlers = {
       case 'in_retreat':
         Text.push(await retreatText())
         break
+      case 'realm_max':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**你的境界已达世界极限**',
+          '>**无法再次突破**',
+          '***',
+          ...(await buildRealmInfo(userInfo)),
+          '***',
+        ].join('\n'))
+        break
     }
     Text.push(Button.xiuxian)
   },
@@ -546,6 +557,7 @@ const commandHandlers = {
         ].join('\n'))
         break
     }
+    Text.push(Button.sectMember)
   },
 
   '宗门签到': async (id, user_id, Text) => {
@@ -1154,10 +1166,12 @@ async function buildRealmInfo(userInfo) {
   return [
     '>' + (await mqqapi.command('境界：' + userInfo.realm.realmName, '突破')),
     '当前修为：' + userInfo.cult,
-    '下一境界：' + userInfo.realm.realmName2,
-    '距离下一境界：' + ((userInfo.realm.realmNeedExp === 0)
-      ? '已满足' + (await mqqapi.command('突破')) + '条件'
-      : '还需' + userInfo.realm.realmNeedExp + '点修为'),
+    (userInfo.realm.realmName2 ? '下一境界：' + userInfo.realm.realmName2 : null),
+    (userInfo.realm.realmNeedExp === -1
+      ? '>你的境界已达世界极限'
+      : '距离下一境界：' + (userInfo.realm.realmNeedExp === 0
+        ? '已满足' + (await mqqapi.command('突破')) + '条件'
+        : '还需' + userInfo.realm.realmNeedExp + '点修为')),
   ]
 }
 
