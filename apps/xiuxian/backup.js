@@ -1,5 +1,6 @@
 import fs from "node:fs"
-import { readdir } from "node:fs/promises"
+import path from "path"
+import { readdir, unlink } from "node:fs/promises"
 
 import mqqapi from "../../model/xiuxian/tool/mqqapi.js"
 import { backupKeys, restoreKeys } from "../../scripts/backup.js"
@@ -40,8 +41,9 @@ export class MozuXiuxianBackup extends plugin {
       const match = this.e.msg.match(/#?(?:魔族陌)?修仙备份(?:还原(.*))?$/)
       const raw = match?.[1]?.trim()
       const filename = raw ? (raw.endsWith('.json') ? raw : raw + '.json') : null
-      if (fs.existsSync(Version.Plugin_Path + "/backup/xiuxian/" + filename)) {
-        const result = await restoreKeys(Version.Plugin_Path + "/backup/xiuxian/" + filename)
+      const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", filename)
+      if (fs.existsSync(filePath)) {
+        const result = await restoreKeys(filePath)
         const message = [
           '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
           '***',
@@ -52,7 +54,8 @@ export class MozuXiuxianBackup extends plugin {
         ].join('\n')
         this.e.reply([message, Button.backup])
       } else {
-        const files = (await readdir(Version.Plugin_Path + "/backup/xiuxian")).filter(item => item.endsWith('.json'))
+        const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
+        const files = (await readdir(backupDir)).filter(item => item.endsWith('.json'))
         const backupItems = await Promise.all(files.map(async (item) => {
           return item + '\n' + (await mqqapi.command('[点击还原]', '修仙备份还原' + item, true))
         }))
@@ -63,14 +66,15 @@ export class MozuXiuxianBackup extends plugin {
           '>请确认文件是否存在',
           '***',
           '**还原备份文件**',
-          '>**' + backupItems.reverse().slice(0, 10).join("**\n>**") + '**',
+          '>**' + backupItems.reverse().slice(0, parseInt(Config.setting.maxBackupFile, 10) || 10).join("**\n>**") + '**',
           '***'
         ].join('\n')
         this.e.reply([message, Button.backup])
       }
     } else {
-      const filename = "/backup/xiuxian/" + formatTime(Math.floor(Date.now() / 1000)) + ".json"
-      const result = await backupKeys("Mozu:xiuxian:*", Version.Plugin_Path + filename)
+      const filename = "/backup/xiuxian/" + formatTime(Math.floor(Date.now() / parseInt(Config.setting.maxBackupFile, 10) || 1000)) + ".json"
+      const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", formatTime(Math.floor(Date.now() / parseInt(Config.setting.maxBackupFile, 10) || 1000)) + ".json")
+      const result = await backupKeys("Mozu:xiuxian:*", filePath)
       const message = [
         '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
         '***',
@@ -80,13 +84,30 @@ export class MozuXiuxianBackup extends plugin {
         '***'
       ].join('\n')
       this.e.reply([message, Button.backup])
+      if (Config.setting.maxBackupFile > 0) {
+        const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
+        const files = (await readdir(backupDir)).filter(item => item.endsWith('.json')).reverse()
+        const removeFiles = files.splice(parseInt(Config.setting.maxBackupFile, 10) || 10, files.length)
+        for (let file of removeFiles) {
+          unlink(path.join(backupDir, file))
+        }
+      }
     }
     return true
   }
 
   async cronBackup() {
-    const filename = "/backup/xiuxian/" + formatTime(Math.floor(Date.now() / 1000)) + ".json"
-    const result = await backupKeys("Mozu:xiuxian:*", Version.Plugin_Path + filename)
+    const filename = "/backup/xiuxian/" + formatTime(Math.floor(Date.now() / parseInt(Config.setting.maxBackupFile, 10) || 1000)) + ".json"
+    const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", formatTime(Math.floor(Date.now() / parseInt(Config.setting.maxBackupFile, 10) || 1000)) + ".json")
+    const result = await backupKeys("Mozu:xiuxian:*", filePath)
+    if (Config.setting.maxBackupFile > 0) {
+      const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
+      const files = (await readdir(backupDir)).filter(item => item.endsWith('.json')).reverse()
+      const removeFiles = files.splice(parseInt(Config.setting.maxBackupFile, 10) || 10, files.length)
+      for (let file of removeFiles) {
+        unlink(path.join(backupDir, file))
+      }
+    }
     logger.info("[魔族陌修仙] 定时备份成功")
     logger.info("[魔族陌修仙] 备份" + result + "个键到" + Version.Plugin_Name + filename)
     return false
@@ -99,7 +120,7 @@ export class MozuXiuxianBackup extends plugin {
  * @returns {string} 格式化时间
  */
 function formatTime(timestamp) {
-  const time = timestamp.toString().length === 10 ? timestamp * 1000 : timestamp
+  const time = timestamp.toString().length === parseInt(Config.setting.maxBackupFile, 10) || 10 ? timestamp * parseInt(Config.setting.maxBackupFile, 10) || 1000 : timestamp
   const d = new Date(time)
 
   const year = d.getFullYear()

@@ -24,3 +24,6 @@ priority: 1000
 
 #修仙定时备份cron表达式
 cronBackup: 0 0 * * * *
+
+#修仙备份文件上限
+maxBackupFile: 10

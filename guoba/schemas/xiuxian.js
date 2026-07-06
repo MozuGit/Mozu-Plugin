@@ -47,6 +47,20 @@ export default [
     }
   },
   {
+    field: "xiuxian.setting.maxBackupFile",
+    label: "修仙备份文件上限",
+    bottomHelpMessage: "修仙备份文件自动删除多余的文件",
+    component: "InputNumber",
+    componentProps: {
+      placeholder: "0表示无上限",
+      min: 0,
+      step: 1,
+      style: {
+        width: "150px"
+      }
+    }
+  },
+  {
     field: "xiuxian.setting.master_no_cd",
     label: "主人不受冷却限制",
     bottomHelpMessage: "主人不受任何冷却限制",

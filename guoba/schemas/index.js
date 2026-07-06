@@ -43,7 +43,8 @@ export function getConfigData() {
         whiteGroup: xxConfig.setting.whiteGroup,
         TextStyle: xxConfig.setting.TextStyle,
         priority: xxConfig.setting.priority,
-        cronBackup: xxConfig.setting.cronBackup
+        cronBackup: xxConfig.setting.cronBackup,
+        maxBackupFile: xxConfig.setting.maxBackupFile
       },
       xiuxian: {
         xiulian: xxConfig.xiuxian.xiulian,
