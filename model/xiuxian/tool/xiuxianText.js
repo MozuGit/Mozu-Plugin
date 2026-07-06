@@ -905,6 +905,119 @@ const prefixHandlers = [
     }
   },
   {
+    prefix: /^(确认)?退出宗门$/,
+    handler: async (id, user_id, Text, msg, at) => {
+      if (msg.includes("确认")) {
+        const value = await xiuxian.exitSect(id)
+        switch (value.event) {
+          case 'sect_exit':
+            Text.push([
+              '<@' + user_id + '>',
+              '***',
+              '**退出宗门成功**',
+              '***'
+            ].join('\n'))
+            break
+          case 'sect_owner':
+            Text.push([
+              '<@' + user_id + '>',
+              '***',
+              '**退出宗门失败**',
+              '>宗主无法退出宗门',
+              '请先' + (await mqqapi.command('转让宗门')),
+              '***'
+            ].join('\n'))
+            break
+          case 'no_sect':
+            Text.push([
+              '<@' + user_id + '>',
+              '***',
+              '**你还没加入宗门呢**',
+              '>点击' + (await mqqapi.command('加入宗门')),
+              '***'
+            ].join('\n'))
+            break
+        }
+        Text.push(Button.sect)
+      } else {
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**请再次确认退出宗门**',
+          '>退出宗门后将失去宗门所有权益',
+          '***'
+        ].join('\n'))
+        Text.push(Button.sectExit)
+      }
+    }
+  },
+  {
+    prefix: /^(确认)?转让宗门\s*\d*/,
+    handler: async (id, user_id, Text, msg, at) => {
+      let transfer_id
+      const _id = (msg.match(/\d+/g) || []).join('')
+      if (at && !Array.isArray(at) && !_id) {
+        if (await xiuxian.hasPlayer(at)) {
+          const atID = (await xiuxian.init(at)).data.id
+          transfer_id = atID
+        } else {
+          transfer_id = 0
+        }
+      } else {
+        transfer_id = parseInt(_id, 10)
+      }
+      const value = await xiuxian.transferSect(id, transfer_id, msg.includes("确认"))
+      switch (value.event) {
+        case 'sect_transfer':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门转让成功**',
+            '>转让ID：' + (await mqqapi.command(transfer_id, '查询修仙者' + transfer_id, true)),
+            '***'
+          ].join('\n'))
+          break
+        case 'no_confirmed':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**请再次确认转让宗门给ID：' + transfer_id + '**',
+            '>点击' + (await mqqapi.command('确认转让宗门', '确认转让宗门' + transfer_id)),
+            '***'
+          ].join('\n'))
+          break
+        case 'not_transfer_id':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**找不到该玩家**',
+            '>请确认该玩家是否在宗门内',
+            '***'
+          ].join('\n'))
+          break
+        case 'no_permission':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**你的宗门权限不足**',
+            '>需宗主才可操作',
+            '***'
+          ].join('\n'))
+          break
+        case 'no_sect':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**你还没加入宗门呢**',
+            '>点击' + (await mqqapi.command('加入宗门')),
+            '***'
+          ].join('\n'))
+          break
+      }
+      Text.push(Button.sectAdmin)
+    }
+  },
+  {
     prefix: /^(全部)?(同意|拒绝)宗门成员\s*\d*/,
     handler: async (id, user_id, Text, msg, at) => {
       let audit_id

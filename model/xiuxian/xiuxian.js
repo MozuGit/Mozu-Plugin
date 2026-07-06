@@ -780,7 +780,7 @@ export default new class {
       membersList.push({
         id: memberAudit[i],
         cult: values[0],
-        realm: Config.Realm.Realms[values[1] - 1] || '无'
+        realm: Config.Realm.Realms[values[1] - 1].name || '无'
       })
     }
     return {
@@ -903,6 +903,75 @@ export default new class {
             event: "not_member"
           }
         }
+      }
+    }
+  }
+
+  async exitSect(id) {
+    const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
+    if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
+      return {
+        event: "no_sect"
+      }
+    }
+    let [members, memberPermission] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员', '宗门成员等级')
+    members = JSON.parse(members)
+    memberPermission = JSON.parse(memberPermission)
+    const member = memberPermission.find(member => member.id === id)
+    if (member && member.permission !== 10) {
+      members = members.filter(item => item !== id)
+      memberPermission = memberPermission.filter(member => member.id !== id)
+      Redis.hmset(`${SECT_INFO_KEY}:${sectId}`, {
+        宗门成员: JSON.stringify(members),
+        宗门成员等级: JSON.stringify(memberPermission)
+      })
+      Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '宗门ID', "0")
+      return {
+        event: "sect_exit"
+      }
+    } else {
+      return {
+        event: "sect_owner"
+      }
+    }
+  }
+
+  async transferSect(id, transfer_id, confirmed = false) {
+    const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
+    if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
+      return {
+        event: "no_sect"
+      }
+    }
+    let [members, memberPermission] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员', '宗门成员等级')
+    members = JSON.parse(members)
+    memberPermission = JSON.parse(memberPermission)
+    if (memberPermission.find(member => member.id === id)?.permission === 10) {
+      if (!members.includes(parseInt(transfer_id, 10))) {
+        return {
+          event: "not_transfer_id"
+        }
+      }
+      if (confirmed) {
+          const member = memberPermission.find(member => member.id === id)
+          const transfer_member = memberPermission.find(member => member.id === transfer_id)
+          member.permission = 1
+          transfer_member.permission = 10
+          Redis.hmset(`${SECT_INFO_KEY}:${sectId}`, {
+            宗门宗主: transfer_id,
+            宗门成员等级: JSON.stringify(memberPermission)
+          })
+          return {
+            event: "sect_transfer"
+          }
+        } else {
+          return {
+            event: "no_confirmed"
+          }
+        }
+    } else {
+      return {
+        event: "no_permission"
       }
     }
   }

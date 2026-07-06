@@ -99,6 +99,19 @@ const Button = {
       ]
     )
   },
+  get sectExit() {
+    return segment.button(
+      [
+        { text: "确认退出宗门", input: "确认退出宗门", style: 4 }
+      ],
+      [
+        { text: "修炼", input: "修炼" },
+        { text: "开采", input: "开采" },
+        { text: "信息", input: "修仙个人信息" },
+        { text: "签到", input: "修仙签到" }
+      ]
+    )
+  },
   get startRetreat() {
     return segment.button(
       [

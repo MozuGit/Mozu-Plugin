@@ -11,7 +11,7 @@ import { Button } from "../../model/xiuxian/index.js"
 export class MozuXiuxianBackup extends plugin {
   constructor() {
     super({
-      name: "魔族陌修仙备份",
+      name: "修仙备份",
       event: "message",
       priority: Config.setting.priority,
       rule: [
