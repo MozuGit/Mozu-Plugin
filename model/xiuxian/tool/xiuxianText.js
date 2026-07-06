@@ -518,7 +518,7 @@ const commandHandlers = {
           '***',
           '**宗门升级成功**',
           '>宗门等级：' + userInfo.sectInfo.level + ' / ' + Config.sect.sect_level.length,
-          '宗门成员上限提升至 ' + Config.sectInfo.max + ' 人',
+          '宗门成员上限提升至 ' + userInfo.sectInfo.max + ' 人',
           '***'
         ].join('\n'))
         break

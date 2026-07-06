@@ -554,7 +554,8 @@ export default [
                 required: true
               }
             ]
-          }
+          },
+          required: true
         }
       ]
     },
