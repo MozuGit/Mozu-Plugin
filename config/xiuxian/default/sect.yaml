@@ -1,47 +1,65 @@
-#宗门经验升级
-sect_up_exp: 
-  - 1000
-  - 10000
-  - 25000
-  - 50000
-  - 100000
-  - 1000000
-  - 5000000
-  - 10000000
-  - 18888888
-
-#宗门签到奖励
-sect_sign:
-  - cult: 10888     #签到修为
-    ls: 10888       #签到灵石
-    sect_exp: 100   #宗门经验
-  - cult: 12888
-    ls: 12888
-    sect_exp: 120
-  - cult: 15888
-    ls: 15888
-    sect_exp: 180
-  - cult: 18888
-    ls: 18888
-    sect_exp: 500
-  - cult: 22000
-    ls: 22000
-    sect_exp: 1000
-  - cult: 28888
-    ls: 28888
-    sect_exp: 1500
-  - cult: 32888
-    ls: 32888
-    sect_exp: 2000
-  - cult: 64888
-    ls: 64888
-    sect_exp: 2500
-  - cult: 128888
-    ls: 128888
-    sect_exp: 5000
-  - cult: 188888
-    ls: 188888
-    sect_exp: 0
+#宗门等级
+sect_level:
+  - up_exp: 0
+    memberMax: 10
+    sign:
+      cult: 10888
+      ls: 10888
+      sectExp: 100
+  - up_exp: 1000
+    memberMax: 20
+    sign:
+      cult: 12888
+      ls: 12888
+      sectExp: 120
+  - up_exp: 10000
+    memberMax: 30
+    sign:
+      cult: 15888
+      ls: 15888
+      sectExp: 180
+  - up_exp: 25000
+    memberMax: 40
+    sign:
+      cult: 18888
+      ls: 18888
+      sectExp: 300
+  - up_exp: 50000
+    memberMax: 50
+    sign:
+      cult: 22000
+      ls: 22000
+      sectExp: 500
+  - up_exp: 100000
+    memberMax: 60
+    sign:
+      cult: 28888
+      ls: 28888
+      sectExp: 1000
+  - up_exp: 1000000
+    memberMax: 70
+    sign:
+      cult: 32888
+      ls: 32888
+      sectExp: 1500
+  - up_exp: 5000000
+    memberMax: 80
+    sign:
+      cult: 64888
+      ls: 64888
+      sectExp: 2000
+  - up_exp: 10000000
+    memberMax: 90
+    sign:
+      cult: 128888
+      ls: 128888
+      sectExp: 3000
+  - up_exp: 0
+    memberMax: 100
+    sign:
+      cult: 188888
+      ls: 188888
+      sectExp: 5000
 
 #宗门升级后经验重置
 sect_up_reset: false

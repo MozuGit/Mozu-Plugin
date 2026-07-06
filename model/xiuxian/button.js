@@ -70,16 +70,14 @@ const Button = {
         { text: "解散", input: "解散宗门" }
       ],
       [
+        { text: "升级", input: "宗门升级" },
+        { text: "管理", input: "宗门管理" }
+      ],
+      [
         { text: "设副宗", input: "宗门设置副宗主" },
         { text: "设长老", input: "宗门设置长老" },
         { text: "设成员", input: "宗门设置成员" },
         { text: "设精英", input: "宗门设置精英" }
-      ],
-      [
-        { text: "修炼", input: "修炼" },
-        { text: "开采", input: "开采" },
-        { text: "信息", input: "修仙个人信息" },
-        { text: "签到", input: "修仙签到" }
       ]
     )
   },

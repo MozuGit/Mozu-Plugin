@@ -459,30 +459,20 @@ export default [
     required: true
   },
   {
-    field: "xiuxian.sect.sect_up_exp",
-    label: "宗门升级经验",
-    component: "GTags",
-    bottomHelpMessage: "宗门升级经验等级",
-    componentProps: {
-      allowAdd: true,
-      allowDel: true
-    },
-    required: true
-  },
-  {
-    field: "xiuxian.sect.sect_sign",
-    label: "宗门签到配置",
+    field: "xiuxian.sect.sect_level",
+    label: "宗门等级配置",
+    bottomHelpMessage: "宗门等级配置一行一级",
     component: "GSubForm",
     componentProps: {
       multiple: true,
       schemas: [
         {
-          field: "cult",
-          label: "宗门签到修为",
-          bottomHelpMessage: "宗门签到获取的修为",
+          field: "up_exp",
+          label: "宗门升级经验",
+          bottomHelpMessage: "宗门升级所需的经验",
           component: "InputNumber",
           componentProps: {
-            placeholder: "请输入宗门签到修为",
+            placeholder: "请输入宗门升级经验",
             min: 0,
             step: 100,
             style: {
@@ -492,14 +482,13 @@ export default [
           required: true
         },
         {
-          field: "ls",
-          label: "宗门签到灵石",
+          field: "memberMax",
+          label: "宗门人数上限",
           component: "InputNumber",
-          bottomHelpMessage: "宗门签到获取的灵石",
           componentProps: {
-            placeholder: "请输入宗门签到灵石",
+            placeholder: "请输入宗门人数上限",
             min: 0,
-            step: 100,
+            step: 1,
             style: {
               width: "180px"
             }
@@ -507,20 +496,68 @@ export default [
           required: true
         },
         {
-          field: "sect_exp",
-          label: "宗门签到经验",
-          component: "InputNumber",
-          bottomHelpMessage: "宗门签到获取的宗门经验",
+          field: "sign",
+          label: "宗门签到奖励",
+          component: "GSubForm",
           componentProps: {
-            placeholder: "请输入宗门签到经验",
-            min: 0,
-            step: 100,
+            modalProps: {
+              title: "宗门签到奖励"
+            },
             style: {
-              width: "180px"
-            }
+              maxHeight: "200px",
+              overflowY: "auto"
+            },
+            schemas: [
+              {
+                field: "cult",
+                label: "修为",
+                bottomHelpMessage: "宗门每日签到获取的修为",
+                component: "InputNumber",
+                componentProps: {
+                  placeholder: "请输入宗门签到修为",
+                  min: 0,
+                  step: 1000,
+                  style: {
+                    width: "180px"
+                  }
+                },
+                required: true
+              },
+              {
+                field: "ls",
+                label: "灵石",
+                bottomHelpMessage: "宗门每日签到获取的灵石",
+                component: "InputNumber",
+                componentProps: {
+                  placeholder: "请输入宗门签到灵石",
+                  min: 0,
+                  step: 1000,
+                  style: {
+                    width: "180px"
+                  }
+                },
+                required: true
+              },
+              {
+                field: "sectExp",
+                label: "宗门经验",
+                bottomHelpMessage: "宗门每日签到获取的宗门经验",
+                component: "InputNumber",
+                componentProps: {
+                  placeholder: "请输入宗门签到经验",
+                  min: 0,
+                  step: 1000,
+                  style: {
+                    width: "180px"
+                  }
+                },
+                required: true
+              }
+            ]
           }
         }
       ]
-    }
+    },
+    required: true
   }
 ]

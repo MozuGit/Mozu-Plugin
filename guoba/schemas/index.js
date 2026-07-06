@@ -63,8 +63,7 @@ export function getConfigData() {
       sect: {
         sect_up_reset: xxConfig.sect.sect_up_reset,
         create_sect_ls: xxConfig.sect.create_sect_ls,
-        sect_up_exp: xxConfig.sect.sect_up_exp,
-        sect_sign: xxConfig.sect.sect_sign
+        sect_level: xxConfig.sect.sect_level
       }
     }
   }
@@ -104,7 +103,6 @@ function xiuxianConfig(data) {
     }
   })
   xxConfig.modify('Realm', "Realms", data.xiuxian.realm)
-  data.xiuxian.sect.sect_up_exp = data.xiuxian.sect.sect_up_exp.map(v => parseInt(v, 10)).filter(v => !isNaN(v));
   Object.keys(data.xiuxian.sect).forEach(key => {
     xxConfig.modify('sect', key, data.xiuxian.sect[key])
   })

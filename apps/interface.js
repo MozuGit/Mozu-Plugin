@@ -3,7 +3,9 @@ import { Version } from "../model/Config/Version.js"
 import { Config } from "../model/Config/Config.js"
 
 global.Mozu = {
-  version: Version.Plugin_Version
+  Plugin_Name: Version.Plugin_Name,
+  Plugin_Path: Version.Plugin_Path,
+  Version: Version.Plugin_Version
 }
 if (Config.Redis.global) global.Redis = Redis
 

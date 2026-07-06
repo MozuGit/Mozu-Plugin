@@ -101,9 +101,8 @@ export default new class {
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return false
     }
-    const [name, desc, members, owner, exp, level, max] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', '宗门简介', '宗门成员', '宗门宗主', '宗门经验', '宗门等级', '宗门人数上限')
-    const sectUpExp = Config.sect.sect_up_exp
-    const nextExp = (sectUpExp.length <= level) ? sectUpExp[sectUpExp.length - 1] : sectUpExp[level - 1]
+    const [name, desc, members, owner, exp, level] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', '宗门简介', '宗门成员', '宗门宗主', '宗门经验', '宗门等级')
+    const nextExp = Config.sect.sect_level[level]?.up_exp || 0
     return {
       id: sectId,
       name,
@@ -112,7 +111,7 @@ export default new class {
       owner,
       exp,
       level,
-      max,
+      max: Config.sect.sect_level.length > parseInt(level, 10) ? Config.sect.sect_level[level - 1].memberMax : Config.sect.sect_level[Config.sect.sect_level.length - 1].memberMax,
       nextExp
     }
   }
@@ -543,7 +542,6 @@ export default new class {
         宗门宗主: id,
         宗门经验: 0,
         宗门等级: 1,
-        宗门人数上限: 20,
         宗门成员等级: JSON.stringify([{ id: id, permission: 10 }])
       })
       Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
@@ -598,11 +596,12 @@ export default new class {
         event: "not_sectid"
       }
     }
-    let [members, memberMax, memberPermission, noAudit] = await Redis.hmget(`${SECT_INFO_KEY}:${joinID}`, '宗门成员', '宗门人数上限', '宗门成员等级', '无需审核状态')
+    let [level, members, memberPermission, noAudit] = await Redis.hmget(`${SECT_INFO_KEY}:${joinID}`, '宗门等级', '宗门成员', '宗门成员等级', '无需审核状态')
+    level = parseInt(level, 10)
     members = JSON.parse(members)
     const memberNum = members.length
+    const memberMax = Config.sect.sect_level[level - 1].memberMax
     memberPermission = JSON.parse(memberPermission)
-    memberMax = parseInt(memberMax, 10)
     noAudit = parseInt(noAudit, 10) || 0
     if (memberNum >= memberMax) {
       return {
@@ -638,6 +637,48 @@ export default new class {
     }
   }
 
+  async sectUp(id) {
+    const sectId = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID'), 10)
+    if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
+      return {
+        event: "no_sect"
+      }
+    }
+    let [exp, level, membersPermission] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门经验', '宗门等级', '宗门成员等级')
+    exp = parseInt(exp, 10)
+    level = parseInt(level, 10)
+    membersPermission = JSON.parse(membersPermission)
+    if (membersPermission.find(item => item.id === id)?.permission < 7) {
+      return {
+        event: "no_permission"
+      }
+    }
+    if (Config.sect.sect_level.length > level) {
+      if (exp >= Config.sect.sect_level[level].up_exp) {
+        level++
+        if (Config.sect.sect_up_reset) {
+          Redis.hmset(`${SECT_INFO_KEY}:${sectId}`, {
+            宗门经验: 0,
+            宗门等级: level
+          })
+        } else {
+          Redis.hset(`${SECT_INFO_KEY}:${id}`, '宗门等级', level)
+        }
+        return {
+          event: "sect_level_up"
+        }
+      } else {
+        return {
+          event: "sect_exp_lack"
+        }
+      }
+    } else {
+      return {
+        event: "sect_level_max"
+      }
+    }
+  }
+
   async signSect(id) {
     let [cult, ls, lastDay, sectId] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, ['修为', '灵石', '宗门上次签到时间', '宗门ID'])
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
@@ -648,7 +689,7 @@ export default new class {
     let [exp, level] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门经验', '宗门等级')
     exp = parseInt(exp, 10)
     level = parseInt(level, 10)
-    let { cult: addcult, ls: addls, sect_exp } = Config.sect.sect_sign[level - 1]
+    let { cult: addcult, ls: addls, sectExp } = Config.sect.sect_level[level - 1].sign
     const today = gettoday()
     if (lastDay && lastDay === today) {
       return {
@@ -657,7 +698,7 @@ export default new class {
     }
     cult = parseInt(cult, 10) + addcult
     ls = parseInt(ls, 10) + addls
-    exp = exp + sect_exp
+    exp = exp + sectExp
     await Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
       修为: cult,
       灵石: ls,
@@ -669,7 +710,7 @@ export default new class {
       data: {
         addcult,
         addls,
-        exp
+        sectExp
       }
     }
   }
@@ -690,7 +731,7 @@ export default new class {
     }
     const pipeline = Redis.pipeline()
     for (let sectId of sectList) {
-      pipeline.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', '宗门简介', '宗门成员', '宗门宗主', '宗门等级', '宗门人数上限')
+      pipeline.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', '宗门简介', '宗门成员', '宗门宗主', '宗门等级')
     }
     const results = await pipeline.exec()
     let sectInfos = []
@@ -702,7 +743,7 @@ export default new class {
         memberNum: JSON.parse(results[i][1][2]).length,
         owner: results[i][1][3],
         level: results[i][1][4],
-        memberMax: results[i][1][5]
+        memberMax: Config.sect.sect_level[results[i][1][4] - 1].memberMax
       })
     }
     return {
@@ -739,7 +780,7 @@ export default new class {
       membersList.push({
         id: memberAudit[i],
         cult: values[0],
-        realm: Config.Realm.Realms[values[1] - 1]
+        realm: Config.Realm.Realms[values[1] - 1] || '无'
       })
     }
     return {
@@ -757,8 +798,9 @@ export default new class {
         event: "no_sect"
       }
     }
-    let [members, memberMax, membersPermission, memberAudit] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员', '宗门人数上限', '宗门成员等级', '待审核成员')
+    let [level, members, membersPermission, memberAudit] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门等级', '宗门成员', '宗门成员等级', '待审核成员')
     let memberNum = JSON.parse(members).length
+    const memberMax = Config.sect.sect_level[level - 1].memberMax
     members = JSON.parse(members)
     membersPermission = JSON.parse(membersPermission)
     memberAudit = JSON.parse(memberAudit || '[]')

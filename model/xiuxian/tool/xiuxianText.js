@@ -420,11 +420,11 @@ const commandHandlers = {
         '宗门名称：' + userInfo.sectInfo.name,
         '宗门简介：' + userInfo.sectInfo.desc,
         '***',
-        '>宗门人数：' + userInfo.sectInfo.member + '/' + userInfo.sectInfo.max,
+        '>宗门人数：' + userInfo.sectInfo.member + ' / ' + userInfo.sectInfo.max,
         '宗主ID：' + userInfo.sectInfo.owner,
         '***',
-        '>宗门等级：' + userInfo.sectInfo.level + '/' + (Config.sect.sect_up_exp.length + 1),
-        '宗门经验：' + userInfo.sectInfo.exp + '/' + userInfo.sectInfo.nextExp,
+        '>宗门等级：' + userInfo.sectInfo.level + ' / ' + (Config.sect.sect_level.length),
+        '宗门经验：' + userInfo.sectInfo.exp + ' / ' + userInfo.sectInfo.nextExp,
         '>' + ((userInfo.sectInfo.nextExp - userInfo.sectInfo.exp > 0)
           ? '距离下一级还需' + (userInfo.sectInfo.nextExp - userInfo.sectInfo.exp) + '点经验'
           : '已满足' + (await mqqapi.command('升级', '宗门升级')) + '要求'),
@@ -508,6 +508,62 @@ const commandHandlers = {
     Text.push(Button.sect)
   },
 
+  '宗门升级': async (id, user_id, Text) => {
+    const value = await xiuxian.sectUp(id)
+    const userInfo = await xiuxian.getUserInfo(id)
+    switch (value.event) {
+      case 'sect_level_up':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**宗门升级成功**',
+          '>宗门等级：' + userInfo.sectInfo.level + ' / ' + Config.sect.sect_level.length,
+          '宗门成员上限提升至 ' + Config.sectInfo.max + ' 人',
+          '***'
+        ].join('\n'))
+        break
+      case 'sect_exp_lack':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**宗门经验不足**',
+          '>宗门经验：' + userInfo.sectInfo.exp + ' / ' + userInfo.sectInfo.nextExp,
+          '距离下一级还需' + (userInfo.sectInfo.nextExp - userInfo.sectInfo.exp) + '点经验',
+          '***'
+        ].join('\n'))
+        break
+      case 'sect_level_max':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**宗门等级已满**',
+          '>宗门等级：' + userInfo.sectInfo.level + ' / ' + (Config.sect.sect_level.length),
+          '无需再次升级宗门',
+          '***'
+        ].join('\n'))
+        break
+      case 'no_permission':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**你的宗门权限不足**',
+          '>需长老及以上可操作',
+          '***'
+        ].join('\n'))
+        break
+      case 'no_sect':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**你还没加入宗门呢**',
+          '>点击' + (await mqqapi.command('加入宗门')),
+          '***'
+        ].join('\n'))
+        break
+    }
+    Text.push(Button.sectAdmin)
+  },
+
   '宗门成员': async (id, user_id, Text) => {
     const value = await xiuxian.sectMember(id)
     switch (value.event) {
@@ -572,7 +628,7 @@ const commandHandlers = {
           '**宗门签到奖励**',
           '>获得修为：' + value.data.addcult,
           '获得灵石：' + value.data.addls,
-          '获得宗门经验：' + value.data.exp,
+          '获得宗门经验：' + value.data.sectExp,
           '***'
         ].join('\n'))
         break
@@ -812,7 +868,7 @@ const prefixHandlers = [
             '<@' + user_id + '>',
             '***',
             '**你要加入的宗门人数已满**',
-            '>**宗门人数：' + value.data.memberNum + '/' + value.data.memberMax + '**',
+            '>**宗门人数：' + value.data.memberNum + ' / ' + value.data.memberMax + '**',
             '***'
           ].join('\n'))
           break
@@ -1194,7 +1250,7 @@ async function buildSectList(sectInfos) {
     sectList.push([
       '**宗门：' + item.name + '  ID：' + item.id + '**',
       '>宗主：' + item.owner + '  等级：' + item.level,
-      '人数：' + item.memberNum + '/' + item.memberMax,
+      '人数：' + item.memberNum + ' / ' + item.memberMax,
       '简介：' + item.desc,
       (await mqqapi.command('点击加入宗门', '加入宗门' + item.id)),
       '***'
