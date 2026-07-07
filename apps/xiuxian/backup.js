@@ -2,7 +2,7 @@ import fs from "node:fs"
 import path from "path"
 import { readdir, unlink } from "node:fs/promises"
 
-import mqqapi from "../../model/xiuxian/tool/mqqapi.js"
+import { mqqapi } from "../../model/xiuxian/tool/protocol.js"
 import { backupKeys, restoreKeys } from "../../scripts/backup.js"
 import { Config } from "../../model/xiuxian/tool/Config/Config.js"
 import { Version } from "../../model/Config/Version.js"
@@ -40,7 +40,7 @@ export class MozuXiuxianBackup extends plugin {
     if (this.e.msg.includes("还原")) {
       const match = this.e.msg.match(/#?(?:魔族陌)?修仙备份(?:还原(.*))?$/)
       const raw = match?.[1]?.trim()
-      const filename = raw ? (raw.endsWith('.json') ? raw : raw + '.json') : null
+      const filename = raw.endsWith('.json') ? raw : raw + '.json'
       const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", filename)
       if (fs.existsSync(filePath)) {
         const result = await restoreKeys(filePath)

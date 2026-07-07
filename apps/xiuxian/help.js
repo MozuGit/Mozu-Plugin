@@ -1,5 +1,5 @@
 import help from '../../model/xiuxian/help.js'
-import mqqapi from "../../model/xiuxian/tool/mqqapi.js"
+import { mqqapi, qagent } from "../../model/xiuxian/tool/protocol.js"
 import { Config } from "../../model/xiuxian/tool/Config/Config.js"
 import { Button } from "../../model/xiuxian/index.js"
 
@@ -27,7 +27,7 @@ export class MozuXiuxianHelp extends plugin {
     }
     const message = [
       '##✨修仙帮助',
-      '>联系主人：' + (await mqqapi.qagent('u_KX6qPA4vv-EbmUhf0enyNg', '魔族陌', '3343712589')),
+      '>联系主人：' + (await qagent('u_KX6qPA4vv-EbmUhf0enyNg', '魔族陌', '3343712589')),
       '修仙指令帮助，bug反馈请联系主人',
       '***',
       '**🎉基础指令**',
