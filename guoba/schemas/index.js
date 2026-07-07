@@ -65,6 +65,9 @@ export function getConfigData() {
         sect_up_reset: xxConfig.sect.sect_up_reset,
         create_sect_ls: xxConfig.sect.create_sect_ls,
         sect_level: xxConfig.sect.sect_level
+      },
+      title: {
+        rankTitle: xxConfig.title.rankTitle
       }
     }
   }
@@ -106,5 +109,8 @@ function xiuxianConfig(data) {
   xxConfig.modify('Realm', "Realms", data.xiuxian.realm)
   Object.keys(data.xiuxian.sect).forEach(key => {
     xxConfig.modify('sect', key, data.xiuxian.sect[key])
+  })
+  Object.keys(data.xiuxian.title).forEach(key => {
+    xxConfig.modify('title', key, data.xiuxian.title[key])
   })
 }

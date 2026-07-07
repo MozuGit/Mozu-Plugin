@@ -15,7 +15,7 @@ const Button = {
       ],
       [
         { text: "突破", input: "突破" },
-        { text: "渡劫", input: "渡劫" },
+        { text: "称号", input: "我的称号" },
         { text: "查询", input: "查询修仙者" },
         { text: "宗门", input: "我的宗门" }
       ],

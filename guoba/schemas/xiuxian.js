@@ -574,5 +574,99 @@ export default [
       ]
     },
     required: true
+  },
+  {
+    component: "Divider",
+    label: "修仙称号设置",
+    componentProps: {
+      type: "horizontal",
+      style: {
+        fontWeight: "bold",
+        color: "rgb(76, 113, 201)",
+        fontSize: "16px"
+      },
+      orientation: "left",
+      plain: true
+    }
+  },
+  {
+    field: "xiuxian.title.rankTitle",
+    label: "排行榜称号配置",
+    component: "GSubForm",
+    componentProps: {
+      modalProps: {
+        title: "排行榜称号配置"
+      },
+      style: {
+        overflowY: "auto"
+      },
+      schemas: [
+        {
+          field: "validDays",
+          label: "称号有效天数",
+          bottomHelpMessage: "称号的有效天数，0表示永久",
+          component: "InputNumber",
+          componentProps: {
+            placeholder: "0表示永久",
+            min: 0,
+            step: 1,
+            style: {
+              width: "120px"
+            }
+          },
+          required: true
+        },
+        {
+          field: "cron",
+          label: "称号发放cron",
+          bottomHelpMessage: "排行榜称号发放cron",
+          component: "EasyCron",
+          componentProps: {
+            placeholder: "*表示任意，?表示不指定（月日和星期互斥）"
+          },
+          required: true
+        },
+        {
+          field: "cult",
+          label: "修为榜称号",
+          component: "GTags",
+          bottomHelpMessage: "修为榜榜单称号配置",
+          componentProps: {
+            multiple: true
+          },
+          required: true
+        },
+        {
+          field: "ls",
+          label: "灵石榜称号",
+          component: "GTags",
+          bottomHelpMessage: "灵石榜榜单称号配置",
+          componentProps: {
+            multiple: true
+          },
+          required: true
+        },
+        {
+          field: "power",
+          label: "战力榜称号",
+          component: "GTags",
+          bottomHelpMessage: "战力榜榜单称号配置",
+          componentProps: {
+            multiple: true
+          },
+          required: true
+        },
+        {
+          field: "retreat",
+          label: "闭关榜称号",
+          component: "GTags",
+          bottomHelpMessage: "闭关榜榜单称号配置",
+          componentProps: {
+            multiple: true
+          },
+          required: true
+        }
+      ]
+    }
   }
 ]

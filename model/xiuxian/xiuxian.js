@@ -18,7 +18,7 @@ export default new class {
         修为: 0,
         灵石: 0,
         境界: 0,
-        称号: "无",
+        称号: -1,
         性别: "未设置",
         宗门ID: 0,
         签到次数: 0,
@@ -49,13 +49,22 @@ export default new class {
     if ((await Redis.exists(`${PLAYER_INFO_KEY}:${id}`)) === 0) {
       return false
     }
-    let [cult, ls, realm, signNum, retreatStartTime, sex, title, sectId] = await Redis.hmget(key, '修为', '灵石', '境界', '签到次数', '闭关时间', '性别', '称号', '宗门ID')
+    let [cult, ls, realm, signNum, retreatStartTime, sex, titleIndex, titles, sectId] = await Redis.hmget(key, '修为', '灵石', '境界', '签到次数', '闭关时间', '性别', '称号', '称号列表', '宗门ID')
     cult = parseInt(cult, 10) || 0
     ls = parseInt(ls, 10) || 0
     realm = parseInt(realm, 10) || 0
     signNum = parseInt(signNum, 10) || 0
     retreatStartTime = parseInt(retreatStartTime, 10) || 0
     sectId = parseInt(sectId, 10) || 0
+    titles = JSON.parse(titles || '[]')
+    titleIndex = parseInt(titleIndex, 10) || -1
+    const title = titleIndex !== -1
+      ? titles[titleIndex - 1]?.title
+        ? Math.floor(Date.now() / 1000) - titles[titleIndex - 1].validTime > 0
+          ? '无'
+          : titles[titleIndex - 1].title
+        : '无'
+      : '无'
 
     const realmName = (Config.Realm.Realms.length >= realm) ? Config.Realm.Realms[realm - 1]?.name || '无' : Config.Realm.Realms[Config.Realm.Realms.length].name || '未命名'
     const realmName2 = Config.Realm.Realms[realm]?.name
@@ -90,7 +99,8 @@ export default new class {
       signNum,
       realm: realms,
       sex: sex || '未设置',
-      title: title || '无',
+      title,
+      titles,
       sectInfo,
       retreat,
       power
@@ -425,24 +435,24 @@ export default new class {
     }
   }
 
-  async getRank(id, type) {
+  async getRank(type, id) {
     const pipeline = Redis.pipeline()
     const idNum = parseInt(await Redis.get('Mozu:xiuxian:openid:counter'))
     switch (type) {
       case '修为':
       case '灵石':
         for (let i = 0; i < idNum; i++) {
-          pipeline.hget(`${PLAYER_INFO_KEY}:${i}`, type)
+          pipeline.hmget(`${PLAYER_INFO_KEY}:${i}`, type, '称号', '称号列表')
         }
         break
       case '战力':
         for (let i = 0; i < idNum; i++) {
-          pipeline.hmget(`${PLAYER_INFO_KEY}:${i}`, '修为', '境界')
+          pipeline.hmget(`${PLAYER_INFO_KEY}:${i}`, '修为', '境界', '称号', '称号列表')
         }
         break
       case '闭关':
         for (let i = 0; i < idNum; i++) {
-          pipeline.hget(`${PLAYER_INFO_KEY}:${i}`, '闭关时间')
+          pipeline.hmget(`${PLAYER_INFO_KEY}:${i}`, '闭关时间', '称号', '称号列表')
         }
         break
     }
@@ -452,11 +462,15 @@ export default new class {
       case '修为':
       case '灵石':
         for (let i = 0; i < idNum; i++) {
-          const value = parseInt(results[i][1], 10)
+          const value = parseInt(results[i][1][0], 10)
+          const titleIndex = parseInt(results[i][1][1], 10) || 0
+          const titles = JSON.parse(results[i][1][2] || '[]')
+          const title = titles[titleIndex - 1]?.title || '无'
           if (value > 0) {
             players.push({
               id: i,
-              value: value
+              value: value,
+              title: title
             })
           }
         }
@@ -466,10 +480,14 @@ export default new class {
           const cult = parseInt(results[i][1][0], 10)
           const realm = parseInt(results[i][1][1], 10) || 0.75
           const value = Math.floor(evaluate(Config.xiuxian.powerFormula, { cult: cult, realm: realm }))
+          const titleIndex = parseInt(results[i][1][2], 10) || 0
+          const titles = JSON.parse(results[i][1][3] || '[]')
+          const title = titles[titleIndex - 1]?.title || '无'
           if (value > 0) {
             players.push({
               id: i,
-              value: value
+              value: value,
+              title: title
             })
           }
         }
@@ -477,12 +495,16 @@ export default new class {
       case '闭关':
         const time = Math.floor(Date.now() / 1000)
         for (let i = 0; i < idNum; i++) {
-          const retreat = parseInt(results[i][1], 10)
+          const retreat = parseInt(results[i][1][0], 10)
+          const titleIndex = parseInt(results[i][1][1], 10) || 0
+          const titles = JSON.parse(results[i][1][2] || '[]')
+          const title = titles[titleIndex - 1]?.title || '无'
           if (retreat > 0) {
             const value = time - retreat
             players.push({
               id: i,
-              value: value
+              value: value,
+              title: title
             })
           }
         }
@@ -493,7 +515,8 @@ export default new class {
     const allRanks = top10Players.map((player, index) => ({
       rank: index + 1,
       id: player.id,
-      value: player.value
+      value: player.value,
+      title: player.title
     }))
     const targetPlayer = players.find(p => p.id === id)
     if (!targetPlayer) {
@@ -510,7 +533,7 @@ export default new class {
       data: {
         rank: rank,
         ranks: allRanks,
-        cult: targetPlayer.value,
+        value: targetPlayer.value,
       }
     }
   }
@@ -953,25 +976,112 @@ export default new class {
         }
       }
       if (confirmed) {
-          const member = memberPermission.find(member => member.id === id)
-          const transfer_member = memberPermission.find(member => member.id === transfer_id)
-          member.permission = 1
-          transfer_member.permission = 10
-          Redis.hmset(`${SECT_INFO_KEY}:${sectId}`, {
-            宗门宗主: transfer_id,
-            宗门成员等级: JSON.stringify(memberPermission)
-          })
-          return {
-            event: "sect_transfer"
-          }
-        } else {
-          return {
-            event: "no_confirmed"
-          }
+        const member = memberPermission.find(member => member.id === id)
+        const transfer_member = memberPermission.find(member => member.id === transfer_id)
+        member.permission = 1
+        transfer_member.permission = 10
+        Redis.hmset(`${SECT_INFO_KEY}:${sectId}`, {
+          宗门宗主: transfer_id,
+          宗门成员等级: JSON.stringify(memberPermission)
+        })
+        return {
+          event: "sect_transfer"
         }
+      } else {
+        return {
+          event: "no_confirmed"
+        }
+      }
     } else {
       return {
         event: "no_permission"
+      }
+    }
+  }
+
+  async sectEnshrined(id, lsNum) {
+    let [ls, sectId] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '宗门ID')
+    ls = parseInt(ls, 10)
+    lsNum = parseInt(lsNum, 10)
+    if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
+      return {
+        event: "no_sect"
+      }
+    }
+    if (ls < lsNum) {
+      return {
+        event: "lack_ls",
+        data: {
+          ls: lsNum
+        }
+      }
+    }
+    if (lsNum >= 0 && lsNum % 10 === 0) {
+      ls = ls - lsNum
+      let [exp, memberContribution] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门经验', '宗门贡献')
+      exp = parseInt(exp, 10) + lsNum / 10
+      memberContribution = JSON.parse(memberContribution || '[]')
+      const member = memberContribution.find(member => member.id === id)
+      if (!member) {
+        memberContribution.push({ id: id, contribution: lsNum })
+      } else {
+        member.contribution += lsNum
+      }
+      Redis.hmset(`${SECT_INFO_KEY}:${sectId}`, {
+        宗门经验: exp,
+        宗门贡献: JSON.stringify(memberContribution)
+      })
+      Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '灵石', ls)
+      return {
+        event: "sect_enshrined",
+        data: {
+          addExp: lsNum / 10,
+          addContribution: lsNum
+        }
+      }
+    } else {
+      return {
+        event: "invalid_lsNum"
+      }
+    }
+  }
+
+  async setSex(id, sexType) {
+    const sex = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '性别')
+    if (sex !== "未设置") {
+      return {
+        event: "in_is_sex"
+      }
+    }
+    if (sexType !== "男" && sexType !== "女") {
+      return {
+        event: "invalid_sex"
+      }
+    }
+    Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '性别', sexType)
+    return {
+      event: "set_sex_success",
+      data: {
+        sex: sexType
+      }
+    }
+  }
+
+  async setTitle(id, titleIndex) {
+    let [titles, title] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '称号列表', '称号')
+    titles = JSON.parse(titles || '[]')
+    titleIndex = parseInt(titleIndex, 10)
+    if (titleIndex < 1 || titleIndex > titles.length) {
+      return {
+        event: "invalid_title"
+      }
+    }
+    title = titles[titleIndex - 1]?.title || '无'
+    Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '称号', titleIndex)
+    return {
+      event: "set_title_success",
+      data: {
+        title: title
       }
     }
   }

@@ -354,7 +354,7 @@ const commandHandlers = {
   },
 
   '修为榜': async (id, user_id, Text) => {
-    const value = await xiuxian.getRank(id, "修为")
+    const value = await xiuxian.getRank("修为", id)
     Text.push([
       '<@' + user_id + '>',
       '***',
@@ -362,13 +362,13 @@ const commandHandlers = {
       '>排行榜仅展示前10名',
       '***',
       ...(await buildRank(value.data.ranks, '修为')),
-      (value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n修为：${value.data.cult}\n***` : ``)
+      (value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n修为：${value.data.value}\n***` : ``)
     ].join('\n'))
     Text.push(Button.rank)
   },
 
   '灵石榜': async (id, user_id, Text) => {
-    const value = await xiuxian.getRank(id, "灵石")
+    const value = await xiuxian.getRank("灵石", id)
     Text.push([
       '<@' + user_id + '>',
       '***',
@@ -376,13 +376,13 @@ const commandHandlers = {
       '>排行榜仅展示前10名',
       '***',
       ...(await buildRank(value.data.ranks, '灵石')),
-      (value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n灵石：${value.data.cult}\n***` : ``)
+      (value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n灵石：${value.data.value}\n***` : ``)
     ].join('\n'))
     Text.push(Button.rank)
   },
 
   '战力榜': async (id, user_id, Text) => {
-    const value = await xiuxian.getRank(id, "战力")
+    const value = await xiuxian.getRank("战力", id)
     Text.push([
       '<@' + user_id + '>',
       '***',
@@ -390,13 +390,13 @@ const commandHandlers = {
       '>排行榜仅展示前10名',
       '***',
       ...(await buildRank(value.data.ranks, '战力')),
-      (value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n战力：${value.data.cult}\n***` : ``)
+      (value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n战力：${value.data.value}\n***` : ``)
     ].join('\n'))
     Text.push(Button.rank)
   },
 
   '闭关榜': async (id, user_id, Text) => {
-    const value = await xiuxian.getRank(id, "闭关")
+    const value = await xiuxian.getRank("闭关", id)
     Text.push([
       '<@' + user_id + '>',
       '***',
@@ -404,9 +404,44 @@ const commandHandlers = {
       '>排行榜仅展示前10名',
       '***',
       ...(await buildRank(value.data.ranks, '闭关时间')),
-      (value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n闭关时间：${value.data.cult}\n***` : ``)
+      (value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n闭关时间：${value.data.value}\n***` : ``)
     ].join('\n'))
     Text.push(Button.rank)
+  },
+
+  '我的称号': async (id, user_id, Text) => {
+    const userInfo = await xiuxian.getUserInfo(id)
+    if (userInfo.titles.length > 0) {
+      let titleList = []
+      for (let i = 0; i < userInfo.titles.length; i++) {
+        const title = userInfo.titles[i]
+        const setTitleBtn = await mqqapi.command('[设置称号]', '设置称号 ' + (i + 1), true)
+        titleList.push([
+          '**称号：' + title.title + '**',
+          '>称号ID：' + (i + 1),
+          '获得时间：' + formatTime(title.getTime),
+          '有效期至：' + ((title.validTime === 0 ? '永久' : (Math.floor(Date.now() / 1000) - title.validTime > 0 ? '已过期' : formatTime(title.validTime)))),
+          setTitleBtn,
+          '***'
+        ].join('\n'))
+      }
+      Text.push([
+        '<@' + user_id + '>',
+        '***',
+        '**称号列表**',
+        '>称号可以通过排行榜等途径获取',
+        '***',
+        ...titleList
+      ].join('\n'))
+    } else {
+      Text.push([
+        '<@' + user_id + '>',
+        '***',
+        '**你还没有称号呢**',
+        '>称号可以通过排行榜等途径获取',
+        '***'
+      ].join('\n'))
+    }
   },
 
   '我的宗门': async (id, user_id, Text) => {
@@ -708,7 +743,7 @@ const commandHandlers = {
 
 const prefixHandlers = [
   {
-    prefix: /^切磋\s*\d*/,
+    prefix: /^#?切磋\s*\d*/,
     handler: async (id, user_id, Text, msg, at, isMaster) => {
       let id2 = 0
       const _id = (msg.match(/\d+/g) || []).join('')
@@ -795,7 +830,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /^查询修仙者\s*\d*/,
+    prefix: /^#?查询修仙者\s*\d*/,
     handler: async (id, user_id, Text, msg, at) => {
       let query_id
       const _id = (msg.match(/\d+/g) || []).join('')
@@ -837,7 +872,51 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /^加入宗门\s*\d*/,
+    prefix: /^#?查询宗门\s*\d*/,
+    handler: async (id, user_id, Text, msg, at) => {
+      let query_id
+      let userInfo
+      const _id = (msg.match(/\d+/g) || []).join('')
+      if (at && !Array.isArray(at) && !_id) {
+        const atID = (await xiuxian.init(at)).data.id
+        userInfo = await xiuxian.getUserInfo(atID)
+      } else {
+        query_id = parseInt(_id, 10)
+      }
+      const sectInfo = query_id ? await xiuxian.getSectInfo(query_id) : userInfo.sectInfo
+      if (sectInfo.id !== 0) {
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**宗门信息**',
+          '>宗门ID：' + sectInfo.id,
+          '宗门名称：' + sectInfo.name,
+          '宗门简介：' + sectInfo.desc,
+          '***',
+          '>宗门人数：' + sectInfo.member + ' / ' + sectInfo.max,
+          '宗主ID：' + sectInfo.owner,
+          '***',
+          '>宗门等级：' + sectInfo.level + ' / ' + (Config.sect.sect_level.length),
+          '宗门经验：' + sectInfo.exp + ' / ' + sectInfo.nextExp,
+          '>' + ((sectInfo.nextExp - sectInfo.exp > 0)
+            ? '距离下一级还需' + (sectInfo.nextExp - sectInfo.exp) + '点经验'
+            : '已满足' + (await mqqapi.command('升级', '宗门升级')) + '要求'),
+          '***'
+        ].join('\n'))
+      } else {
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**未找到该宗门**',
+          '>请确认该宗门是否存在或创建',
+          '***'
+        ].join('\n'))
+      }
+      Text.push(Button.sect)
+    }
+  },
+  {
+    prefix: /^#?加入宗门\s*\d*/,
     handler: async (id, user_id, Text, msg, at) => {
       let join_id
       const _id = (msg.match(/\d+/g) || []).join('')
@@ -905,7 +984,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /^(确认)?退出宗门$/,
+    prefix: /^#?(确认)?退出宗门$/,
     handler: async (id, user_id, Text, msg, at) => {
       if (msg.includes("确认")) {
         const value = await xiuxian.exitSect(id)
@@ -952,7 +1031,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /^(确认)?转让宗门\s*\d*/,
+    prefix: /^#?(确认)?转让宗门\s*\d*/,
     handler: async (id, user_id, Text, msg, at) => {
       let transfer_id
       const _id = (msg.match(/\d+/g) || []).join('')
@@ -1018,7 +1097,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /^(全部)?(同意|拒绝)宗门成员\s*\d*/,
+    prefix: /^#?(全部)?(同意|拒绝)宗门成员\s*\d*/,
     handler: async (id, user_id, Text, msg, at) => {
       let audit_id
       const _id = (msg.match(/\d+/g) || []).join('')
@@ -1137,7 +1216,122 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /生成(通用)?兑换码(.*)/,
+    prefix: /^#?宗门供奉\s*\d*/,
+    handler: async (id, user_id, Text, msg) => {
+      const value = await xiuxian.sectEnshrined(id, msg.replace(/#?宗门供奉/, '').trim())
+      const userInfo = await xiuxian.getUserInfo(id)
+      switch (value.event) {
+        case 'sect_enshrined':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门供奉成功**',
+            '>灵石：-' + value.data.addContribution,
+            '宗门经验：+' + value.data.addExp,
+            '宗门贡献：+' + value.data.addContribution,
+            '***'
+          ].join('\n'))
+          break
+        case 'lack_ls':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门供奉失败**',
+            '>你的灵石不足',
+            '供奉灵石数量：' + value.data.ls,
+            '当前灵石：' + userInfo.ls,
+            '***'
+          ].join('\n'))
+          break
+        case 'invalid_lsNum':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门供奉失败**',
+            '>供奉灵石数量格式错误',
+            '供奉灵石需10的倍数且大于0',
+            '正确格式：宗门供奉1000',
+            '***'
+          ].join('\n'))
+          break
+        case 'no_sect':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**你还没加入宗门呢**',
+            '>点击' + (await mqqapi.command('加入宗门')),
+            '***'
+          ].join('\n'))
+          break
+      }
+      Text.push(Button.sect)
+    }
+  },
+  {
+    prefix: /^#?设置性别\s*(男|女)/,
+    handler: async (id, user_id, Text, msg) => {
+      const value = await xiuxian.setSex(id, msg.replace(/#?设置性别/, '').trim())
+      switch (value.event) {
+        case 'set_sex_success':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**性别设置成功**',
+            '>当前性别：' + value.data.sex,
+            '***'
+          ].join('\n'))
+          break
+        case 'invalid_sex':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**性别设置失败**',
+            '>请确认性别是否正确',
+            '***'
+          ].join('\n'))
+          break
+        case 'in_is_sex':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**性别已设置**',
+            '>无法再次设置性别',
+            '***'
+          ].join('\n'))
+          break
+      }
+      Text.push(Button.xiuxian)
+    }
+  },
+  {
+    prefix: /^#?设置称号\s*\d*/,
+    handler: async (id, user_id, Text, msg) => {
+      const value = await xiuxian.setTitle(id, msg.replace(/#?设置称号/, '').trim())
+      switch (value.event) {
+        case 'set_title_success':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**称号设置成功**',
+            '>当前称号：' + value.data.title,
+            '***'
+          ].join('\n'))
+          break
+        case 'invalid_title':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**称号设置失败**',
+            '>请确认称号ID是否存在',
+            '***'
+          ].join('\n'))
+          break
+      }
+      Text.push(Button.xiuxian)
+    }
+  },
+  {
+    prefix: /^#?生成(通用)?兑换码(.*)/,
     handler: async (id, user_id, Text, msg, at, isMaster) => {
       const value = await xiuxian.genCdkey(user_id, msg, isMaster)
       switch (value.event) {
@@ -1167,7 +1361,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /删除(全部)?兑换码/,
+    prefix: /^#?删除(全部)?兑换码/,
     handler: async (id, user_id, Text, msg, at, isMaster) => {
       const value = await xiuxian.delCdkey(user_id, msg.replace(/#?使用兑换码/, '').trim(), isMaster)
       switch (value.event) {
@@ -1206,7 +1400,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /^使用兑换码(.*)/,
+    prefix: /^#?使用兑换码(.*)/,
     handler: async (id, user_id, Text, msg, at) => {
       const value = await xiuxian.useCdkey(id, user_id, msg.replace(/#?使用兑换码/, '').trim())
       switch (value.event) {
@@ -1264,7 +1458,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /^切换ID/,
+    prefix: /^#?切换ID/,
     handler: async (id, user_id, Text, msg, at, isMaster) => {
       let switch_id
       const _id = (msg.match(/\d+/g) || []).join('')
@@ -1350,6 +1544,7 @@ async function buildRank(ranks, index) {
     rankText.push([
       '>**' + (await mqqapi.command('No.' + item.rank + ' => ' + 'ID：' + item.id, '查询修仙者' + item.id)) + '**',
       '**' + index + '：' + ((index === "闭关时间") ? secondsToTimeText(item.value) : item.value) + '**',
+      '**称号：' + item.title + '**',
       '**' + (await mqqapi.command('切磋', '切磋' + item.id)) + '**',
       '***'
     ].join('\n'))

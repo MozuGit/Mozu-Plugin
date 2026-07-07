@@ -1,5 +1,3 @@
-import Redis from '#Redis'
-
 import { RegExp } from "../../model/xiuxian/index.js"
 import { Config } from "../../model/xiuxian/tool/Config/Config.js"
 import { xiuxianText } from "../../model/xiuxian/tool/xiuxianText.js"
