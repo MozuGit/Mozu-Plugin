@@ -160,6 +160,23 @@ const Button = {
       ]
     )
   },
+  get title() {
+    return segment.button(
+      [
+        { text: "设置称号+ID", input: "设置称号" , style: 4 }
+      ],
+      [
+        { text: "我的称号", input: "我的称号" },
+        { text: "修仙排行", input: "修仙排行" }
+      ],
+      [
+        { text: "修炼", input: "修炼" },
+        { text: "开采", input: "开采" },
+        { text: "信息", input: "修仙个人信息" },
+        { text: "签到", input: "修仙签到" }
+      ]
+    )
+  },
   get cdk() {
     return segment.button(
       [

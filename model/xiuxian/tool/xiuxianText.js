@@ -442,6 +442,7 @@ const commandHandlers = {
         '***'
       ].join('\n'))
     }
+    Text.push(Button.title)
   },
 
   '我的宗门': async (id, user_id, Text) => {
@@ -1327,7 +1328,7 @@ const prefixHandlers = [
           ].join('\n'))
           break
       }
-      Text.push(Button.xiuxian)
+      Text.push(Button.title)
     }
   },
   {
