@@ -1278,7 +1278,7 @@ const prefixHandlers = [
             '<@' + user_id + '>',
             '***',
             '**性别设置成功**',
-            '>当前性别：' + value.data.sex,
+            '>性别：' + value.data.sex,
             '***'
           ].join('\n'))
           break
@@ -1398,6 +1398,7 @@ const prefixHandlers = [
           ].join('\n'))
           break
       }
+      Text.push(Button.cdk)
     }
   },
   {

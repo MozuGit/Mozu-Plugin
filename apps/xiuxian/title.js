@@ -60,7 +60,6 @@ export class MozuXiuxianTitle extends plugin {
         } else {
           titleIndex.validTime = Config.title.rankTitle.validDays !== 0 ? nowTime + Config.title.rankTitle.validDays * 86400 : 0
         }
-        logger.info(titleList)
         Redis.hset(`Mozu:xiuxian:playerInfo:${rankList[index].id}`, '称号列表', JSON.stringify(titleList))
         index++
       }

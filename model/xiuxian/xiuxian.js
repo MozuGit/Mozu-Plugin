@@ -60,9 +60,11 @@ export default new class {
     titleIndex = parseInt(titleIndex, 10) || -1
     const title = titleIndex !== -1
       ? titles[titleIndex - 1]?.title
-        ? Math.floor(Date.now() / 1000) - titles[titleIndex - 1].validTime > 0
-          ? '无'
-          : titles[titleIndex - 1].title
+        ? titles[titleIndex - 1].validTime === 0
+          ? titles[titleIndex - 1].title
+          : titles[titleIndex - 1].validTime > Math.floor(Date.now() / 1000)
+            ? titles[titleIndex - 1].title
+            : '无'
         : '无'
       : '无'
 
@@ -465,7 +467,15 @@ export default new class {
           const value = parseInt(results[i][1][0], 10)
           const titleIndex = parseInt(results[i][1][1], 10) || 0
           const titles = JSON.parse(results[i][1][2] || '[]')
-          const title = titles[titleIndex - 1]?.title || '无'
+          const title = titleIndex !== -1
+            ? titles[titleIndex - 1]?.title
+              ? titles[titleIndex - 1].validTime === 0
+                ? titles[titleIndex - 1].title
+                : titles[titleIndex - 1].validTime > Math.floor(Date.now() / 1000)
+                  ? titles[titleIndex - 1].title
+                  : '无'
+              : '无'
+            : '无'
           if (value > 0) {
             players.push({
               id: i,
@@ -482,7 +492,15 @@ export default new class {
           const value = Math.floor(evaluate(Config.xiuxian.powerFormula, { cult: cult, realm: realm }))
           const titleIndex = parseInt(results[i][1][2], 10) || 0
           const titles = JSON.parse(results[i][1][3] || '[]')
-          const title = titles[titleIndex - 1]?.title || '无'
+          const title = titleIndex !== -1
+            ? titles[titleIndex - 1]?.title
+              ? titles[titleIndex - 1].validTime === 0
+                ? titles[titleIndex - 1].title
+                : titles[titleIndex - 1].validTime > Math.floor(Date.now() / 1000)
+                  ? titles[titleIndex - 1].title
+                  : '无'
+              : '无'
+            : '无'
           if (value > 0) {
             players.push({
               id: i,
@@ -498,7 +516,15 @@ export default new class {
           const retreat = parseInt(results[i][1][0], 10)
           const titleIndex = parseInt(results[i][1][1], 10) || 0
           const titles = JSON.parse(results[i][1][2] || '[]')
-          const title = titles[titleIndex - 1]?.title || '无'
+          const title = titleIndex !== -1
+            ? titles[titleIndex - 1]?.title
+              ? titles[titleIndex - 1].validTime === 0
+                ? titles[titleIndex - 1].title
+                : titles[titleIndex - 1].validTime > Math.floor(Date.now() / 1000)
+                  ? titles[titleIndex - 1].title
+                  : '无'
+              : '无'
+            : '无'
           if (retreat > 0) {
             const value = time - retreat
             players.push({

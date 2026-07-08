@@ -5,6 +5,40 @@ export default [
   },
   {
     component: "Divider",
+    label: "修仙重置",
+    componentProps: {
+      type: "horizontal",
+      style: {
+        fontWeight: "bold",
+        color: "rgb(76, 113, 201)",
+        fontSize: "16px"
+      },
+      orientation: "left",
+      plain: true
+    }
+  },
+  {
+    field: 'actions',
+    label: '重置修仙配置',
+    component: 'GButtons',
+    componentProps: {
+      buttons: [
+        {
+          label: '重置',
+          action: 'resetxxConfig',
+          type: 'default',
+          danger: true,
+          icon: "ant-design:delete-filled",
+          confirm: {
+            title: '确认重置',
+            content: '确认重置所有修仙配置吗？此操作不可撤销！'
+          }
+        }
+      ]
+    }
+  },
+  {
+    component: "Divider",
     label: "修仙基础设置",
     componentProps: {
       type: "horizontal",

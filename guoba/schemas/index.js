@@ -1,18 +1,22 @@
 import _ from 'lodash'
+import fs from 'fs/promises'
 import path from 'node:path'
 import { unflatten } from 'flat'
 
+import Redis from '#Redis'
 import { Config } from '../../model/Config/Config.js'
 import { Version } from '../../model/Config/Version.js'
 import { Config as xxConfig } from '../../model/xiuxian/tool/Config/Config.js'
 
-import Redis from './Redis.js'
+import RedisConfig from './Redis.js'
 import xiuxian from './xiuxian.js'
 import makeMessage from './makeMessage.js'
+import xiuxianTools from './xiuxian-tools.js'
 
 export const schemas = [
-  ...Redis,
+  ...RedisConfig,
   ...xiuxian,
+  ...xiuxianTools,
   ...makeMessage
 ]
 
@@ -68,6 +72,13 @@ export function getConfigData() {
       },
       title: {
         rankTitle: xxConfig.title.rankTitle
+      },
+      tools: {
+        title: {
+          title: "默认称号",
+          id: 1,
+          validDay: 0
+        }
       }
     }
   }
@@ -113,4 +124,53 @@ function xiuxianConfig(data) {
   Object.keys(data.xiuxian.title).forEach(key => {
     xxConfig.modify('title', key, data.xiuxian.title[key])
   })
+}
+
+export const actions = {
+  resetxxConfig: async (params, { Result }) => {
+    await fs.cp(path.join(Version.Plugin_Path, 'config', 'xiuxian', 'default'), path.join(Version.Plugin_Path, 'config', 'xiuxian', 'config'), { recursive: true })
+    return Result.ok({}, "重置修仙配置成功喵~")
+  },
+  removeCdk: async (cdks, { Result }) => {
+    logger.info(Result.toString())
+    if (!cdks[0] || cdks[0] === "[object Object]") return Result.error("未选中兑换码")
+    const pipeline = Redis.pipeline()
+    for (const cdk of cdks) {
+      pipeline.del(`Mozu:xiuxian:cdk:${cdk}`)
+    }
+    await pipeline.exec()
+    return Result.ok({}, "删除兑换码成功")
+  },
+  addTitle: async (params, { Result }) => {
+    let [title, id, validDay] = params
+    if (!title || !id || !validDay) return Result.error("参数缺失")
+    validDay = parseInt(validDay, 10)
+    if ((await Redis.exists(`Mozu:xiuxian:playerInfo:${id}`)) === 0) return Result.error("修仙ID不存在")
+    const nowTime = Math.floor(Date.now() / 1000)
+    let titleList = JSON.parse(await Redis.hget(`Mozu:xiuxian:playerInfo:${id}`, '称号列表') || '[]')
+    const titleIndex = titleList.find(item => item.title === title)
+    if (titleIndex) {
+      titleIndex.validTime = validDay !== 0 ? nowTime + validDay * 86400 : 0
+    } else {
+      titleList.push({ title: title, getTime: nowTime, validTime: validDay !== 0 ? nowTime + validDay * 86400 : 0 })
+    }
+    await Redis.hset(`Mozu:xiuxian:playerInfo:${id}`, '称号列表', JSON.stringify(titleList))
+    return Result.ok({}, "给予称号成功")
+  }
+}
+
+async function getCdks() {
+  const stream = Redis.scanStream({
+    match: "Mozu:xiuxian:cdk:*",
+    count: 100
+  })
+  const cdks = []
+  for await (const keys of stream) {
+    if (keys.length) {
+      keys.forEach(key => {
+        cdks.push(key.replace("Mozu:xiuxian:cdk:", ""))
+      })
+    }
+  }
+  return cdks
 }
