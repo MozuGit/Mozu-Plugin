@@ -6,7 +6,7 @@ import { unflatten } from 'flat'
 import Redis from '#Redis'
 import { Config } from '../../model/Config/Config.js'
 import { Version } from '../../model/Config/Version.js'
-import { Config as xxConfig } from '../../model/xiuxian/tool/Config/Config.js'
+import { Config as xxConfig } from '../../model/xiuxian/tools/Config/Config.js'
 
 import RedisConfig from './Redis.js'
 import xiuxian from './xiuxian.js'

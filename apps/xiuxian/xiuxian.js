@@ -1,6 +1,6 @@
 import { RegExp } from "../../model/xiuxian/index.js"
-import { Config } from "../../model/xiuxian/tool/Config/Config.js"
-import { xiuxianText } from "../../model/xiuxian/tool/xiuxianText.js"
+import { Config } from "../../model/xiuxian/tools/Config/Config.js"
+import { xiuxianText } from "../../model/xiuxian/tools/xiuxianText.js"
 
 export class MozuXiuxian extends plugin {
   constructor() {

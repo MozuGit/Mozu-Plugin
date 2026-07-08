@@ -2,7 +2,7 @@ import Redis from "#Redis"
 import randomInt from "#randomInt"
 import crypto from 'crypto'
 import { evaluate } from "mathjs"
-import { Config } from "./tool/Config/Config.js"
+import { Config } from "./tools/Config/Config.js"
 
 const PLAYER_INFO_KEY = "Mozu:xiuxian:playerInfo"
 const SECT_INFO_KEY = "Mozu:xiuxian:sectInfo"

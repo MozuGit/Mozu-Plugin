@@ -1,6 +1,6 @@
 import help from '../../model/xiuxian/help.js'
-import { mqqapi, qagent } from "../../model/xiuxian/tool/protocol.js"
-import { Config } from "../../model/xiuxian/tool/Config/Config.js"
+import { mqqapi, qagent } from "../../model/xiuxian/tools/protocol.js"
+import { Config } from "../../model/xiuxian/tools/Config/Config.js"
 import { Button } from "../../model/xiuxian/index.js"
 
 export class MozuXiuxianHelp extends plugin {

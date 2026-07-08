@@ -1,4 +1,4 @@
-import { Config } from "./tool/Config/Config.js"
+import { Config } from "./tools/Config/Config.js"
 
 const prefix = Config.setting.forceSharp ? '^#' : '^#?'
 

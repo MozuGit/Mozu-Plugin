@@ -1,4 +1,4 @@
-import { Config } from "../../model/xiuxian/tool/Config/Config.js"
+import { Config } from "../../model/xiuxian/tools/Config/Config.js"
 import { xiuxian } from "../../model/xiuxian/index.js"
 
 export class MozuXiuxianTitle extends plugin {

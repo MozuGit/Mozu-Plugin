@@ -1,7 +1,7 @@
 import Redis from "#Redis"
 import { Version } from "../model/Config/Version.js"
 import { Config } from "../model/Config/Config.js"
-import { mqqapi, qagent } from "../model/xiuxian/tool/protocol.js"
+import { mqqapi, qagent } from "../model/xiuxian/tools/protocol.js"
 
 global.Mozu = {
   pluginInfo: {
