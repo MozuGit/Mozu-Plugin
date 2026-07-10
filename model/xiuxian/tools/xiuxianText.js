@@ -1457,6 +1457,7 @@ const prefixHandlers = [
           ].join('\n'))
           break
       }
+      Text.push(Button.xiuxian)
     }
   },
   {
@@ -1535,7 +1536,7 @@ async function buildRealmInfo(userInfo) {
     (userInfo.realm.realmNeedExp === -1
       ? '>你的境界已达世界极限'
       : '距离下一境界：' + (userInfo.realm.realmNeedExp === 0
-        ? '已满足' + (await mqqapi.command('突破')) + '条件'
+        ? '已满足' + (await mqqapi.command('突破', '突破', true)) + '条件'
         : '还需' + userInfo.realm.realmNeedExp + '点修为')),
   ]
 }
