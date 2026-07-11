@@ -243,7 +243,7 @@ export default new class {
     cult = parseInt(cult, 10)
     realm = parseInt(realm, 10)
     const Realms = Config.Realm.Realms
-    if (realm >= Realms.length - 1) {
+    if (realm >= Realms.length) {
       return {
         event: "realm_max"
       }
