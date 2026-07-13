@@ -72,6 +72,10 @@ export function getConfigData() {
         powerFormula: xxConfig.xiuxian.powerFormula
       },
       realm: xxConfig.Realm.Realms,
+      beast: {
+        beasts: xxConfig.beast.beasts,
+        huntBeastCD: xxConfig.beast.huntBeastCD
+      },
       sect: {
         sect_up_reset: xxConfig.sect.sect_up_reset,
         create_sect_ls: xxConfig.sect.create_sect_ls,
@@ -137,6 +141,9 @@ function xiuxianConfig(data) {
   })
   Object.keys(data.xiuxian.title).forEach(key => {
     xxConfig.modify('title', key, data.xiuxian.title[key])
+  })
+  Object.keys(data.xiuxian.beast).forEach(key => {
+    xxConfig.modify('beast', key, data.xiuxian.beast[key])
   })
 }
 

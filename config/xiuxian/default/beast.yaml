@@ -1,0 +1,215 @@
+#猎杀妖兽CD（秒）
+huntBeastCD: 600
+
+#修仙妖兽配置
+beasts:
+  - name: "暗影狼"
+    power: 5000
+    reward:
+      cult: 200
+      ls: 2000
+    punishment:
+      cult: 250
+  - name: "烈焰雀"
+    power: 12000
+    reward:
+      cult: 380
+      ls: 2500
+    punishment:
+      cult: 480
+  - name: "岩石龟"
+    power: 19000
+    reward:
+      cult: 620
+      ls: 3100
+    punishment:
+      cult: 780
+  - name: "毒牙蛛"
+    power: 40000
+    reward:
+      cult: 900
+      ls: 3800
+    punishment:
+      cult: 1100
+  - name: "冰霜蟒"
+    power: 44000
+    reward:
+      cult: 1200
+      ls: 4500
+    punishment:
+      cult: 1450
+  - name: "雷霆豹"
+    power: 60000
+    reward:
+      cult: 1600
+      ls: 5300
+    punishment:
+      cult: 1900
+  - name: "疾风狐"
+    power: 66000
+    reward:
+      cult: 2000
+      ls: 6100
+    punishment:
+      cult: 2400
+  - name: "血瞳蝠"
+    power: 70000
+    reward:
+      cult: 2400
+      ls: 6900
+    punishment:
+      cult: 2900
+  - name: "金甲蝎"
+    power: 77777
+    reward:
+      cult: 2800
+      ls: 7700
+    punishment:
+      cult: 3400
+  - name: "古木灵"
+    power: 88888
+    reward:
+      cult: 3300
+      ls: 8600
+    punishment:
+      cult: 4000
+  - name: "碧水蜥"
+    power: 100000
+    reward:
+      cult: 3800
+      ls: 9500
+    punishment:
+      cult: 4600
+  - name: "赤火猿"
+    power: 114514
+    reward:
+      cult: 4300
+      ls: 10400
+    punishment:
+      cult: 5200
+  - name: "厚土熊"
+    power: 128888
+    reward:
+      cult: 4900
+      ls: 11400
+    punishment:
+      cult: 5900
+  - name: "暗夜枭"
+    power: 158888
+    reward:
+      cult: 5500
+      ls: 12400
+    punishment:
+      cult: 6600
+  - name: "白银蚁"
+    power: 188888
+    reward:
+      cult: 6100
+      ls: 13400
+    punishment:
+      cult: 7300
+  - name: "苍穹鹰"
+    power: 222222
+    reward:
+      cult: 6800
+      ls: 14500
+    punishment:
+      cult: 8100
+  - name: "赤焰蛟"
+    power: 333333
+    reward:
+      cult: 7500
+      ls: 15600
+    punishment:
+      cult: 8900
+  - name: "玄冥蜂"
+    power: 444444
+    reward:
+      cult: 8200
+      ls: 16700
+    punishment:
+      cult: 9700
+  - name: "白玉鹿"
+    power: 555555
+    reward:
+      cult: 8888
+      ls: 17800
+    punishment:
+      cult: 9999
+  - name: "墨鳞蛟"
+    power: 666666
+    reward:
+      cult: 8888
+      ls: 18900
+    punishment:
+      cult: 9999
+  - name: "暗夜影狼"
+    power: 777777
+    reward:
+      cult: 8888
+      ls: 20000
+    punishment:
+      cult: 9999
+  - name: "烈焰神雀"
+    power: 888888
+    reward:
+      cult: 8888
+      ls: 21100
+    punishment:
+      cult: 9999
+  - name: "太古岩龟"
+    power: 999999
+    reward:
+      cult: 8888
+      ls: 22200
+    punishment:
+      cult: 9999
+  - name: "毒皇蛛后"
+    power: 1288888
+    reward:
+      cult: 8888
+      ls: 23300
+    punishment:
+      cult: 9999
+  - name: "冰晶天蟒"
+    power: 1314520
+    reward:
+      cult: 8888
+      ls: 24400
+    punishment:
+      cult: 9999
+  - name: "九霄雷豹"
+    power: 1444444
+    reward:
+      cult: 8888
+      ls: 25500
+    punishment:
+      cult: 9999
+  - name: "幻影风狐"
+    power: 1666666
+    reward:
+      cult: 8888
+      ls: 26600
+    punishment:
+      cult: 9999
+  - name: "血月魔蝠"
+    power: 1888888
+    reward:
+      cult: 8888
+      ls: 27700
+    punishment:
+      cult: 9999
+  - name: "黄金圣蝎"
+    power: 2333333
+    reward:
+      cult: 8888
+      ls: 28800
+    punishment:
+      cult: 9999
+  - name: "苍穹墨蛟"
+    power: 2888888
+    reward:
+      cult: 8888
+      ls: 30000
+    punishment:
+      cult: 9999

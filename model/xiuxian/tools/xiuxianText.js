@@ -445,6 +445,29 @@ const commandHandlers = {
     Text.push(Button.title)
   },
 
+  '妖兽列表': async (id, user_id, Text) => {
+    const beasts = Config.beast.beasts
+    let beastText = []
+    let i = 1
+    for (let beast of beasts) {
+      beastText.push([
+        '>妖兽ID：' + i,
+        '名称：' + beast.name,
+        '战力：' + beast.power,
+        (await mqqapi.command('查看妖兽', '查看妖兽' + i, true)) + '  ' + (await mqqapi.command('猎杀妖兽', '猎杀妖兽' + i, true)),
+        '***'
+      ].join('\n'))
+      i++
+    }
+    Text.push([
+      '<@' + user_id + '>',
+      '***',
+      '**妖兽列表**',
+      ...beastText
+    ].join('\n'))
+    Text.push(Button.beast)
+  },
+
   '我的宗门': async (id, user_id, Text) => {
     const userInfo = await xiuxian.getUserInfo(id)
     if (userInfo.sectInfo.id !== 0) {
@@ -870,6 +893,115 @@ const prefixHandlers = [
         ].join('\n'))
       }
       Text.push(Button.xiuxian)
+    }
+  },
+  {
+    prefix: /^#?查看妖兽\s*\d*/,
+    handler: async (id, user_id, Text, msg, at) => {
+      const beast_id = parseInt(msg.match(/^#?查看妖兽\s*(\d*)/)?.[1], 10)
+      const beastInfo = Config.beast.beasts[beast_id - 1]
+      if (!beastInfo) {
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**妖兽ID不存在**',
+          '>请确认妖兽ID是否正确',
+          '***'
+        ].join('\n'))
+      } else {
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**妖兽信息**',
+          '>妖兽ID：' + beast_id,
+          '名称：' + beastInfo.name,
+          '战力：' + beastInfo.power,
+          (await mqqapi.command('猎杀妖兽', '猎杀妖兽' + beast_id, true)) + '  ' + (await mqqapi.command('妖兽列表', '妖兽列表', true)),
+          '***',
+          '**奖励**',
+          '>胜利奖励：' + beastInfo.reward.cult + '点修为+' + beastInfo.reward.ls + '灵石',
+          '***',
+          '**惩罚**',
+          '>失败惩罚：' + '扣除' + beastInfo.punishment.cult + '点修为',
+          '***'
+        ].join('\n'))
+      }
+      Text.push(Button.beast)
+    }
+  },
+  {
+    prefix: /^#?猎杀妖兽\s*\d*/,
+    handler: async (id, user_id, Text, msg, at, isMaster) => {
+      const beast_id = parseInt(msg.match(/^#?猎杀妖兽\s*(\d*)/)?.[1], 10)
+      const beastInfo = Config.beast.beasts[beast_id - 1]
+      if (!beastInfo) {
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**妖兽ID不存在**',
+          '>请确认妖兽ID是否正确',
+          '***'
+        ].join('\n'))
+      } else {
+        const value = await xiuxian.huntBeast(id, beastInfo, isMaster)
+        const power = await xiuxian.getPower(id)
+        switch (value.event) {
+          case 'hunt_beast':
+            Text.push([
+              '<@' + user_id + '>',
+              '***',
+              '**战斗开始**',
+              '>正在前往猎杀妖兽  ' + (await mqqapi.command(beastInfo.name, '查看妖兽' + beast_id, true)),
+              '***',
+              '**猎杀情况**',
+              '>你的战力：' + power,
+              '妖兽战力：' + beastInfo.power,
+              '猎杀成功概率：' + value.data.winRate + '%',
+              '***'
+            ].join('\n'))
+            switch (value.data.state) {
+              case 'success':
+                Text.push([
+                  '<@' + user_id + '>',
+                  '***',
+                  '**战斗结束**',
+                  '>你成功击杀了妖兽' + (await mqqapi.command(beastInfo.name, '查看妖兽' + beast_id, true)) + '！',
+                  '***',
+                  '**奖励结算**',
+                  '>获得修为：' + beastInfo.reward.cult,
+                  '获得灵石：' + beastInfo.reward.ls,
+                  '***'
+                ].join('\n'))
+                break
+              case 'failure':
+                Text.push([
+                  '<@' + user_id + '>',
+                  '***',
+                  '**战斗结束**',
+                  '>你被妖兽' + (await mqqapi.command(beastInfo.name, '查看妖兽' + beast_id, true)) + '击败了！',
+                  '***',
+                  '**惩罚结算**',
+                  '>损失修为：' + beastInfo.punishment.cult,
+                  '***'
+                ].join('\n'))
+                break
+            }
+            break
+          case 'hunt_beast_cd':
+            Text.push([
+              '<@' + user_id + '>',
+              '***',
+              '**当前正在CD中...**',
+              '>剩余：' + value.data.outTime + '秒',
+              '***',
+            ].join('\n'))
+            break
+          case 'in_retreat':
+            Text.push(await retreatText())
+            break
+        }
+      }
+      Text.push(Button.beast)
     }
   },
   {

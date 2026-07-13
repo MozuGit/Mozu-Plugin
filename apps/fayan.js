@@ -39,7 +39,7 @@ export class MozuFayan extends plugin {
   }
 
   async fayan(e) {
-    if (!Config.fayan.enable || !this.e.group || !this.e.isMaster) return false
+    if (!Config.fayan.enable || !this.e.group) return false
     const type = this.e.msg.match(/^#?发言榜(日榜|月榜|周榜|昨日|上周)?$/)?.[1] || "日榜"
     let date
     switch (type) {
@@ -66,6 +66,7 @@ export class MozuFayan extends plugin {
       Redis.zrevrank(key, this.e.user_id)
     ])
     const userIds = list.filter((_, i) => i % 2 === 0)
+    if (userIds.length === 0) return false
     const names = await Redis.hmget(`Mozu:username`, ...userIds)
     let message
     let msg = []

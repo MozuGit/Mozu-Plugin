@@ -564,6 +564,64 @@ export default new class {
     }
   }
 
+  async huntBeast(id, beastInfo, isMaster) {
+    let [cult, ls, last, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '灵石', '上次猎杀妖兽时间', '闭关时间')
+    cult = parseInt(cult, 10),
+    ls = parseInt(ls, 10)
+    last = parseInt(last, 10) || 0
+    retreatStart = parseInt(retreatStart, 10) || 0
+    if (retreatStart !== 0) {
+      return {
+        event: "in_retreat"
+      }
+    }
+    if (Math.floor(Date.now() / 1000) - last <= Config.beast.huntBeastCD && !(isMaster && Config.setting.master_no_cd)) {
+      const outTime = Config.beast.huntBeastCD - (Math.floor(Date.now() / 1000) - last)
+      return {
+        event: "hunt_beast_cd",
+        data: {
+          outTime
+        }
+      }
+    }
+    const power = await this.getPower(id)
+    const baseWinRate = power / (power + beastInfo.power)
+    const randomFactor = 0.95 + Math.random() * 0.1
+    let finalWinRate = baseWinRate * randomFactor
+    finalWinRate = Math.max(0.01, Math.min(0.99, finalWinRate))
+    const roll = Math.random()
+    const isWin = roll < finalWinRate
+    if (isWin) {
+      cult += beastInfo.reward.cult
+      ls += beastInfo.reward.ls
+      Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
+        修为: cult,
+        灵石: ls,
+        上次猎杀妖兽时间: Math.floor(Date.now() / 1000)
+      })
+      return {
+        event: "hunt_beast",
+        data: {
+          state: "success",
+          winRate: (finalWinRate * 100).toFixed(2)
+        }
+      }
+    } else {
+      cult += beastInfo.punishment.cult
+      Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
+        修为: cult,
+        上次猎杀妖兽时间: Math.floor(Date.now() / 1000)
+      })
+      return {
+        event: "hunt_beast",
+        data: {
+          state: "failure",
+          winRate: (finalWinRate * 100).toFixed(2)
+        }
+      }
+    }
+  }
+
   async createSect(id) {
     let [ls, sectId, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '宗门ID', '闭关时间')
     ls = parseInt(ls, 10)

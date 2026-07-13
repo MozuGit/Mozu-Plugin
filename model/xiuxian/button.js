@@ -150,6 +150,32 @@ const Button = {
       ]
     )
   },
+  get beast() {
+    return segment.button(
+      [
+        { text: "猎杀妖兽+编号", input: prefix + "猎杀妖兽" },
+        { text: "查看妖兽+编号", input: prefix + "查看妖兽" }
+      ],
+      [
+        { text: "修炼", input: prefix + "修炼" },
+        { text: "开采", input: prefix + "开采" },
+        { text: "信息", input: prefix + "修仙个人信息" },
+        { text: "签到", input: prefix + "修仙签到" }
+      ],
+      [
+        { text: "切磋", input: prefix + "切磋" },
+        { text: "妖兽", input: prefix + "妖兽列表" },
+        { text: "闭关", input: prefix + "开始闭关" },
+        { text: "出关", input: prefix + "结束闭关" }
+      ],
+      [
+        { text: "突破", input: prefix + "突破" },
+        { text: "称号", input: prefix + "我的称号" },
+        { text: "查询", input: prefix + "查询修仙者" },
+        { text: "宗门", input: prefix + "我的宗门" }
+      ]
+    )
+  },
   get rank() {
     return segment.button(
       [

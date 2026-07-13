@@ -411,7 +411,6 @@ export default [
   {
     field: "xiuxian.realm",
     label: "修仙境界配置",
-    helpMessage: "修改后需要重启才能生效",
     component: "GSubForm",
     componentProps: {
       multiple: true,
@@ -470,6 +469,147 @@ export default [
         }
       ]
     }
+  },
+  {
+    component: "Divider",
+    label: "修仙妖兽设置",
+    componentProps: {
+      type: "horizontal",
+      style: {
+        fontWeight: "bold",
+        color: "rgb(76, 113, 201)",
+        fontSize: "16px"
+      },
+      orientation: "left",
+      plain: true
+    }
+  },
+  {
+    field: "xiuxian.beast.huntBeastCD",
+    label: "猎杀妖兽CD",
+    bottomHelpMessage: "猎杀妖兽的冷却时间（单位：秒）",
+    component: "InputNumber",
+    componentProps: {
+      placeholder: "请输入猎杀妖兽CD",
+      min: 0,
+      step: 10,
+      style: {
+        width: "180px"
+      }
+    },
+    required: true
+  },
+  {
+    field: "xiuxian.beast.beasts",
+    label: "修仙妖兽配置",
+    component: "GSubForm",
+    componentProps: {
+      multiple: true,
+      schemas: [
+        {
+          field: "name",
+          label: "妖兽名称",
+          component: "Input",
+          bottomHelpMessage: "修仙妖兽名称",
+          componentProps: {
+            placeholder: "请输入妖兽名称"
+          },
+          required: true
+        },
+        {
+          field: "power",
+          label: "妖兽战力",
+          bottomHelpMessage: "妖兽战力",
+          component: "InputNumber",
+          componentProps: {
+            placeholder: "请输入妖兽战力",
+            min: 0,
+            step: 100,
+            style: {
+              width: "180px"
+            }
+          },
+          required: true
+        },
+        {
+          field: "reward",
+          label: "成功奖励",
+          bottomHelpMessage: "猎杀妖兽成功的奖励",
+          component: "GSubForm",
+          componentProps: {
+            modalProps: {
+              title: "猎杀妖兽成功的奖励"
+            },
+            style: {
+              maxHeight: "200px",
+              overflowY: "auto"
+            },
+            schemas: [
+              {
+                field: "cult",
+                label: "获得修为",
+                component: "InputNumber",
+                componentProps: {
+                  placeholder: "请输入修为",
+                  min: 0,
+                  step: 100,
+                  style: {
+                    width: "180px"
+                  }
+                },
+                required: true
+              },
+              {
+                field: "ls",
+                label: "获得灵石",
+                component: "InputNumber",
+                componentProps: {
+                  placeholder: "请输入灵石",
+                  min: 0,
+                  step: 100,
+                  style: {
+                    width: "180px"
+                  }
+                },
+                required: true
+              }
+            ]
+          }
+        },
+        {
+          field: "punishment",
+          label: "失败惩罚",
+          bottomHelpMessage: "猎杀妖兽失败的惩罚",
+          component: "GSubForm",
+          componentProps: {
+            modalProps: {
+              title: "猎杀妖兽失败的惩罚"
+            },
+            style: {
+              maxHeight: "200px",
+              overflowY: "auto"
+            },
+            schemas: [
+              {
+                field: "cult",
+                label: "扣除修为",
+                component: "InputNumber",
+                componentProps: {
+                  placeholder: "请输入修为",
+                  min: 0,
+                  step: 100,
+                  style: {
+                    width: "180px"
+                  }
+                },
+                required: true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    required: true
   },
   {
     component: "Divider",
@@ -602,8 +742,7 @@ export default [
                 required: true
               }
             ]
-          },
-          required: true
+          }
         }
       ]
     },
