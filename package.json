@@ -1,11 +1,11 @@
 {
   "name": "Mozu-Plugin",
-  "version": "1.1.1",
-  "description": "TRSS-Yunzai插件",
+  "version": "1.1.2",
+  "description": "适用于TRSS-Yunzai的插件，主要功能有修仙、伪造聊天、发言统计等",
   "main": "index.js",
   "type": "module",
   "icon": "./Mo.png",
-  "author": "魔族陌",
+  "author": "@MozuGit",
   "license": "GPL-3.0-only",
   "repository": {
     "type": "git",

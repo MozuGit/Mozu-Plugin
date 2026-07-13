@@ -12,12 +12,14 @@ import RedisConfig from './Redis.js'
 import xiuxian from './xiuxian.js'
 import makeMessage from './makeMessage.js'
 import xiuxianTools from './xiuxian-tools.js'
+import fayan from './fayan.js'
 
 export const schemas = [
   ...RedisConfig,
   ...xiuxian,
   ...xiuxianTools,
-  ...makeMessage
+  ...makeMessage,
+  ...fayan
 ]
 
 export function getConfigData() {
@@ -36,6 +38,11 @@ export function getConfigData() {
       onlyMaster: Config.makeMessage.onlyMaster,
       whiteQQList: Config.makeMessage.whiteQQList,
       repeatCount: Config.makeMessage.repeatCount
+    },
+    fayan: {
+      enable: Config.fayan.enable,
+      sendMarkdown: Config.fayan.sendMarkdown,
+      count: Config.fayan.count
     },
     xiuxian: {
       setting: {
@@ -88,6 +95,7 @@ export function setConfigData(data, { Result }) {
   const nested = unflatten(data)
   redisConfig(nested)
   makeMessageConfig(nested)
+  fayanConfig(nested)
   xiuxianConfig(nested)
   return Result.ok({}, "保存成功喵~")
 }
@@ -101,6 +109,12 @@ function redisConfig(data) {
 function makeMessageConfig(data) {
   Object.keys(data.makeMessage).forEach(key => {
     Config.modify('makeMessage', key, data.makeMessage[key])
+  })
+}
+
+function fayanConfig(data) {
+  Object.keys(data.fayan).forEach(key => {
+    Config.modify('fayan', key, data.fayan[key])
   })
 }
 

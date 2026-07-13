@@ -18,5 +18,8 @@ export const Version = {
   },
   get Plugin_Version() {
     return pkg.version
+  },
+  get Plugin_pkg() {
+    return pkg
   }
 }
