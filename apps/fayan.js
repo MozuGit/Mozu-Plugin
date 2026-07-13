@@ -26,7 +26,7 @@ export class MozuFayan extends plugin {
   }
 
   async accept(e) {
-    if (!Config.fayan.enable || !this.e.group || !this.e.isMaster) return false
+    if (!Config.fayan.enable || !this.e.group) return false
     let date = await gettoday()
     let month = await getmonth()
     let week = await getweek()
