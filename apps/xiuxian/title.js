@@ -1,11 +1,12 @@
 import { Config } from "../../model/xiuxian/tools/Config/Config.js"
 import { xiuxian } from "../../model/xiuxian/index.js"
+import Redis from "#Redis"
 
 export class MozuXiuxianTitle extends plugin {
   constructor() {
     super({
-      name: '修仙排行榜定时称号',
-      dsc: '根据修仙排行榜排名定时发放称号',
+      name: '修仙称号',
+      dsc: '修仙定时称号',
       event: 'message',
       priority: Config.setting.priority,
       task: [
@@ -13,6 +14,11 @@ export class MozuXiuxianTitle extends plugin {
           cron: Config.title.rankTitle.cron || "0 0 0 ? * 1",
           name: "修仙排行榜定时发放称号",
           fnc: () => this.cronTitle()
+        },
+        {
+          cron: Config.title.cleanTitle.cron || "0 0 0 * * *",
+          name: "定时清理过期称号",
+          fnc: () => this.cleanTitle()
         }
       ]
     })
@@ -52,6 +58,7 @@ export class MozuXiuxianTitle extends plugin {
         titleList = JSON.parse(titleList[1] || '[]')
         titleLists.push(titleList)
       }
+      const updatePipeline = Redis.pipeline()
       for (let title of titles) {
         let titleList = titleLists[index]
         const titleIndex = titleList.find(item => item.title === title)
@@ -60,9 +67,46 @@ export class MozuXiuxianTitle extends plugin {
         } else {
           titleIndex.validTime = Config.title.rankTitle.validDays !== 0 ? nowTime + Config.title.rankTitle.validDays * 86400 : 0
         }
-        Redis.hset(`Mozu:xiuxian:playerInfo:${rankList[index].id}`, '称号列表', JSON.stringify(titleList))
+        updatePipeline.hset(`Mozu:xiuxian:playerInfo:${rankList[index].id}`, '称号列表', JSON.stringify(titleList))
+        updatePipeline.sadd('Mozu:xiuxian:title:owners', rankList[index].id)
         index++
       }
+      await updatePipeline.exec()
     }
+  }
+
+  async cleanTitle(e) {
+    if (!Config.setting.enable) return false
+    const nowTime = Math.floor(Date.now() / 1000)
+    const ids = await Redis.smembers('Mozu:xiuxian:title:owners')
+    if (ids.length === 0) return
+    const pipeline = Redis.pipeline()
+    for (const id of ids) {
+      pipeline.hmget(`Mozu:xiuxian:playerInfo:${id}`, '称号', '称号列表')
+    }
+    const results = await pipeline.exec()
+    const updatePipeline = Redis.pipeline()
+    results.forEach(([err, data], index) => {
+      const id = ids[index]
+      let titleIndex = parseInt(data[0], 10)
+      if (isNaN(titleIndex) || titleIndex < 0) titleIndex = -1
+      const titleLists = JSON.parse(data[1] || '[]')
+      const indexes = titleLists.reduce((acc, title, index) => {
+        if (title.validTime !== 0 && title.validTime <= nowTime) acc.push(index)
+        return acc
+      }, [])
+      if (indexes.includes(titleIndex - 1)) titleIndex = -1
+      for (let i = indexes.length - 1; i >= 0; i--) {
+        titleLists.splice(indexes[i], 1)
+      }
+      updatePipeline.hmset(`Mozu:xiuxian:playerInfo:${id}`, {
+        称号: titleIndex,
+        称号列表: JSON.stringify(titleLists)
+      })
+      if (titleLists.length === 0) {
+        updatePipeline.srem('Mozu:xiuxian:title:owners', id)
+      }
+    })
+    await updatePipeline.exec()
   }
 }

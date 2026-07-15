@@ -82,7 +82,8 @@ export function getConfigData() {
         sect_level: xxConfig.sect.sect_level
       },
       title: {
-        rankTitle: xxConfig.title.rankTitle
+        rankTitle: xxConfig.title.rankTitle,
+        cleanTitle: xxConfig.title.cleanTitle
       },
       tools: {
         title: {
@@ -153,7 +154,6 @@ export const actions = {
     return Result.ok({}, "重置修仙配置成功喵~")
   },
   removeCdk: async (cdks, { Result }) => {
-    logger.info(Result.toString())
     if (!cdks[0] || cdks[0] === "[object Object]") return Result.error("未选中兑换码")
     const pipeline = Redis.pipeline()
     for (const cdk of cdks) {
@@ -176,6 +176,7 @@ export const actions = {
       titleList.push({ title: title, getTime: nowTime, validTime: validDay !== 0 ? nowTime + validDay * 86400 : 0 })
     }
     await Redis.hset(`Mozu:xiuxian:playerInfo:${id}`, '称号列表', JSON.stringify(titleList))
+    await Redis.sadd('Mozu:xiuxian:title:owners', id)
     return Result.ok({}, "给予称号成功")
   }
 }

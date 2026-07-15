@@ -841,5 +841,30 @@ export default [
         }
       ]
     }
+  },
+  {
+    field: "xiuxian.title.cleanTitle",
+    label: "清理过期称号配置",
+    component: "GSubForm",
+    componentProps: {
+      modalProps: {
+        title: "清理过期称号配置"
+      },
+      style: {
+        overflowY: "auto"
+      },
+      schemas: [
+        {
+          field: "cron",
+          label: "定时清理cron",
+          bottomHelpMessage: "定时清理过期称号cron",
+          component: "EasyCron",
+          componentProps: {
+            placeholder: "*表示任意，?表示不指定（月日和星期互斥）"
+          },
+          required: true
+        }
+      ]
+    }
   }
 ]
