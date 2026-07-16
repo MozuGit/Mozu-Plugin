@@ -26,10 +26,9 @@ export const mqqapi = new class {
   * 
   * @param {string} peerUid QQ的Uid
   * @param {string} peerName 显示文本
-  * @param {string} text Markdown不支持该渲染默认显示
   * @returns 返回qagent格式文本
 */
-async function qagent(peerUid, peerName, text = peerName) {
+async function qagent(peerUid = "u_KX6qPA4vv-EbmUhf0enyNg", peerName = "魔族陌") {
   const result = `[${peerName}](qagent://markdown/node?type=quser&peerUid=${peerUid}&peerName=${peerName})`
   return result
 }

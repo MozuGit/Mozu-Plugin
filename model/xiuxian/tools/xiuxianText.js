@@ -26,7 +26,7 @@ async function xiuxianText(msg, user_id, at, isMaster) {
         '<@' + user_id + '>',
         '***',
         '**功能开发中，即将上线**',
-        '>催一催作者：' + (await qagent('u_KX6qPA4vv-EbmUhf0enyNg', '魔族陌', '3343712589')),
+        '>催一催作者：' + (await qagent(Config.setting.contact.peerUid, Config.setting.contact.peerName)),
         '***',
       ].join('\n'))
       Text.push(Button.author)
@@ -37,7 +37,7 @@ async function xiuxianText(msg, user_id, at, isMaster) {
       '<@' + user_id + '>',
       '***',
       '**系统错误，请稍后重试**',
-      '>联系主人：' + (await qagent('u_KX6qPA4vv-EbmUhf0enyNg', '魔族陌', '3343712589')),
+      '>联系主人：' + (await qagent(Config.setting.contact.peerUid, Config.setting.contact.peerName)),
       '***',
     ].join('\n'))
   }

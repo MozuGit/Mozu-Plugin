@@ -27,3 +27,8 @@ cronBackup: 0 0 * * * *
 
 #修仙备份文件上限
 maxBackupFile: 10
+
+#联系主人
+contact:
+  peerUid: u_KX6qPA4vv-EbmUhf0enyNg
+  peerName: 魔族陌

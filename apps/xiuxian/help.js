@@ -27,7 +27,7 @@ export class MozuXiuxianHelp extends plugin {
     }
     const message = [
       '##✨修仙帮助',
-      '>联系主人：' + (await qagent('u_KX6qPA4vv-EbmUhf0enyNg', '魔族陌', '3343712589')),
+      '>联系主人：' + (await qagent(Config.setting.contact.peerUid, Config.setting.contact.peerName)),
       '修仙指令帮助，bug反馈请联系主人',
       '***',
       '**🎉基础指令**',

@@ -95,6 +95,40 @@ export default [
     }
   },
   {
+    field: "xiuxian.setting.contact",
+    label: "联系主人",
+    component: "GSubForm",
+    componentProps: {
+      modalProps: {
+        title: "联系主人"
+      },
+      style: {
+        maxHeight: "200px",
+        overflowY: "auto"
+      },
+      schemas: [
+        {
+          field: "peerUid",
+          label: "QQUid",
+          bottomHelpMessage: "QQUid不是QQ号",
+          component: "Input",
+          componentProps: {
+            placeholder: "请输入QQUid"
+          }
+        },
+        {
+          field: "peerName",
+          label: "外显文本",
+          bottomHelpMessage: "显示文本",
+          component: "Input",
+          componentProps: {
+            placeholder: "请输入文本"
+          }
+        }
+      ]
+    }
+  },
+  {
     field: "xiuxian.setting.master_no_cd",
     label: "主人不受冷却限制",
     bottomHelpMessage: "主人不受任何冷却限制",
