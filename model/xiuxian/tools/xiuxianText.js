@@ -153,7 +153,7 @@ const commandHandlers = {
           '<@' + user_id + '>',
           '***',
           '**准备突破**',
-          '>**当前突破成功率：' + value.data.rate + '%**',
+          '>**突破成功率：' + value.data.rate + '%**',
           '***',
         ].join('\n'))
         if (value.data.state === "success") {
@@ -165,6 +165,8 @@ const commandHandlers = {
             '***',
             ...(await buildRealmInfo(userInfo)),
             '***',
+            '**' + (await mqqapi.command('突破太慢？试试一键突破', '一键突破', true)) + '**',
+            '***'
           ].join('\n'))
         } else if (value.data.state === "failed") {
           Text.push([
@@ -175,6 +177,8 @@ const commandHandlers = {
             '***',
             ...(await buildRealmInfo(userInfo)),
             '***',
+            '**' + (await mqqapi.command('突破太慢？试试一键突破', '一键突破', true)) + '**',
+            '***'
           ].join('\n'))
         }
         break
@@ -186,7 +190,7 @@ const commandHandlers = {
           '>**你的修为还不足以突破**',
           '***',
           ...(await buildRealmInfo(userInfo)),
-          '***',
+          '***'
         ].join('\n'))
         break
       case 'in_retreat':
@@ -202,6 +206,66 @@ const commandHandlers = {
           ...(await buildRealmInfo(userInfo)),
           '***',
         ].join('\n'))
+        break
+    }
+    Text.push(Button.xiuxian)
+  },
+
+  '一键突破': async (id, user_id, Text) => {
+    const value = await xiuxian.realmUp(id, true)
+    const userInfo = await xiuxian.getUserInfo(id)
+    const realmUpInfoText = []
+    switch (value.event) {
+      case 'realm_up_all':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**准备一键突破**',
+          '>**突破成功率：未知**',
+          '***',
+        ].join('\n'))
+        for (const realmUpInfo of value.data.realmUpInfo) {
+          switch (realmUpInfo.state) {
+            case 'success':
+              realmUpInfoText.push('>突破成功  境界提升到：' + realmUpInfo.realm)
+              break
+            case 'failed':
+              realmUpInfoText.push('>突破失败  次数：' + realmUpInfo.count + '修为：-' + realmUpInfo.failed_cult)
+              break
+            case 'cult_lack':
+              realmUpInfoText.push('>修为不足  还需' + (realmUpInfo.value - userInfo.cult) + '点修为')
+              break
+            case 'realm_max':
+              realmUpInfoText.push('>境界已达世界极限')
+              break
+          }
+        }
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**一键突破结果**',
+          '>境界：' + userInfo.realm.realmName,
+          '***',
+          '**突破过程**',
+          ...realmUpInfoText,
+          '***',
+          ...(await buildRealmInfo(userInfo)),
+          '***',
+        ].join('\n'))
+        break
+      case 'realm_max':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**你的境界已达世界极限**',
+          '>**无法再次突破**',
+          '***',
+          ...(await buildRealmInfo(userInfo)),
+          '***',
+        ].join('\n'))
+        break
+      case 'in_retreat':
+        Text.push(await retreatText())
         break
     }
     Text.push(Button.xiuxian)

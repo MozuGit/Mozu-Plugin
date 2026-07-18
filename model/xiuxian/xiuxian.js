@@ -299,7 +299,7 @@ export default new class {
     }
   }
 
-  async realmUp(id) {
+  async realmUp(id, upAll = false) {
     const retreatStart = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '闭关时间'), 10) || 0
     if (retreatStart !== 0) {
       return {
@@ -315,32 +315,108 @@ export default new class {
         event: "realm_max"
       }
     }
-    if (cult >= Realms[realm].value) {
-      if (randomInt(1, 100, id) <= Realms[realm].success) {
-        Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '境界', realm + 1)
-        return {
-          event: "realm_up",
-          data: {
-            state: "success",
-            rate: Realms[realm].success,
-            cult: Realms[realm].failed
+    if (upAll) {
+      let cultAll = 0
+      let realmUpFailed = undefined
+      let realmUpInfo = []
+      while (true) {
+        if (realm >= Realms.length) {
+          if (realmUpFailed) {
+            realmUpInfo.push({
+              state: "failed",
+              failed_cult: realmUpFailed.failed_cult,
+              count: realmUpFailed.count
+            })
+            realmUpFailed = undefined
           }
+          realmUpInfo.push({
+            state: "realm_max"
+          })
+          break
         }
-      } else {
-        const cultFailed = cult - Realms[realm].failed
-        Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '修为', cultFailed)
-        return {
-          event: "realm_up",
-          data: {
-            state: "failed",
-            rate: Realms[realm].success,
-            cult: Realms[realm].failed
+        if (cult < Realms[realm].value) {
+          if (realmUpFailed) {
+            realmUpInfo.push({
+              state: "failed",
+              failed_cult: realmUpFailed.failed_cult,
+              count: realmUpFailed.count
+            })
+            realmUpFailed = undefined
+          }
+          realmUpInfo.push({
+            state: "cult_lack",
+            value: Realms[realm].value
+          })
+          break
+        }
+        if (randomInt(1, 100, id) <= Realms[realm].success) {
+          if (realmUpFailed) {
+            realmUpInfo.push({
+              state: "failed",
+              failed_cult: realmUpFailed.failed_cult,
+              count: realmUpFailed.count
+            })
+            realmUpFailed = undefined
+          }
+          realm++
+          realmUpInfo.push({
+            state: "success",
+            realm: Realms[realm - 1].name
+          })
+        } else {
+          const failed_cult = Realms[realm].failed
+          cult = cult - failed_cult
+          cultAll += failed_cult
+          if (!realmUpFailed) {
+            realmUpFailed = {
+              failed_cult: failed_cult,
+              count: 1
+            }
+          } else {
+            realmUpFailed.failed_cult = realmUpFailed.failed_cult + failed_cult
+            realmUpFailed.count++
           }
         }
       }
-    } else {
+      Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
+        境界: realm,
+        修为: cult
+      })
       return {
-        event: "cult_lack"
+        event: "realm_up_all",
+        data: {
+          realmUpInfo: realmUpInfo,
+          cult: cultAll
+        }
+      }
+    } else {
+      if (cult >= Realms[realm].value) {
+        if (randomInt(1, 100, id) <= Realms[realm].success) {
+          Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '境界', realm + 1)
+          return {
+            event: "realm_up",
+            data: {
+              state: "success",
+              rate: Realms[realm].success,
+              cult: Realms[realm].failed
+            }
+          }
+        } else {
+          const cultFailed = cult - Realms[realm].failed
+          Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '修为', cultFailed)
+          return {
+            event: "realm_up",
+            data: {
+              state: "failed",
+              rate: Realms[realm].success,
+              cult: Realms[realm].failed
+            }
+          }
+        }
+      } else {
+        return {
+          event: "cult_lack"
+        }
       }
     }
   }

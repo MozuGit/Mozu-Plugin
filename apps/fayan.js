@@ -72,6 +72,8 @@ export class MozuFayan extends plugin {
     let msg = []
     if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.fayan.sendMarkdown) {
       msg.push([
+        '<@' + this.e.user_id.replace(this.e.self_id + ':', '') + '>',
+        '***',
         '**本群发言榜' + type + '**',
         '***'
       ].join('\n'))
