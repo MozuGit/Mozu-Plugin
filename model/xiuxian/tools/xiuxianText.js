@@ -144,133 +144,6 @@ const commandHandlers = {
     Text.push(Button.xiuxian)
   },
 
-  '突破': async (id, user_id, Text) => {
-    const value = await xiuxian.realmUp(id)
-    const userInfo = await xiuxian.getUserInfo(id)
-    switch (value.event) {
-      case 'realm_up':
-        Text.push([
-          '<@' + user_id + '>',
-          '***',
-          '**准备突破**',
-          '>**突破成功率：' + value.data.rate + '%**',
-          '***',
-        ].join('\n'))
-        if (value.data.state === "success") {
-          Text.push([
-            '<@' + user_id + '>',
-            '***',
-            '**突破成功**',
-            '>成功突破到：**' + userInfo.realm.realmName + '**',
-            '***',
-            ...(await buildRealmInfo(userInfo)),
-            '***',
-            '**' + (await mqqapi.command('突破太慢？试试一键突破', '一键突破', true)) + '**',
-            '***'
-          ].join('\n'))
-        } else if (value.data.state === "failed") {
-          Text.push([
-            '<@' + user_id + '>',
-            '***',
-            '**突破失败**',
-            '>**修为-' + value.data.cult + '**',
-            '***',
-            ...(await buildRealmInfo(userInfo)),
-            '***',
-            '**' + (await mqqapi.command('突破太慢？试试一键突破', '一键突破', true)) + '**',
-            '***'
-          ].join('\n'))
-        }
-        break
-      case 'cult_lack':
-        Text.push([
-          '<@' + user_id + '>',
-          '***',
-          '**突破失败**',
-          '>**你的修为还不足以突破**',
-          '***',
-          ...(await buildRealmInfo(userInfo)),
-          '***'
-        ].join('\n'))
-        break
-      case 'in_retreat':
-        Text.push(await retreatText())
-        break
-      case 'realm_max':
-        Text.push([
-          '<@' + user_id + '>',
-          '***',
-          '**你的境界已达世界极限**',
-          '>**无法再次突破**',
-          '***',
-          ...(await buildRealmInfo(userInfo)),
-          '***',
-        ].join('\n'))
-        break
-    }
-    Text.push(Button.xiuxian)
-  },
-
-  '一键突破': async (id, user_id, Text) => {
-    const value = await xiuxian.realmUp(id, true)
-    const userInfo = await xiuxian.getUserInfo(id)
-    const realmUpInfoText = []
-    switch (value.event) {
-      case 'realm_up_all':
-        Text.push([
-          '<@' + user_id + '>',
-          '***',
-          '**准备一键突破**',
-          '>**突破成功率：未知**',
-          '***',
-        ].join('\n'))
-        for (const realmUpInfo of value.data.realmUpInfo) {
-          switch (realmUpInfo.state) {
-            case 'success':
-              realmUpInfoText.push('>突破成功  境界提升到：' + realmUpInfo.realm)
-              break
-            case 'failed':
-              realmUpInfoText.push('>突破失败  次数：' + realmUpInfo.count + '修为：-' + realmUpInfo.failed_cult)
-              break
-            case 'cult_lack':
-              realmUpInfoText.push('>修为不足  还需' + (realmUpInfo.value - userInfo.cult) + '点修为')
-              break
-            case 'realm_max':
-              realmUpInfoText.push('>境界已达世界极限')
-              break
-          }
-        }
-        Text.push([
-          '<@' + user_id + '>',
-          '***',
-          '**一键突破结果**',
-          '>境界：' + userInfo.realm.realmName,
-          '***',
-          '**突破过程**',
-          ...realmUpInfoText,
-          '***',
-          ...(await buildRealmInfo(userInfo)),
-          '***',
-        ].join('\n'))
-        break
-      case 'realm_max':
-        Text.push([
-          '<@' + user_id + '>',
-          '***',
-          '**你的境界已达世界极限**',
-          '>**无法再次突破**',
-          '***',
-          ...(await buildRealmInfo(userInfo)),
-          '***',
-        ].join('\n'))
-        break
-      case 'in_retreat':
-        Text.push(await retreatText())
-        break
-    }
-    Text.push(Button.xiuxian)
-  },
-
   '修仙个人信息': async (id, user_id, Text) => {
     const userInfo = await xiuxian.getUserInfo(id)
     Text.push([
@@ -881,6 +754,113 @@ const commandHandlers = {
 }
 
 const prefixHandlers = [
+  {
+    prefix: /^#?(一键)?突破/,
+    handler: async (id, user_id, Text, msg, at, isMaster) => {
+      const value = await xiuxian.realmUp(id, msg.includes("一键"))
+      const userInfo = await xiuxian.getUserInfo(id)
+      const realmUpInfoText = []
+      switch (value.event) {
+        case 'realm_up_all':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**准备一键突破**',
+            '>**突破成功率：未知**',
+            '***',
+          ].join('\n'))
+          for (const realmUpInfo of value.data.realmUpInfo) {
+            switch (realmUpInfo.state) {
+              case 'success':
+                realmUpInfoText.push('>突破成功  境界提升到：' + realmUpInfo.realm)
+                break
+              case 'failed':
+                realmUpInfoText.push('>突破失败  次数：' + realmUpInfo.count + '  修为：-' + realmUpInfo.failed_cult)
+                break
+              case 'cult_lack':
+                realmUpInfoText.push('>修为不足  还需' + (realmUpInfo.value - userInfo.cult) + '点修为')
+                break
+              case 'realm_max':
+                realmUpInfoText.push('>境界已达世界极限')
+                break
+            }
+          }
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**一键突破结果**',
+            '>境界：' + userInfo.realm.realmName,
+            '***',
+            '**突破过程**',
+            ...realmUpInfoText,
+            '***',
+            ...(await buildRealmInfo(userInfo)),
+            '***',
+          ].join('\n'))
+          break
+        case 'realm_up':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**准备突破**',
+            '>**突破成功率：' + value.data.rate + '%**',
+            '***',
+          ].join('\n'))
+          if (value.data.state === "success") {
+            Text.push([
+              '<@' + user_id + '>',
+              '***',
+              '**突破成功**',
+              '>成功突破到：**' + userInfo.realm.realmName + '**',
+              '***',
+              ...(await buildRealmInfo(userInfo)),
+              '***',
+              '**' + (await mqqapi.command('突破太慢？试试一键突破', '一键突破', true)) + '**',
+              '***'
+            ].join('\n'))
+          } else if (value.data.state === "failed") {
+            Text.push([
+              '<@' + user_id + '>',
+              '***',
+              '**突破失败**',
+              '>**修为-' + value.data.cult + '**',
+              '***',
+              ...(await buildRealmInfo(userInfo)),
+              '***',
+              '**' + (await mqqapi.command('突破太慢？试试一键突破', '一键突破', true)) + '**',
+              '***'
+            ].join('\n'))
+          }
+          break
+        case 'cult_lack':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**突破失败**',
+            '>**你的修为还不足以突破**',
+            '***',
+            ...(await buildRealmInfo(userInfo)),
+            '***'
+          ].join('\n'))
+          break
+        case 'in_retreat':
+          Text.push(await retreatText())
+          break
+        case 'realm_max':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**你的境界已达世界极限**',
+            '>**无法再次突破**',
+            '***',
+            ...(await buildRealmInfo(userInfo)),
+            '***',
+          ].join('\n'))
+          break
+      }
+      Text.push(Button.xiuxian)
+    }
+  },
   {
     prefix: /^#?切磋\s*\d*/,
     handler: async (id, user_id, Text, msg, at, isMaster) => {
