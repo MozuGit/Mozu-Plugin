@@ -219,8 +219,8 @@ const commandHandlers = {
       '**' + (await mqqapi.command('灵石：' + userInfo.ls, '修炼', true)) + '**',
       '***',
       '>灵根：无',
-      '灵根加成：0%',
-      '功法加成：0%',
+      '灵根加成：0 %',
+      '功法加成：' + userInfo.addition.art + ' %',
       '***'
     ].join('\n'))
     Text.push(Button.xiuxian)
@@ -466,6 +466,57 @@ const commandHandlers = {
       ...beastText
     ].join('\n'))
     Text.push(Button.beast)
+  },
+
+  '秘境列表': async (id, user_id, Text) => {
+    const secretRealms = Config.drop.secretRealms
+    const { easy = [], medium = [], hard = [] } = Object.groupBy(secretRealms, item => item.level ?? 'easy')
+    const buildTexts = async (items, startIndex = 1) => {
+      const promises = items.map(async (item, idx) => {
+        const index = startIndex + idx
+        const [viewCmd, exploreCmd] = await Promise.all([
+          mqqapi.command('查看秘境', '查看秘境' + index, true),
+          mqqapi.command('探索秘境', '探索秘境' + index, true)
+        ])
+        return [
+          '**秘境：' + item.name + '**',
+          viewCmd + '  ' + exploreCmd
+        ].join('\n')
+      })
+      return Promise.all(promises)
+    }
+    const easyText = await buildTexts(easy, 1)
+    const mediumText = await buildTexts(medium, easy.length + 1)
+    const hardText = await buildTexts(hard, easy.length + medium.length + 1)
+    Text.push([
+      '<@' + user_id + '>',
+      '***',
+      '**秘境列表**',
+      '***',
+      '**初级秘境**',
+      '>门槛：' + (Config.Realm.Realms[Config.drop.secretRealm_limit.easy - 1]?.name ?? '无') + (((await xiuxian.getUserInfo(id)).realm.realm >= Config.drop.secretRealm_limit.easy) ? ' **「已达成」**' : ''),
+      ...easyText,
+      '***',
+      '**进阶秘境**',
+      '>门槛：' + (Config.Realm.Realms[Config.drop.secretRealm_limit.medium - 1]?.name ?? '无') + ((await xiuxian.getUserInfo(id)).realm.realm >= Config.drop.secretRealm_limit.medium ? ' **「已达成」**' : ''),
+      ...mediumText,
+      '***',
+      '**高级秘境**',
+      '>门槛：' + (Config.Realm.Realms[Config.drop.secretRealm_limit.hard - 1]?.name ?? '无') + ((await xiuxian.getUserInfo(id)).realm.realm >= Config.drop.secretRealm_limit.hard ? ' **「已达成」**' : ''),
+      ...hardText,
+      '***'
+    ].join('\n'))
+    Text.push(Button.secretRealm)
+  },
+
+  '储物袋': async (id, user_id, Text) => {
+    Text.push([
+      '<@' + user_id + '>',
+      '***',
+      '**请选择你需要查看的背包**',
+      '***'
+    ].join('\n'))
+    Text.push(Button.bag)
   },
 
   '我的宗门': async (id, user_id, Text) => {
@@ -879,8 +930,8 @@ const prefixHandlers = [
           '**' + (await mqqapi.command('灵石：' + userInfo.ls, '开采', true)) + '**',
           '***',
           '>灵根：无',
-          '灵根加成：0%',
-          '功法加成：0%',
+          '灵根加成：0 %',
+          '功法加成：' + userInfo.addition.art + ' %',
           '***'
         ].join('\n'))
       } else {
@@ -1002,6 +1053,479 @@ const prefixHandlers = [
         }
       }
       Text.push(Button.beast)
+    }
+  },
+  {
+    prefix: /^#?查看秘境\s*\d*/,
+    handler: async (id, user_id, Text, msg, at) => {
+      const secretRealm_id = parseInt(msg.match(/^#?查看秘境\s*(\d*)/)?.[1], 10)
+      const secretRealmInfo = Config.drop.secretRealms[secretRealm_id - 1]
+      if (!secretRealmInfo) {
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**秘境ID不存在**',
+          '>请确认秘境ID是否正确',
+          '***'
+        ].join('\n'))
+      } else {
+        const pills = []
+        const arts = []
+        const { pills: pillData, arts: artData } = Config.drop
+        for (let i = 0, len = pillData.length; i < len; i++) {
+          if (pillData[i].fromSecretRealmID === secretRealm_id) {
+            pills.push('>- ' + pillData[i].name)
+          }
+        }
+        for (let i = 0, len = artData.length; i < len; i++) {
+          if (artData[i].fromSecretRealmID === secretRealm_id) {
+            arts.push('>- ' + artData[i].name)
+          }
+        }
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**秘境信息**',
+          '>名称：' + secretRealmInfo.name,
+          '门槛：' + (Config.Realm.Realms[Config.drop.secretRealm_limit[secretRealmInfo.level] - 1]?.name ?? '无'),
+          '消耗：' + secretRealmInfo.cost_ls + '灵石',
+          '掉落概率：' + secretRealmInfo.drop_rate + '%',
+          '***',
+          '**秘境产出**',
+          '>##**丹药**',
+          ...pills,
+          '',
+          '>##**功法**',
+          ...arts,
+          '***'
+        ].join('\n'))
+      }
+      Text.push(Button.secretRealm)
+    }
+  },
+  {
+    prefix: /^#?探索秘境(十次|百次)?\s*\d*/,
+    handler: async (id, user_id, Text, msg, at) => {
+      const matchs = msg.match(/^#?探索秘境(十次|百次)?\s*(\d*)/)
+      const count = matchs[1] === "十次" ? 10 : matchs[1] === "百次" ? 100 : 1
+      const secretRealm_id = parseInt(matchs[2], 10)
+      const secretRealmInfo = Config.drop.secretRealms[secretRealm_id - 1]
+      if (!secretRealmInfo) {
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**秘境ID不存在**',
+          '>请确认秘境ID是否正确',
+          '***'
+        ].join('\n'))
+      } else {
+        const pills = Config.drop.pills.filter(pill => pill.fromSecretRealmID === secretRealm_id)
+        const arts = Config.drop.arts.filter(art => art.fromSecretRealmID === secretRealm_id)
+        secretRealmInfo.pills = pills
+        secretRealmInfo.arts = arts
+        const value = await xiuxian.exploreSecretRealm(id, secretRealmInfo, count)
+        const userInfo = await xiuxian.getUserInfo(id)
+        switch (value.event) {
+          case 'explore_secret_realm':
+            let dropText = []
+            for (const pill of mergeItems(value.data.pills)) {
+              dropText.push('>获得丹药：' + pill.name + ' * ' + pill.count)
+            }
+            for (const art of mergeItems(value.data.arts)) {
+              dropText.push('>获得功法：' + art.name + ' * ' + art.count)
+            }
+            Text.push([
+              '<@' + user_id + '>',
+              '***',
+              '**探索秘境成功**',
+              '***',
+              '**秘境：' + secretRealmInfo.name + '**',
+              '>消耗：' + value.data.need_ls + '灵石',
+              '探索次数：' + count + ' 次',
+              '***',
+              '**探索结果**',
+              ...(dropText.length !== 0 ? dropText : ['>什么都没有拿到']),
+              '***'
+            ].join('\n'))
+            break
+          case 'lack_ls':
+            Text.push([
+              '<@' + user_id + '>',
+              '***',
+              '**探索秘境失败**',
+              '>你的灵石不足',
+              '需要灵石：' + value.data.need_ls,
+              '当前灵石：' + userInfo.ls,
+              '***'
+            ].join('\n'))
+            break
+          case 'limit_realm':
+            Text.push([
+              '<@' + user_id + '>',
+              '***',
+              '**探索秘境失败**',
+              '>未达到秘境所需门槛',
+              '需要境界：' + (Config.Realm.Realms[Config.drop.secretRealm_limit[secretRealmInfo.level] - 1].name),
+              '当前境界：' + userInfo.realm.realmName,
+              '***'
+            ].join('\n'))
+            break
+          case 'in_retreat':
+            Text.push(await retreatText())
+            break
+        }
+      }
+      Text.push(Button.secretRealm)
+    }
+  },
+  {
+    prefix: /^#?丹药背包\s*\d*/,
+    handler: async (id, user_id, Text, msg, at) => {
+      const count = (parseInt((msg.match(/\d+/g) || []).join(''), 10) || 1) - 1
+      const pills = (await xiuxian.getUserBag(id)).pills
+      let pillsText = []
+      for (const pill of pills) {
+        pillsText.push([
+          '>名称：' + pill.name + '   ' + '编号：' + pill.id,
+          '数量：' + pill.count,
+          '使用：' + pill.cult + '修为',
+          '出售：' + pill.sell_ls + '灵石',
+          (await mqqapi.command('使用丹药', '使用丹药' + pill.id + ' 数量:1')) + '   ' + (await mqqapi.command('出售丹药', '出售丹药' + pill.id + ' 数量:1')),
+          '***'
+        ].join('\n'))
+      }
+      const pagePromises = []
+      for (let i = 0; i < Math.ceil(pillsText.length / 5); i++) {
+        pagePromises.push(mqqapi.command(i + 1, '丹药背包' + (i + 1), true));
+      }
+      const pageText = await Promise.all(pagePromises)
+      Text.push([
+        '<@' + user_id + '>',
+        '***',
+        '**丹药背包**',
+        '>当前页数：' + (count + 1),
+        pageText.join('  '),
+        '***',
+        ...(pillsText.length !== 0
+          ? pillsText.length >= count * 5
+            ? pillsText.slice(count * 5, count * 5 + 5)
+            : ['>**没有更多物品了**', '***']
+          : ['>**什么丹药都没有**', '***']),
+      ].join('\n'))
+      Text.push(Button.pill)
+    }
+  },
+  {
+    prefix: /^#?功法背包\s*\d*/,
+    handler: async (id, user_id, Text, msg, at) => {
+      const count = (parseInt((msg.match(/\d+/g) || []).join(''), 10) || 1) - 1
+      const arts = (await xiuxian.getUserBag(id)).arts
+      let artsText = []
+      for (const art of arts) {
+        artsText.push([
+          '>名称：' + art.name + '   ' + '编号：' + art.id,
+          '数量：' + art.count,
+          '功法加成：' + art.addition + ' %',
+          '出售：' + art.sell_ls + '灵石',
+          (await mqqapi.command('学习功法', '学习功法' + art.id, true)) + '   ' + (await mqqapi.command('出售功法', '出售功法' + art.id + ' 数量:1')),
+          '***'
+        ].join('\n'))
+      }
+      const pagePromises = []
+      for (let i = 0; i < Math.ceil(artsText.length / 5); i++) {
+        pagePromises.push(mqqapi.command(i + 1, '功法背包' + (i + 1), true));
+      }
+      const pageText = await Promise.all(pagePromises)
+      Text.push([
+        '<@' + user_id + '>',
+        '***',
+        '**功法背包**',
+        '>当前页数：' + (count + 1),
+        pageText.join('  '),
+        '***',
+        ...(artsText.length !== 0
+          ? artsText.length >= count * 5
+            ? artsText.slice(count * 5, count * 5 + 5)
+            : ['>**没有更多物品了**', '***']
+          : ['>**什么功法都没有**', '***']),
+      ].join('\n'))
+      Text.push(Button.art)
+    }
+  },
+  {
+    prefix: /^#?(?:一键)?使用丹药\s*(\d*)(?:\s*数量[:：]\s*(\d+))?/,
+    handler: async (id, user_id, Text, msg, at) => {
+      const match = msg.match(/^#?(?:一键)?使用丹药\s*(\d*)(?:\s*数量[:：]\s*(\d+))?/)
+      const pillId = parseInt(match[1], 10)
+      const count = parseInt(match[2], 10) || 1
+      const value = await xiuxian.usePill(id, pillId, count, msg.includes('一键'))
+      switch (value.event) {
+        case 'use_pill_all':
+          let useCount = 0
+          let usePillsText = []
+          for (const pill of value.data.usePills) {
+            usePillsText.push([
+              '>使用丹药：' + pill.name + ' * ' + pill.count,
+              '获得修为：' + pill.cultAll,
+              '***'
+            ].join('\n'))
+            useCount += pill.count
+          }
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**一键使用丹药**',
+            '>使用数量：' + useCount,
+            '增加修为：' + value.data.addcult,
+            '***',
+            ...(usePillsText.length ? usePillsText : ['>什么丹药也没有'])
+          ].join('\n'))
+          break
+        case 'use_pill':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**使用丹药成功**',
+            '>使用丹药：' + value.data.pill.name,
+            '使用数量：' + count,
+            '增加修为：' + value.data.addcult,
+            '***'
+          ].join('\n'))
+          break
+        case 'lack_pill_count':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**背包丹药不足**',
+            '>丹药：' + value.data.pill.name,
+            '使用数量：' + count,
+            '丹药数量：' + value.data.pill.count,
+            '***'
+          ].join('\n'))
+          break
+        case 'no_pill':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**丹药不存在**',
+            '>请确认丹药是否存在',
+            '***'
+          ].join('\n'))
+          break
+        case 'in_retreat':
+          Text.push(await retreatText())
+          break
+      }
+      Text.push(Button.pill)
+    }
+  },
+  {
+    prefix: /^#?(?:一键)?出售丹药\s*(\d*)(?:\s*数量[:：]\s*(\d+))?/,
+    handler: async (id, user_id, Text, msg, at) => {
+      const match = msg.match(/^#?(?:一键)?出售丹药\s*(\d*)(?:\s*数量[:：]\s*(\d+))?/)
+      const pillId = parseInt(match[1], 10)
+      const count = parseInt(match[2], 10) || 1
+      const value = await xiuxian.sellPill(id, pillId, count, msg.includes('一键'))
+      switch (value.event) {
+        case 'sell_pill_all':
+          let sellCount = 0
+          let sellPillsText = []
+          for (const pill of value.data.sellPills) {
+            sellPillsText.push([
+              '>出售丹药：' + pill.name + ' * ' + pill.count,
+              '获得灵石：' + pill.lsAll,
+              '***'
+            ].join('\n'))
+            sellCount += pill.count
+          }
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**一键出售丹药**',
+            '>出售数量：' + sellCount,
+            '获得灵石：' + value.data.addls,
+            '***',
+            ...(sellPillsText.length ? sellPillsText : ['>什么丹药也没有']),
+          ].join('\n'))
+          break
+        case 'sell_pill':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**出售丹药成功**',
+            '>出售丹药：' + value.data.pill.name,
+            '出售数量：' + count,
+            '获得灵石：' + value.data.addls,
+            '***'
+          ].join('\n'))
+          break
+        case 'lack_pill_count':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**背包丹药不足**',
+            '>丹药：' + value.data.pill.name,
+            '出售数量：' + count,
+            '丹药数量：' + value.data.pill.count,
+            '***'
+          ].join('\n'))
+          break
+        case 'no_pill':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**丹药不存在**',
+            '>请确认丹药是否存在',
+            '***'
+          ].join('\n'))
+          break
+        case 'in_retreat':
+          Text.push(await retreatText())
+          break
+      }
+      Text.push(Button.pill)
+    }
+  },
+  {
+    prefix: /^#?(?:一键)?学习功法\s*\d*/,
+    handler: async (id, user_id, Text, msg, at) => {
+      const match = msg.match(/^#?(?:一键)?学习功法\s*\d*/)
+      const artId = parseInt(match[1], 10)
+      const value = await xiuxian.learnArt(id, artId, msg.includes('一键'))
+      const userInfo = await xiuxian.getUserInfo(id)
+      switch (value.event) {
+        case 'learn_art_all':
+          const arts = Config.drop.arts
+          const haslearnArtsText = []
+          const learnArtsText = []
+          const learnArtsInsText = []
+          for (const haslearnArt of value.data.haslearnArts) {
+            const art = arts.find(a => a.id === haslearnArt)
+            haslearnArtsText.push('>已学习过功法：' + art.name + '  跳过学习')
+          }
+          for (const learnArt of value.data.learnArts) {
+            const art = arts.find(a => a.id === learnArt.id)
+            learnArtsText.push('>功法：' + art.name + '  成功  加成：' + art.addition + ' %')
+          }
+          for (const learnArtIns of value.data.learnArtsIns) {
+            const art = arts.find(a => a.id === learnArtIns.id)
+            learnArtsInsText.push('>功法：' + art.name + '  失败  修为：-' + learnArtIns.deduct_cult)
+          }
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**一键学习功法**',
+            '>功法加成：' + userInfo.addition.art + ' %',
+            '***',
+            ...haslearnArtsText,
+            ...learnArtsInsText,
+            ...learnArtsText,
+            ...((haslearnArtsText.length || learnArtsInsText.length || learnArtsText.length) ? [''] : ['>什么功法也没有']),
+            '***'
+          ].join('\n'))
+          break
+        case 'learn_art':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**学习功法**',
+            '>功法加成：' + userInfo.addition.art + ' %',
+            '***',
+            '**功法：' + value.data.artInfo.name + '**',
+            '>功法学习' + (value.data.state ? '成功' : '失败'),
+            (value.data.state ? '功法加成：' + value.data.artInfo.addition + ' %' : '修为：-' + value.data.artInfo.deduct_cult)
+          ].join('\n'))
+          break
+        case 'learned_art':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**功法已学习**',
+            '>这个功法你学习过了',
+            '***'
+          ].join('\n'))
+          break
+        case 'no_art':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**功法不存在**',
+            '>请确认功法是否存在',
+            '***'
+          ].join('\n'))
+          break
+        case 'in_retreat':
+          Text.push(await retreatText())
+          break
+      }
+      Text.push(Button.art)
+    }
+  },
+  {
+    prefix: /^#?(?:一键)?出售功法\s*(\d*)(?:\s*数量[:：]\s*(\d+))?/,
+    handler: async (id, user_id, Text, msg, at) => {
+      const match = msg.match(/^#?(?:一键)?出售功法\s*(\d*)(?:\s*数量[:：]\s*(\d+))?/)
+      const artId = parseInt(match[1], 10)
+      const count = parseInt(match[2], 10) || 1
+      const value = await xiuxian.sellArt(id, artId, count, msg.includes('一键'))
+      switch (value.event) {
+        case 'sell_art_all':
+          let sellCount = 0
+          let sellArtsText = []
+          for (const art of value.data.sellArts) {
+            sellArtsText.push([
+              '>出售功法：' + art.name + ' * ' + art.count,
+              '获得功法：' + art.lsAll,
+              '***'
+            ].join('\n'))
+            sellCount += art.count
+          }
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**一键出售功法**',
+            '>出售数量：' + sellCount,
+            '获得灵石：' + value.data.addls,
+            '***',
+            ...(sellArtsText.length ? sellArtsText : ['>什么功法也没有'])
+          ].join('\n'))
+          break
+        case 'sell_art':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**出售功法成功**',
+            '>出售功法：' + value.data.art.name,
+            '出售数量：' + count,
+            '获得灵石：' + value.data.addls,
+            '***'
+          ].join('\n'))
+          break
+        case 'lack_art_count':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**背包功法不足**',
+            '>功法：' + value.data.art.name,
+            '出售数量：' + count,
+            '功法数量：' + value.data.art.count,
+            '***'
+          ].join('\n'))
+          break
+        case 'no_art':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**功法不存在**',
+            '>请确认功法是否存在',
+            '***'
+          ].join('\n'))
+          break
+        case 'in_retreat':
+          Text.push(await retreatText())
+          break
+      }
+      Text.push(Button.art)
     }
   },
   {
@@ -1712,6 +2236,21 @@ async function retreatText() {
   ].join('\n')
 }
 
+function mergeItems(arr) {
+  const map = new Map()
+  arr.forEach(item => {
+    if (map.has(item.id)) {
+      map.get(item.id).count += 1
+    } else {
+      map.set(item.id, {
+        id: item.id,
+        name: item.name,
+        count: 1
+      })
+    }
+  })
+  return Array.from(map.values())
+}
 
 /**
  * 时间戳转 2026-01-01 08:00:00 格式

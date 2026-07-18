@@ -1,3 +1,5 @@
+import { Config } from "../../model/xiuxian/tools/Config/Config.js"
+
 export default [
   {
     component: "SOFT_GROUP_BEGIN",
@@ -900,5 +902,316 @@ export default [
         }
       ]
     }
+  },
+  {
+    component: "Divider",
+    label: "修仙秘境设置",
+    componentProps: {
+      type: "horizontal",
+      style: {
+        fontWeight: "bold",
+        color: "rgb(76, 113, 201)",
+        fontSize: "16px"
+      },
+      orientation: "left",
+      plain: true
+    }
+  },
+  {
+    field: "xiuxian.drop.secretRealm_limit",
+    label: "秘境等级配置",
+    component: "GSubForm",
+    componentProps: {
+      modalProps: {
+        title: "等级限制配置"
+      },
+      style: {
+        maxHeight: "200px",
+        overflowY: "auto"
+      },
+      schemas: [
+        {
+          field: "easy",
+          label: "初级秘境",
+          bottomHelpMessage: "进入初级秘境的最低境界",
+          component: "Select",
+          componentProps: {
+            options: getRealmList()
+          },
+          required: true
+        },
+        {
+          field: "medium",
+          label: "进阶秘境",
+          bottomHelpMessage: "进入进阶秘境的最低境界",
+          component: "Select",
+          componentProps: {
+            options: getRealmList()
+          },
+          required: true
+        },
+        {
+          field: "hard",
+          label: "高级秘境",
+          bottomHelpMessage: "进入高级秘境的最低境界",
+          component: "Select",
+          componentProps: {
+            options: getRealmList()
+          },
+          required: true
+        }
+      ]
+    }
+  },
+  {
+    field: "xiuxian.drop.secretRealms",
+    label: "秘境配置",
+    component: "GSubForm",
+    componentProps: {
+      multiple: true,
+      schemas: [
+        {
+          field: "name",
+          label: "秘境名称",
+          bottomHelpMessage: "建议四个字",
+          component: "Input",
+          componentProps: {
+            placeholder: "请输入秘境名称"
+          },
+          required: true
+        },
+        {
+          field: "level",
+          label: "秘境等级限制",
+          bottomHelpMessage: "进入秘境的门槛",
+          component: "RadioGroup",
+          componentProps: {
+            options: [
+              { label: "初级", value: "easy" },
+              { label: "进阶", value: "medium" },
+              { label: "高级", value: "hard" },
+            ]
+          },
+          required: true
+        },
+        {
+          field: "cost_ls",
+          label: "秘境消耗灵石",
+          bottomHelpMessage: "进入秘境消耗的灵石",
+          component: "InputNumber",
+          componentProps: {
+            min: 0,
+            step: 1000,
+            placeholder: "请输入灵石",
+            style: {
+              width: "120px"
+            }
+          },
+          required: true
+        },
+        {
+          field: "drop_rate",
+          label: "秘境掉落概率",
+          bottomHelpMessage: "秘境掉落奖励的概率",
+          component: "InputNumber",
+          componentProps: {
+            min: 0,
+            max: 100,
+            placeholder: "请输入",
+            style: {
+              width: "120px"
+            }
+          },
+          required: true
+        }
+      ]
+    },
+    required: true
+  },
+  {
+    field: "xiuxian.drop.pills",
+    label: "丹药配置",
+    component: "GSubForm",
+    componentProps: {
+      multiple: true,
+      schemas: [
+        {
+          field: "id",
+          label: "物品ID",
+          helpMessage: "物品ID必须唯一",
+          component: "InputNumber",
+          componentProps: {
+            placeholder: "请输入物品ID"
+          },
+          required: true
+        },
+        {
+          field: "name",
+          label: "丹药名称",
+          component: "Input",
+          componentProps: {
+            placeholder: "请输入丹药名称"
+          },
+          required: true
+        },
+        {
+          field: "cult",
+          label: "丹药修为",
+          bottomHelpMessage: "使用丹药后获得的修为",
+          component: "InputNumber",
+          componentProps: {
+            min: 0,
+            step: 1000,
+            placeholder: "请输入修为",
+            style: {
+              width: "120px"
+            }
+          },
+          required: true
+        },
+        {
+          field: "sell_ls",
+          label: "出售丹药灵石",
+          bottomHelpMessage: "出售丹药获得的灵石",
+          component: "InputNumber",
+          componentProps: {
+            min: 0,
+            step: 1000,
+            placeholder: "请输入灵石",
+            style: {
+              width: "120px"
+            }
+          },
+          required: true
+        },
+        {
+          field: "fromSecretRealmID",
+          label: "丹药来源秘境",
+          bottomHelpMessage: "丹药来源的秘境产出",
+          component: "Select",
+          componentProps: {
+            options: getSecretRealmList()
+          },
+          required: true
+        }
+      ]
+    },
+    required: true
+  },
+  {
+    field: "xiuxian.drop.arts",
+    label: "功法配置",
+    component: "GSubForm",
+    componentProps: {
+      multiple: true,
+      schemas: [
+        {
+          field: "id",
+          label: "物品ID",
+          helpMessage: "物品ID必须唯一",
+          component: "InputNumber",
+          componentProps: {
+            placeholder: "请输入物品ID"
+          },
+          required: true
+        },
+        {
+          field: "name",
+          label: "功法名称",
+          component: "Input",
+          componentProps: {
+            placeholder: "请输入功法名称"
+          },
+          required: true
+        },
+        {
+          field: "rate",
+          label: "学习成功概率",
+          bottomHelpMessage: "学习功法成功的概率，失败遭受反噬",
+          component: "InputNumber",
+          componentProps: {
+            min: 0,
+            max: 100,
+            step: 1000,
+            placeholder: "请输入概率",
+            style: {
+              width: "120px"
+            }
+          },
+          required: true
+        },
+        {
+          field: "deduct_cult",
+          label: "反噬修为",
+          bottomHelpMessage: "学习功法失败扣除的修为",
+          component: "InputNumber",
+          componentProps: {
+            min: 0,
+            step: 1000,
+            placeholder: "请输入修为",
+            style: {
+              width: "120px"
+            }
+          },
+          required: true
+        },
+        {
+          field: "addition",
+          label: "功法加成",
+          bottomHelpMessage: "战力功法加成 单位 %",
+          component: "InputNumber",
+          componentProps: {
+            min: 0,
+            placeholder: "（%）",
+            style: {
+              width: "120px"
+            }
+          },
+          required: true
+        },
+        {
+          field: "sell_ls",
+          label: "出售功法灵石",
+          bottomHelpMessage: "出售功法获得的灵石",
+          component: "InputNumber",
+          componentProps: {
+            min: 0,
+            step: 1000,
+            placeholder: "请输入灵石",
+            style: {
+              width: "120px"
+            }
+          },
+          required: true
+        },
+        {
+          field: "fromSecretRealmID",
+          label: "功法来源秘境",
+          bottomHelpMessage: "丹药来源的秘境产出",
+          component: "Select",
+          componentProps: {
+            options: getSecretRealmList()
+          },
+          required: true
+        }
+      ]
+    },
+    required: true
   }
 ]
+
+function getRealmList() {
+  const realms = Config.Realm.Realms
+  return realms.map((realm, index) => ({
+    label: realm.name,
+    value: index + 1
+  }))
+}
+
+function getSecretRealmList() {
+  const secretRealms = Config.drop.secretRealms
+  return secretRealms.map((secretRealm, index) => ({
+    label: secretRealm.name,
+    value: index + 1
+  }))
+}

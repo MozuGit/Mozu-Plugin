@@ -176,6 +176,90 @@ const Button = {
       ]
     )
   },
+  get secretRealm() {
+    const secretRealms = Config.drop.secretRealms
+    const args = []
+    args.push([
+      { text: "探索秘境+编号", input: prefix + "探索秘境" },
+      { text: "查看秘境+编号", input: prefix + "查看秘境" }
+    ])
+    if (secretRealms.length) {
+      const realmButtons = secretRealms.map((realm, index) => ({ text: realm.name, input: prefix + "探索秘境" + (index + 1) }))
+      for (let i = 0; i < realmButtons.length; i += 3) {
+        args.push(realmButtons.slice(i, i + 3))
+      }
+    }
+    args.push([
+      { text: "修炼", input: prefix + "修炼" },
+      { text: "开采", input: prefix + "开采" },
+      { text: "信息", input: prefix + "修仙个人信息" },
+      { text: "签到", input: prefix + "修仙签到" }
+    ])
+    return segment.button(...args)
+  },
+  get bag() {
+    return segment.button(
+      [
+        { text: "丹药背包", input: prefix + "丹药背包" },
+        { text: "功法背包", input: prefix + "功法背包" },
+        { text: "储物背包", input: prefix + "储物背包" }
+      ],
+      [
+        { text: "修炼", input: prefix + "修炼" },
+        { text: "开采", input: prefix + "开采" },
+        { text: "信息", input: prefix + "修仙个人信息" },
+        { text: "签到", input: prefix + "修仙签到" }
+      ]
+    )
+  },
+  get pill() {
+    return segment.button(
+      [
+        { text: "使用丹药+编号", input: prefix + "使用丹药" },
+        { text: "出售丹药+编号", input: prefix + "出售丹药" }
+      ],
+      [
+        { text: "一键使用", input: prefix + "一键使用丹药" },
+        { text: "储物袋", input: prefix + "储物袋" },
+        { text: "一键出售", input: prefix + "一键出售丹药" }
+      ],
+      [
+        { text: "丹药背包", input: prefix + "丹药背包" },
+        { text: "功法背包", input: prefix + "功法背包" },
+        { text: "储物背包", input: prefix + "储物背包" }
+      ],
+      [
+        { text: "修炼", input: prefix + "修炼" },
+        { text: "开采", input: prefix + "开采" },
+        { text: "信息", input: prefix + "修仙个人信息" },
+        { text: "签到", input: prefix + "修仙签到" }
+      ]
+    )
+  },
+  get art() {
+    return segment.button(
+      [
+        { text: "学习功法+编号", input: prefix + "学习功法" },
+        { text: "出售功法+编号", input: prefix + "出售功法" }
+      ],
+      [
+        { text: "一键学习", input: prefix + "一键学习功法" },
+        { text: "储物袋", input: prefix + "储物袋" },
+        { text: "一键出售", input: prefix + "一键出售功法" }
+      ],
+      [
+        { text: "丹药背包", input: prefix + "丹药背包" },
+        { text: "功法背包", input: prefix + "功法背包" },
+        { text: "储物背包", input: prefix + "储物背包" }
+      ],
+      [
+        { text: "修炼", input: prefix + "修炼" },
+        { text: "开采", input: prefix + "开采" },
+        { text: "信息", input: prefix + "修仙个人信息" },
+        { text: "签到", input: prefix + "修仙签到" }
+      ]
+    )
+  },
   get rank() {
     return segment.button(
       [

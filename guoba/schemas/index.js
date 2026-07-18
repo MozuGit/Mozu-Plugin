@@ -86,6 +86,12 @@ export function getConfigData() {
         rankTitle: xxConfig.title.rankTitle,
         cleanTitle: xxConfig.title.cleanTitle
       },
+      drop: {
+        secretRealm_limit: xxConfig.drop.secretRealm_limit,
+        secretRealms: xxConfig.drop.secretRealms,
+        pills: xxConfig.drop.pills,
+        arts: xxConfig.drop.arts
+      },
       tools: {
         title: {
           title: "默认称号",
@@ -102,7 +108,10 @@ export function setConfigData(data, { Result }) {
   redisConfig(nested)
   makeMessageConfig(nested)
   fayanConfig(nested)
-  xiuxianConfig(nested)
+  const xiuxian = xiuxianConfig(nested)
+  if (xiuxian) {
+    return Result.error(xiuxian)
+  }
   return Result.ok({}, "保存成功喵~")
 }
 
@@ -147,6 +156,12 @@ function xiuxianConfig(data) {
   Object.keys(data.xiuxian.beast).forEach(key => {
     xxConfig.modify('beast', key, data.xiuxian.beast[key])
   })
+  if (hasRepeatedId(data.xiuxian.drop.pills, data.xiuxian.drop.arts)) {
+    return "物品ID重复"
+  }
+  Object.keys(data.xiuxian.drop).forEach(key => {
+    xxConfig.modify('drop', key, data.xiuxian.drop[key])
+  })
 }
 
 export const actions = {
@@ -182,18 +197,15 @@ export const actions = {
   }
 }
 
-async function getCdks() {
-  const stream = Redis.scanStream({
-    match: "Mozu:xiuxian:cdk:*",
-    count: 100
-  })
-  const cdks = []
-  for await (const keys of stream) {
-    if (keys.length) {
-      keys.forEach(key => {
-        cdks.push(key.replace("Mozu:xiuxian:cdk:", ""))
-      })
+function hasRepeatedId(...args) {
+  const seen = new Set()
+  for (let i = 0; i < args.length; i++) {
+    const arr = args[i]
+    for (let j = 0; j < arr.length; j++) {
+      const id = arr[j].id
+      if (seen.has(id)) return true
+      seen.add(id)
     }
   }
-  return cdks
+  return false
 }

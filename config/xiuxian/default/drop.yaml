@@ -1,0 +1,374 @@
+#秘境等级限制
+secretRealm_limit:
+  easy: 1
+  medium: 45
+  hard: 81
+
+#秘境列表
+secretRealms:
+  - name: 翠风林地  #秘境名称
+    level: easy  #秘境难度等级（等级类型：easy、medium、hard）
+    cost_ls: 200  #消耗灵石
+    drop_rate: 20  #掉落概率（%）
+  - name: 碧波浅滩
+    level: easy
+    cost_ls: 300
+    drop_rate: 20
+  - name: 晨露山谷
+    level: easy
+    cost_ls: 400
+    drop_rate: 20
+  - name: 熔火矿坑
+    level: medium
+    cost_ls: 1000
+    drop_rate: 20
+  - name: 暗影密林
+    level: medium
+    cost_ls: 2000
+    drop_rate: 20
+  - name: 霜噬遗迹
+    level: medium
+    cost_ls: 3000
+    drop_rate: 20
+  - name: 永夜祭坛
+    level: hard
+    cost_ls: 10000
+    drop_rate: 20
+  - name: 混沌深渊
+    level: hard
+    cost_ls: 20000
+    drop_rate: 20
+  - name: 虚空星墓
+    level: hard
+    cost_ls: 30000
+    drop_rate: 20
+
+#丹药列表
+pills:
+  - id: 1  #物品ID
+    name: 翠风露  #丹药名称
+    cult: 100  #使用丹药获得的修为
+    sell_ls: 120  #出售丹药获得的灵石
+    fromSecretRealmID: 1  #来源秘境ID
+  - id: 2
+    name: 木灵散
+    cult: 100
+    sell_ls: 120
+    fromSecretRealmID: 1
+  - id: 3
+    name: 清风丸
+    cult: 100
+    sell_ls: 120
+    fromSecretRealmID: 1
+  - id: 4
+    name: 碧水丹
+    cult: 200
+    sell_ls: 240
+    fromSecretRealmID: 2
+  - id: 5
+    name: 润脉膏
+    cult: 200
+    sell_ls: 240
+    fromSecretRealmID: 2
+  - id: 6
+    name: 鱼鳞粉
+    cult: 200
+    sell_ls: 240
+    fromSecretRealmID: 2
+  - id: 7
+    name: 晨露丸
+    cult: 300
+    sell_ls: 360
+    fromSecretRealmID: 3
+  - id: 8
+    name: 回春散
+    cult: 300
+    sell_ls: 360
+    fromSecretRealmID: 3
+  - id: 9
+    name: 养气丹
+    cult: 300
+    sell_ls: 360
+    fromSecretRealmID: 3
+  - id: 10
+    name: 熔火丹
+    cult: 1000
+    sell_ls: 1200
+    fromSecretRealmID: 4
+  - id: 11
+    name: 赤焰散
+    cult: 1000
+    sell_ls: 1200
+    fromSecretRealmID: 4
+  - id: 12
+    name: 地脉膏
+    cult: 1000
+    sell_ls: 1200
+    fromSecretRealmID: 4
+  - id: 13
+    name: 暗影膏
+    cult: 2000
+    sell_ls: 2400
+    fromSecretRealmID: 5
+  - id: 14
+    name: 幽木散
+    cult: 2000
+    sell_ls: 2400
+    fromSecretRealmID: 5
+  - id: 15
+    name: 夜行丹
+    cult: 2000
+    sell_ls: 2400
+    fromSecretRealmID: 5
+  - id: 16
+    name: 霜噬散
+    cult: 3000
+    sell_ls: 3600
+    fromSecretRealmID: 6
+  - id: 17
+    name: 玄冰丹
+    cult: 3000
+    sell_ls: 3600
+    fromSecretRealmID: 6
+  - id: 18
+    name: 寒玉膏
+    cult: 3000
+    sell_ls: 3600
+    fromSecretRealmID: 6
+  - id: 19
+    name: 永夜丹
+    cult: 10000
+    sell_ls: 12000
+    fromSecretRealmID: 7
+  - id: 20
+    name: 暗祭膏
+    cult: 10000
+    sell_ls: 12000
+    fromSecretRealmID: 7
+  - id: 21
+    name: 无光丸
+    cult: 10000
+    sell_ls: 12000
+    fromSecretRealmID: 7
+  - id: 22
+    name: 混沌丹
+    cult: 20000
+    sell_ls: 24000
+    fromSecretRealmID: 8
+  - id: 23
+    name: 深渊膏
+    cult: 20000
+    sell_ls: 24000
+    fromSecretRealmID: 8
+  - id: 24
+    name: 虚空散
+    cult: 20000
+    sell_ls: 24000
+    fromSecretRealmID: 8
+  - id: 25
+    name: 虚空丹
+    cult: 30000
+    sell_ls: 36000
+    fromSecretRealmID: 9
+  - id: 26
+    name: 星墓膏
+    cult: 30000
+    sell_ls: 36000
+    fromSecretRealmID: 9
+  - id: 27
+    name: 太虚丸
+    cult: 30000
+    sell_ls: 36000
+    fromSecretRealmID: 9
+
+#功法列表
+arts:
+  - id: 10001  #物品ID
+    name: 翠风心决  #功法名称
+    rate: 50  #学习功法成功率（%）
+    deduct_cult: 100  #学习失败反噬修为
+    addition: 1  #功法加成（%）
+    sell_ls: 120  #出售功法获得的灵石
+    fromSecretRealmID: 1  #来源秘境ID
+  - id: 10002
+    name: 木灵化气
+    rate: 50
+    deduct_cult: 100
+    addition: 1
+    sell_ls: 120
+    fromSecretRealmID: 1
+  - id: 10003
+    name: 清风引
+    rate: 50
+    deduct_cult: 100
+    addition: 1
+    sell_ls: 120
+    fromSecretRealmID: 1
+  - id: 10004
+    name: 碧水凝元
+    rate: 50
+    deduct_cult: 200
+    addition: 2
+    sell_ls: 240
+    fromSecretRealmID: 2
+  - id: 10005
+    name: 润脉养息
+    rate: 50
+    deduct_cult: 200
+    addition: 2
+    sell_ls: 240
+    fromSecretRealmID: 2
+  - id: 10006
+    name: 鱼鳞护体
+    rate: 50
+    deduct_cult: 200
+    addition: 2
+    sell_ls: 240
+    fromSecretRealmID: 2
+  - id: 10007
+    name: 晨露聚灵
+    rate: 50
+    deduct_cult: 300
+    addition: 3
+    sell_ls: 360
+    fromSecretRealmID: 3
+  - id: 10008
+    name: 回春生息
+    rate: 50
+    deduct_cult: 300
+    addition: 3
+    sell_ls: 360
+    fromSecretRealmID: 3
+  - id: 10009
+    name: 养气培元
+    rate: 50
+    deduct_cult: 300
+    addition: 3
+    sell_ls: 360
+    fromSecretRealmID: 3
+  - id: 10010
+    name: 熔火焚天
+    rate: 50
+    deduct_cult: 1000
+    addition: 4
+    sell_ls: 1200
+    fromSecretRealmID: 4
+  - id: 10011
+    name: 赤焰护体
+    rate: 50
+    deduct_cult: 1000
+    addition: 4
+    sell_ls: 1200
+    fromSecretRealmID: 4
+  - id: 10012
+    name: 地脉引燃
+    rate: 50
+    deduct_cult: 1000
+    addition: 4
+    sell_ls: 1200
+    fromSecretRealmID: 4
+  - id: 10013
+    name: 暗影匿踪
+    rate: 50
+    deduct_cult: 2000
+    addition: 5
+    sell_ls: 2400
+    fromSecretRealmID: 5
+  - id: 10014
+    name: 幽木缠丝
+    rate: 50
+    deduct_cult: 2000
+    addition: 5
+    sell_ls: 2400
+    fromSecretRealmID: 5
+  - id: 10015
+    name: 夜行无声
+    rate: 50
+    deduct_cult: 2000
+    addition: 5
+    sell_ls: 2400
+    fromSecretRealmID: 5
+  - id: 10016
+    name: 霜噬万物
+    rate: 50
+    deduct_cult: 3000
+    addition: 6
+    sell_ls: 3600
+    fromSecretRealmID: 6
+  - id: 10017
+    name: 玄冰凝甲
+    rate: 50
+    deduct_cult: 3000
+    addition: 6
+    sell_ls: 3600
+    fromSecretRealmID: 6
+  - id: 10018
+    name: 寒玉固本
+    rate: 50
+    deduct_cult: 3000
+    addition: 6
+    sell_ls: 3600
+    fromSecretRealmID: 6
+  - id: 10019
+    name: 永夜降临
+    rate: 50
+    deduct_cult: 10000
+    addition: 7
+    sell_ls: 12000
+    fromSecretRealmID: 7
+  - id: 10020
+    name: 暗祭献魂
+    rate: 50
+    deduct_cult: 10000
+    addition: 7
+    sell_ls: 12000
+    fromSecretRealmID: 7
+  - id: 10021
+    name: 无光噬灵
+    rate: 50
+    deduct_cult: 10000
+    addition: 7
+    sell_ls: 12000
+    fromSecretRealmID: 7
+  - id: 10022
+    name: 混沌初开
+    rate: 50
+    deduct_cult: 20000
+    addition: 8
+    sell_ls: 24000
+    fromSecretRealmID: 8
+  - id: 10023
+    name: 深渊镇魔
+    rate: 50
+    deduct_cult: 20000
+    addition: 8
+    sell_ls: 24000
+    fromSecretRealmID: 8
+  - id: 10024
+    name: 虚空破界
+    rate: 50
+    deduct_cult: 20000
+    addition: 8
+    sell_ls: 24000
+    fromSecretRealmID: 8
+  - id: 10025
+    name: 虚空碎星
+    rate: 50
+    deduct_cult: 30000
+    addition: 9
+    sell_ls: 36000
+    fromSecretRealmID: 9
+  - id: 10026
+    name: 星墓封神
+    rate: 50
+    deduct_cult: 30000
+    addition: 9
+    sell_ls: 36000
+    fromSecretRealmID: 9
+  - id: 10027
+    name: 太虚归元
+    rate: 50
+    deduct_cult: 30000
+    addition: 9
+    sell_ls: 36000
+    fromSecretRealmID: 9

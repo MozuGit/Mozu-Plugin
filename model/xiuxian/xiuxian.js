@@ -4,8 +4,9 @@ import crypto from 'crypto'
 import { evaluate } from "mathjs"
 import { Config } from "./tools/Config/Config.js"
 
-const PLAYER_INFO_KEY = "Mozu:xiuxian:playerInfo"
-const SECT_INFO_KEY = "Mozu:xiuxian:sectInfo"
+const PLAYER_INFO_KEY = "Mozu:xiuxian:playerInfo"  //玩家信息KEY
+const PLAYER_BAG_KEY = "Mozu:xiuxian:playerBag"  //玩家背包KEY
+const SECT_INFO_KEY = "Mozu:xiuxian:sectInfo"  //宗门信息KEY
 
 export default new class {
   async init(openid) {
@@ -49,13 +50,14 @@ export default new class {
     if ((await Redis.exists(`${PLAYER_INFO_KEY}:${id}`)) === 0) {
       return false
     }
-    let [cult, ls, realm, signNum, retreatStartTime, sex, titleIndex, titles, sectId] = await Redis.hmget(key, '修为', '灵石', '境界', '签到次数', '闭关时间', '性别', '称号', '称号列表', '宗门ID')
+    let [cult, ls, realm, signNum, retreatStartTime, sex, titleIndex, titles, arts, sectId] = await Redis.hmget(key, '修为', '灵石', '境界', '签到次数', '闭关时间', '性别', '称号', '称号列表', '功法列表', '宗门ID')
     cult = parseInt(cult, 10) || 0
     ls = parseInt(ls, 10) || 0
     realm = parseInt(realm, 10) || 0
     signNum = parseInt(signNum, 10) || 0
     retreatStartTime = parseInt(retreatStartTime, 10) || 0
     sectId = parseInt(sectId, 10) || 0
+    arts = JSON.parse(arts || '[]')
     titles = JSON.parse(titles || '[]')
     titleIndex = parseInt(titleIndex, 10) || -1
     const title = titleIndex !== -1
@@ -67,6 +69,15 @@ export default new class {
             : '无'
         : '无'
       : '无'
+
+    const artsMap = new Map(Config.drop.arts.map(art => [art.id, art]))
+
+    const addition = {
+      art: arts.reduce((addition, id) => {
+        const art = artsMap.get(id)
+        return addition + (art ? art.addition : 0)
+      }, 0)
+    }
 
     const realmName = (Config.Realm.Realms.length >= realm) ? Config.Realm.Realms[realm - 1]?.name || '无' : Config.Realm.Realms[Config.Realm.Realms.length].name || '未命名'
     const realmName2 = Config.Realm.Realms[realm]?.name
@@ -84,7 +95,7 @@ export default new class {
     }
 
     const realms = {
-      realm: realm,
+      realm: parseInt(realm, 10),
       realmName,
       realmName2,
       realmNeedExp,
@@ -103,9 +114,58 @@ export default new class {
       sex: sex || '未设置',
       title,
       titles,
+      addition,
       sectInfo,
       retreat,
       power
+    }
+  }
+
+  async getUserBag(id) {
+    const { pills, arts } = Config.drop
+    let [pillsData, artsData] = await Redis.hmget(`${PLAYER_BAG_KEY}:${id}`, '丹药', '功法')
+    pillsData = JSON.parse(pillsData || '[]')
+    artsData = JSON.parse(artsData || '[]')
+    const Map = {}
+    pills.forEach(item => {
+      Map[item.id] = {
+        name: item.name,
+        cult: item.cult,
+        sell_ls: item.sell_ls
+      }
+    })
+    arts.forEach(item => {
+      Map[item.id] = {
+        name: item.name,
+        rate: item.rate,
+        deduct_cult: item.deduct_cult,
+        addition: item.addition,
+        sell_ls: item.sell_ls
+      }
+    })
+    pillsData = pillsData
+      .filter(item => Map[item.id] !== undefined)
+      .map(item => ({
+        ...item,
+        name: Map[item.id].name,
+        cult: Map[item.id].cult,
+        sell_ls: Map[item.id].sell_ls
+      }))
+      .sort((a, b) => a.id - b.id)
+    artsData = artsData
+      .filter(item => Map[item.id] !== undefined)
+      .map(item => ({
+        ...item,
+        name: Map[item.id].name,
+        rate: Map[item.id].rate,
+        deduct_cult: Map[item.id].deduct_cult,
+        addition: Map[item.id].addition,
+        sell_ls: Map[item.id].sell_ls
+      }))
+      .sort((a, b) => a.id - b.id)
+    return {
+      pills: pillsData,
+      arts: artsData
     }
   }
 
@@ -130,10 +190,17 @@ export default new class {
 
   async getPower(id) {
     const key = `${PLAYER_INFO_KEY}:${id}`
-    let [cult, realm] = await Redis.hmget(key, '修为', '境界')
+    let [cult, realm, arts] = await Redis.hmget(key, '修为', '境界', '功法列表')
     cult = parseInt(cult, 10)
     realm = parseInt(realm, 10) || 0.75
-    const power = Math.floor(evaluate(Config.xiuxian.powerFormula, { cult: cult, realm: realm }))
+    arts = JSON.parse(arts || '[]')
+    const artsMap = new Map(Config.drop.arts.map(art => [art.id, art]))
+    const addition = arts.reduce((addition, id) => {
+      const art = artsMap.get(id)
+      return addition + (art ? art.addition : 0)
+    }, 0)
+    let power = Math.floor(evaluate(Config.xiuxian.powerFormula, { cult: cult, realm: realm }))
+    power = Math.floor(power + power * (addition / 100))
     return power
   }
 
@@ -449,7 +516,7 @@ export default new class {
         break
       case '战力':
         for (let i = 0; i < idNum; i++) {
-          pipeline.hmget(`${PLAYER_INFO_KEY}:${i}`, '修为', '境界', '称号', '称号列表')
+          pipeline.hmget(`${PLAYER_INFO_KEY}:${i}`, '修为', '境界', '称号', '称号列表', '功法列表')
         }
         break
       case '闭关':
@@ -486,10 +553,17 @@ export default new class {
         }
         break
       case '战力':
+        const artsMap = new Map(Config.drop.arts.map(art => [art.id, art]))
         for (let i = 0; i < idNum; i++) {
           const cult = parseInt(results[i][1][0], 10)
           const realm = parseInt(results[i][1][1], 10) || 0.75
-          const value = Math.floor(evaluate(Config.xiuxian.powerFormula, { cult: cult, realm: realm }))
+          const arts = JSON.parse(results[i][1][4] || '[]')
+          const addition = arts.reduce((addition, id) => {
+            const art = artsMap.get(id)
+            return addition + (art ? art.addition : 0)
+          }, 0)
+          const power = Math.floor(evaluate(Config.xiuxian.powerFormula, { cult: cult, realm: realm }))
+          const value = Math.floor(power + power * (addition / 100))
           const titleIndex = parseInt(results[i][1][2], 10) || 0
           const titles = JSON.parse(results[i][1][3] || '[]')
           const title = titleIndex !== -1
@@ -566,7 +640,7 @@ export default new class {
 
   async huntBeast(id, beastInfo, isMaster) {
     let [cult, ls, last, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '灵石', '上次猎杀妖兽时间', '闭关时间')
-    cult = parseInt(cult, 10),
+    cult = parseInt(cult, 10)
     ls = parseInt(ls, 10)
     last = parseInt(last, 10) || 0
     retreatStart = parseInt(retreatStart, 10) || 0
@@ -617,6 +691,406 @@ export default new class {
         data: {
           state: "failure",
           winRate: (finalWinRate * 100).toFixed(2)
+        }
+      }
+    }
+  }
+
+  async exploreSecretRealm(id, secretRealmInfo, count = 1) {
+    const limitRealm = Config.drop.secretRealm_limit[secretRealmInfo.level] || 0
+    let [ls, realm, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '境界', '闭关时间')
+    ls = parseInt(ls, 10)
+    realm = parseInt(realm, 10)
+    retreatStart = parseInt(retreatStart, 10) || 0
+    if (retreatStart !== 0) {
+      return {
+        event: "in_retreat"
+      }
+    }
+    if (realm < limitRealm) {
+      return {
+        event: "limit_realm"
+      }
+    }
+    if (ls < secretRealmInfo.cost_ls * count) {
+      return {
+        event: "lack_ls",
+        data: {
+          need_ls: secretRealmInfo.cost_ls * count
+        }
+      }
+    }
+    let pills = []
+    let arts = []
+    Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '灵石', ls - (secretRealmInfo.cost_ls * count))
+    for (let i = 0; i < count; i++) {
+      if (randomInt(100, 1, id) <= secretRealmInfo.drop_rate) {
+        if (randomInt(100, 1, id) <= 70) {
+          pills.push(secretRealmInfo.pills[randomInt(secretRealmInfo.pills.length - 1, 0, id)])
+        } else {
+          arts.push(secretRealmInfo.arts[randomInt(secretRealmInfo.arts.length - 1, 0, id)])
+        }
+      }
+    }
+    if (pills.length !== 0 || arts.length !== 0) {
+      let [pillsData, artsData] = await Redis.hmget(`${PLAYER_BAG_KEY}:${id}`, '丹药', '功法')
+      pillsData = JSON.parse(pillsData || '[]')
+      artsData = JSON.parse(artsData || '[]')
+      for (const pill of pills) {
+        const pillData = pillsData.find(p => p.id === pill.id)
+        if (pillData) {
+          pillData.count = pillData.count + 1
+        } else {
+          pillsData.push({ id: pill.id, count: 1 })
+        }
+      }
+      for (const art of arts) {
+        const artData = artsData.find(a => a.id === art.id)
+        if (artData) {
+          artData.count = artData.count + 1
+        } else {
+          artsData.push({ id: art.id, count: 1 })
+        }
+      }
+      Redis.hmset(`${PLAYER_BAG_KEY}:${id}`, {
+        丹药: JSON.stringify(pillsData),
+        功法: JSON.stringify(artsData)
+      })
+    }
+    return {
+      event: "explore_secret_realm",
+      data: {
+        need_ls: secretRealmInfo.cost_ls * count,
+        pills: pills,
+        arts: arts
+      }
+    }
+  }
+
+  async usePill(id, pillId, count = 1, pillAll = false) {
+    let [cult, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '闭关时间')
+    cult = parseInt(cult, 10)
+    retreatStart = parseInt(retreatStart, 10) || 0
+    if (retreatStart !== 0) {
+      return {
+        event: "in_retreat"
+      }
+    }
+    if (pillAll) {
+      const pillsData = (await this.getUserBag(id)).pills
+      let usePills = []
+      const addcult = pillsData.reduce((acc, item) => {
+        usePills.push({
+          id: item.id,
+          name: item.name,
+          cultAll: item.cult * item.count,
+          count: item.count
+        })
+        return acc += item.cult * item.count
+      }, 0)
+      Redis.hset(`${PLAYER_BAG_KEY}:${id}`, '丹药', '[]')
+      Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '修为', cult + addcult)
+      return {
+        event: "use_pill_all",
+        data: {
+          addcult: addcult,
+          usePills: usePills.sort((a, b) => a.id - b.id)
+        }
+      }
+    } else {
+      const pills = Config.drop.pills
+      const pillsData = JSON.parse(await Redis.hget(`${PLAYER_BAG_KEY}:${id}`, '丹药') || '[]')
+      const pill = pillsData.find(p => p.id === pillId)
+      if (pill) {
+        const pillInfo = pills.find(p => p.id === pill.id)
+        if (pillInfo) {
+          if (pill.count >= count) {
+            pill.count = pill.count - count
+            const addcult = count * pillInfo.cult
+            if (pill.count === 0) {
+              const index = pillsData.findIndex(p => p.id === pill.id)
+              pillsData.splice(index, 1)
+            }
+            Redis.hset(`${PLAYER_BAG_KEY}:${id}`, '丹药', JSON.stringify(pillsData))
+            Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '修为', cult + addcult)
+            return {
+              event: "use_pill",
+              data: {
+                addcult: addcult,
+                count: pill.count,
+                pill: pillInfo
+              }
+            }
+          } else {
+            return {
+              event: "lack_pill_count",
+              data: {
+                pill: pillInfo
+              }
+            }
+          }
+        } else {
+          return {
+            event: "no_pill"
+          }
+        }
+      } else {
+        return {
+          event: "no_pill"
+        }
+      }
+    }
+  }
+
+  async sellPill(id, pillId, count = 1, pillAll = false) {
+    let [ls, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '闭关时间')
+    ls = parseInt(ls, 10)
+    retreatStart = parseInt(retreatStart, 10) || 0
+    if (retreatStart !== 0) {
+      return {
+        event: "in_retreat"
+      }
+    }
+    if (pillAll) {
+      const pillsData = (await this.getUserBag(id)).pills
+      let sellPills = []
+      const addls = pillsData.reduce((acc, item) => {
+        usePills.push({
+          id: item.id,
+          name: item.name,
+          lsAll: item.sell_ls * item.count,
+          count: item.count
+        })
+        return acc += item.sell_ls * item.count
+      }, 0)
+      Redis.hset(`${PLAYER_BAG_KEY}:${id}`, '丹药', '[]')
+      Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '灵石', ls + addls)
+      return {
+        event: "sell_pill_all",
+        data: {
+          addls: addls,
+          sellPills: sellPills.sort((a, b) => a.id - b.id)
+        }
+      }
+    } else {
+      const pills = Config.drop.pills
+      const pillsData = JSON.parse(await Redis.hget(`${PLAYER_BAG_KEY}:${id}`, '丹药') || '[]')
+      const pill = pillsData.find(p => p.id === pillId)
+      if (pill) {
+        const pillInfo = pills.find(p => p.id === pill.id)
+        if (pillInfo) {
+          if (pill.count >= count) {
+            pill.count = pill.count - count
+            const addls = count * pillInfo.sell_ls
+            if (pill.count === 0) {
+              const index = pillsData.findIndex(p => p.id === pill.id)
+              pillsData.splice(index, 1)
+            }
+            Redis.hset(`${PLAYER_BAG_KEY}:${id}`, '丹药', JSON.stringify(pillsData))
+            Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '灵石', ls + addls)
+            return {
+              event: "sell_pill",
+              data: {
+                addls: addls,
+                count: pill.count,
+                pill: pillInfo
+              }
+            }
+          } else {
+            return {
+              event: "lack_pill_count",
+              data: {
+                pill: pillInfo
+              }
+            }
+          }
+        } else {
+          return {
+            event: "no_pill"
+          }
+        }
+      } else {
+        return {
+          event: "no_pill"
+        }
+      }
+    }
+  }
+
+  async learnArt(id, artId, artAll = false) {
+    let [cult, arts, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '功法列表', '闭关时间')
+    cult = parseInt(cult, 10)
+    arts = new Set(JSON.parse(arts || '[]'))
+    retreatStart = parseInt(retreatStart, 10) || 0
+    if (retreatStart !== 0) {
+      return {
+        event: "in_retreat"
+      }
+    }
+    if (artAll) {
+      const artsData = JSON.parse(await Redis.hget(`${PLAYER_BAG_KEY}:${id}`, '功法') || '[]')
+      let haslearnArts = []
+      let learnArts = []
+      let learnArtsIns = []
+      let deduct_cult = 0
+      for (const art of artsData) {
+        if (arts.has(art.id)) {
+          haslearnArts.push(art.id)
+        } else {
+          const artInfo = Config.drop.arts.find(a => a.id === art.id)
+          if (!artInfo) continue
+          let count = art.count
+          for (let i = 0; i < art.count; i++) {
+            count--
+            if (randomInt(100, 1, id) <= artInfo.rate) {
+              arts.add(art.id)
+              learnArts.push({
+                id: art.id,
+                addition: artInfo.addition
+              })
+              break
+            } else {
+              const learnArtIns = learnArtsIns.find(a => a.id === art.id)
+              learnArtsIns.push({
+                id: art.id,
+                count: 1,
+                deduct_cult: artInfo.deduct_cult
+              })
+              deduct_cult += artInfo.deduct_cult
+            }
+          }
+          if (count === 0) {
+            const index = artsData.findIndex(a => a.id === art.id)
+            artsData.splice(index, 1)
+          } else {
+            const artData = artsData.find(a => a.id === art.id)
+            artData.count = count
+          }
+        }
+      }
+      Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
+        功法列表: JSON.stringify([...arts]),
+        修为: cult - deduct_cult
+      })
+      Redis.hset(`${PLAYER_BAG_KEY}:${id}`, '功法', JSON.stringify(artsData))
+      return {
+        event: "learn_art_all",
+        data: {
+          haslearnArts: haslearnArts.sort((a, b) => a.id - b.id),
+          learnArts: learnArts.sort((a, b) => a.id - b.id),
+          learnArtsIns: learnArtsIns.sort((a, b) => a.id - b.id)
+        }
+      }
+    } else {
+      if (arts.has(artId)) {
+        return {
+          event: "learned_art"
+        }
+      }
+      const artsData = JSON.parse(await Redis.hget(`${PLAYER_BAG_KEY}:${id}`, '功法') || '[]')
+      const artData = artsData.find(a => a.id === artId)
+      if (artData) {
+        artData.count = artData.count - 1
+        const artInfo = Config.drop.arts.find(a => a.id === artData.id)
+        if (artInfo) {
+          let state
+          if (randomInt(100, 1, id) <= artInfo.rate) {
+            arts.add(artId)
+            state = true
+            Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '功法列表', artsData)
+          } else {
+            state = false
+            Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '修为', cult - artInfo.deduct_cult)
+          }
+          Redis.hset(`${PLAYER_BAG_KEY}:${id}`, '功法', JSON.stringify([...arts]))
+          return {
+            event: "learn_art",
+            data: {
+              state,
+              artInfo
+            }
+          }
+        } else {
+          event: "no_art"
+        }
+      } else {
+        return {
+          event: "no_art"
+        }
+      }
+    }
+  }
+
+  async sellArt(id, artId, count = 1, artAll = false) {
+    let [ls, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '闭关时间')
+    ls = parseInt(ls, 10)
+    retreatStart = parseInt(retreatStart, 10) || 0
+    if (retreatStart !== 0) {
+      return {
+        event: "in_retreat"
+      }
+    }
+    if (artAll) {
+      const artsData = (await this.getUserBag(id)).arts
+      let sellArt = []
+      const addls = artsData.reduce((acc, item) => {
+        sellArt.push({
+          id: item.id,
+          name: item.name,
+          lsAll: item.sell_ls * item.count,
+          count: item.count
+        })
+        return acc += item.sell_ls * item.count
+      }, 0)
+      Redis.hset(`${PLAYER_BAG_KEY}:${id}`, '功法', '[]')
+      Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '灵石', ls + addls)
+      return {
+        event: "sell_art_all",
+        data: {
+          addls: addls,
+          sellArts: sellArt.sort((a, b) => a.id - b.id)
+        }
+      }
+    } else {
+      const arts = Config.drop.arts
+      const artsData = JSON.parse(await Redis.hget(`${PLAYER_BAG_KEY}:${id}`, '功法') || '[]')
+      const art = artsData.find(p => p.id === artId)
+      if (art) {
+        const artInfo = arts.find(p => p.id === art.id)
+        if (artInfo) {
+          if (art.count >= count) {
+            art.count = art.count - count
+            const addls = count * artInfo.sell_ls
+            if (art.count === 0) {
+              const index = artsData.findIndex(p => p.id === art.id)
+              artsData.splice(index, 1)
+            }
+            Redis.hset(`${PLAYER_BAG_KEY}:${id}`, '丹药', JSON.stringify(artsData))
+            Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '灵石', ls + addls)
+            return {
+              event: "sell_art",
+              data: {
+                addls: addls,
+                count: art.count,
+                art: artInfo
+              }
+            }
+          } else {
+            return {
+              event: "lack_art_count",
+              data: {
+                art: artInfo
+              }
+            }
+          }
+        } else {
+          return {
+            event: "no_art"
+          }
+        }
+      } else {
+        return {
+          event: "no_art"
         }
       }
     }
