@@ -16,7 +16,7 @@ export class MozuXiuxianBackup extends plugin {
       priority: Config.setting.priority,
       rule: [
         {
-          reg: "#?(?:魔族陌)?修仙备份(?:还原(.*))?$",
+          reg: "#?(?:魔族陌)?修仙备份(?:还原)?(.*)$",
           fnc: "xiuxianBackup"
         }
       ],
@@ -37,11 +37,11 @@ export class MozuXiuxianBackup extends plugin {
     } else if (Config.setting.group === 2) {
       if (!Config.setting.whiteGroup.includes(this.e.group_id)) return false
     }
+    const match = this.e.msg.match(/#?(?:魔族陌)?修仙备份(?:还原)?(.*)$/)
+    const raw = match?.[1]?.trim()
     if (this.e.msg.includes("还原")) {
-      const match = this.e.msg.match(/#?(?:魔族陌)?修仙备份(?:还原(.*))?$/)
-      const raw = match?.[1]?.trim()
-      const filename = raw.endsWith('.json') ? raw : raw + '.json'
-      const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", filename)
+      const fileName = raw.endsWith('.json') ? raw : raw + '.json'
+      const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", fileName)
       if (fs.existsSync(filePath)) {
         const result = await restoreKeys(filePath)
         const message = [
@@ -49,7 +49,7 @@ export class MozuXiuxianBackup extends plugin {
           '***',
           '**修仙备份还原成功**',
           '>还原' + result + '个键',
-          '来自文件' + Version.Plugin_Name + '/' + filename,
+          '来自文件' + path.join(Version.Plugin_Name, 'backup', 'xiuxian', fileName),
           '***'
         ].join('\n')
         this.e.reply([message, Button.backup])
@@ -62,9 +62,13 @@ export class MozuXiuxianBackup extends plugin {
         const message = [
           '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
           '***',
-          '**文件不存在**',
-          '>请确认文件是否存在',
-          '***',
+          ...(fileName !== ".json"
+            ? [
+              '**文件不存在**',
+              '>请确认文件是否存在',
+              '***'
+            ]
+            : []),
           '**还原备份文件**',
           '>**' + backupItems.reverse().slice(0, parseInt(Config.setting.maxBackupFile, 10) || 10).join("**\n>**") + '**',
           '***'
@@ -72,15 +76,16 @@ export class MozuXiuxianBackup extends plugin {
         this.e.reply([message, Button.backup])
       }
     } else {
-      const filename = "/backup/xiuxian/" + formatTime(Math.floor(Date.now() / parseInt(Config.setting.maxBackupFile, 10) || 1000)) + ".json"
-      const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", formatTime(Math.floor(Date.now() / parseInt(Config.setting.maxBackupFile, 10) || 1000)) + ".json")
+      const fileTime = formatTime(Date.now())
+      const fileName = raw ? raw.endsWith('.json') ? raw : raw + '.json' : fileTime + ".json"
+      const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", fileName)
       const result = await backupKeys("Mozu:xiuxian:*", filePath)
       const message = [
         '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
         '***',
         '**修仙备份成功**',
         '>备份' + result + '个键到：',
-        Version.Plugin_Name + filename,
+        path.join(Version.Plugin_Name, 'backup', 'xiuxian', fileName),
         '***'
       ].join('\n')
       this.e.reply([message, Button.backup])
@@ -97,8 +102,9 @@ export class MozuXiuxianBackup extends plugin {
   }
 
   async cronBackup() {
-    const filename = "/backup/xiuxian/" + formatTime(Math.floor(Date.now() / parseInt(Config.setting.maxBackupFile, 10) || 1000)) + ".json"
-    const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", formatTime(Math.floor(Date.now() / parseInt(Config.setting.maxBackupFile, 10) || 1000)) + ".json")
+    const fileTime = formatTime(Date.now())
+    const fileName = fileTime + ".json"
+    const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", fileName)
     const result = await backupKeys("Mozu:xiuxian:*", filePath)
     if (Config.setting.maxBackupFile > 0) {
       const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
@@ -109,7 +115,7 @@ export class MozuXiuxianBackup extends plugin {
       }
     }
     logger.info("[魔族陌修仙] 定时备份成功")
-    logger.info("[魔族陌修仙] 备份" + result + "个键到" + Version.Plugin_Name + filename)
+    logger.info("[魔族陌修仙] 备份" + result + "个键到" + path.join(Version.Plugin_Name, 'backup', 'xiuxian', fileName))
     return false
   }
 }
@@ -120,7 +126,7 @@ export class MozuXiuxianBackup extends plugin {
  * @returns {string} 格式化时间
  */
 function formatTime(timestamp) {
-  const time = timestamp.toString().length === parseInt(Config.setting.maxBackupFile, 10) || 10 ? timestamp * parseInt(Config.setting.maxBackupFile, 10) || 1000 : timestamp
+  const time = timestamp.toString().length === 10 ? timestamp * 1000 : timestamp
   const d = new Date(time)
 
   const year = d.getFullYear()

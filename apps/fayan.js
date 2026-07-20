@@ -75,6 +75,7 @@ export class MozuFayan extends plugin {
         '<@' + this.e.user_id.replace(this.e.self_id + ':', '') + '>',
         '***',
         '**本群发言榜' + type + '**',
+        '>数据仅供参考  请以实际发言为准',
         '***'
       ].join('\n'))
       for (let i = 0; i < list.length; i += 2) {
@@ -105,6 +106,8 @@ export class MozuFayan extends plugin {
     } else {
       msg.push([
         '本群发言榜' + type,
+        '--------',
+        '数据仅供参考  请以实际发言为准',
         '--------'
       ].join('\n'))
       for (let i = 0; i < list.length; i += 2) {

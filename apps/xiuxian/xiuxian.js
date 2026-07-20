@@ -42,6 +42,6 @@ export class MozuXiuxian extends plugin {
     if (lastText !== null) {
       await this.e.reply(segment.markdown(lastText))
     }
-    return false
+    return true
   }
 }
