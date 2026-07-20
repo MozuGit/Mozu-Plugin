@@ -32,7 +32,7 @@ async function xiuxianText(msg, user_id, at, isMaster) {
       Text.push(Button.author)
     }
   } catch (err) {
-    logger.error(err)
+    logger.error("[魔族陌修仙] " + logger.red(err))
     Text.push([
       '<@' + user_id + '>',
       '***',
@@ -40,6 +40,7 @@ async function xiuxianText(msg, user_id, at, isMaster) {
       '>联系主人：' + (await qagent(Config.setting.contact.peerUid, Config.setting.contact.peerName)),
       '***',
     ].join('\n'))
+    Text.push(Button.author)
   }
   return Text
 }
