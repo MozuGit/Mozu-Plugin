@@ -20,7 +20,7 @@ export default [
     }
   },
   {
-    field: "xiuxian.tools.cdk",
+    field: "tools.cdk",
     label: "兑换码",
     bottomHelpMessage: "兑换码列表",
     component: "Select",
@@ -44,7 +44,7 @@ export default [
             title: '确认删除',
             content: '确认该兑换码吗？此操作不可撤销！'
           },
-          args: ['#{xiuxian.tools.cdk}']
+          args: ['#{tools.cdk}']
         }
       ]
     }
@@ -64,7 +64,7 @@ export default [
     }
   },
   {
-    field: "xiuxian.tools.title.id",
+    field: "tools.title.id",
     label: "修仙ID",
     bottomHelpMessage: "要给予称号的修仙ID",
     component: "InputNumber",
@@ -77,7 +77,7 @@ export default [
     }
   },
   {
-    field: "xiuxian.tools.title.title",
+    field: "tools.title.title",
     label: "称号文本",
     bottomHelpMessage: "要给予称号的文本",
     component: "Input",
@@ -89,7 +89,7 @@ export default [
     }
   },
   {
-    field: "xiuxian.tools.title.validDay",
+    field: "tools.title.validDay",
     label: "称号有效期",
     bottomHelpMessage: "要给予称号的有效期（单位：天，0表示永久）",
     component: "InputNumber",
@@ -112,7 +112,7 @@ export default [
           action: 'addTitle',
           type: 'primary',
           icon: "ant-design:plus-circle-filled",
-          args: ['#{xiuxian.tools.title.title}', '#{xiuxian.tools.title.id}', '#{xiuxian.tools.title.validDay}']
+          args: ['#{tools.title.title}', '#{tools.title.id}', '#{tools.title.validDay}']
         }
       ]
     }

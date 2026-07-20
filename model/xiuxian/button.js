@@ -1,6 +1,6 @@
-import { Config } from "./tools/Config/Config.js"
+import Config from "#Config"
 
-const prefix = Config.setting.forceSharp ? '/' : ''
+const prefix = Config.xiuxian.setting.forceSharp ? '/' : ''
 
 const Button = {
   get xiuxian() {
@@ -177,7 +177,7 @@ const Button = {
     )
   },
   get secretRealm() {
-    const secretRealms = Config.drop.secretRealms
+    const secretRealms = Config.xiuxian.drop.secretRealms
     const args = []
     args.push([
       { text: "探索秘境+编号", input: prefix + "探索秘境" },

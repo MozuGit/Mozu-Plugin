@@ -1,6 +1,6 @@
-import { Config } from "./tools/Config/Config.js"
+import Config from "#Config"
 
-const prefix = Config.setting.forceSharp ? '/' : ''
+const prefix = Config.xiuxian.setting.forceSharp ? '/' : ''
 
 const help = {
   get xiuxian() {

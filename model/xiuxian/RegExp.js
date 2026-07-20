@@ -1,6 +1,6 @@
-import { Config } from "./tools/Config/Config.js"
+import Config from "#Config"
 
-const prefix = Config.setting.forceSharp ? '^#' : '^#?'
+const prefix = Config.xiuxian.setting.forceSharp ? '^#' : '^#?'
 
 const patterns = [
   /(修炼|开采|修仙签到|修仙个人信息|我的称号|(一键)?突破|修仙排行|妖兽列表|秘境列表|修仙更多|撤回加入宗门申请)/,

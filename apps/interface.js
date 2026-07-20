@@ -1,7 +1,7 @@
 import Redis from "#Redis"
-import { Config } from "../model/Config/Config.js"
+import Config from "#Config"
 
-if (Config.Redis.global) global.Redis = Redis
+if (Config.config.Redis.global) global.Redis = Redis
 
 export class MozuInterface extends plugin {
   constructor() {

@@ -1,5 +1,5 @@
+import Config from "#Config"
 import { RegExp } from "../../model/xiuxian/index.js"
-import { Config } from "../../model/xiuxian/tools/Config/Config.js"
 import { xiuxianText } from "../../model/xiuxian/tools/xiuxianText.js"
 
 export class MozuXiuxian extends plugin {
@@ -8,7 +8,7 @@ export class MozuXiuxian extends plugin {
       name: '魔族陌修仙',
       dsc: '魔族陌修仙',
       event: 'message',
-      priority: Config.setting.priority,
+      priority: Config.xiuxian.setting.priority,
       rule: [{
         reg: RegExp.xiuxian,
         fnc: 'xiuxian'
@@ -17,11 +17,11 @@ export class MozuXiuxian extends plugin {
   }
 
   async xiuxian(e) {
-    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.setting.enable) return false
-    if (Config.setting.group === 1) {
-      if (Config.setting.blackGroup.includes(this.e.group_id)) return false
-    } else if (Config.setting.group === 2) {
-      if (!Config.setting.whiteGroup.includes(this.e.group_id)) return false
+    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.xiuxian.setting.enable) return false
+    if (Config.xiuxian.setting.group === 1) {
+      if (Config.xiuxian.setting.blackGroup.includes(this.e.group_id)) return false
+    } else if (Config.xiuxian.setting.group === 2) {
+      if (!Config.xiuxian.setting.whiteGroup.includes(this.e.group_id)) return false
     }
     const user_id = this.e.user_id.replace(`${this.e.self_id}:`, '')
     const message = await xiuxianText(this.e.msg.replace(/^#/, ''), user_id, this.e?.at?.replace(`${this.e.self_id}:`, ''), this.e.isMaster)

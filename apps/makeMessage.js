@@ -1,5 +1,5 @@
 import Redis from '#Redis'
-import { Config } from '../model/Config/Config.js'
+import Config from "#Config"
 
 export class MozuMakeMessage extends plugin {
   constructor() {
@@ -22,7 +22,7 @@ export class MozuMakeMessage extends plugin {
   }
 
   async forged(e) {
-    if (['QQBot'].includes(e?.bot?.adapter?.name) || !Config.makeMessage.enable || (Config.makeMessage.onlyMaster && !this.e.isMaster)) return false
+    if (['QQBot'].includes(e?.bot?.adapter?.name) || !Config.config.makeMessage.enable || (Config.config.makeMessage.onlyMaster && !this.e.isMaster)) return false
     let msgList = [], imgUrls = [], AtQQ = []
     let num = 0
     if (!e.group) return e.reply("私聊暂不支持此操作", true)
@@ -76,7 +76,7 @@ export class MozuMakeMessage extends plugin {
           if (imgUrls.length !== 1) imgUrls.pop()
         }
       }
-      if (Config.makeMessage.whiteQQList.includes(Number(msg[0])) && !e.isMaster) continue
+      if (Config.config.makeMessage.whiteQQList.includes(Number(msg[0])) && !e.isMaster) continue
       msgList.push({
         message: msgContent,
         user_id: Number(msg[0]),
@@ -91,12 +91,12 @@ export class MozuMakeMessage extends plugin {
   }
 
   async repeat(e) {
-    if (['QQBot'].includes(e?.bot?.adapter?.name) || !Config.makeMessage.enable || (Config.makeMessage.onlyMaster && !this.e.isMaster)) return false
+    if (['QQBot'].includes(e?.bot?.adapter?.name) || !Config.config.makeMessage.enable || (Config.config.makeMessage.onlyMaster && !this.e.isMaster)) return false
     let msgList = []
     if (!e.group) return e.reply("私聊暂不支持此操作", true)
     let match = e.msg.match(/^#?伪(造|装)复读\s*(.+?)(?:\s+(\d+))?$/)
     let text = match[2]
-    let number = match[3] ? parseInt(match[3]) : Config.makeMessage.repeatCount || 10
+    let number = match[3] ? parseInt(match[3]) : Config.config.makeMessage.repeatCount || 10
     const QQListdata = await this.e.group.getMemberArray()
     let userIds = QQListdata.map(member => member.user_id)
     let userNames = QQListdata.map(member => member.nickname)

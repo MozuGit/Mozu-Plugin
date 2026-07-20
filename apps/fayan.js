@@ -1,5 +1,5 @@
 import Redis from '#Redis'
-import { Config } from '../model/Config/Config.js'
+import Config from "#Config"
 
 export class MozuFayan extends plugin {
   constructor() {
@@ -26,7 +26,7 @@ export class MozuFayan extends plugin {
   }
 
   async accept(e) {
-    if (!Config.fayan.enable || !this.e.group) return false
+    if (!Config.config.fayan.enable || !this.e.group) return false
     let date = await gettoday()
     let month = await getmonth()
     let week = await getweek()
@@ -39,7 +39,7 @@ export class MozuFayan extends plugin {
   }
 
   async fayan(e) {
-    if (!Config.fayan.enable || !this.e.group) return false
+    if (!Config.config.fayan.enable || !this.e.group) return false
     const type = this.e.msg.match(/^#?发言榜(日榜|月榜|周榜|昨日|上周)?$/)?.[1] || "日榜"
     let date
     switch (type) {
@@ -60,7 +60,7 @@ export class MozuFayan extends plugin {
         break
     }
     const key = `Mozu:msg:${date}:group:${this.e.group_id}`
-    let list = await Redis.zrevrange(key, 0, Config.fayan.count - 1, 'WITHSCORES')
+    let list = await Redis.zrevrange(key, 0, Config.config.fayan.count - 1, 'WITHSCORES')
     let [score, rank] = await Promise.all([
       Redis.zscore(key, this.e.user_id),
       Redis.zrevrank(key, this.e.user_id)
@@ -70,7 +70,7 @@ export class MozuFayan extends plugin {
     const names = await Redis.hmget(`Mozu:username`, ...userIds)
     let message
     let msg = []
-    if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.fayan.sendMarkdown) {
+    if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.config.fayan.sendMarkdown) {
       msg.push([
         '<@' + this.e.user_id.replace(this.e.self_id + ':', '') + '>',
         '***',
@@ -125,7 +125,7 @@ export class MozuFayan extends plugin {
   }
 
   async clearAll(e) {
-    if (!Config.fayan.enable || !this.e.group || !this.e.isMaster) return false
+    if (!Config.config.fayan.enable || !this.e.group || !this.e.isMaster) return false
     let date = await gettoday()
     let month = await getmonth()
     let week = await getweek()
@@ -134,7 +134,7 @@ export class MozuFayan extends plugin {
     pipeline.del(`Mozu:msg:${month}:group:${this.e.group_id}`)
     pipeline.del(`Mozu:msg:${week}:group:${this.e.group_id}`)
     await pipeline.exec()
-    if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.fayan.sendMarkdown) {
+    if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.config.fayan.sendMarkdown) {
       const message = segment.markdown([
         '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
         '***',
@@ -158,14 +158,14 @@ export class MozuFayan extends plugin {
   }
 
   async clearAt(e) {
-    if (!Config.fayan.enable || !this.e.group || !this.e.isMaster) return false
+    if (!Config.config.fayan.enable || !this.e.group || !this.e.isMaster) return false
     let date = await gettoday()
     let month = await getmonth()
     let week = await getweek()
     const pipeline = Redis.pipeline()
     const AtQQ = this.e?.at
     if (!AtQQ) {
-      if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.fayan.sendMarkdown) {
+      if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.config.fayan.sendMarkdown) {
         const message = segment.markdown([
           '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
           '***',
@@ -193,7 +193,7 @@ export class MozuFayan extends plugin {
     pipeline.zrem(`Mozu:msg:${month}:group:${this.e.group_id}`, AtQQ)
     pipeline.zrem(`Mozu:msg:${week}:group:${this.e.group_id}`, AtQQ)
     await pipeline.exec()
-    if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.fayan.sendMarkdown) {
+    if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.config.fayan.sendMarkdown) {
       const message = segment.markdown([
         '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
         '***',

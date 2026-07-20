@@ -1,4 +1,4 @@
-import { Config } from "../../model/xiuxian/tools/Config/Config.js"
+import Config from "#Config"
 
 export default [
   {
@@ -227,75 +227,59 @@ export default [
     }
   },
   {
-    field: "xiuxian.xiuxian.range",
-    label: "上限下限",
-    component: "GSubForm",
+    field: "xiuxian.xiuxian.maxcult",
+    label: "修为上限",
+    bottomHelpMessage: "修炼单次随机修为上限",
+    component: "InputNumber",
     componentProps: {
-      modalProps: {
-        title: "修为&灵石的上限下限"
-      },
+      placeholder: "请输入修为上限",
+      min: 0,
+      step: 100,
       style: {
-        maxHeight: "200px",
-        overflowY: "auto"
-      },
-      schemas: [
-        {
-          field: "maxcult",
-          label: "修为上限",
-          bottomHelpMessage: "修炼单次随机修为上限",
-          component: "InputNumber",
-          componentProps: {
-            placeholder: "请输入修为上限",
-            min: 0,
-            step: 100,
-            style: {
-              width: "180px"
-            }
-          }
-        },
-        {
-          field: "mincult",
-          label: "修为下限",
-          bottomHelpMessage: "修炼单次随机修为下限",
-          component: "InputNumber",
-          componentProps: {
-            placeholder: "请输入修为下限",
-            min: 0,
-            step: 100,
-            style: {
-              width: "180px"
-            }
-          }
-        },
-        {
-          field: "maxls",
-          label: "灵石上限",
-          bottomHelpMessage: "开采单次随机灵石上限",
-          component: "InputNumber",
-          componentProps: {
-            placeholder: "请输入灵石上限",
-            min: 0,
-            step: 100,
-            style: {
-              width: "180px"
-            }
-          }
-        },
-        {
-          field: "minls",
-          label: "灵石下限",
-          bottomHelpMessage: "开采单次随机灵石下限",
-          component: "InputNumber",
-          componentProps: {
-            placeholder: "请输入灵石下限",
-            min: 0,
-            step: 100,
-            style: {
-              width: "180px"
-            }
-          }
-        }
-      ]
+        width: "180px"
+      }
+    }
+  },
+  {
+    field: "xiuxian.xiuxian.mincult",
+    label: "修为下限",
+    bottomHelpMessage: "修炼单次随机修为下限",
+    component: "InputNumber",
+    componentProps: {
+      placeholder: "请输入修为下限",
+      min: 0,
+      step: 100,
+      style: {
+        width: "180px"
+      }
+    }
+  },
+  {
+    field: "xiuxian.xiuxian.maxls",
+    label: "灵石上限",
+    bottomHelpMessage: "开采单次随机灵石上限",
+    component: "InputNumber",
+    componentProps: {
+      placeholder: "请输入灵石上限",
+      min: 0,
+      step: 100,
+      style: {
+        width: "180px"
+      }
+    }
+  },
+  {
+    field: "xiuxian.xiuxian.minls",
+    label: "灵石下限",
+    bottomHelpMessage: "开采单次随机灵石下限",
+    component: "InputNumber",
+    componentProps: {
+      placeholder: "请输入灵石下限",
+      min: 0,
+      step: 100,
+      style: {
+        width: "180px"
+      }
     }
   },
   {
@@ -445,7 +429,7 @@ export default [
     }
   },
   {
-    field: "xiuxian.realm",
+    field: "xiuxian.Realm",
     label: "修仙境界配置",
     component: "GSubForm",
     componentProps: {
@@ -1201,7 +1185,7 @@ export default [
 ]
 
 function getRealmList() {
-  const realms = Config.Realm.Realms
+  const realms = Config.xiuxian.Realm.Realms
   return realms.map((realm, index) => ({
     label: realm.name,
     value: index + 1
@@ -1209,7 +1193,7 @@ function getRealmList() {
 }
 
 function getSecretRealmList() {
-  const secretRealms = Config.drop.secretRealms
+  const secretRealms = Config.xiuxian.drop.secretRealms
   return secretRealms.map((secretRealm, index) => ({
     label: secretRealm.name,
     value: index + 1

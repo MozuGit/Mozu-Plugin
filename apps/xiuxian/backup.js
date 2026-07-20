@@ -2,9 +2,9 @@ import fs from "node:fs"
 import path from "path"
 import { readdir, unlink } from "node:fs/promises"
 
+import Config from "#Config"
 import { mqqapi } from "../../model/xiuxian/tools/protocol.js"
 import { backupKeys, restoreKeys } from "../../scripts/backup.js"
-import { Config } from "../../model/xiuxian/tools/Config/Config.js"
 import { Version } from "../../model/Config/Version.js"
 import { Button } from "../../model/xiuxian/index.js"
 
@@ -13,7 +13,7 @@ export class MozuXiuxianBackup extends plugin {
     super({
       name: "修仙备份",
       event: "message",
-      priority: Config.setting.priority,
+      priority: Config.xiuxian.setting.priority,
       rule: [
         {
           reg: "#?(?:魔族陌)?修仙备份(?:还原)?(.*)$",
@@ -22,7 +22,7 @@ export class MozuXiuxianBackup extends plugin {
       ],
       task: [
         {
-          cron: Config.setting.cronBackup || "0 0 * * * *",
+          cron: Config.xiuxian.setting.cronBackup || "0 0 * * * *",
           name: "修仙定时备份",
           fnc: () => this.cronBackup()
         }
@@ -31,11 +31,11 @@ export class MozuXiuxianBackup extends plugin {
   }
 
   async xiuxianBackup(e) {
-    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.setting.enable || !this.e.isMaster) return false
-    if (Config.setting.group === 1) {
-      if (Config.setting.blackGroup.includes(this.e.group_id)) return false
-    } else if (Config.setting.group === 2) {
-      if (!Config.setting.whiteGroup.includes(this.e.group_id)) return false
+    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.xiuxian.setting.enable || !this.e.isMaster) return false
+    if (Config.xiuxian.setting.group === 1) {
+      if (Config.xiuxian.setting.blackGroup.includes(this.e.group_id)) return false
+    } else if (Config.xiuxian.setting.group === 2) {
+      if (!Config.xiuxian.setting.whiteGroup.includes(this.e.group_id)) return false
     }
     const match = this.e.msg.match(/#?(?:魔族陌)?修仙备份(?:还原)?(.*)$/)
     const raw = match?.[1]?.trim()
@@ -70,7 +70,7 @@ export class MozuXiuxianBackup extends plugin {
             ]
             : []),
           '**还原备份文件**',
-          '>**' + backupItems.reverse().slice(0, parseInt(Config.setting.maxBackupFile, 10) || 10).join("**\n>**") + '**',
+          '>**' + backupItems.reverse().slice(0, parseInt(Config.xiuxian.setting.maxBackupFile, 10) || 10).join("**\n>**") + '**',
           '***'
         ].join('\n')
         this.e.reply([message, Button.backup])
@@ -89,10 +89,10 @@ export class MozuXiuxianBackup extends plugin {
         '***'
       ].join('\n')
       this.e.reply([message, Button.backup])
-      if (Config.setting.maxBackupFile > 0) {
+      if (Config.xiuxian.setting.maxBackupFile > 0) {
         const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
         const files = (await readdir(backupDir)).filter(item => item.endsWith('.json')).reverse()
-        const removeFiles = files.splice(parseInt(Config.setting.maxBackupFile, 10) || 10, files.length)
+        const removeFiles = files.splice(parseInt(Config.xiuxian.setting.maxBackupFile, 10) || 10, files.length)
         for (let file of removeFiles) {
           unlink(path.join(backupDir, file))
         }
@@ -106,10 +106,10 @@ export class MozuXiuxianBackup extends plugin {
     const fileName = fileTime + ".json"
     const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", fileName)
     const result = await backupKeys("Mozu:xiuxian:*", filePath)
-    if (Config.setting.maxBackupFile > 0) {
+    if (Config.xiuxian.setting.maxBackupFile > 0) {
       const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
       const files = (await readdir(backupDir)).filter(item => item.endsWith('.json')).reverse()
-      const removeFiles = files.splice(parseInt(Config.setting.maxBackupFile, 10) || 10, files.length)
+      const removeFiles = files.splice(parseInt(Config.xiuxian.setting.maxBackupFile, 10) || 10, files.length)
       for (let file of removeFiles) {
         unlink(path.join(backupDir, file))
       }

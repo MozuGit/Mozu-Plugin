@@ -4,14 +4,14 @@ export default [
     component: 'SOFT_GROUP_BEGIN'
   },
   {
-    field: 'redis.global',
+    field: 'config.Redis.global',
     label: '全局Redis',
     helpMessage: '修改后需要重启才能生效',
     bottomHelpMessage: '挂载到云崽global.Redis不和global.redis冲突',
     component: 'Switch'
   },
   {
-    field: 'redis.host',
+    field: 'config.Redis.host',
     label: '服务器地址',
     helpMessage: '修改后需要重启才能生效',
     bottomHelpMessage: 'Redis服务器IP地址',
@@ -21,7 +21,7 @@ export default [
     }
   },
   {
-    field: 'redis.port',
+    field: 'config.Redis.port',
     label: '端口号',
     helpMessage: '修改后需要重启才能生效',
     bottomHelpMessage: 'Redis端口号',
@@ -34,7 +34,7 @@ export default [
     }
   },
   {
-    field: 'redis.database',
+    field: 'config.Redis.database',
     label: '数据库编号',
     helpMessage: '修改后需要重启才能生效',
     bottomHelpMessage: 'Redis数据库编号',
@@ -47,7 +47,7 @@ export default [
     }
   },
   {
-    field: 'redis.connectTimeout',
+    field: 'config.Redis.connectTimeout',
     label: '连接超时时间',
     helpMessage: '修改后需要重启才能生效',
     bottomHelpMessage: '连接超过时间重连',
@@ -62,7 +62,7 @@ export default [
     }
   },
   {
-    field: 'redis.keepAlive',
+    field: 'config.Redis.keepAlive',
     label: '心跳间隔',
     helpMessage: '修改后需要重启才能生效',
     bottomHelpMessage: '心跳间隔',
@@ -77,7 +77,7 @@ export default [
     }
   },
   {
-    field: 'redis.noDelay',
+    field: 'config.Redis.noDelay',
     label: '禁用Nagle算法',
     helpMessage: '修改后需要重启才能生效',
     bottomHelpMessage: '禁用Nagle算法，降低延迟',

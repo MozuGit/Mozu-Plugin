@@ -1,6 +1,6 @@
+import Config from "#Config"
 import help from '../../model/xiuxian/help.js'
 import { mqqapi, qagent } from "../../model/xiuxian/tools/protocol.js"
-import { Config } from "../../model/xiuxian/tools/Config/Config.js"
 import { Button } from "../../model/xiuxian/index.js"
 
 export class MozuXiuxianHelp extends plugin {
@@ -8,7 +8,7 @@ export class MozuXiuxianHelp extends plugin {
     super({
       name: "魔族陌修仙帮助",
       event: "message",
-      priority: Config.setting.priority,
+      priority: Config.xiuxian.setting.priority,
       rule: [
         {
           reg: "#?(魔族陌)?修仙帮助",
@@ -19,15 +19,15 @@ export class MozuXiuxianHelp extends plugin {
   }
 
   async xiuxianHelp(e) {
-    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.setting.enable) return false
-    if (Config.setting.group === 1) {
-      if (Config.setting.blackGroup.includes(this.e.group_id)) return false
-    } else if (Config.setting.group === 2) {
-      if (!Config.setting.whiteGroup.includes(this.e.group_id)) return false
+    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.xiuxian.setting.enable) return false
+    if (Config.xiuxian.setting.group === 1) {
+      if (Config.xiuxian.setting.blackGroup.includes(this.e.group_id)) return false
+    } else if (Config.xiuxian.setting.group === 2) {
+      if (!Config.xiuxian.setting.whiteGroup.includes(this.e.group_id)) return false
     }
     const message = [
       '##✨修仙帮助',
-      '>联系主人：' + (await qagent(Config.setting.contact.peerUid, Config.setting.contact.peerName)),
+      '>联系主人：' + (await qagent(Config.xiuxian.setting.contact.peerUid, Config.xiuxian.setting.contact.peerName)),
       '修仙指令帮助，bug反馈请联系主人',
       '***',
       '**🎉基础指令**',

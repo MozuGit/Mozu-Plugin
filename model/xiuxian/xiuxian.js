@@ -2,7 +2,7 @@ import Redis from "#Redis"
 import randomInt from "#randomInt"
 import crypto from 'crypto'
 import { evaluate } from "mathjs"
-import { Config } from "./tools/Config/Config.js"
+import Config from "#Config"
 
 const PLAYER_INFO_KEY = "Mozu:xiuxian:playerInfo"  //玩家信息KEY
 const PLAYER_BAG_KEY = "Mozu:xiuxian:playerBag"  //玩家背包KEY
@@ -70,7 +70,7 @@ export default new class {
         : '无'
       : '无'
 
-    const artsMap = new Map(Config.drop.arts.map(art => [art.id, art]))
+    const artsMap = new Map(Config.xiuxian.drop.arts.map(art => [art.id, art]))
 
     const addition = {
       art: arts.reduce((addition, id) => {
@@ -79,9 +79,9 @@ export default new class {
       }, 0)
     }
 
-    const realmName = (Config.Realm.Realms.length >= realm) ? Config.Realm.Realms[realm - 1]?.name || '无' : Config.Realm.Realms[Config.Realm.Realms.length].name || '未命名'
-    const realmName2 = Config.Realm.Realms[realm]?.name
-    const realmNeedExp = Config.Realm.Realms[realm]?.value ? Math.max(0, (Config.Realm.Realms[realm].value || 0) - cult) : -1
+    const realmName = (Config.xiuxian.Realm.Realms.length >= realm) ? Config.xiuxian.Realm.Realms[realm - 1]?.name || '无' : Config.xiuxian.Realm.Realms[Config.xiuxian.Realm.Realms.length].name || '未命名'
+    const realmName2 = Config.xiuxian.Realm.Realms[realm]?.name
+    const realmNeedExp = Config.xiuxian.Realm.Realms[realm]?.value ? Math.max(0, (Config.xiuxian.Realm.Realms[realm].value || 0) - cult) : -1
     const retreatRunTime = getStringTime(Math.floor(Date.now() / 1000) - retreatStartTime)
     const power = await this.getPower(id) || 0
 
@@ -122,7 +122,7 @@ export default new class {
   }
 
   async getUserBag(id) {
-    const { pills, arts } = Config.drop
+    const { pills, arts } = Config.xiuxian.drop
     let [pillsData, artsData] = await Redis.hmget(`${PLAYER_BAG_KEY}:${id}`, '丹药', '功法')
     pillsData = JSON.parse(pillsData || '[]')
     artsData = JSON.parse(artsData || '[]')
@@ -174,7 +174,7 @@ export default new class {
       return false
     }
     const [name, desc, members, owner, exp, level] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', '宗门简介', '宗门成员', '宗门宗主', '宗门经验', '宗门等级')
-    const nextExp = Config.sect.sect_level[level]?.up_exp || 0
+    const nextExp = Config.xiuxian.sect.sect_level[level]?.up_exp || 0
     return {
       id: sectId,
       name,
@@ -183,7 +183,7 @@ export default new class {
       owner,
       exp,
       level,
-      max: Config.sect.sect_level.length > parseInt(level, 10) ? Config.sect.sect_level[level - 1].memberMax : Config.sect.sect_level[Config.sect.sect_level.length - 1].memberMax,
+      max: Config.xiuxian.sect.sect_level.length > parseInt(level, 10) ? Config.xiuxian.sect.sect_level[level - 1].memberMax : Config.xiuxian.sect.sect_level[Config.xiuxian.sect.sect_level.length - 1].memberMax,
       nextExp
     }
   }
@@ -194,12 +194,12 @@ export default new class {
     cult = parseInt(cult, 10)
     realm = parseInt(realm, 10) || 0.75
     arts = JSON.parse(arts || '[]')
-    const artsMap = new Map(Config.drop.arts.map(art => [art.id, art]))
+    const artsMap = new Map(Config.xiuxian.drop.arts.map(art => [art.id, art]))
     const addition = arts.reduce((addition, id) => {
       const art = artsMap.get(id)
       return addition + (art ? art.addition : 0)
     }, 0)
-    let power = Math.floor(evaluate(Config.xiuxian.powerFormula, { cult: cult, realm: realm }))
+    let power = Math.floor(evaluate(Config.xiuxian.xiuxian.powerFormula, { cult: cult, realm: realm }))
     power = Math.floor(power + power * (addition / 100))
     return power
   }
@@ -214,8 +214,8 @@ export default new class {
         event: "in_retreat"
       }
     }
-    if (Math.floor(Date.now() / 1000) - last <= Config.xiuxian.xiulian && !(isMaster && Config.setting.master_no_cd)) {
-      const outTime = Config.xiuxian.xiulian - (Math.floor(Date.now() / 1000) - last)
+    if (Math.floor(Date.now() / 1000) - last <= Config.xiuxian.xiuxian.xiulian && !(isMaster && Config.xiuxian.setting.master_no_cd)) {
+      const outTime = Config.xiuxian.xiuxian.xiulian - (Math.floor(Date.now() / 1000) - last)
       return {
         event: "xiulian_cd",
         data: {
@@ -223,7 +223,7 @@ export default new class {
         }
       }
     }
-    const addcult = randomInt(Config.xiuxian.maxcult, Config.xiuxian.mincult, id)
+    const addcult = randomInt(Config.xiuxian.xiuxian.maxcult, Config.xiuxian.xiuxian.mincult, id)
     cult += addcult
     Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
       修为: cult,
@@ -248,8 +248,8 @@ export default new class {
         event: "in_retreat"
       }
     }
-    if (Math.floor(Date.now() / 1000) - last <= Config.xiuxian.kaicai && !(isMaster && Config.setting.master_no_cd)) {
-      const outTime = Config.xiuxian.kaicai - (Math.floor(Date.now() / 1000) - last)
+    if (Math.floor(Date.now() / 1000) - last <= Config.xiuxian.xiuxian.kaicai && !(isMaster && Config.xiuxian.setting.master_no_cd)) {
+      const outTime = Config.xiuxian.xiuxian.kaicai - (Math.floor(Date.now() / 1000) - last)
       return {
         event: "kaicai_cd",
         data: {
@@ -257,7 +257,7 @@ export default new class {
         }
       }
     }
-    let addls = randomInt(Config.xiuxian.maxls, Config.xiuxian.minls, id)
+    let addls = randomInt(Config.xiuxian.xiuxian.maxls, Config.xiuxian.xiuxian.minls, id)
     ls += addls
     Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
       灵石: ls,
@@ -274,7 +274,7 @@ export default new class {
 
   async sign(id) {
     let [cult, ls, signCount, lastDay] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, ['修为', '灵石', '签到次数', '上次签到时间'])
-    let { cult: addcult, ls: addls } = Config.xiuxian.sign
+    let { cult: addcult, ls: addls } = Config.xiuxian.xiuxian.sign
     const today = gettoday()
     if (lastDay && lastDay === today) {
       return {
@@ -309,7 +309,7 @@ export default new class {
     let [cult, realm] = await Redis.hmget('Mozu:xiuxian:playerInfo:' + id, '修为', '境界')
     cult = parseInt(cult, 10)
     realm = parseInt(realm, 10)
-    const Realms = Config.Realm.Realms
+    const Realms = Config.xiuxian.Realm.Realms
     if (realm >= Realms.length) {
       return {
         event: "realm_max"
@@ -499,12 +499,12 @@ export default new class {
           cult: cult
         }
       }
-    } else if ((Math.floor(Date.now() / 1000) - pvp_cd) <= Config.xiuxian.pvp.atk_cd && !(isMaster && Config.setting.master_no_cd)) {
+    } else if ((Math.floor(Date.now() / 1000) - pvp_cd) <= Config.xiuxian.xiuxian.pvp.atk_cd && !(isMaster && Config.xiuxian.setting.master_no_cd)) {
       return {
         event: "pvp_cd",
         data: {
           event_id: id,
-          pvp_cd: Config.xiuxian.pvp.atk_cd - (Math.floor(Date.now() / 1000) - pvp_cd)
+          pvp_cd: Config.xiuxian.xiuxian.pvp.atk_cd - (Math.floor(Date.now() / 1000) - pvp_cd)
         }
       }
     }
@@ -527,12 +527,12 @@ export default new class {
           cult: cult
         }
       }
-    } else if ((Math.floor(Date.now() / 1000) - pvp_cd) <= Config.xiuxian.pvp.def_cd && !(isMaster && Config.setting.master_no_cd)) {
+    } else if ((Math.floor(Date.now() / 1000) - pvp_cd) <= Config.xiuxian.xiuxian.pvp.def_cd && !(isMaster && Config.xiuxian.setting.master_no_cd)) {
       return {
         event: "pvp_cd",
         data: {
           event_id: id2,
-          pvp_cd: Config.xiuxian.pvp.def_cd - (Math.floor(Date.now() / 1000) - pvp_cd)
+          pvp_cd: Config.xiuxian.xiuxian.pvp.def_cd - (Math.floor(Date.now() / 1000) - pvp_cd)
         }
       }
     }
@@ -629,7 +629,7 @@ export default new class {
         }
         break
       case '战力':
-        const artsMap = new Map(Config.drop.arts.map(art => [art.id, art]))
+        const artsMap = new Map(Config.xiuxian.drop.arts.map(art => [art.id, art]))
         for (let i = 0; i < idNum; i++) {
           const cult = parseInt(results[i][1][0], 10)
           const realm = parseInt(results[i][1][1], 10) || 0.75
@@ -638,7 +638,7 @@ export default new class {
             const art = artsMap.get(id)
             return addition + (art ? art.addition : 0)
           }, 0)
-          const power = Math.floor(evaluate(Config.xiuxian.powerFormula, { cult: cult, realm: realm }))
+          const power = Math.floor(evaluate(Config.xiuxian.xiuxian.powerFormula, { cult: cult, realm: realm }))
           const value = Math.floor(power + power * (addition / 100))
           const titleIndex = parseInt(results[i][1][2], 10) || 0
           const titles = JSON.parse(results[i][1][3] || '[]')
@@ -725,8 +725,8 @@ export default new class {
         event: "in_retreat"
       }
     }
-    if (Math.floor(Date.now() / 1000) - last <= Config.beast.huntBeastCD && !(isMaster && Config.setting.master_no_cd)) {
-      const outTime = Config.beast.huntBeastCD - (Math.floor(Date.now() / 1000) - last)
+    if (Math.floor(Date.now() / 1000) - last <= Config.xiuxian.beast.huntBeastCD && !(isMaster && Config.xiuxian.setting.master_no_cd)) {
+      const outTime = Config.xiuxian.beast.huntBeastCD - (Math.floor(Date.now() / 1000) - last)
       return {
         event: "hunt_beast_cd",
         data: {
@@ -773,7 +773,7 @@ export default new class {
   }
 
   async exploreSecretRealm(id, secretRealmInfo, count = 1) {
-    const limitRealm = Config.drop.secretRealm_limit[secretRealmInfo.level] || 0
+    const limitRealm = Config.xiuxian.drop.secretRealm_limit[secretRealmInfo.level] || 0
     let [ls, realm, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '境界', '闭关时间')
     ls = parseInt(ls, 10)
     realm = parseInt(realm, 10)
@@ -874,7 +874,7 @@ export default new class {
         }
       }
     } else {
-      const pills = Config.drop.pills
+      const pills = Config.xiuxian.drop.pills
       const pillsData = JSON.parse(await Redis.hget(`${PLAYER_BAG_KEY}:${id}`, '丹药') || '[]')
       const pill = pillsData.find(p => p.id === pillId)
       if (pill) {
@@ -949,7 +949,7 @@ export default new class {
         }
       }
     } else {
-      const pills = Config.drop.pills
+      const pills = Config.xiuxian.drop.pills
       const pillsData = JSON.parse(await Redis.hget(`${PLAYER_BAG_KEY}:${id}`, '丹药') || '[]')
       const pill = pillsData.find(p => p.id === pillId)
       if (pill) {
@@ -1013,7 +1013,7 @@ export default new class {
         if (arts.has(art.id)) {
           haslearnArts.push(art.id)
         } else {
-          const artInfo = Config.drop.arts.find(a => a.id === art.id)
+          const artInfo = Config.xiuxian.drop.arts.find(a => a.id === art.id)
           if (!artInfo) continue
           let count = art.count
           for (let i = 0; i < art.count; i++) {
@@ -1067,7 +1067,7 @@ export default new class {
       const artData = artsData.find(a => a.id === artId)
       if (artData) {
         artData.count = artData.count - 1
-        const artInfo = Config.drop.arts.find(a => a.id === artData.id)
+        const artInfo = Config.xiuxian.drop.arts.find(a => a.id === artData.id)
         if (artInfo) {
           let state
           if (randomInt(100, 1, id) <= artInfo.rate) {
@@ -1128,7 +1128,7 @@ export default new class {
         }
       }
     } else {
-      const arts = Config.drop.arts
+      const arts = Config.xiuxian.drop.arts
       const artsData = JSON.parse(await Redis.hget(`${PLAYER_BAG_KEY}:${id}`, '功法') || '[]')
       const art = artsData.find(p => p.id === artId)
       if (art) {
@@ -1190,7 +1190,7 @@ export default new class {
         }
       }
     }
-    if (ls >= Config.sect.create_sect_ls) {
+    if (ls >= Config.xiuxian.sect.create_sect_ls) {
       const sectCount = await Redis.incr('Mozu:xiuxian:sectid:counter')
       Redis.hmset(`${SECT_INFO_KEY}:${sectCount}`, {
         宗门名称: "修仙宗门",
@@ -1202,7 +1202,7 @@ export default new class {
         宗门成员等级: JSON.stringify([{ id: id, permission: 10 }])
       })
       Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
-        灵石: ls - Config.sect.create_sect_ls,
+        灵石: ls - Config.xiuxian.sect.create_sect_ls,
         宗门ID: sectCount
       })
       return {
@@ -1257,7 +1257,7 @@ export default new class {
     level = parseInt(level, 10)
     members = JSON.parse(members)
     const memberNum = members.length
-    const memberMax = Config.sect.sect_level[level - 1].memberMax
+    const memberMax = Config.xiuxian.sect.sect_level[level - 1].memberMax
     memberPermission = JSON.parse(memberPermission)
     noAudit = parseInt(noAudit, 10) || 0
     if (memberNum >= memberMax) {
@@ -1310,10 +1310,10 @@ export default new class {
         event: "no_permission"
       }
     }
-    if (Config.sect.sect_level.length > level) {
-      if (exp >= Config.sect.sect_level[level].up_exp) {
+    if (Config.xiuxian.sect.sect_level.length > level) {
+      if (exp >= Config.xiuxian.sect.sect_level[level].up_exp) {
         level++
-        if (Config.sect.sect_up_reset) {
+        if (Config.xiuxian.sect.sect_up_reset) {
           Redis.hmset(`${SECT_INFO_KEY}:${sectId}`, {
             宗门经验: 0,
             宗门等级: level
@@ -1346,7 +1346,7 @@ export default new class {
     let [exp, level] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门经验', '宗门等级')
     exp = parseInt(exp, 10)
     level = parseInt(level, 10)
-    let { cult: addcult, ls: addls, sectExp } = Config.sect.sect_level[level - 1].sign
+    let { cult: addcult, ls: addls, sectExp } = Config.xiuxian.sect.sect_level[level - 1].sign
     const today = gettoday()
     if (lastDay && lastDay === today) {
       return {
@@ -1400,7 +1400,7 @@ export default new class {
         memberNum: JSON.parse(results[i][1][2]).length,
         owner: results[i][1][3],
         level: results[i][1][4],
-        memberMax: Config.sect.sect_level[results[i][1][4] - 1].memberMax
+        memberMax: Config.xiuxian.sect.sect_level[results[i][1][4] - 1].memberMax
       })
     }
     return {
@@ -1437,7 +1437,7 @@ export default new class {
       membersList.push({
         id: memberAudit[i],
         cult: values[0],
-        realm: Config.Realm.Realms[values[1] - 1].name || '无'
+        realm: Config.xiuxian.Realm.Realms[values[1] - 1].name || '无'
       })
     }
     return {
@@ -1457,7 +1457,7 @@ export default new class {
     }
     let [level, members, membersPermission, memberAudit] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门等级', '宗门成员', '宗门成员等级', '待审核成员')
     let memberNum = JSON.parse(members).length
-    const memberMax = Config.sect.sect_level[level - 1].memberMax
+    const memberMax = Config.xiuxian.sect.sect_level[level - 1].memberMax
     members = JSON.parse(members)
     membersPermission = JSON.parse(membersPermission)
     memberAudit = JSON.parse(memberAudit || '[]')
@@ -1957,13 +1957,13 @@ function getStringTime(time) {
 
 function getProfit(time) {
   let hours = Math.floor(time / 3600)
-  const hoursMax = parseInt(Config.xiuxian.retreat.max, 10)
+  const hoursMax = parseInt(Config.xiuxian.xiuxian.retreat.max, 10)
   if (hoursMax !== 0) {
     if (hours > hoursMax) {
       hours = hoursMax
     }
   }
-  const cult = hours * parseInt(Config.xiuxian.retreat.cult, 10)
+  const cult = hours * parseInt(Config.xiuxian.xiuxian.retreat.cult, 10)
   return { cult }
 }
 

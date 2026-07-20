@@ -1,5 +1,5 @@
+import Config from "#Config"
 import { Button, xiuxian } from "../index.js"
-import { Config } from "./Config/Config.js"
 import { mqqapi, qagent } from "./protocol.js"
 
 async function xiuxianText(msg, user_id, at, isMaster) {
@@ -26,7 +26,7 @@ async function xiuxianText(msg, user_id, at, isMaster) {
         '<@' + user_id + '>',
         '***',
         '**功能开发中，即将上线**',
-        '>催一催作者：' + (await qagent(Config.setting.contact.peerUid, Config.setting.contact.peerName)),
+        '>催一催作者：' + (await qagent(Config.xiuxian.setting.contact.peerUid, Config.xiuxian.setting.contact.peerName)),
         '***',
       ].join('\n'))
       Text.push(Button.author)
@@ -37,7 +37,7 @@ async function xiuxianText(msg, user_id, at, isMaster) {
       '<@' + user_id + '>',
       '***',
       '**系统错误，请稍后重试**',
-      '>联系主人：' + (await qagent(Config.setting.contact.peerUid, Config.setting.contact.peerName)),
+      '>联系主人：' + (await qagent(Config.xiuxian.setting.contact.peerUid, Config.xiuxian.setting.contact.peerName)),
       '***',
     ].join('\n'))
     Text.push(Button.author)
@@ -172,8 +172,8 @@ const commandHandlers = {
         '***',
         '**闭关说明**',
         '>闭关期间无法进行任何操作',
-        '每闭关一小时获得' + Config.xiuxian.retreat.cult + '点修为',
-        '闭关上限' + Config.xiuxian.retreat.max + '小时',
+        '每闭关一小时获得' + Config.xiuxian.xiuxian.retreat.cult + '点修为',
+        '闭关上限' + Config.xiuxian.xiuxian.retreat.max + '小时',
         '闭关上限后时间仍会累计，但收益不会计算',
         '***'
       ].join('\n'))
@@ -198,8 +198,8 @@ const commandHandlers = {
         '***',
         '**你还没开始闭关呢**',
         '>闭关期间无法进行任何操作',
-        '每闭关一小时获得' + Config.xiuxian.retreat.cult + '点修为',
-        '闭关上限' + Config.xiuxian.retreat.max + '小时',
+        '每闭关一小时获得' + Config.xiuxian.xiuxian.retreat.cult + '点修为',
+        '闭关上限' + Config.xiuxian.xiuxian.retreat.max + '小时',
         '闭关上限后时间仍会累计，但收益不会计算',
         '***'
       ].join('\n'))
@@ -270,8 +270,8 @@ const commandHandlers = {
           '***',
           '**你还没开始闭关呢**',
           '>闭关期间无法进行任何操作',
-          '每闭关一小时获得' + Config.xiuxian.retreat.cult + '点修为',
-          '闭关上限' + Config.xiuxian.retreat.max + '小时',
+          '每闭关一小时获得' + Config.xiuxian.xiuxian.retreat.cult + '点修为',
+          '闭关上限' + Config.xiuxian.xiuxian.retreat.max + '小时',
           '闭关上限后时间仍会累计，但收益不会计算',
           '***'
         ].join('\n'))
@@ -384,7 +384,7 @@ const commandHandlers = {
   },
 
   '妖兽列表': async (id, user_id, Text) => {
-    const beasts = Config.beast.beasts
+    const beasts = Config.xiuxian.beast.beasts
     let beastText = []
     let i = 1
     for (let beast of beasts) {
@@ -407,7 +407,7 @@ const commandHandlers = {
   },
 
   '秘境列表': async (id, user_id, Text) => {
-    const secretRealms = Config.drop.secretRealms
+    const secretRealms = Config.xiuxian.drop.secretRealms
     const { easy = [], medium = [], hard = [] } = Object.groupBy(secretRealms, item => item.level ?? 'easy')
     const buildTexts = async (items, startIndex = 1) => {
       const promises = items.map(async (item, idx) => {
@@ -432,15 +432,15 @@ const commandHandlers = {
       '**秘境列表**',
       '***',
       '**初级秘境**',
-      '>门槛：' + (Config.Realm.Realms[Config.drop.secretRealm_limit.easy - 1]?.name ?? '无') + (((await xiuxian.getUserInfo(id)).realm.realm >= Config.drop.secretRealm_limit.easy) ? ' **「已达成」**' : ''),
+      '>门槛：' + (Config.xiuxian.Realm.Realms[Config.xiuxian.drop.secretRealm_limit.easy - 1]?.name ?? '无') + (((await xiuxian.getUserInfo(id)).realm.realm >= Config.xiuxian.drop.secretRealm_limit.easy) ? ' **「已达成」**' : ''),
       ...easyText,
       '***',
       '**进阶秘境**',
-      '>门槛：' + (Config.Realm.Realms[Config.drop.secretRealm_limit.medium - 1]?.name ?? '无') + ((await xiuxian.getUserInfo(id)).realm.realm >= Config.drop.secretRealm_limit.medium ? ' **「已达成」**' : ''),
+      '>门槛：' + (Config.xiuxian.Realm.Realms[Config.xiuxian.drop.secretRealm_limit.medium - 1]?.name ?? '无') + ((await xiuxian.getUserInfo(id)).realm.realm >= Config.xiuxian.drop.secretRealm_limit.medium ? ' **「已达成」**' : ''),
       ...mediumText,
       '***',
       '**高级秘境**',
-      '>门槛：' + (Config.Realm.Realms[Config.drop.secretRealm_limit.hard - 1]?.name ?? '无') + ((await xiuxian.getUserInfo(id)).realm.realm >= Config.drop.secretRealm_limit.hard ? ' **「已达成」**' : ''),
+      '>门槛：' + (Config.xiuxian.Realm.Realms[Config.xiuxian.drop.secretRealm_limit.hard - 1]?.name ?? '无') + ((await xiuxian.getUserInfo(id)).realm.realm >= Config.xiuxian.drop.secretRealm_limit.hard ? ' **「已达成」**' : ''),
       ...hardText,
       '***'
     ].join('\n'))
@@ -471,7 +471,7 @@ const commandHandlers = {
         '>宗门人数：' + userInfo.sectInfo.member + ' / ' + userInfo.sectInfo.max,
         '宗主ID：' + userInfo.sectInfo.owner,
         '***',
-        '>宗门等级：' + userInfo.sectInfo.level + ' / ' + (Config.sect.sect_level.length),
+        '>宗门等级：' + userInfo.sectInfo.level + ' / ' + (Config.xiuxian.sect.sect_level.length),
         '宗门经验：' + userInfo.sectInfo.exp + ' / ' + userInfo.sectInfo.nextExp,
         '>' + ((userInfo.sectInfo.nextExp - userInfo.sectInfo.exp > 0)
           ? '距离下一级还需' + (userInfo.sectInfo.nextExp - userInfo.sectInfo.exp) + '点经验'
@@ -528,7 +528,7 @@ const commandHandlers = {
           '<@' + user_id + '>',
           '***',
           '**创建宗门失败**',
-          '>创建宗门需要' + Config.sect.create_sect_ls + '灵石',
+          '>创建宗门需要' + Config.xiuxian.sect.create_sect_ls + '灵石',
           '当前灵石：' + value.data.ls,
           '***'
         ].join('\n'))
@@ -565,7 +565,7 @@ const commandHandlers = {
           '<@' + user_id + '>',
           '***',
           '**宗门升级成功**',
-          '>宗门等级：' + userInfo.sectInfo.level + ' / ' + Config.sect.sect_level.length,
+          '>宗门等级：' + userInfo.sectInfo.level + ' / ' + Config.xiuxian.sect.sect_level.length,
           '宗门成员上限提升至 ' + userInfo.sectInfo.max + ' 人',
           '***'
         ].join('\n'))
@@ -585,7 +585,7 @@ const commandHandlers = {
           '<@' + user_id + '>',
           '***',
           '**宗门等级已满**',
-          '>宗门等级：' + userInfo.sectInfo.level + ' / ' + (Config.sect.sect_level.length),
+          '>宗门等级：' + userInfo.sectInfo.level + ' / ' + (Config.xiuxian.sect.sect_level.length),
           '无需再次升级宗门',
           '***'
         ].join('\n'))
@@ -995,7 +995,7 @@ const prefixHandlers = [
     prefix: /^#?查看妖兽\s*\d*/,
     handler: async (id, user_id, Text, msg, at) => {
       const beast_id = parseInt(msg.match(/^#?查看妖兽\s*(\d*)/)?.[1], 10)
-      const beastInfo = Config.beast.beasts[beast_id - 1]
+      const beastInfo = Config.xiuxian.beast.beasts[beast_id - 1]
       if (!beastInfo) {
         Text.push([
           '<@' + user_id + '>',
@@ -1029,7 +1029,7 @@ const prefixHandlers = [
     prefix: /^#?猎杀妖兽\s*\d*/,
     handler: async (id, user_id, Text, msg, at, isMaster) => {
       const beast_id = parseInt(msg.match(/^#?猎杀妖兽\s*(\d*)/)?.[1], 10)
-      const beastInfo = Config.beast.beasts[beast_id - 1]
+      const beastInfo = Config.xiuxian.beast.beasts[beast_id - 1]
       if (!beastInfo) {
         Text.push([
           '<@' + user_id + '>',
@@ -1104,7 +1104,7 @@ const prefixHandlers = [
     prefix: /^#?查看秘境\s*\d*/,
     handler: async (id, user_id, Text, msg, at) => {
       const secretRealm_id = parseInt(msg.match(/^#?查看秘境\s*(\d*)/)?.[1], 10)
-      const secretRealmInfo = Config.drop.secretRealms[secretRealm_id - 1]
+      const secretRealmInfo = Config.xiuxian.drop.secretRealms[secretRealm_id - 1]
       if (!secretRealmInfo) {
         Text.push([
           '<@' + user_id + '>',
@@ -1116,7 +1116,7 @@ const prefixHandlers = [
       } else {
         const pills = []
         const arts = []
-        const { pills: pillData, arts: artData } = Config.drop
+        const { pills: pillData, arts: artData } = Config.xiuxian.drop
         for (let i = 0, len = pillData.length; i < len; i++) {
           if (pillData[i].fromSecretRealmID === secretRealm_id) {
             pills.push('>- ' + pillData[i].name)
@@ -1132,7 +1132,7 @@ const prefixHandlers = [
           '***',
           '**秘境信息**',
           '>名称：' + secretRealmInfo.name,
-          '门槛：' + (Config.Realm.Realms[Config.drop.secretRealm_limit[secretRealmInfo.level] - 1]?.name ?? '无'),
+          '门槛：' + (Config.xiuxian.Realm.Realms[Config.xiuxian.drop.secretRealm_limit[secretRealmInfo.level] - 1]?.name ?? '无'),
           '消耗：' + secretRealmInfo.cost_ls + '灵石',
           '掉落概率：' + secretRealmInfo.drop_rate + '%',
           '***',
@@ -1154,7 +1154,7 @@ const prefixHandlers = [
       const matchs = msg.match(/^#?探索秘境(十次|百次)?\s*(\d*)/)
       const count = matchs[1] === "十次" ? 10 : matchs[1] === "百次" ? 100 : 1
       const secretRealm_id = parseInt(matchs[2], 10)
-      const secretRealmInfo = Config.drop.secretRealms[secretRealm_id - 1]
+      const secretRealmInfo = Config.xiuxian.drop.secretRealms[secretRealm_id - 1]
       if (!secretRealmInfo) {
         Text.push([
           '<@' + user_id + '>',
@@ -1164,8 +1164,8 @@ const prefixHandlers = [
           '***'
         ].join('\n'))
       } else {
-        const pills = Config.drop.pills.filter(pill => pill.fromSecretRealmID === secretRealm_id)
-        const arts = Config.drop.arts.filter(art => art.fromSecretRealmID === secretRealm_id)
+        const pills = Config.xiuxian.drop.pills.filter(pill => pill.fromSecretRealmID === secretRealm_id)
+        const arts = Config.xiuxian.drop.arts.filter(art => art.fromSecretRealmID === secretRealm_id)
         secretRealmInfo.pills = pills
         secretRealmInfo.arts = arts
         const value = await xiuxian.exploreSecretRealm(id, secretRealmInfo, count)
@@ -1210,7 +1210,7 @@ const prefixHandlers = [
               '***',
               '**探索秘境失败**',
               '>未达到秘境所需门槛',
-              '需要境界：' + (Config.Realm.Realms[Config.drop.secretRealm_limit[secretRealmInfo.level] - 1].name),
+              '需要境界：' + (Config.xiuxian.Realm.Realms[Config.xiuxian.drop.secretRealm_limit[secretRealmInfo.level] - 1].name),
               '当前境界：' + userInfo.realm.realmName,
               '***'
             ].join('\n'))
@@ -1440,7 +1440,7 @@ const prefixHandlers = [
       const userInfo = await xiuxian.getUserInfo(id)
       switch (value.event) {
         case 'learn_art_all':
-          const arts = Config.drop.arts
+          const arts = Config.xiuxian.drop.arts
           const haslearnArtsText = []
           const learnArtsText = []
           const learnArtsInsText = []
@@ -1598,7 +1598,7 @@ const prefixHandlers = [
           '>宗门人数：' + sectInfo.member + ' / ' + sectInfo.max,
           '宗主ID：' + sectInfo.owner,
           '***',
-          '>宗门等级：' + sectInfo.level + ' / ' + (Config.sect.sect_level.length),
+          '>宗门等级：' + sectInfo.level + ' / ' + (Config.xiuxian.sect.sect_level.length),
           '宗门经验：' + sectInfo.exp + ' / ' + sectInfo.nextExp,
           '>' + ((sectInfo.nextExp - sectInfo.exp > 0)
             ? '距离下一级还需' + (sectInfo.nextExp - sectInfo.exp) + '点经验'

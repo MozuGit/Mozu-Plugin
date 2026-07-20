@@ -1,8 +1,0 @@
-#发言统计开关
-enable: true
-
-#使用Markdown发送（仅QQBot使用）
-sendMarkdown: true
-
-#排行榜最多显示
-count: 10

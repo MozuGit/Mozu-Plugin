@@ -1,6 +1,6 @@
-import { Config } from "../../model/xiuxian/tools/Config/Config.js"
-import { xiuxian } from "../../model/xiuxian/index.js"
+import Config from "#Config"
 import Redis from "#Redis"
+import { xiuxian } from "../../model/xiuxian/index.js"
 
 export class MozuXiuxianTitle extends plugin {
   constructor() {
@@ -8,15 +8,15 @@ export class MozuXiuxianTitle extends plugin {
       name: '修仙称号',
       dsc: '修仙定时称号',
       event: 'message',
-      priority: Config.setting.priority,
+      priority: Config.xiuxian.setting.priority,
       task: [
         {
-          cron: Config.title.rankTitle.cron || "0 0 0 ? * 1",
+          cron: Config.xiuxian.title.rankTitle.cron || "0 0 0 ? * 1",
           name: "修仙排行榜定时发放称号",
           fnc: () => this.cronTitle()
         },
         {
-          cron: Config.title.cleanTitle.cron || "0 0 0 * * *",
+          cron: Config.xiuxian.title.cleanTitle.cron || "0 0 0 * * *",
           name: "定时清理过期称号",
           fnc: () => this.cleanTitle()
         }
@@ -25,7 +25,7 @@ export class MozuXiuxianTitle extends plugin {
   }
 
   async cronTitle() {
-    if (!Config.setting.enable) return false
+    if (!Config.xiuxian.setting.enable) return false
     const nowTime = Math.floor(Date.now() / 1000)
     const rankType = ['修为', '灵石', '战力', '闭关']
     for (const type of rankType) {
@@ -34,16 +34,16 @@ export class MozuXiuxianTitle extends plugin {
       let titles = []
       switch (type) {
         case '修为':
-          titles = Config.title.rankTitle.cult.slice(0, rankList.length)
+          titles = Config.xiuxian.title.rankTitle.cult.slice(0, rankList.length)
           break
         case '灵石':
-          titles = Config.title.rankTitle.ls.slice(0, rankList.length)
+          titles = Config.xiuxian.title.rankTitle.ls.slice(0, rankList.length)
           break
         case '战力':
-          titles = Config.title.rankTitle.power.slice(0, rankList.length)
+          titles = Config.xiuxian.title.rankTitle.power.slice(0, rankList.length)
           break
         case '闭关':
-          titles = Config.title.rankTitle.retreat.slice(0, rankList.length)
+          titles = Config.xiuxian.title.rankTitle.retreat.slice(0, rankList.length)
           break
       }
       let index = 0
@@ -63,9 +63,9 @@ export class MozuXiuxianTitle extends plugin {
         let titleList = titleLists[index]
         const titleIndex = titleList.find(item => item.title === title)
         if (!titleIndex) {
-          titleList.push({ title: title, getTime: nowTime, validTime: Config.title.rankTitle.validDays !== 0 ? nowTime + Config.title.rankTitle.validDays * 86400 : 0 })
+          titleList.push({ title: title, getTime: nowTime, validTime: Config.xiuxian.title.rankTitle.validDays !== 0 ? nowTime + Config.xiuxian.title.rankTitle.validDays * 86400 : 0 })
         } else {
-          titleIndex.validTime = Config.title.rankTitle.validDays !== 0 ? nowTime + Config.title.rankTitle.validDays * 86400 : 0
+          titleIndex.validTime = Config.xiuxian.title.rankTitle.validDays !== 0 ? nowTime + Config.xiuxian.title.rankTitle.validDays * 86400 : 0
         }
         updatePipeline.hset(`Mozu:xiuxian:playerInfo:${rankList[index].id}`, '称号列表', JSON.stringify(titleList))
         updatePipeline.sadd('Mozu:xiuxian:title:owners', rankList[index].id)
@@ -76,7 +76,7 @@ export class MozuXiuxianTitle extends plugin {
   }
 
   async cleanTitle(e) {
-    if (!Config.setting.enable) return false
+    if (!Config.xiuxian.setting.enable) return false
     const nowTime = Math.floor(Date.now() / 1000)
     const ids = await Redis.smembers('Mozu:xiuxian:title:owners')
     if (ids.length === 0) return
