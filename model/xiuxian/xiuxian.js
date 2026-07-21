@@ -81,7 +81,7 @@ export default new class {
 
     const realmName = (Config.xiuxian.Realm.Realms.length >= realm) ? Config.xiuxian.Realm.Realms[realm - 1]?.name || '无' : Config.xiuxian.Realm.Realms[Config.xiuxian.Realm.Realms.length].name || '未命名'
     const realmName2 = Config.xiuxian.Realm.Realms[realm]?.name
-    const realmNeedExp = Config.xiuxian.Realm.Realms[realm]?.value ? Math.max(0, (Config.xiuxian.Realm.Realms[realm].value || 0) - cult) : -1
+    const realmNeedExp = Config.xiuxian.Realm.Realms[realm]?.value ? Math.max(0, (Config.xiuxian.Realm.Realms[realm]?.value || 0) - cult) : -1
     const retreatRunTime = getStringTime(Math.floor(Date.now() / 1000) - retreatStartTime)
     const power = await this.getPower(id) || 0
 
@@ -1437,7 +1437,7 @@ export default new class {
       membersList.push({
         id: memberAudit[i],
         cult: values[0],
-        realm: Config.xiuxian.Realm.Realms[values[1] - 1].name || '无'
+        realm: Config.xiuxian.Realm.Realms[values[1] - 1]?.name || '无'
       })
     }
     return {

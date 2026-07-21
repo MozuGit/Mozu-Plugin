@@ -1,3 +1,5 @@
+import util from 'util'
+
 import Config from "#Config"
 import { Button, xiuxian } from "../index.js"
 import { mqqapi, qagent } from "./protocol.js"
@@ -32,7 +34,7 @@ async function xiuxianText(msg, user_id, at, isMaster) {
       Text.push(Button.author)
     }
   } catch (err) {
-    logger.error("[魔族陌修仙] " + logger.red(err))
+    logger.error(logger.cyan("[魔族陌修仙] ") + logger.red(util.inspect(err)))
     Text.push([
       '<@' + user_id + '>',
       '***',
