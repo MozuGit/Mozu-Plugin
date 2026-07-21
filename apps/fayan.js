@@ -4,8 +4,8 @@ import Config from "#Config"
 export class MozuFayan extends plugin {
   constructor() {
     super({
-      name: '发言次数统计',
-      dsc: '发言次数统计',
+      name: '魔族陌:发言统计',
+      dsc: '记录群友发言次数将其排序',
       event: 'message',
       priority: -1,
       rule: [
@@ -23,19 +23,6 @@ export class MozuFayan extends plugin {
         }
       ]
     })
-  }
-
-  async accept(e) {
-    if (!Config.config.fayan.enable || !this.e.group) return false
-    let date = await gettoday()
-    let month = await getmonth()
-    let week = await getweek()
-    const pipeline = Redis.pipeline()
-    pipeline.zincrby(`Mozu:msg:${date}:group:${this.e.group_id}`, 1, this.e.user_id)
-    pipeline.zincrby(`Mozu:msg:${month}:group:${this.e.group_id}`, 1, this.e.user_id)
-    pipeline.zincrby(`Mozu:msg:${week}:group:${this.e.group_id}`, 1, this.e.user_id)
-    pipeline.hset(`Mozu:username`, this.e.user_id, this.e?.nickname || this.e?.sender?.nickname)
-    await pipeline.exec()
   }
 
   async fayan(e) {
@@ -59,7 +46,7 @@ export class MozuFayan extends plugin {
         date = await getweek(1)
         break
     }
-    const key = `Mozu:msg:${date}:group:${this.e.group_id}`
+    const key = `Mozu:msg:${date}:group:${this.e.self_id}:${this.e.group_id.replace(e.self_id + ':', '')}`
     let list = await Redis.zrevrange(key, 0, Config.config.fayan.count - 1, 'WITHSCORES')
     let [score, rank] = await Promise.all([
       Redis.zscore(key, this.e.user_id),
@@ -217,6 +204,19 @@ export class MozuFayan extends plugin {
     }
   }
 }
+
+Bot.on?.('message', async (e) => {
+  if (!Config.config.fayan.enable || !e?.group) return false
+  let date = await gettoday()
+  let month = await getmonth()
+  let week = await getweek()
+  const pipeline = Redis.pipeline()
+  pipeline.zincrby(`Mozu:msg:${date}:group:${e.self_id}:${e.group_id.replace(e.self_id + ':', '')}`, 1, e.user_id)
+  pipeline.zincrby(`Mozu:msg:${month}:group:${e.group_id}`, 1, e.user_id)
+  pipeline.zincrby(`Mozu:msg:${week}:group:${e.group_id}`, 1, e.user_id)
+  pipeline.hset(`Mozu:username`, e.user_id, e?.nickname || e?.sender?.nickname)
+  await pipeline.exec()
+})
 
 async function gettoday(num = 0) {
   const currentDate = new Date()

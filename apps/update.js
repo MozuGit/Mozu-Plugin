@@ -11,7 +11,7 @@ try {
 export class update extends plugin {
   constructor() {
     super({
-      name: "魔族陌更新插件",
+      name: "魔族陌:更新插件",
       event: "message",
       priority: 1145,
       rule: [

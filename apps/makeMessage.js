@@ -4,7 +4,7 @@ import Config from "#Config"
 export class MozuMakeMessage extends plugin {
   constructor() {
     super({
-      name: "伪造聊天",
+      name: "魔族陌:伪造聊天",
       dsc: "自定义伪造聊天",
       event: "message",
       priority: 1145,

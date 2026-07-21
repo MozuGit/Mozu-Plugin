@@ -1,12 +1,11 @@
 import Config from "#Config"
-import help from '../../model/xiuxian/help.js'
 import { mqqapi, qagent } from "../../model/xiuxian/tools/protocol.js"
-import { Button } from "../../model/xiuxian/index.js"
+import { help, Button } from "../../model/xiuxian/index.js"
 
 export class MozuXiuxianHelp extends plugin {
   constructor() {
     super({
-      name: "魔族陌修仙帮助",
+      name: "魔族陌:修仙帮助",
       event: "message",
       priority: Config.xiuxian.setting.priority,
       rule: [

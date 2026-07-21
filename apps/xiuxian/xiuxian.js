@@ -5,7 +5,7 @@ import { xiuxianText } from "../../model/xiuxian/tools/xiuxianText.js"
 export class MozuXiuxian extends plugin {
   constructor() {
     super({
-      name: '魔族陌修仙',
+      name: '魔族陌:修仙',
       dsc: '魔族陌修仙',
       event: 'message',
       priority: Config.xiuxian.setting.priority,
