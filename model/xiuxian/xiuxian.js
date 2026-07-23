@@ -1,7 +1,8 @@
-import Redis from "#Redis"
-import randomInt from "#randomInt"
 import crypto from 'crypto'
+import seedrandom from "seedrandom"
 import { evaluate } from "mathjs"
+
+import Redis from "#Redis"
 import Config from "#Config"
 
 const PLAYER_INFO_KEY = "Mozu:xiuxian:playerInfo"  //玩家信息KEY
@@ -223,7 +224,7 @@ export default new class {
         }
       }
     }
-    const addcult = randomInt(Config.xiuxian.xiuxian.maxcult, Config.xiuxian.xiuxian.mincult, id)
+    const addcult = crypto.randomInt(Config.xiuxian.xiuxian.mincult, Config.xiuxian.xiuxian.maxcult + 1)
     cult += addcult
     Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
       修为: cult,
@@ -257,7 +258,7 @@ export default new class {
         }
       }
     }
-    let addls = randomInt(Config.xiuxian.xiuxian.maxls, Config.xiuxian.xiuxian.minls, id)
+    let addls = crypto.randomInt(Config.xiuxian.xiuxian.minls, Config.xiuxian.xiuxian.maxls + 1)
     ls += addls
     Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
       灵石: ls,
@@ -349,7 +350,7 @@ export default new class {
           })
           break
         }
-        if (randomInt(1, 100, id) <= Realms[realm].success) {
+        if (crypto.randomInt(1, 101) <= Realms[realm].success) {
           if (realmUpFailed) {
             realmUpInfo.push({
               state: "failed",
@@ -391,7 +392,7 @@ export default new class {
       }
     } else {
       if (cult >= Realms[realm].value) {
-        if (randomInt(1, 100, id) <= Realms[realm].success) {
+        if (crypto.randomInt(1, 101) <= Realms[realm].success) {
           Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '境界', realm + 1)
           return {
             event: "realm_up",
@@ -544,8 +545,8 @@ export default new class {
     finalWinRate = Math.max(0.01, Math.min(0.99, finalWinRate))
     const roll = Math.random()
     const isAWin = roll < finalWinRate
-    const cultAddA = randomInt(1000, 5000, id)
-    const cultAddB = randomInt(1000, 5000, id2)
+    const cultAddA = crypto.randomInt(1000, 5001)
+    const cultAddB = crypto.randomInt(1000, 5001)
     const cultA = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '修为'), 10)
     const cultB = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id2}`, '修为'), 10)
     if (isAWin) {
@@ -800,11 +801,11 @@ export default new class {
     let arts = []
     Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '灵石', ls - (secretRealmInfo.cost_ls * count))
     for (let i = 0; i < count; i++) {
-      if (randomInt(100, 1, id) <= secretRealmInfo.drop_rate) {
-        if (randomInt(100, 1, id) <= 70) {
-          pills.push(secretRealmInfo.pills[randomInt(secretRealmInfo.pills.length - 1, 0, id)])
+      if (crypto.randomInt(1, 101) <= secretRealmInfo.drop_rate) {
+        if (crypto.randomInt(1, 101) <= 70) {
+          pills.push(secretRealmInfo.pills[crypto.randomInt(0, secretRealmInfo.pills.length)])
         } else {
-          arts.push(secretRealmInfo.arts[randomInt(secretRealmInfo.arts.length - 1, 0, id)])
+          arts.push(secretRealmInfo.arts[crypto.randomInt(0, secretRealmInfo.arts.length)])
         }
       }
     }
@@ -1018,7 +1019,7 @@ export default new class {
           let count = art.count
           for (let i = 0; i < art.count; i++) {
             count--
-            if (randomInt(100, 1, id) <= artInfo.rate) {
+            if (crypto.randomInt(1, 101) <= artInfo.rate) {
               arts.add(art.id)
               learnArts.push({
                 id: art.id,
@@ -1070,7 +1071,7 @@ export default new class {
         const artInfo = Config.xiuxian.drop.arts.find(a => a.id === artData.id)
         if (artInfo) {
           let state
-          if (randomInt(100, 1, id) <= artInfo.rate) {
+          if (crypto.randomInt(1, 101) <= artInfo.rate) {
             arts.add(artId)
             state = true
             Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '功法列表', artsData)
@@ -1378,7 +1379,7 @@ export default new class {
     const sectNum = (sectCount > 10) ? 10 : sectCount
     const sectArr = Array.from({ length: sectCount }, (_, i) => i + 1)
     for (let i = 0; i < sectNum; i++) {
-      const ran = randomInt(sectCount - 1 - i, 0, id)
+      const ran = crypto.randomInt(0, sectCount - i)
       sectList.push(sectArr.splice(ran, 1)[0])
     }
     if (sectList.length === 0) {

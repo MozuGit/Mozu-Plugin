@@ -23,7 +23,6 @@ const appFiles = await getFiles(path.join(pluginRoot, "apps")).then((files) =>
   files.filter((file) => file.endsWith(".js"))
 )
 
-
 const files = [...appFiles]
 
 files.forEach((file) => {
