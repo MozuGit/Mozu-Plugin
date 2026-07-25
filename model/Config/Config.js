@@ -211,7 +211,7 @@ class Cfg {
 export default new Proxy(new Cfg(), {
   get(target, prop) {
     if (prop === 'masterQQ') {
-      return yzCfg.masterQQ
+      return yzCfg?.masterQQ
     }
     if (prop in target) {
       return typeof target[prop] === 'function'

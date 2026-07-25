@@ -1,0 +1,8 @@
+#OpenAI的URL地址
+baseURL: "https://api.deepseek.com"
+
+#OpenAI的模型
+model: "deepseek-v4-flash"
+
+#OpenAI的密钥
+apiKey: "sk-***"

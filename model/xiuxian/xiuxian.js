@@ -1,9 +1,9 @@
 import crypto from 'crypto'
-import seedrandom from "seedrandom"
 import { evaluate } from "mathjs"
 
 import Redis from "#Redis"
 import Config from "#Config"
+import openai from '../ai/openai.js'
 import notify from './tools/notify.js'
 
 const PLAYER_INFO_KEY = "Mozu:xiuxian:playerInfo"  //玩家信息KEY
@@ -1696,12 +1696,28 @@ export default new class {
           if (sectName.length >= Config.xiuxian.sect.sect_validation.name.min) {
             switch (Config.xiuxian.sect.sect_validation.audit.mode) {
               case 1:
-                break //暂未实现
+                const value = await openai.aiAuditText(sectName)
+                if (value === "否") {
+                  Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', sectName)
+                  return {
+                    event: "sect_set_name_success"
+                  }
+                } else if (value === "是") {
+                  return {
+                    event: "sect_set_name_illegal"
+                  }
+                }
+              default:
+                Redis.hset(`Mozu:xiuxian:audit:sect:name`, sectId, sectName)
+                await notify.sectAuditName(sectId, sectName)
+                return {
+                  event: "sect_name_audit"
+                }
               case 2:
                 for (const key of Config.xiuxian.sect.sect_validation.audit.keywords) {
                   if (sectName.includes(key)) {
                     return {
-                      event: "in_key_name"
+                      event: "sect_set_name_illegal"
                     }
                   }
                 }
@@ -1711,12 +1727,6 @@ export default new class {
                   event: "sect_set_name_success"
                 }
                 break
-              default:
-                Redis.hset(`Mozu:xiuxian:audit:sect:name`, sectId, sectName)
-                await notify.sectAuditName(sectId, sectName)
-                return {
-                  event: "sect_name_audit"
-                }
             }
           } else {
             return {
@@ -1754,12 +1764,28 @@ export default new class {
           if (sectDesc.length >= Config.xiuxian.sect.sect_validation.desc.min) {
             switch (Config.xiuxian.sect.sect_validation.audit.mode) {
               case 1:
-                break //暂未实现
+                const value = await openai.aiAuditText(sectDesc)
+                if (value === "否") {
+                  Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门简介', sectDesc)
+                  return {
+                    event: "sect_set_desc_success"
+                  }
+                } else if (value === "是") {
+                  return {
+                    event: "sect_set_desc_illegal"
+                  }
+                }
+              default:
+                Redis.hset(`Mozu:xiuxian:audit:sect:desc`, sectId, sectDesc)
+                await notify.sectAuditDesc(sectId, sectDesc)
+                return {
+                  event: "sect_desc_audit"
+                }
               case 2:
                 for (const key of Config.xiuxian.sect.sect_validation.audit.keywords) {
                   if (sectDesc.includes(key)) {
                     return {
-                      event: "in_key_desc"
+                      event: "sect_set_desc_illegal"
                     }
                   }
                 }
@@ -1769,12 +1795,6 @@ export default new class {
                   event: "sect_set_desc_success"
                 }
                 break
-              default:
-                Redis.hset(`Mozu:xiuxian:audit:sect:desc`, sectId, sectDesc)
-                await notify.sectAuditDesc(sectId, sectDesc)
-                return {
-                  event: "sect_desc_audit"
-                }
             }
           } else {
             return {

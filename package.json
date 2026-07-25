@@ -1,6 +1,6 @@
 {
   "name": "Mozu-Plugin",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "适用于TRSS-Yunzai的插件，主要功能有修仙、伪造聊天、发言统计等",
   "main": "index.js",
   "type": "module",
@@ -17,6 +17,7 @@
     "ioredis": "^5.10.0",
     "lodash": "^4.18.1",
     "mathjs": "^15.2.0",
+    "openai": "^6.49.0",
     "yaml": "^2.9.0"
   },
   "imports": {

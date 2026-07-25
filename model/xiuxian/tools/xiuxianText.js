@@ -1995,13 +1995,13 @@ const prefixHandlers = [
             '***'
           ].join('\n'))
           break
-        case 'in_key_name':
+        case 'sect_set_name_illegal':
           Text.push([
             '<@' + user_id + '>',
             '***',
             '**设置宗门名称失败**',
             '>请修改宗门名称',
-            '宗门名称中包含违禁词',
+            '宗门名称中包含违禁词或违规',
             '***'
           ].join('\n'))
           break
@@ -2078,13 +2078,13 @@ const prefixHandlers = [
             '***'
           ].join('\n'))
           break
-        case 'in_key_desc':
+        case 'sect_set_desc_illegal':
           Text.push([
             '<@' + user_id + '>',
             '***',
             '**设置宗门简介失败**',
             '>请修改宗门简介',
-            '宗门简介中包含违禁词',
+            '宗门简介中包含违禁词或违规',
             '***'
           ].join('\n'))
           break

@@ -692,7 +692,7 @@ export default [
                 componentProps: {
                   options: [
                     { label: "手动审核", value: 0 },
-                    { label: "AI审核（待开发）", value: 1 },
+                    { label: "AI审核", value: 1 },
                     { label: "关键词审核", value: 2 },
                     { label: "无需审核", value: 3 }
                   ]

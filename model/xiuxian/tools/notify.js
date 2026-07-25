@@ -3,7 +3,7 @@ import { mqqapi } from './protocol.js'
 
 export default new class {
   async sectAuditName(sectId, sectName) {
-    if (!Config.masterQQ.length) return
+    if (!Config?.masterQQ?.length) return
     let BotList = []
     if (Array.isArray(Bot.uin)) {
       BotList.push(Bot.uin)
@@ -32,7 +32,7 @@ export default new class {
   }
 
   async sectAuditDesc(sectId, sectDesc) {
-    if (!Config.masterQQ.length) return
+    if (!Config?.masterQQ?.length) return
     let BotList = []
     if (Array.isArray(Bot.uin)) {
       BotList.push(Bot.uin)
