@@ -706,7 +706,7 @@ export default [
                 componentProps: {
                   multiple: true
                 }
-              },
+              }
             ]
           }
         },
