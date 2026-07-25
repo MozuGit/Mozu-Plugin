@@ -69,13 +69,15 @@ const Button = {
       ],
       [
         { text: "商店", input: prefix + "宗门商店" },
-        { text: "改名字", input: prefix + "宗门设置名称" },
-        { text: "改简介", input: prefix + "宗门设置简介" },
+        { text: "改名字", input: prefix + "设置宗门名称" },
+        { text: "改简介", input: prefix + "设置宗门简介" },
         { text: "解散", input: prefix + "解散宗门" }
       ],
       [
         { text: "升级", input: prefix + "宗门升级" },
-        { text: "管理", input: prefix + "宗门管理" }
+        { text: "管理", input: prefix + "宗门管理" },
+        { text: "占位", input: prefix + "占位" },
+        { text: "占位", input: prefix + "占位" }
       ],
       [
         { text: "设副宗", input: prefix + "宗门设置副宗主" },
@@ -196,6 +198,49 @@ const Button = {
       { text: "签到", input: prefix + "修仙签到" }
     ])
     return segment.button(...args)
+  },
+  get audit() {
+    return segment.button(
+      [
+        { text: "名称审核", input: prefix + "宗门名称审核" },
+        { text: "修仙审核", input: prefix + "修仙审核" },
+        { text: "简介审核", input: prefix + "宗门简介审核" }
+      ]
+    )
+  },
+  get sectAuditName() {
+    return segment.button(
+      [
+        { text: "审核通过 + ID", input: prefix + "宗门名称审核通过" },
+        { text: "审核驳回 + ID", input: prefix + "宗门名称审核拒绝" }
+      ],
+      [
+        { text: "一键审核通过", input: prefix + "宗门名称审核全部通过" },
+        { text: "一键审核驳回", input: prefix + "宗门名称审核全部拒绝" }
+      ],
+      [
+        { text: "名称审核", input: prefix + "宗门名称审核" },
+        { text: "修仙审核", input: prefix + "修仙审核" },
+        { text: "简介审核", input: prefix + "宗门简介审核" }
+      ]
+    )
+  },
+  get sectAuditDesc() {
+    return segment.button(
+      [
+        { text: "审核通过 + ID", input: prefix + "宗门简介审核通过" },
+        { text: "审核驳回 + ID", input: prefix + "宗门简介审核拒绝" }
+      ],
+      [
+        { text: "一键审核通过", input: prefix + "宗门简介审核全部通过" },
+        { text: "一键审核驳回", input: prefix + "宗门简介审核全部拒绝" }
+      ],
+      [
+        { text: "名称审核", input: prefix + "宗门名称审核" },
+        { text: "修仙审核", input: prefix + "修仙审核" },
+        { text: "简介审核", input: prefix + "宗门简介审核" }
+      ]
+    )
   },
   get bag() {
     return segment.button(

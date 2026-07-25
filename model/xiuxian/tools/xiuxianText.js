@@ -477,7 +477,7 @@ const commandHandlers = {
         '宗门经验：' + userInfo.sectInfo.exp + ' / ' + userInfo.sectInfo.nextExp,
         '>' + ((userInfo.sectInfo.nextExp - userInfo.sectInfo.exp > 0)
           ? '距离下一级还需' + (userInfo.sectInfo.nextExp - userInfo.sectInfo.exp) + '点经验'
-          : '已满足' + (await mqqapi.command('升级', '宗门升级')) + '要求'),
+          : '已满足' + (await mqqapi.command('升级', '宗门升级', true)) + '要求'),
         '***'
       ].join('\n'))
     } else {
@@ -1604,7 +1604,7 @@ const prefixHandlers = [
           '宗门经验：' + sectInfo.exp + ' / ' + sectInfo.nextExp,
           '>' + ((sectInfo.nextExp - sectInfo.exp > 0)
             ? '距离下一级还需' + (sectInfo.nextExp - sectInfo.exp) + '点经验'
-            : '已满足' + (await mqqapi.command('升级', '宗门升级')) + '要求'),
+            : '已满足' + (await mqqapi.command('升级', '宗门升级', true)) + '要求'),
           '***'
         ].join('\n'))
       } else {
@@ -1893,7 +1893,7 @@ const prefixHandlers = [
             '<@' + user_id + '>',
             '***',
             '**宗门人数已满**',
-            '>请先' + (await mqqapi.command('升级宗门')) + '或' + (await mqqapi.command('移除玩家', '踢出宗门')),
+            '>请先' + (await mqqapi.command('升级宗门', '升级宗门', true)) + '或' + (await mqqapi.command('移除玩家', '踢出宗门')),
             '***',
           ].join('\n'))
           break
@@ -1969,6 +1969,304 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.sect)
+    }
+  },
+  {
+    prefix: /^#?设置宗门名称([\s\S]*)/,
+    handler: async (id, user_id, Text, msg) => {
+      const value = await xiuxian.sectSetName(id, msg.replace(/#?设置宗门名称/, '').trim())
+      switch (value.event) {
+        case 'sect_set_name_success':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**设置宗门名称成功**',
+            '>宗门名称：' + msg.replace(/#?设置宗门名称/, '').trim(),
+            '***'
+          ].join('\n'))
+          break
+        case 'sect_name_audit':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门名称审核中**',
+            '>已发送宗门名称审核',
+            '届时可以随时修改宗门名称',
+            '***'
+          ].join('\n'))
+          break
+        case 'in_key_name':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**设置宗门名称失败**',
+            '>请修改宗门名称',
+            '宗门名称中包含违禁词',
+            '***'
+          ].join('\n'))
+          break
+        case 'max_name':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**设置宗门名称失败**',
+            '>宗门名称最多 ' + Config.xiuxian.sect.sect_validation.name.max + ' 个字',
+            '***'
+          ].join('\n'))
+          break
+        case 'min_name':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**设置宗门名称失败**',
+            '>宗门名称至少 ' + Config.xiuxian.sect.sect_validation.name.min + ' 个字',
+            '***'
+          ].join('\n'))
+          break
+        case 'not_allowed_newline':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**设置宗门名称失败**',
+            '>宗门名称不允许换行',
+            '***'
+          ].join('\n'))
+          break
+        case 'no_permission':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**你的宗门权限不足**',
+            '>需宗门宗主可操作',
+            '***'
+          ].join('\n'))
+          break
+        case 'no_sect':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**你还没加入宗门呢**',
+            '>点击' + (await mqqapi.command('加入宗门')),
+            '***'
+          ].join('\n'))
+          break
+      }
+      Text.push(Button.sectAdmin)
+    }
+  },
+  {
+    prefix: /^#?设置宗门简介([\s\S]*)/,
+    handler: async (id, user_id, Text, msg) => {
+      const value = await xiuxian.sectSetDesc(id, msg.replace(/#?设置宗门简介/, '').trim())
+      switch (value.event) {
+        case 'sect_set_desc_success':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**设置宗门简介成功**',
+            '>宗门简介：' + msg.replace(/#?设置宗门简介/, '').trim(),
+            '***'
+          ].join('\n'))
+          break
+        case 'sect_desc_audit':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门简介审核中**',
+            '>已发送宗门简介审核',
+            '届时可以随时修改宗门简介',
+            '***'
+          ].join('\n'))
+          break
+        case 'in_key_desc':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**设置宗门简介失败**',
+            '>请修改宗门简介',
+            '宗门简介中包含违禁词',
+            '***'
+          ].join('\n'))
+          break
+        case 'max_desc':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**设置宗门简介失败**',
+            '>宗门简介最多 ' + Config.xiuxian.sect.sect_validation.desc.max + ' 个字',
+            '***'
+          ].join('\n'))
+          break
+        case 'min_desc':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**设置宗门简介失败**',
+            '>宗门简介至少 ' + Config.xiuxian.sect.sect_validation.desc.min + ' 个字',
+            '***'
+          ].join('\n'))
+          break
+        case 'not_allowed_newline':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**设置宗门简介失败**',
+            '>宗门简介不允许换行',
+            '***'
+          ].join('\n'))
+          break
+        case 'no_permission':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**你的宗门权限不足**',
+            '>需宗门宗主可操作',
+            '***'
+          ].join('\n'))
+          break
+        case 'no_sect':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**你还没加入宗门呢**',
+            '>点击' + (await mqqapi.command('加入宗门')),
+            '***'
+          ].join('\n'))
+          break
+      }
+      Text.push(Button.sectAdmin)
+    }
+  },
+  {
+    prefix: /^#?宗门名称审核(全部)?(通过|拒绝)?\s*\d*/,
+    handler: async (id, user_id, Text, msg, at, isMaster) => {
+      const match = msg.match(/^#?宗门名称审核(?:全部)?(通过|拒绝)?\s*(\d*)/)
+      const approves = match[1] === "通过" ? 1 : match[1] === "拒绝" ? 2 : 0
+      const value = await xiuxian.sectNameAudit(isMaster, approves, msg.includes("全部"), match[2] || 0)
+      switch (value.event) {
+        case 'sect_name_audit_all_success':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门名称审核全部' + match[1] + '**',
+            '>操作成功！',
+            '***'
+          ].join('\n'))
+          break
+        case 'sect_name_audit_success':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门名称审核' + match[1] + '**',
+            '>操作成功！',
+            match[1] + '宗门ID：' + match[2],
+            '***'
+          ].join('\n'))
+          break
+        case 'not_sect_id':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门不在待审核列表里**',
+            '宗门ID：',
+            '***'
+          ].join('\n'))
+          break
+        case 'sect_name_audit_list':
+          const sectNameAuditListText = []
+          for (const [ID, name] of Object.entries(value.data.sectAuditName)) {
+            sectNameAuditListText.push([
+              '>宗门ID：' + ID,
+              '待审核名称：' + name,
+              (await mqqapi.command('[审核通过]', '宗门名称审核通过' + ID, true)) + '      ' + (await mqqapi.command('[审核驳回]', '宗门名称审核拒绝' + ID, true)),
+              '***'
+            ].join('\n'))
+          }
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门名称审核**',
+            '***',
+            ...(sectNameAuditListText.length ? sectNameAuditListText : ['>暂无待审核信息', '***'])
+          ].join('\n'))
+          break
+        case 'no_permission':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**权限不足**',
+            '>请确认你是否有足够的权限',
+            '***'
+          ].join('\n'))
+          break
+      }
+      Text.push(Button.sectAuditName)
+    }
+  },
+  {
+    prefix: /^#?宗门简介审核(全部)?(通过|拒绝)?\s*\d*/,
+    handler: async (id, user_id, Text, msg, at, isMaster) => {
+      const match = msg.match(/^#?宗门简介审核(?:全部)?(通过|拒绝)?\s*(\d*)/)
+      const approves = match[1] === "通过" ? 1 : match[1] === "拒绝" ? 2 : 0
+      const value = await xiuxian.sectDescAudit(isMaster, approves, msg.includes("全部"), match[2] || 0)
+      switch (value.event) {
+        case 'sect_desc_audit_all_success':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门简介审核全部' + match[1] + '**',
+            '>操作成功！',
+            '***'
+          ].join('\n'))
+          break
+        case 'sect_desc_audit_success':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门简介审核' + match[1] + '**',
+            '>操作成功！',
+            match[1] + '宗门ID：' + match[2],
+            '***'
+          ].join('\n'))
+          break
+        case 'not_sect_id':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门不在待审核列表里**',
+            '宗门ID：',
+            '***'
+          ].join('\n'))
+          break
+        case 'sect_desc_audit_list':
+          const sectNameAuditListText = []
+          for (const [ID, name] of Object.entries(value.data.sectAuditDesc)) {
+            sectNameAuditListText.push([
+              '>宗门ID：' + ID,
+              '待审核简介：' + name,
+              (await mqqapi.command('[审核通过]', '宗门简介审核通过' + ID, true)) + '      ' + (await mqqapi.command('[审核驳回]', '宗门简介审核拒绝' + ID, true)),
+              '***'
+            ].join('\n'))
+          }
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门简介审核**',
+            '***',
+            ...(sectNameAuditListText.length ? sectNameAuditListText : ['>暂无待审核信息', '***'])
+          ].join('\n'))
+          break
+        case 'no_permission':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**权限不足**',
+            '>请确认你是否有足够的权限',
+            '***'
+          ].join('\n'))
+          break
+      }
+      Text.push(Button.sectAuditDesc)
     }
   },
   {

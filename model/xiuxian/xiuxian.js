@@ -4,6 +4,7 @@ import { evaluate } from "mathjs"
 
 import Redis from "#Redis"
 import Config from "#Config"
+import notify from './tools/notify.js'
 
 const PLAYER_INFO_KEY = "Mozu:xiuxian:playerInfo"  //玩家信息KEY
 const PLAYER_BAG_KEY = "Mozu:xiuxian:playerBag"  //玩家背包KEY
@@ -1677,6 +1678,214 @@ export default new class {
     } else {
       return {
         event: "invalid_lsNum"
+      }
+    }
+  }
+
+  async sectSetName(id, sectName) {
+    const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
+    if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
+      return {
+        event: "no_sect"
+      }
+    }
+    const memberPermission = JSON.parse(await Redis.hget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员等级'))
+    if (memberPermission.find(member => member.id === id)?.permission === 10) {
+      if (Config.xiuxian.sect.sect_validation.name.newline || !/\r?\n/.test(sectName)) {
+        if (sectName.length <= Config.xiuxian.sect.sect_validation.name.max || Config.xiuxian.sect.sect_validation.name.max === -1) {
+          if (sectName.length >= Config.xiuxian.sect.sect_validation.name.min) {
+            switch (Config.xiuxian.sect.sect_validation.audit.mode) {
+              case 1:
+                break //暂未实现
+              case 2:
+                for (const key of Config.xiuxian.sect.sect_validation.audit.keywords) {
+                  if (sectName.includes(key)) {
+                    return {
+                      event: "in_key_name"
+                    }
+                  }
+                }
+              case 3:
+                Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', sectName)
+                return {
+                  event: "sect_set_name_success"
+                }
+                break
+              default:
+                Redis.hset(`Mozu:xiuxian:audit:sect:name`, sectId, sectName)
+                await notify.sectAuditName(sectId, sectName)
+                return {
+                  event: "sect_name_audit"
+                }
+            }
+          } else {
+            return {
+              event: "min_name"
+            }
+          }
+        } else {
+          return {
+            event: "max_name"
+          }
+        }
+      } else {
+        return {
+          event: "not_allowed_newline"
+        }
+      }
+    } else {
+      return {
+        event: "no_permission"
+      }
+    }
+  }
+
+  async sectSetDesc(id, sectDesc) {
+    const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
+    if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
+      return {
+        event: "no_sect"
+      }
+    }
+    const memberPermission = JSON.parse(await Redis.hget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员等级'))
+    if (memberPermission.find(member => member.id === id)?.permission === 10) {
+      if (Config.xiuxian.sect.sect_validation.desc.newline || !/\r?\n/.test(sectDesc)) {
+        if (sectDesc.length <= Config.xiuxian.sect.sect_validation.desc.max || Config.xiuxian.sect.sect_validation.desc.max === -1) {
+          if (sectDesc.length >= Config.xiuxian.sect.sect_validation.desc.min) {
+            switch (Config.xiuxian.sect.sect_validation.audit.mode) {
+              case 1:
+                break //暂未实现
+              case 2:
+                for (const key of Config.xiuxian.sect.sect_validation.audit.keywords) {
+                  if (sectDesc.includes(key)) {
+                    return {
+                      event: "in_key_desc"
+                    }
+                  }
+                }
+              case 3:
+                Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门简介', sectDesc)
+                return {
+                  event: "sect_set_desc_success"
+                }
+                break
+              default:
+                Redis.hset(`Mozu:xiuxian:audit:sect:desc`, sectId, sectDesc)
+                await notify.sectAuditDesc(sectId, sectDesc)
+                return {
+                  event: "sect_desc_audit"
+                }
+            }
+          } else {
+            return {
+              event: "min_desc"
+            }
+          }
+        } else {
+          return {
+            event: "max_desc"
+          }
+        }
+      } else {
+        return {
+          event: "not_allowed_newline"
+        }
+      }
+    } else {
+      return {
+        event: "no_permission"
+      }
+    }
+  }
+
+  async sectNameAudit(isMaster, approved = 0, auditAll = false, sectId = false) {
+    if (isMaster) {
+      const sectAuditName = await Redis.hgetall("Mozu:xiuxian:audit:sect:name") || {}
+      switch (approved) {
+        case 1:
+        case 2:
+          if (auditAll) {
+            const pipeline = Redis.pipeline()
+            if (approved === 1) {
+              for (const [id, name] of Object.entries(sectAuditName)) {
+                pipeline.hset(`${SECT_INFO_KEY}:${id}`, '宗门名称', name)
+              }
+            }
+            pipeline.del("Mozu:xiuxian:audit:sect:name")
+            await pipeline.exec()
+            return {
+              event: "sect_name_audit_all_success"
+            }
+          } else {
+            if (sectId in sectAuditName) {
+              if (approved === 1) Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', sectAuditName[sectId])
+              Redis.hdel("Mozu:xiuxian:audit:sect:name", sectId)
+              return {
+                event: "sect_name_audit_success",
+              }
+            } else {
+              return {
+                event: "not_sect_id"
+              }
+            }
+          }
+        default:
+          return {
+            event: "sect_name_audit_list",
+            data: {
+              sectAuditName: sectAuditName
+            }
+          }
+      }
+    } else {
+      return {
+        event: "no_permission"
+      }
+    }
+  }
+
+  async sectDescAudit(isMaster, approved = 0, auditAll = false, sectId = false) {
+    if (isMaster) {
+      const sectAuditDesc = await Redis.hgetall("Mozu:xiuxian:audit:sect:desc") || {}
+      switch (approved) {
+        case 1:
+        case 2:
+          if (auditAll) {
+            const pipeline = Redis.pipeline()
+            if (approved === 1) {
+              for (const [id, desc] of Object.entries(sectAuditDesc)) {
+                pipeline.hset(`${SECT_INFO_KEY}:${id}`, '宗门简介', desc)
+              }
+            }
+            pipeline.del("Mozu:xiuxian:audit:sect:desc")
+            await pipeline.exec()
+            return {
+              event: "sect_desc_audit_all_success"
+            }
+          } else {
+            if (sectId in sectAuditDesc) {
+              if (approved === 1) Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门简介', sectAuditDesc[sectId] || "无")
+              Redis.hdel("Mozu:xiuxian:audit:sect:desc", sectId)
+              return {
+                event: "sect_desc_audit_success",
+              }
+            } else {
+              return {
+                event: "not_sect_id"
+              }
+            }
+          }
+        default:
+          return {
+            event: "sect_desc_audit_list",
+            data: {
+              sectAuditDesc: sectAuditDesc
+            }
+          }
+      }
+    } else {
+      return {
+        event: "no_permission"
       }
     }
   }

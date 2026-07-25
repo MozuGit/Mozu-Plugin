@@ -7,9 +7,16 @@ import _ from 'lodash'
 import { Version } from './Version.js'
 import { YamlReader } from './YamlReader.js'
 
+let yzCfg
+try {
+  yzCfg = (await import(Version.Plugin_Path + '/../../lib/config/config.js')).default
+} catch (e) {
+  logger.error(`[${Version.Plugin_Name}]未获取到config.js ${logger.yellow("通知所有主人")} 将无法使用`)
+}
+
 class Cfg {
   constructor() {
-    this.configCache = {}  // 改名为 configCache，避免与 "config" 目录名冲突
+    this.configCache = {}
     this.watcher = {}
 
     this.dirCfgNames = ["config", "xiuxian"]
@@ -22,25 +29,25 @@ class Cfg {
     for (const dirCfgName of this.dirCfgNames) {
       const dirCfgPath = path.join(Version.Plugin_Path, 'config', dirCfgName, 'config')
       const defCfgPath = path.join(Version.Plugin_Path, 'config', dirCfgName, 'default')
-      
+
       if (!fs.existsSync(dirCfgPath)) {
         fs.mkdirSync(dirCfgPath, { recursive: true })
       }
-      
+
       if (!fs.existsSync(defCfgPath)) {
         continue
       }
-      
+
       fs.readdirSync(defCfgPath)
         .filter((file) => file.endsWith('.yaml'))
         .forEach((file) => {
           const name = path.basename(file, '.yaml')
           const userCfgPath = path.join(dirCfgPath, file)
-          
+
           if (!fs.existsSync(userCfgPath)) {
             fs.copyFileSync(path.join(defCfgPath, file), userCfgPath)
           }
-          
+
           this.watch(userCfgPath, name, dirCfgName)
         })
     }
@@ -99,7 +106,7 @@ class Cfg {
       this.configCache[key] = new YamlReader(file).jsonData
 
       const changes = this.findDifference(oldConfig, this.configCache[key])
-      
+
       for (const changeKey in changes) {
         const value = changes[changeKey]
         let changeType = null
@@ -126,39 +133,39 @@ class Cfg {
   /** 获取所有配置 */
   getCfg() {
     let result = {}
-    
+
     for (const dirCfgName of this.dirCfgNames) {
       const defCfgPath = path.join(Version.Plugin_Path, 'config', dirCfgName, 'default')
       const dirCfgPath = path.join(Version.Plugin_Path, 'config', dirCfgName, 'config')
-      
+
       if (!fs.existsSync(defCfgPath)) continue
-      
+
       const files = fs.readdirSync(defCfgPath)
         .filter((file) => file.endsWith('.yaml'))
-      
+
       for (const file of files) {
         const name = path.basename(file, '.yaml')
         const userCfgPath = path.join(dirCfgPath, file)
-        
+
         if (!fs.existsSync(userCfgPath)) {
           fs.copyFileSync(path.join(defCfgPath, file), userCfgPath)
         }
-        
+
         if (!result[dirCfgName]) {
           result[dirCfgName] = {}
         }
-        
+
         result[dirCfgName][name] = this.getDefOrConfig(dirCfgName, name)
       }
     }
-    
+
     return result
   }
 
   /** 修改配置 */
   modify(dirCfgName, name, key, value) {
     let filePath = path.join(Version.Plugin_Path, 'config', dirCfgName, 'config', `${name}.yaml`)
-    
+
     if (!fs.existsSync(filePath)) {
       const defFilePath = path.join(Version.Plugin_Path, 'config', dirCfgName, 'default', `${name}.yaml`)
       if (fs.existsSync(defFilePath)) {
@@ -171,7 +178,7 @@ class Cfg {
         return false
       }
     }
-    
+
     new YamlReader(filePath).set(key, value)
     delete this.configCache[`${dirCfgName}.config.${name}`]
     return true
@@ -203,13 +210,15 @@ class Cfg {
 
 export default new Proxy(new Cfg(), {
   get(target, prop) {
-    // 首先检查是否是 Cfg 实例自身的属性或方法
+    if (prop === 'masterQQ') {
+      return yzCfg.masterQQ
+    }
     if (prop in target) {
-      return typeof target[prop] === 'function' 
-        ? target[prop].bind(target) 
+      return typeof target[prop] === 'function'
+        ? target[prop].bind(target)
         : target[prop]
     }
-    
+
     // 检查是否是配置目录名
     if (typeof prop === 'string' && target.dirCfgNames.includes(prop)) {
       const dirCfgName = prop
@@ -221,7 +230,7 @@ export default new Proxy(new Cfg(), {
         }
       })
     }
-    
+
     return undefined
   }
 })

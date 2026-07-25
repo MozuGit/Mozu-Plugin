@@ -152,7 +152,7 @@ export default [
       options: [
         { label: "不启用", value: 0 },
         { label: "黑名单", value: 1 },
-        { label: "白名单", value: 2 },
+        { label: "白名单", value: 2 }
       ]
     }
   },
@@ -177,7 +177,7 @@ export default [
     componentProps: {
       options: [
         { label: "普通文本", value: 0 },
-        { label: "Markdown", value: 1 },
+        { label: "Markdown", value: 1 }
       ]
     }
   },
@@ -429,7 +429,7 @@ export default [
     }
   },
   {
-    field: "xiuxian.Realm",
+    field: "xiuxian.Realm.Realms",
     label: "修仙境界配置",
     component: "GSubForm",
     componentProps: {
@@ -663,6 +663,154 @@ export default [
       style: {
         width: "180px"
       }
+    },
+    required: true
+  },
+  {
+    field: "xiuxian.sect.sect_validation",
+    label: "宗门名称简介配置",
+    component: "GSubForm",
+    componentProps: {
+      schemas: [
+        {
+          field: "audit",
+          label: "审核设置",
+          component: "GSubForm",
+          componentProps: {
+            modalProps: {
+              title: "宗门审核设置"
+            },
+            style: {
+              maxHeight: "200px",
+              overflowY: "auto"
+            },
+            schemas: [
+              {
+                field: "mode",
+                label: "审核模式",
+                component: "RadioGroup",
+                componentProps: {
+                  options: [
+                    { label: "手动审核", value: 0 },
+                    { label: "AI审核（待开发）", value: 1 },
+                    { label: "关键词审核", value: 2 },
+                    { label: "无需审核", value: 3 }
+                  ]
+                }
+              },
+              {
+                field: "keywords",
+                label: "关键词-黑名单",
+                component: "GTags",
+                bottomHelpMessage: "仅审核模式是关键词审核时有效",
+                componentProps: {
+                  multiple: true
+                }
+              },
+            ]
+          }
+        },
+        {
+          field: "name",
+          label: "名称设置",
+          component: "GSubForm",
+          componentProps: {
+            modalProps: {
+              title: "宗门名称设置"
+            },
+            style: {
+              maxHeight: "200px",
+              overflowY: "auto"
+            },
+            schemas: [
+              {
+                field: "max",
+                label: "宗门名称长度上限",
+                bottomHelpMessage: "设置宗门名称上限，-1表示无上限",
+                component: "InputNumber",
+                componentProps: {
+                  placeholder: "请输入长度",
+                  min: -1,
+                  style: {
+                    width: "180px"
+                  }
+                },
+                required: true
+              },
+              {
+                field: "max",
+                label: "宗门名称长度下限",
+                bottomHelpMessage: "设置宗门名称下限",
+                component: "InputNumber",
+                componentProps: {
+                  placeholder: "请输入长度",
+                  min: 0,
+                  style: {
+                    width: "180px"
+                  }
+                },
+                required: true
+              },
+              {
+                field: "newline",
+                label: "允许换行",
+                bottomHelpMessage: "是否允许宗门名称换行",
+                component: "Switch"
+              }
+            ]
+          }
+        },
+        {
+          field: "desc",
+          label: "简介设置",
+          component: "GSubForm",
+          componentProps: {
+            modalProps: {
+              title: "宗门简介设置"
+            },
+            style: {
+              maxHeight: "200px",
+              overflowY: "auto"
+            },
+            schemas: [
+              {
+                field: "max",
+                label: "宗门简介长度上限",
+                bottomHelpMessage: "设置宗门简介上限，-1表示无上限",
+                component: "InputNumber",
+                componentProps: {
+                  placeholder: "请输入长度",
+                  min: -1,
+                  style: {
+                    width: "180px"
+                  }
+                },
+                required: true
+              },
+              {
+                field: "max",
+                label: "宗门简介长度下限",
+                bottomHelpMessage: "设置简介名称下限",
+                component: "InputNumber",
+                componentProps: {
+                  placeholder: "请输入长度",
+                  min: 0,
+                  style: {
+                    width: "180px"
+                  }
+                },
+                required: true
+              },
+              {
+                field: "newline",
+                label: "允许换行",
+                bottomHelpMessage: "是否允许宗门简介换行",
+                component: "Switch"
+              }
+            ]
+          }
+        }
+      ]
     },
     required: true
   },

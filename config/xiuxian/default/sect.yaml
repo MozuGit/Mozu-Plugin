@@ -1,11 +1,11 @@
 #宗门等级
 sect_level:
-  - up_exp: 0
-    memberMax: 10
-    sign:
-      cult: 10888
-      ls: 10888
-      sectExp: 100
+  - up_exp: 0  #宗门升级需要的宗门经验
+    memberMax: 10  #宗门人数上限
+    sign:  #签到奖励
+      cult: 10888  #签到奖励：修为
+      ls: 10888  #签到奖励：灵石
+      sectExp: 100  #签到奖励：宗门经验
   - up_exp: 1000
     memberMax: 20
     sign:
@@ -60,6 +60,20 @@ sect_level:
       cult: 188888
       ls: 188888
       sectExp: 5000
+
+#宗门名称简介配置
+sect_validation:
+  audit:
+    mode: 0  #审核模式 0 - 手动审核   1 - AI审核（待开发）   2 - 关键词审核   3 - 无需审核
+    keywords: []  #设置关键词审核时触发  数组形式  黑名单词
+  name:
+    max: 8  #宗门设置名称字符上限  -1表示无上限
+    min: 1  #宗门设置名称字符下限
+    newline: false  #是否允许换行
+  desc:
+    max: 100  #宗门设置简介字符上限  -1表示无上限
+    min: 0  #宗门设置简介字符下限
+    newline: true  #是否允许换行
 
 #宗门升级后经验重置
 sect_up_reset: false
