@@ -100,8 +100,11 @@
 
 <script setup>
 import { reactive, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { LockOutlined, SafetyOutlined, ArrowLeftOutlined } from '@ant-design/icons-vue'
+
+const router = useRouter()
 
 const loading = ref(false)
 const showResetPanel = ref(false)
@@ -191,7 +194,9 @@ async function handleLogin() {
     const data = await res.json()
 
     if (data.success) {
-      message.success('登录成功：待更新')
+      localStorage.setItem('token', data.data.token)
+      message.success('登录成功')
+      router.push('/xiuxian')
     } else {
       message.error(data.message || '登录失败')
     }
@@ -233,6 +238,10 @@ async function handleResetPassword() {
   }
   if (!resetForm.newPassword) {
     message.error('请输入新密码')
+    return
+  }
+  if (resetForm.newPassword.length < 6) {
+    message.error('密码不能少于6位')
     return
   }
   resetting.value = true

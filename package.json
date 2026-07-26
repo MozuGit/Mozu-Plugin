@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
+    "@vueuse/core": "^14.3.0",
     "ant-design-vue": "^4.2.6",
     "axios": "^1.18.0",
     "chokidar": "^5.0.0",
