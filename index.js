@@ -2,6 +2,7 @@ import fs, { appendFile } from "fs"
 import path from "path"
 import { fileURLToPath, pathToFileURL } from 'url'
 import { Version } from './model/Config/Version.js'
+import './server/index.js'
 
 const _filename = fileURLToPath(import.meta.url)
 const pluginRoot = path.dirname(_filename)
