@@ -34,6 +34,7 @@ app.post('/api/login', async (req, res) => {
       const { code, newPassword } = req.body
       if (code === await Redis.get("Mozu:panel:code")) {
         Config.modify('panel', 'login', 'password', newPassword)
+        await Redis.del("Mozu:panel:code")
         res.json({
           success: true
         })
