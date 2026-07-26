@@ -19,7 +19,7 @@
         <div class="slogan">
           <div class="main-title">Mozu-Plugin</div>
           <div class="sub-title">
-            请输入文本
+            不知道写什么
           </div>
         </div>
       </div>
@@ -39,7 +39,8 @@
             </a-input-password>
           </a-form-item>
           <div style="text-align: right; margin-bottom: 5px; margin-top: 0; line-height: 1;">
-            <a-button type="link" @click="openResetPanel" style="padding: 0; height: auto; font-size: 14px;">忘记密码</a-button>
+            <a-button type="link" @click="openResetPanel"
+              style="padding: 0; height: auto; font-size: 14px;">忘记密码</a-button>
           </div>
           <a-form-item style="margin-bottom: 0;">
             <a-button type="primary" html-type="submit" block size="large" :loading="loading" class="gold-black-btn">
@@ -54,33 +55,26 @@
         <!-- 使用相对定位容器，让标题绝对居中 -->
         <div style="position: relative; display: flex; align-items: center; margin-bottom: 20px; height: 32px;">
           <a-button type="text" @click="closeResetPanel" style="padding: 0; position: absolute; left: 0; z-index: 1;">
-            <template #icon><ArrowLeftOutlined /></template>
+            <template #icon>
+              <ArrowLeftOutlined />
+            </template>
           </a-button>
-          <h2 style="margin: 0; width: 100%; text-align: center; font-size: 20px; position: absolute; left: 0; right: 0;">忘记密码</h2>
+          <h2
+            style="margin: 0; width: 100%; text-align: center; font-size: 20px; position: absolute; left: 0; right: 0;">
+            忘记密码
+          </h2>
         </div>
         <a-form :model="resetForm" @finish="handleResetPassword" size="default">
           <a-form-item style="margin-bottom: 12px;">
             <div style="display: flex; gap: 8px;">
-              <a-input 
-                v-model:value="resetForm.code" 
-                placeholder="验证码" 
-                size="default"
-                style="flex: 1;"
-                maxlength="6"
-                @input="handleCodeInput"
-              >
+              <a-input v-model:value="resetForm.code" placeholder="验证码" size="default" style="flex: 1;" maxlength="6"
+                @input="handleCodeInput">
                 <template #prefix>
                   <SafetyOutlined />
                 </template>
               </a-input>
-              <a-button 
-                type="primary" 
-                :disabled="countdown > 0 || sendingCode" 
-                @click="handleGetCode" 
-                size="default"
-                class="gold-black-btn"
-                style="min-width: 110px; font-size: 13px;"
-              >
+              <a-button type="primary" :disabled="countdown > 0 || sendingCode" @click="handleGetCode" size="default"
+                class="gold-black-btn" style="min-width: 110px; font-size: 13px;">
                 {{ countdown > 0 ? `${countdown}秒后重试` : '获取验证码' }}
               </a-button>
             </div>
@@ -93,7 +87,8 @@
             </a-input-password>
           </a-form-item>
           <a-form-item style="margin-bottom: 0;">
-            <a-button type="primary" html-type="submit" block size="default" :loading="resetting" class="gold-black-btn">
+            <a-button type="primary" html-type="submit" block size="default" :loading="resetting"
+              class="gold-black-btn">
               重置密码
             </a-button>
           </a-form-item>
@@ -124,34 +119,27 @@ const resetForm = reactive({
   newPassword: ''
 })
 
-// 验证码输入限制：只能输入数字，最多6位
 function handleCodeInput(e) {
   let value = e.target.value
-  // 只保留数字
   value = value.replace(/[^\d]/g, '')
-  // 最多6位
   if (value.length > 6) {
     value = value.slice(0, 6)
   }
   resetForm.code = value
 }
 
-// 清理定时器
-watch(countdown, (val) => {
-  if (val <= 0) {
+function startCountdown() {
+  if (timer) {
     clearInterval(timer)
     timer = null
   }
-})
-
-function startCountdown() {
-  countdown.value = 300
+  if (countdown.value <= 0) return
   timer = setInterval(() => {
-    if (countdown.value > 0) {
-      countdown.value--
-    } else {
+    countdown.value--
+    if (countdown.value <= 0) {
       clearInterval(timer)
       timer = null
+      fetchTTL()
     }
   }, 1000)
 }
@@ -165,6 +153,21 @@ function openResetPanel() {
     timer = null
   }
   countdown.value = 0
+  fetchTTL()
+}
+
+async function fetchTTL() {
+  try {
+    const res = await fetch('/api/login?reset=get_code_ttl', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    const data = await res.json()
+    if (data.success && data.ttl > 0) {
+      countdown.value = data.ttl
+      startCountdown()
+    }
+  } catch (e) { }
 }
 
 function closeResetPanel() {
@@ -211,7 +214,7 @@ async function handleGetCode() {
     const data = await res.json()
     if (data.success) {
       message.success('验证码已发送')
-      startCountdown()
+      await fetchTTL()
     } else {
       message.error(data.message || '获取验证码失败')
     }
@@ -371,6 +374,7 @@ async function hashSHA256(password) {
     opacity: 0;
     transform: translateY(80px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -382,6 +386,7 @@ async function hashSHA256(password) {
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -486,9 +491,11 @@ async function hashSHA256(password) {
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
@@ -500,16 +507,20 @@ async function hashSHA256(password) {
     padding: 0 5%;
     gap: 40px;
   }
+
   .right-panel-wrapper {
     width: 360px;
   }
+
   .logo-image img {
     width: 160px;
     height: 160px;
   }
+
   .slogan .main-title {
     font-size: 40px;
   }
+
   .slogan .sub-title {
     font-size: 24px;
   }
@@ -522,30 +533,37 @@ async function hashSHA256(password) {
     padding: 20px;
     gap: 30px;
   }
+
   .right-panel-wrapper {
     width: 100%;
     max-width: 400px;
   }
+
   .left-content {
     padding-left: 0;
     justify-content: center;
     width: 100%;
   }
+
   .logo-image img {
     width: 120px;
     height: 120px;
   }
+
   .slogan .main-title {
     font-size: 32px;
     margin-bottom: 16px;
   }
+
   .slogan .sub-title {
     font-size: 20px;
   }
+
   .github-link {
     top: 15px;
     right: 15px;
   }
+
   .github-link svg {
     height: 28px;
     width: 28px;

@@ -30,6 +30,12 @@ app.post('/api/login', async (req, res) => {
           message: '验证码获取频繁'
         })
       }
+    } else if (reset === 'get_code_ttl') {
+      const ttl = await Redis.ttl("Mozu:panel:code")
+      res.json({
+        success: true,
+        ttl: ttl
+      })
     } else if (reset === 'reset_password') {
       const { code, newPassword } = req.body
       if (code === await Redis.get("Mozu:panel:code")) {
