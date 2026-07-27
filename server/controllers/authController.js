@@ -100,7 +100,7 @@ const handleNormalLogin = async (req, res) => {
 
   if (password === Config.panel.login.password) {
     const token = crypto.randomBytes(32).toString('hex')
-    await Redis.set("Mozu:panel:token", token, 'EX', 60 * 60 * 24)
+    await Redis.sadd("Mozu:panel:token", token)
     res.json({
       success: true,
       message: '登录成功',
@@ -118,10 +118,10 @@ const handleNormalLogin = async (req, res) => {
 
 // 退出登录
 const handleExitLogin = async (req, res) => {
-  const token = await Redis.get("Mozu:panel:token")
   const authHeader = req.headers.authorization.substring(7)
-  if (token === authHeader) {
-    await Redis.del("Mozu:panel:token")
+  const presence = await Redis.sismember("Mozu:panel:token", authHeader)
+  if (presence) {
+    await Redis.srem("Mozu:panel:token", authHeader)
     res.json({
       success: true,
       message: '退出登录成功'

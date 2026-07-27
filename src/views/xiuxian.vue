@@ -1,28 +1,59 @@
 <template>
-  <a-card title="魔族陌修仙" class="fade-in-card" :bordered="false">
-    <a-row :gutter="16">
-      <a-col :span="12">
-        <a-statistic title="修仙人数" :value="displayPlayerCount" :loading="loading" class="statistic-item">
-          <template #suffix>
-            <span style="font-size: 16px; color: #52c41a;">人</span>
+  <div class="dashboard-container">
+    <!-- 顶部快捷栏 - 可滑动 -->
+    <div class="quick-nav">
+      <a-space :size="12" class="nav-scroll-container">
+        <a-button :type="currentPage === 'xiuxian' ? 'primary' : 'default'"
+          :class="{ active: currentPage === 'xiuxian' }" @click="navigateTo('xiuxian')">
+          <template #icon>
+            <HomeOutlined />
           </template>
-        </a-statistic>
-      </a-col>
-      <a-col :span="12">
-        <a-statistic title="宗门数量" :value="displaySectCount" :loading="loading" class="statistic-item">
-          <template #suffix>
-            <span style="font-size: 16px; color: #1890ff;">个</span>
+          首页
+        </a-button>
+        <a-button :type="currentPage === 'config' ? 'primary' : 'default'" :class="{ active: currentPage === 'config' }"
+          @click="navigateTo('config')">
+          <template #icon>
+            <setting-outlined />
           </template>
-        </a-statistic>
-      </a-col>
-    </a-row>
-  </a-card>
+          修仙配置
+        </a-button>
+        <a-button :type="currentPage === 'cdk' ? 'primary' : 'default'" :class="{ active: currentPage === 'cdk' }"
+          @click="navigateTo('cdk')">
+          <template #icon>
+            <gift-outlined />
+          </template>
+          兑换码操作
+        </a-button>
+      </a-space>
+    </div>
+
+    <!-- 仪表盘内容 -->
+    <a-card title="魔族陌修仙" class="fade-in-card" :bordered="false">
+      <a-row :gutter="[16, 16]">
+        <a-col :xs="24" :sm="12">
+          <a-statistic title="修仙人数" :value="displayPlayerCount" :loading="loading" class="statistic-item">
+            <template #suffix>
+              <span style="font-size: 16px; color: #52c41a;">人</span>
+            </template>
+          </a-statistic>
+        </a-col>
+        <a-col :xs="24" :sm="12">
+          <a-statistic title="宗门数量" :value="displaySectCount" :loading="loading" class="statistic-item">
+            <template #suffix>
+              <span style="font-size: 16px; color: #1890ff;">个</span>
+            </template>
+          </a-statistic>
+        </a-col>
+      </a-row>
+    </a-card>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, watch, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
+import { HomeOutlined, SettingOutlined, GiftOutlined } from '@ant-design/icons-vue'
 
 const playerCount = ref(0)
 const sectCount = ref(0)
@@ -31,6 +62,25 @@ const displaySectCount = ref(0)
 const loading = ref(false)
 
 const router = useRouter()
+const route = useRoute()
+
+const currentPage = computed(() => {
+  if (route.path === '/xiuxian/config') return 'config'
+  if (route.path === '/xiuxian/cdk') return 'cdk'
+  return 'xiuxian'
+})
+
+const navigateTo = (page) => {
+  const targetPath = page === 'xiuxian'
+    ? '/xiuxian'
+    : page === 'config'
+      ? '/xiuxian/config'
+      : '/xiuxian/cdk'
+
+  if (route.path !== targetPath) {
+    router.push(targetPath)
+  }
+}
 
 const animateNumber = (target, displayRef, duration = 1500) => {
   const start = Math.round(displayRef.value)
@@ -71,6 +121,7 @@ const fetchData = async () => {
       localStorage.removeItem('token')
       router.push('/login')
       document.title = '魔族陌 - 登录'
+      return
     }
     const data = await res.json()
     if (data.success) {
@@ -107,8 +158,94 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.fade-in-card {
+.dashboard-container {
+  width: 100%;
+}
+
+/* 顶部快捷栏样式 - 可滑动 */
+.quick-nav {
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   animation: slideInFromLeft 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  overflow: hidden;
+}
+
+.nav-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  padding-bottom: 4px; /* 为滚动条留空间但隐藏 */
+}
+
+.nav-scroll-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
+}
+
+.nav-scroll-container > * {
+  flex-shrink: 0;
+}
+
+.quick-nav .ant-btn {
+  height: 40px;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+.quick-nav .ant-btn:not(.ant-btn-primary) {
+  background: #f5f7fa;
+  border-color: #e8eaed;
+  color: #5f6368;
+}
+
+.quick-nav .ant-btn:not(.ant-btn-primary):hover {
+  background: #e8f0fe;
+  border-color: #b8d4fe;
+  color: #1a73e8;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.2);
+}
+
+.quick-nav .ant-btn.active {
+  background: #e8f0fe;
+  border-color: #1a73e8;
+  color: #1a73e8;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.15);
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .quick-nav {
+    padding: 10px 12px;
+    margin-bottom: 16px;
+  }
+  
+  .quick-nav .ant-btn {
+    height: 36px;
+    font-size: 13px;
+    padding: 4px 12px;
+  }
+  
+  .nav-scroll-container {
+    gap: 8px !important;
+  }
+}
+
+.fade-in-card {
+  animation: slideInItem 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   opacity: 0;
   transform: translateX(-30px);
 }
@@ -125,8 +262,20 @@ onMounted(() => {
   }
 }
 
+@keyframes slideInItem {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .statistic-item {
-  animation: slideInItem 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: slideInSubItem 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   opacity: 0;
   transform: translateX(-20px);
 }
@@ -139,7 +288,7 @@ onMounted(() => {
   animation-delay: 0.35s;
 }
 
-@keyframes slideInItem {
+@keyframes slideInSubItem {
   from {
     opacity: 0;
     transform: translateX(-20px);
@@ -161,12 +310,10 @@ onMounted(() => {
   font-weight: 600;
 }
 
-/* 加载状态下数字颜色略微变淡 */
 :deep(.ant-statistic-loading .ant-statistic-content) {
   opacity: 0.6;
 }
 
-/* 卡片样式微调 */
 :deep(.ant-card) {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -176,5 +323,16 @@ onMounted(() => {
 :deep(.ant-card:hover) {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
+}
+
+/* 响应式统计卡片 */
+@media (max-width: 768px) {
+  :deep(.ant-statistic-content) {
+    font-size: 24px;
+  }
+  
+  :deep(.ant-statistic-title) {
+    font-size: 14px;
+  }
 }
 </style>

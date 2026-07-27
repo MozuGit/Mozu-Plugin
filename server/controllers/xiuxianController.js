@@ -2,9 +2,8 @@ import Redis from '#Redis'
 
 export const getInfo = async (req, res) => {
   try {
-    const token = await Redis.get("Mozu:panel:token")
-    const authHeader = req.headers.authorization.substring(7)
-    if (token !== authHeader) {
+    const presence = await Redis.sismember("Mozu:panel:token", req.headers.authorization.substring(7))
+    if (!presence) {
       return res.status(401).json({
         success: false,
         message: 'token过期或无效'

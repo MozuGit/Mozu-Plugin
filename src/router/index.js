@@ -22,6 +22,16 @@ const routes = [
     component: () => import('../views/xiuxian.vue')
   },
   {
+    path: '/xiuxian/config',
+    name: 'xiuxianConfig',
+    component: () => import('../views/xiuxian/config.vue')
+  },
+  {
+    path: '/xiuxian/cdk',
+    name: 'xiuxianCdk',
+    component: () => import('../views/xiuxian/cdk.vue')
+  },
+  {
     path: '/settings',
     name: 'settings',
     component: () => import('../views/settings.vue')
