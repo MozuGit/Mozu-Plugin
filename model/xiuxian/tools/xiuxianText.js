@@ -865,7 +865,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /^#?切磋\s+\d*/,
+    prefix: /^#?切磋\s*\d+/,
     handler: async (id, user_id, Text, msg, at, isMaster) => {
       let id2 = 0
       const _id = (msg.match(/\d+/g) || []).join('')
@@ -884,6 +884,7 @@ const prefixHandlers = [
             '***',
             '**' + ((value.data.event_id === id) ? '' : '对方') + '当前正在闭关**',
             '>暂时无法切磋',
+            '找不到人切磋？试试**' + (await mqqapi.command("随机切磋")) + '**',
             '***'
           ].join('\n'))
           break
@@ -893,6 +894,7 @@ const prefixHandlers = [
             '***',
             '**' + ((value.data.event_id === id) ? '你的' : '对方') + '修为不足5000**',
             '>暂时无法切磋',
+            '找不到人切磋？试试**' + (await mqqapi.command("随机切磋")) + '**',
             '***'
           ].join('\n'))
           break
@@ -902,6 +904,7 @@ const prefixHandlers = [
             '***',
             '**' + ((value.data.event_id === id) ? '当前' : '对方') + '正在CD中...**',
             '>**剩余' + value.data.pvp_cd + '秒**',
+            '找不到人切磋？试试**' + (await mqqapi.command("随机切磋")) + '**',
             '***'
           ].join('\n'))
           break
@@ -910,6 +913,7 @@ const prefixHandlers = [
             '<@' + user_id + '>',
             '***',
             '**不能和自己切磋**',
+            '找不到人切磋？试试**' + (await mqqapi.command("随机切磋")) + '**',
             '***'
           ].join('\n'))
           break
@@ -919,6 +923,7 @@ const prefixHandlers = [
             '***',
             '**未找到该玩家**',
             '>请确认该玩家是否存在或注册',
+            '找不到人切磋？试试**' + (await mqqapi.command("随机切磋")) + '**',
             '***'
           ].join('\n'))
           break

@@ -706,6 +706,7 @@ export default new class {
         被切磋冷却: Math.floor(Date.now() / 1000)
       })
     }
+    this.getPower(id)
     this.getPower(randomPlayer[0])  //刷新战力
     return {
       event: "pvp_end",
