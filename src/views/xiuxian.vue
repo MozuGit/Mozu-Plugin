@@ -27,7 +27,6 @@
       </a-space>
     </div>
 
-    <!-- 仪表盘内容 -->
     <a-card title="魔族陌修仙" class="fade-in-card" :bordered="false">
       <a-row :gutter="[16, 16]">
         <a-col :xs="24" :sm="12">

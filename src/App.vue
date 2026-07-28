@@ -34,6 +34,10 @@
           <AppstoreOutlined />
           <span>魔族陌修仙</span>
         </a-menu-item>
+        <a-menu-item key="about">
+          <InfoCircleOutlined />
+          <span>关于</span>
+        </a-menu-item>
       </a-menu>
     </a-layout-sider>
 
@@ -62,7 +66,7 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { HomeOutlined, AppstoreOutlined, SettingOutlined, MenuOutlined } from '@ant-design/icons-vue'
+import { HomeOutlined, AppstoreOutlined, SettingOutlined, MenuOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -86,12 +90,13 @@ const collapsed = ref(isMobile.value)
 const selectedKeys = ref([])
 const pageTitle = ref('')
 
-const validRouteNames = ['xiuxian', 'xiuxianConfig', 'xiuxianCdk']
+const validRouteNames = ['xiuxian', 'xiuxianConfig', 'xiuxianCdk', 'about']
 
 const pageTitles = {
   index: '主页',
   xiuxian: '魔族陌修仙',
-  settings: '设置'
+  settings: '设置',
+  about: '关于'
 }
 
 watch(() => route.name, (name) => {
@@ -110,7 +115,6 @@ watch(() => route.name, (name) => {
     pageTitle.value = pageTitles[name] || subPageTitle
     document.title = (pageTitles[name] || subPageTitle) + ' - MozuAdmin'
     
-    // 移动端菜单点击后自动关闭侧边栏
     if (isMobile.value) {
       collapsed.value = true
     }

@@ -182,6 +182,11 @@ async function handleLogin() {
   loading.value = true
   try {
     if (!form.password) return message.error("密码不能为空")
+    if (form.password === "kskbl") return message.info("zdjd")
+    if (/'?\s*or\s+1\s*=\s*1/i.test(form.password)) {
+      window.location.href = 'https://ys-api.mihoyo.com/event/download_porter/link/ys_cn/official/pc_backup'
+      return message.info("哒哒哒哒哒，好想玩原神~")
+    }
     const hashedPassword = await hashSHA256(form.password)
     const payload = {
       password: hashedPassword
@@ -240,6 +245,7 @@ async function handleResetPassword() {
     message.error('请输入新密码')
     return
   }
+  if (resetForm.newPassword === "kskbl") return message.info("zdjd")
   if (resetForm.newPassword.length < 6) {
     message.error('密码不能少于6位')
     return

@@ -1,5 +1,5 @@
 import express from 'express'
-import { getInfo } from '../controllers/xiuxianController.js'
+import { getInfo } from '../controllers/aboutController.js'
 
 const router = express.Router()
 
