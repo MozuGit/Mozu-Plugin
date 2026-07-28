@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import fs from 'fs/promises'
 import path from 'node:path'
+import crypto from 'crypto'
 import { unflatten } from 'flat'
 
 import Redis from '#Redis'
@@ -8,6 +9,7 @@ import Config from "#Config"
 import { Version } from '../../model/Config/Version.js'
 
 import RedisConfig from './Redis.js'
+import panel from './panel.js'
 import xiuxian from './xiuxian.js'
 import makeMessage from './makeMessage.js'
 import xiuxianTools from './xiuxian-tools.js'
@@ -16,6 +18,7 @@ import openai from './openai.js'
 
 export const schemas = [
   ...RedisConfig,
+  ...panel,
   ...xiuxian,
   ...xiuxianTools,
   ...makeMessage,
@@ -26,6 +29,13 @@ export const schemas = [
 export function getConfigData() {
   return {
     ...Config.getCfg(),
+    panel: {
+      ...Config.getCfg().panel,
+      login: {
+        ...Config.getCfg().panel.login,
+        password: ''
+      }
+    },
     tools: {
       title: {
         id: 1,
@@ -38,13 +48,13 @@ export function getConfigData() {
 
 export function setConfigData(data, { Result }) {
   const nested = unflatten(data)
-
+  nested.panel.login.password = crypto.createHash('sha256').update(nested.panel.login.password).digest('hex')
   batchModifyConfig([
     { dir: 'config', file: 'Redis', data: nested.config.Redis },
     { dir: 'config', file: 'makeMessage', data: nested.config.makeMessage },
     { dir: 'config', file: 'fayan', data: nested.config.fayan },
     { dir: 'config', file: 'openai', data: nested.config.openai },
-    { dir: 'xiuxian', file: 'setting', data: nested.xiuxian.setting },
+    { dir: 'panel', file: 'login', data: nested.panel.login },
   ])
   const xiuxianError = handleXiuxianConfig(nested.xiuxian)
   if (xiuxianError) {

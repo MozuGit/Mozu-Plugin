@@ -154,7 +154,7 @@ const commandHandlers = {
       ...(await buildUserInfo(userInfo)),
       '***',
       '**战力：' + userInfo.power + '**',
-      '>**' + (await mqqapi.command('境界：' + userInfo.realm.realmName, '突破')) + '**',
+      '>**' + (await mqqapi.command('境界：' + userInfo.realm.realmName, '突破', true)) + '**',
       '**' + (await mqqapi.command('修为：' + userInfo.cult, '修炼', true)) + '**',
       '**' + (await mqqapi.command('灵石：' + userInfo.ls, '修炼', true)) + '**',
       '***',
@@ -884,7 +884,7 @@ const prefixHandlers = [
             '***',
             '**' + ((value.data.event_id === id) ? '' : '对方') + '当前正在闭关**',
             '>暂时无法切磋',
-            '找不到人切磋？试试**' + (await mqqapi.command("随机切磋")) + '**',
+            '找不到人切磋？试试**' + (await mqqapi.command("随机切磋", "随机切磋", true)) + '**',
             '***'
           ].join('\n'))
           break
@@ -894,7 +894,7 @@ const prefixHandlers = [
             '***',
             '**' + ((value.data.event_id === id) ? '你的' : '对方') + '修为不足5000**',
             '>暂时无法切磋',
-            '找不到人切磋？试试**' + (await mqqapi.command("随机切磋")) + '**',
+            '找不到人切磋？试试**' + (await mqqapi.command("随机切磋", "随机切磋", true)) + '**',
             '***'
           ].join('\n'))
           break
@@ -904,7 +904,7 @@ const prefixHandlers = [
             '***',
             '**' + ((value.data.event_id === id) ? '当前' : '对方') + '正在CD中...**',
             '>**剩余' + value.data.pvp_cd + '秒**',
-            '找不到人切磋？试试**' + (await mqqapi.command("随机切磋")) + '**',
+            '找不到人切磋？试试**' + (await mqqapi.command("随机切磋", "随机切磋", true)) + '**',
             '***'
           ].join('\n'))
           break
@@ -913,7 +913,7 @@ const prefixHandlers = [
             '<@' + user_id + '>',
             '***',
             '**不能和自己切磋**',
-            '找不到人切磋？试试**' + (await mqqapi.command("随机切磋")) + '**',
+            '找不到人切磋？试试**' + (await mqqapi.command("随机切磋", "随机切磋", true)) + '**',
             '***'
           ].join('\n'))
           break
@@ -923,7 +923,7 @@ const prefixHandlers = [
             '***',
             '**未找到该玩家**',
             '>请确认该玩家是否存在或注册',
-            '找不到人切磋？试试**' + (await mqqapi.command("随机切磋")) + '**',
+            '找不到人切磋？试试**' + (await mqqapi.command("随机切磋", "随机切磋", true)) + '**',
             '***'
           ].join('\n'))
           break
@@ -932,7 +932,7 @@ const prefixHandlers = [
             '<@' + user_id + '>',
             '***',
             '**切磋开始**',
-            '>**你对ID: ' + (await mqqapi.command(id2, '查询修仙者' + id2)) + '发起切磋**',
+            '>**你对ID: ' + (await mqqapi.command(id2, '查询修仙者' + id2, true)) + '发起切磋**',
             '***',
             '**切磋信息**',
             '>你的战力：' + value.data.powerA,
@@ -944,8 +944,8 @@ const prefixHandlers = [
             '<@' + user_id + '>',
             '***',
             '**切磋结果**',
-            '>**你的ID：' + (await mqqapi.command(id, '查询修仙者' + id)) + '**',
-            '**对方ID：' + (await mqqapi.command(id2, '查询修仙者' + id2)) + '**',
+            '>**你的ID：' + (await mqqapi.command(id, '查询修仙者' + id, true)) + '**',
+            '**对方ID：' + (await mqqapi.command(id2, '查询修仙者' + id2, true)) + '**',
             '***',
             '**切磋结算**',
             '>你' + (value.data.winner ? '胜利：+' : '失败：-') + value.data.cultA + '点修为',
@@ -978,7 +978,7 @@ const prefixHandlers = [
             '<@' + user_id + '>',
             '***',
             '**切磋结果**',
-            '>**你的ID：' + (await mqqapi.command(id, '查询修仙者' + id)) + '**',
+            '>**你的ID：' + (await mqqapi.command(id, '查询修仙者' + id, true)) + '**',
             '**对方ID：' + (await mqqapi.command(value.data.random_id, '查询修仙者' + value.data.random_id)) + '**',
             '***',
             '**切磋结算**',
