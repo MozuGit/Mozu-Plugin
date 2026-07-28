@@ -865,7 +865,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /^#?切磋\s*\d*/,
+    prefix: /^#?切磋\s+\d*/,
     handler: async (id, user_id, Text, msg, at, isMaster) => {
       let id2 = 0
       const _id = (msg.match(/\d+/g) || []).join('')
@@ -947,6 +947,72 @@ const prefixHandlers = [
             '对方' + (value.data.winner ? '失败：-' : '胜利：+') + value.data.cultB + '点修为',
             '***'
           ].join('\n'))
+      }
+      Text.push(Button.xiuxian)
+    }
+  },
+  {
+    prefix: /^#?(随机)?切磋/,
+    handler: async (id, user_id, Text, msg, at, isMaster) => {
+      const value = await xiuxian.pvpRandom(id, isMaster)
+      switch (value.event) {
+        case 'pvp_end':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**切磋开始**',
+            '>**你对ID: ' + (await mqqapi.command(value.data.random_id, '查询修仙者' + value.data.random_id)) + '发起切磋**',
+            '***',
+            '**切磋信息**',
+            '>你的战力：' + value.data.self_power,
+            '对方战力：' + value.data.random_power,
+            '切磋成功概率：' + (value.data.finalWinRate * 100).toFixed(2) + '%',
+            '***'
+          ].join('\n'))
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**切磋结果**',
+            '>**你的ID：' + (await mqqapi.command(id, '查询修仙者' + id)) + '**',
+            '**对方ID：' + (await mqqapi.command(value.data.random_id, '查询修仙者' + value.data.random_id)) + '**',
+            '***',
+            '**切磋结算**',
+            '>你' + (value.data.winner ? '胜利：+' : '失败：-') + value.data.cultAddSelf + '点修为',
+            '对方' + (value.data.winner ? '失败：-' : '胜利：+') + value.data.cultAddRandom + '点修为',
+            '***'
+          ].join('\n'))
+          break
+        case 'player_lack':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**随机切磋玩家不足**',
+            '>符合随机切磋的玩家不足',
+            '暂时无法随机切磋',
+            '***'
+          ].join('\n'))
+          break
+        case 'pvp_cd':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**当前正在CD中...**',
+            '>**剩余' + value.data.pvp_cd + '秒**',
+            '***'
+          ].join('\n'))
+          break
+        case 'cult_lack':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**你的修为不足5000**',
+            '>暂时无法切磋',
+            '***'
+          ].join('\n'))
+          break
+        case 'in_retreat':
+          Text.push(await retreatText())
+          break
       }
       Text.push(Button.xiuxian)
     }

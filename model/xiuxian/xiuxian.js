@@ -203,6 +203,11 @@ export default new class {
     }, 0)
     let power = Math.floor(evaluate(Config.xiuxian.xiuxian.powerFormula, { cult: cult, realm: realm }))
     power = Math.floor(power + power * (addition / 100))
+    if (cult > 5000) {
+      Redis.zadd('Mozu:xiuxian:random:pvp', power, id)
+    } else {
+      Redis.zrem('Mozu:xiuxian:random:pvp', id)
+    }
     return power
   }
 
@@ -577,6 +582,140 @@ export default new class {
         powerB,
         cultA: cultAddA,
         cultB: cultAddB,
+        finalWinRate
+      }
+    }
+  }
+
+  async pvpRandom(id, isMaster) {
+    let [cult, retreatStart, pvp_cd] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '闭关时间', '切磋冷却')
+    cult = parseInt(cult, 10)
+    retreatStart = parseInt(retreatStart, 10) || 0
+    pvp_cd = parseInt(pvp_cd, 10) || 0
+    if (retreatStart !== 0) {
+      return {
+        event: "in_retreat"
+      }
+    }
+    if (cult < 5000) {
+      return {
+        event: "cult_lack",
+        data: {
+          cult: cult
+        }
+      }
+    }
+    if ((Math.floor(Date.now() / 1000) - pvp_cd) <= Config.xiuxian.xiuxian.pvp.atk_cd && !(isMaster && Config.xiuxian.setting.master_no_cd)) {
+      return {
+        event: "pvp_cd",
+        data: {
+          pvp_cd: Config.xiuxian.xiuxian.pvp.atk_cd - (Math.floor(Date.now() / 1000) - pvp_cd)
+        }
+      }
+    }
+    const result = await Redis.zrange('Mozu:xiuxian:random:pvp', 0, -1, 'WITHSCORES')
+    const playerEntries = []
+    for (let i = 0; i < result.length; i += 2) {
+      if (parseInt(result[i], 10) !== id) {
+        playerEntries.push([parseInt(result[i], 10), parseInt(result[i + 1], 10)])
+      }
+    }
+    if (!playerEntries.length) {
+      return {
+        event: "player_lack"
+      }
+    }
+    const self_power = await this.getPower(id)
+    for (let i = 0; i < result.length; i += 2) {
+      if (parseInt(result[i], 10) !== id) {
+        playerEntries.push(parseInt(result[i], 10))
+        playerEntries.push(parseInt(result[i + 1], 10))
+      }
+    }
+    if (!playerEntries.length) {
+      return {
+        event: "player_lack"
+      }
+    }
+    let randomPlayer = null
+    let left = 0
+    let right = playerEntries.length / 2 - 1
+    if (self_power <= playerEntries[1]) {
+      randomPlayer = [playerEntries[0], playerEntries[1]]
+    } else if (self_power >= playerEntries[playerEntries.length - 1]) {
+      const lastIdx = playerEntries.length - 2
+      randomPlayer = [playerEntries[lastIdx], playerEntries[lastIdx + 1]]
+    } else {
+      while (left <= right) {
+        const mid = Math.floor((left + right) / 2)
+        const idx = mid * 2
+        const score = playerEntries[idx + 1]
+        if (score === self_power) {
+          randomPlayer = [playerEntries[idx], score]
+          break
+        }
+        if (score < self_power) {
+          left = mid + 1
+        } else {
+          right = mid - 1
+        }
+      }
+    }
+    if (!randomPlayer) {
+      if (right < 0) {
+        randomPlayer = [playerEntries[0], playerEntries[1]]
+      } else if (left >= playerEntries.length / 2) {
+        const lastIdx = playerEntries.length - 2
+        randomPlayer = [playerEntries[lastIdx], playerEntries[lastIdx + 1]]
+      } else {
+        const lIdx = left * 2
+        const rIdx = right * 2
+        const lScore = playerEntries[lIdx + 1]
+        const rScore = playerEntries[rIdx + 1]
+        randomPlayer = Math.abs(lScore - self_power) < Math.abs(rScore - self_power)
+          ? [playerEntries[lIdx], lScore]
+          : [playerEntries[rIdx], rScore]
+      }
+    }
+    const baseWinRate = self_power / (self_power + randomPlayer[1])
+    const randomFactor = 0.95 + Math.random() * 0.1
+    let finalWinRate = baseWinRate * randomFactor
+    finalWinRate = Math.max(0.01, Math.min(0.99, finalWinRate))
+    const roll = Math.random()
+    const isSelfWin = roll < finalWinRate
+    const cultAddSelf = crypto.randomInt(1000, 5001)
+    const cultAddRandom = crypto.randomInt(1000, 5001)
+    const self_cult = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '修为'), 10)
+    const random_cult = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${randomPlayer[0]}`, '修为'), 10)
+    if (isSelfWin) {
+      await Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
+        修为: self_cult + cultAddSelf,
+        切磋冷却: Math.floor(Date.now() / 1000)
+      })
+      await Redis.hmset(`${PLAYER_INFO_KEY}:${randomPlayer[0]}`, {
+        修为: random_cult - cultAddRandom,
+        被切磋冷却: Math.floor(Date.now() / 1000)
+      })
+    } else {
+      await Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
+        修为: self_cult - cultAddSelf,
+        切磋冷却: Math.floor(Date.now() / 1000)
+      })
+      await Redis.hmset(`${PLAYER_INFO_KEY}:${randomPlayer[0]}`, {
+        修为: random_cult + cultAddRandom,
+        被切磋冷却: Math.floor(Date.now() / 1000)
+      })
+    }
+    this.getPower(randomPlayer[0])  //刷新战力
+    return {
+      event: "pvp_end",
+      data: {
+        winner: isSelfWin,
+        self_power,
+        random_id: randomPlayer[0],
+        random_power: randomPlayer[1],
+        cultAddSelf,
+        cultAddRandom,
         finalWinRate
       }
     }
@@ -1958,6 +2097,7 @@ export default new class {
     }
     const quantities = [...msg.matchAll(/数量:(\d+)/g)].map(m => parseInt(m[1], 10))
     const quantity = quantities.length === 0 ? 1 : quantities.reduce((a, b) => a + b, 0)
+    const cdkText = [...msg.matchAll(/文本:([^\s]*)/g)].map(m => m[1].trim())
     const value = {
       genera: msg.includes("通用"),
       forceSetting: msg.includes("强制设置"),
@@ -1965,8 +2105,14 @@ export default new class {
       lsList: [...msg.matchAll(/灵石:(-?\d+)/g)].map(m => parseInt(m[1], 10))
     }
     const cdkSet = new Set()
-    while (cdkSet.size < quantity) {
-      cdkSet.add(genCdkString())
+    if (cdkText.length) {
+      for (const text of cdkText) {
+        cdkSet.add(text)
+      }
+    } else {
+      while (cdkSet.size < quantity) {
+        cdkSet.add(genCdkString())
+      }
     }
     const cdks = [...cdkSet]
     const pipeline = Redis.pipeline()
