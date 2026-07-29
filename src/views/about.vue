@@ -107,21 +107,58 @@ const latestVersion = ref('')
 const authorName = ref('MozuGit')
 const authorUrl = ref('https://github.com/MozuGit')
 
-// 版本对比逻辑
 const versionStatus = computed(() => {
   if (!pluginVersion.value || !latestVersion.value) return 'normal'
-  
-  const current = pluginVersion.value.replace('v', '').split('.').map(Number)
-  const latest = latestVersion.value.replace('v', '').split('.').map(Number)
-  
-  for (let i = 0; i < Math.max(current.length, latest.length); i++) {
-    const curr = current[i] || 0
-    const lat = latest[i] || 0
-    
+  const current = pluginVersion.value.replace(/^v/, '')
+  const latest = latestVersion.value.replace(/^v/, '')
+  const parseVersion = (version) => {
+    const match = version.match(/^(\d+(?:\.\d+)*)(?:[-.](.+))?$/)
+    if (!match) return { segments: [0], prerelease: '' }
+    const segments = match[1].split('.').map(Number)
+    const prerelease = match[2] || ''
+    return { segments, prerelease }
+  }
+  const currentParsed = parseVersion(current)
+  const latestParsed = parseVersion(latest)
+  const maxLength = Math.max(currentParsed.segments.length, latestParsed.segments.length)
+  for (let i = 0; i < maxLength; i++) {
+    const curr = currentParsed.segments[i] || 0
+    const lat = latestParsed.segments[i] || 0
     if (lat > curr) return 'update'
     if (curr > lat) return 'beta'
   }
-  
+  if (!currentParsed.prerelease && !latestParsed.prerelease) {
+    return 'normal'
+  }
+  if (currentParsed.prerelease && !latestParsed.prerelease) {
+    return 'beta'
+  }
+  if (!currentParsed.prerelease && latestParsed.prerelease) {
+    return 'beta'
+  }
+  const prereleaseOrder = ['alpha', 'beta', 'rc', 'pre', 'preview']
+  const comparePrerelease = (pre1, pre2) => {
+    const getPrereleaseInfo = (pre) => {
+      const parts = pre.split('.')
+      const type = parts[0].replace(/\d+$/, '')
+      const number = parseInt(parts[0].match(/\d+$/)?.[0] || '0') || (parts[1] ? parseInt(parts[1]) : 0)
+      const orderIndex = prereleaseOrder.indexOf(type.toLowerCase())
+      return {
+        type: type.toLowerCase(),
+        orderIndex: orderIndex >= 0 ? orderIndex : prereleaseOrder.length,
+        number: number
+      }
+    }
+    const info1 = getPrereleaseInfo(pre1)
+    const info2 = getPrereleaseInfo(pre2)
+    if (info1.orderIndex !== info2.orderIndex) {
+      return info2.orderIndex - info1.orderIndex
+    }
+    return info2.number - info1.number
+  }
+  const compareResult = comparePrerelease(currentParsed.prerelease, latestParsed.prerelease)
+  if (compareResult > 0) return 'update'
+  if (compareResult < 0) return 'beta'
   return 'normal'
 })
 

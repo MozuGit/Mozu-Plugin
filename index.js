@@ -2,7 +2,9 @@ import fs, { appendFile } from "fs"
 import path from "path"
 import { fileURLToPath, pathToFileURL } from 'url'
 import { Version } from './model/Config/Version.js'
-import './server/index.js'
+try {
+  await import('./server/index.js')
+} catch (err) { logger.error("[魔族陌面版] 服务器启动失败：", err) }
 
 const _filename = fileURLToPath(import.meta.url)
 const pluginRoot = path.dirname(_filename)
