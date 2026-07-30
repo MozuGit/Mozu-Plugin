@@ -177,10 +177,7 @@ async function restoreKeys(backupFile) {
 
     return restoredCount
   } catch (error) {
-    if (error instanceof SyntaxError) {
-      throw new Error(`JSON格式错误: ${error.message}\n提示：备份文件可能缺少 [ 或 ]，已尝试自动修复`)
-    }
-    throw error
+    logger.error(error)
   }
 }
 
