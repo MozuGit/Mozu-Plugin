@@ -48,7 +48,11 @@ export function getConfigData() {
 
 export function setConfigData(data, { Result }) {
   const nested = unflatten(data)
-  nested.panel.login.password = crypto.createHash('sha256').update(nested.panel.login.password).digest('hex')
+  if (nested.panel.login.password) {
+    nested.panel.login.password = crypto.createHash('sha256').update(nested.panel.login.password).digest('hex')
+  } else {
+    nested.panel.login.password = Config.panel.login.password
+  }
   batchModifyConfig([
     { dir: 'config', file: 'Redis', data: nested.config.Redis },
     { dir: 'config', file: 'makeMessage', data: nested.config.makeMessage },
