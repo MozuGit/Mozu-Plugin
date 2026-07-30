@@ -1838,6 +1838,7 @@ export default new class {
               case 1:
                 const value = await openai.aiAuditText(sectName)
                 if (value === "否") {
+                  notify.sectAuditName(sectId, sectName, true)
                   Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', sectName)
                   return {
                     event: "sect_set_name_success"
@@ -1906,6 +1907,7 @@ export default new class {
               case 1:
                 const value = await openai.aiAuditText(sectDesc)
                 if (value === "否") {
+                  notify.sectAuditDesc(sectId, sectDesc, true)
                   Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门简介', sectDesc)
                   return {
                     event: "sect_set_desc_success"
@@ -2042,6 +2044,28 @@ export default new class {
               sectAuditDesc: sectAuditDesc
             }
           }
+      }
+    } else {
+      return {
+        event: "no_permission"
+      }
+    }
+  }
+
+  async sectReset(sectId, isMaster, type) {
+    if (isMaster) {
+      if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
+        return {
+          event: "no_sect"
+        }
+      }
+      if (type === '名称') {
+        Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', '修仙宗门')
+      } else if (type === '简介') {
+        Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门简介', '未设置')
+      }
+      return {
+        event: "sect_reset"
       }
     } else {
       return {

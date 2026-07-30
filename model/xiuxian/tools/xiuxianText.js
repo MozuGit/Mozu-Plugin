@@ -2341,6 +2341,46 @@ const prefixHandlers = [
     }
   },
   {
+    prefix: /^#?重置宗门(名称|简介)\s*\d*/,
+    handler: async (id, user_id, Text, msg, at, isMaster) => {
+      const match = msg.match(/^#?重置宗门(名称|简介)\s*(\d*)/)
+      const sectId = parseInt(match[2], 10)
+      const type = match[1].trim()
+      const value = await xiuxian.sectReset(sectId, isMaster, type)
+      switch (value.event) {
+        case 'sect_reset':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**重置宗门' + type + '成功**',
+            '>宗门ID：' + sectId,
+            (type === '名称') ? '宗门名称：修仙宗门' : '宗门简介：未设置',
+            '***'
+          ].join('\n'))
+          break
+        case 'no_sect':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**宗门不存在**',
+            '>请确认该宗门是否存在',
+            '***'
+          ].join('\n'))
+          break
+        case 'no_permission':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**权限不足**',
+            '>请确认你是否有足够的权限',
+            '***'
+          ].join('\n'))
+          break
+      }
+      Text.push(Button.author)
+    }
+  },
+  {
     prefix: /^#?设置性别\s*(男|女)/,
     handler: async (id, user_id, Text, msg) => {
       const value = await xiuxian.setSex(id, msg.replace(/#?设置性别/, '').trim())
