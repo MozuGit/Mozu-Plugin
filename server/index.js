@@ -46,9 +46,7 @@ async function getRemoteIp() {
     let response
     try {
       response = await fetch(api)
-    } catch {
-      continue
-    }
+    } catch { continue }
     if (response.status === 200) {
       let { code, data } = await response.json()
       if (code === 0) {

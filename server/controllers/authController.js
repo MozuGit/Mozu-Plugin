@@ -35,17 +35,16 @@ export const handleLogin = async (req, res) => {
 
 // 获取验证码
 const handleGetCode = async (req, res) => {
-  if (await Redis.get("Mozu:panel:code")) {
+  const ip = getIP(req)
+  if (await Redis.get(`Mozu:panel:code:${ip}`) && ip !== '127.0.0.1') {
     return res.json({
       success: false,
       message: '获取验证码频繁，请稍后再试'
     })
   }
-
   const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0')
-  logger.info("[魔族陌面版][验证码] " + code)
-  await Redis.set("Mozu:panel:code", code, 'EX', 300)
-
+  logger.info(logger.yellow(`[魔族陌面版][验证码][来自IP：${ip}] ${code}`))
+  await Redis.set(`Mozu:panel:code:${ip}`, code, 'EX', 300)
   res.json({
     success: true
   })
@@ -53,10 +52,11 @@ const handleGetCode = async (req, res) => {
 
 // 获取验证码剩余时间
 const handleGetCodeTTL = async (req, res) => {
-  const ttl = await Redis.ttl("Mozu:panel:code")
+  const ip = getIP(req)
+  const ttl = await Redis.ttl(`Mozu:panel:code:${ip}`)
   res.json({
     success: true,
-    ttl: ttl
+    ttl: ip === '127.0.0.1' ? 0 : ttl
   })
 }
 
@@ -71,7 +71,8 @@ const handleResetPassword = async (req, res) => {
     })
   }
 
-  const savedCode = await Redis.get("Mozu:panel:code")
+  const ip = getIP(req)
+  const savedCode = await Redis.get(`Mozu:panel:code:${ip}`)
   if (code !== savedCode) {
     return res.json({
       success: false,
@@ -80,7 +81,7 @@ const handleResetPassword = async (req, res) => {
   }
 
   Config.modify('panel', 'login', 'password', newPassword)
-  await Redis.del("Mozu:panel:code")
+  await Redis.del(`Mozu:panel:code:${ip}`)
 
   res.json({
     success: true
@@ -98,7 +99,7 @@ const handleNormalLogin = async (req, res) => {
     })
   }
 
-  if (password === Config.panel.login.password) {
+  if (password === Config.panel.login.password || (await hashSHA256(password)) === Config.panel.login.password) {
     const token = crypto.randomBytes(32).toString('hex')
     await Redis.sadd("Mozu:panel:token", token)
     res.json({
@@ -127,4 +128,21 @@ const handleExitLogin = async (req, res) => {
       message: '退出登录成功'
     })
   }
+}
+
+async function hashSHA256(password) {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(password)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  return hashHex
+}
+
+function getIP(req) {
+  let ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.headers['x-real-ip'] || req.headers['cf-connecting-ip'] || req.headers['x-client-ip']
+  if (!ip || ip === 'unknown') {
+    ip = req.connection?.remoteAddress || req.socket?.remoteAddress || req.ip
+  }
+  return ip
 }
