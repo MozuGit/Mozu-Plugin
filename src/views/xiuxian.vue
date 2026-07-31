@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-container">
-    <!-- 顶部快捷栏 - 可滑动 -->
+    <!-- 顶部快捷栏 -->
     <div class="quick-nav">
       <a-space :size="12" class="nav-scroll-container">
         <a-button :type="currentPage === 'xiuxian' ? 'primary' : 'default'"
@@ -161,7 +161,7 @@ onMounted(() => {
   width: 100%;
 }
 
-/* 顶部快捷栏样式 - 可滑动 */
+/* 顶部快捷栏样式 */
 .quick-nav {
   margin-bottom: 24px;
   padding: 12px 16px;
@@ -178,16 +178,16 @@ onMounted(() => {
   overflow-y: hidden;
   white-space: nowrap;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
-  padding-bottom: 4px; /* 为滚动条留空间但隐藏 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 4px;
 }
 
 .nav-scroll-container::-webkit-scrollbar {
-  display: none; /* Chrome/Safari/Opera */
+  display: none;
 }
 
-.nav-scroll-container > * {
+.nav-scroll-container>* {
   flex-shrink: 0;
 }
 
@@ -231,13 +231,13 @@ onMounted(() => {
     padding: 10px 12px;
     margin-bottom: 16px;
   }
-  
+
   .quick-nav .ant-btn {
     height: 36px;
     font-size: 13px;
     padding: 4px 12px;
   }
-  
+
   .nav-scroll-container {
     gap: 8px !important;
   }
@@ -324,12 +324,11 @@ onMounted(() => {
   transform: translateY(-2px);
 }
 
-/* 响应式统计卡片 */
 @media (max-width: 768px) {
   :deep(.ant-statistic-content) {
     font-size: 24px;
   }
-  
+
   :deep(.ant-statistic-title) {
     font-size: 14px;
   }

@@ -32,10 +32,10 @@ app.listen(Config.panel.login.port || 11451, '0.0.0.0', () => {
     Math.floor(Math.random() * 155 + 100)
   ]
   RGB.sort(() => Math.random() - 0.5)
-  logger.info(logger.rgb(...RGB)("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"))
+  logger.info(logger.rgb(...RGB)("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"))
   logger.info(logger.rgb(...RGB)("┃ ") + logger.rgb(131, 224, 255)("[魔族陌] 启动成功喵~"))
   logger.info(logger.rgb(...RGB)("┃ ") + logger.rgb(118, 255, 118)(`登录地址：http://${displayHost}:${Config.panel.login.port || 11451}`))
-  logger.info(logger.rgb(...RGB)("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"))
+  logger.info(logger.rgb(...RGB)("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"))
 })
 
 async function getRemoteIp() {

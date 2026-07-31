@@ -70,5 +70,5 @@ pnpm install
 
 ## 鸣谢
 
- - **[Guaba-Plugin](https://github.com/guoba-yunzai/guoba-plugin)**
- - **[meme-plugin](https:)**
+ - [Guaba-Plugin](https://github.com/guoba-yunzai/guoba-plugin)
+ - [meme-plugin](https:)
