@@ -48,20 +48,14 @@
         <span v-else class="update-hint-placeholder"></span>
       </div>
 
-      <a-table 
-        :columns="columns" 
-        :data-source="playerList" 
-        :loading="loading && playerList.length === 0"
-        :pagination="pagination"
-        :locale="tableLocale" 
-        row-key="id" 
-        class="player-table"
-        @change="handleTableChange"
-      >
+      <a-table :columns="columns" :data-source="playerList" :loading="loading && playerList.length === 0"
+        :pagination="pagination" :locale="tableLocale" row-key="id" class="player-table" @change="handleTableChange">
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'currentTitle'">
-            <a-tag v-if="record.titleIndex !== undefined && record.titleIndex !== null && record.titleIndex >= 0 && record.titles && record.titles[record.titleIndex]" color="purple">
-              {{ record.titles[record.titleIndex].title }}
+            <a-tag
+              v-if="record.titleIndex !== undefined && record.titleIndex !== null && record.titleIndex > 0 && record.titles && record.titles[record.titleIndex - 1]"
+              color="purple">
+              {{ record.titles[record.titleIndex - 1].title }}
             </a-tag>
             <span v-else style="color: #999;">-</span>
           </template>
@@ -82,17 +76,8 @@
       </a-table>
     </a-card>
 
-    <a-modal 
-      v-model:visible="modalVisible" 
-      title="编辑玩家信息" 
-      ok-text="保存"
-      cancel-text="取消" 
-      @ok="handleSubmit" 
-      @cancel="handleCancel" 
-      :confirm-loading="submitLoading" 
-      width="700px"
-      :destroyOnClose="true"
-    >
+    <a-modal v-model:visible="modalVisible" title="编辑玩家信息" ok-text="保存" cancel-text="取消" @ok="handleSubmit"
+      @cancel="handleCancel" :confirm-loading="submitLoading" width="700px" :destroyOnClose="true">
       <a-form ref="formRef" :model="formState" :rules="formRules" :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }">
         <a-form-item label="修仙ID">
           <a-input v-model:value="formState.id" disabled />
@@ -107,13 +92,8 @@
         </a-form-item>
 
         <a-form-item label="境界" name="realm">
-          <a-select 
-            v-model:value="formState.realm" 
-            placeholder="请选择境界"
-            show-search
-            option-filter-prop="label"
-            :options="realmOptions"
-          />
+          <a-select v-model:value="formState.realm" placeholder="请选择境界" show-search option-filter-prop="label"
+            :options="realmOptions" />
         </a-form-item>
 
         <a-form-item label="性别" name="sex">
@@ -125,17 +105,10 @@
         </a-form-item>
 
         <a-form-item label="当前使用称号" name="titleIndex">
-          <a-select 
-            v-model:value="formState.titleIndex" 
-            placeholder="请选择当前使用的称号"
-          >
+          <a-select v-model:value="formState.titleIndex" placeholder="请选择当前使用的称号">
             <a-select-option :value="-1">无</a-select-option>
-            <a-select-option 
-              v-for="(title, index) in formState.titles" 
-              :key="index" 
-              :value="index"
-              :disabled="!title.title || title.title.trim() === ''"
-            >
+            <a-select-option v-for="(title, index) in formState.titles" :key="index" :value="index + 1"
+              :disabled="!title.title || title.title.trim() === ''">
               {{ title.title || `未命名称号${index + 1}` }}
             </a-select-option>
           </a-select>
@@ -147,68 +120,38 @@
               <div class="title-row">
                 <div class="title-field">
                   <label class="title-label">称号名称：</label>
-                  <a-input 
-                    v-model:value="title.title" 
-                    placeholder="请输入称号名称" 
-                    style="flex: 1;"
-                    @change="updateTitleOptions"
-                  />
+                  <a-input v-model:value="title.title" placeholder="请输入称号名称" style="flex: 1;"
+                    @change="updateTitleOptions" />
                 </div>
-                
+
                 <div class="title-field">
                   <label class="title-label">获得时间：</label>
                   <div class="time-picker-group">
-                    <a-date-picker 
-                      v-model:value="title.getDate"
-                      show-time
-                      format="YYYY-MM-DD HH:mm:ss"
-                      placeholder="选择获得时间"
-                      style="flex: 1;"
-                      @change="(date) => handleGetDateChange(index, date)"
-                    />
-                    <a-button 
-                      size="small" 
-                      @click="setCurrentTime(index)"
-                      title="设置为当前时间"
-                    >
+                    <a-date-picker v-model:value="title.getDate" show-time format="YYYY-MM-DD HH:mm:ss"
+                      placeholder="选择获得时间" style="flex: 1;" @change="(date) => handleGetDateChange(index, date)" />
+                    <a-button size="small" @click="setCurrentTime(index)" title="设置为当前时间">
                       现在
                     </a-button>
                   </div>
                 </div>
-                
+
                 <div class="title-field">
                   <label class="title-label">到期时间：</label>
                   <div class="expire-time-group">
-                    <a-switch 
-                      v-model:checked="title.isPermanent" 
-                      checked-children="永久" 
-                      un-checked-children="限时"
-                      @change="(checked) => handlePermanentChange(index, checked)"
-                    />
-                    <a-date-picker 
-                      v-if="!title.isPermanent"
-                      v-model:value="title.validDate"
-                      show-time
-                      format="YYYY-MM-DD HH:mm:ss"
-                      placeholder="选择到期时间"
-                      style="flex: 1;"
-                      :disabledDate="disabledDate"
-                      @change="(date) => handleValidDateChange(index, date)"
-                    />
+                    <a-switch v-model:checked="title.isPermanent" checked-children="永久" un-checked-children="限时"
+                      @change="(checked) => handlePermanentChange(index, checked)" />
+                    <a-date-picker v-if="!title.isPermanent" v-model:value="title.validDate" show-time
+                      format="YYYY-MM-DD HH:mm:ss" placeholder="选择到期时间" style="flex: 1;" :disabledDate="disabledDate"
+                      @change="(date) => handleValidDateChange(index, date)" />
                   </div>
                 </div>
-                
-                <a-button 
-                  type="text" 
-                  danger 
-                  @click="removeTitle(index)"
-                  class="remove-title-btn"
-                >
+
+                <a-button type="text" danger @click="removeTitle(index)" class="remove-title-btn">
                   <delete-outlined />
                 </a-button>
               </div>
             </div>
-            
+
             <a-button type="dashed" block @click="addTitle" style="margin-top: 12px;">
               <template #icon><plus-outlined /></template>
               添加称号
@@ -329,14 +272,14 @@ const columns = [
     title: '修为',
     dataIndex: 'cult',
     key: 'cult',
-    width: 120, 
+    width: 120,
     ellipsis: true
   },
   {
     title: '灵石',
     dataIndex: 'ls',
     key: 'ls',
-    width: 120, 
+    width: 120,
     ellipsis: true
   },
   {
@@ -401,10 +344,10 @@ const fetchPlayerList = async (page = 1, silent = false) => {
   } else {
     isUpdating.value = true
   }
-  
+
   try {
     const data = await apiRequest(`/api/xiuxian/player?action=getlist&page=${page - 1}`)
-    
+
     if (data) {
       if (data.players) {
         playerList.value = data.players.map(player => ({
@@ -413,7 +356,7 @@ const fetchPlayerList = async (page = 1, silent = false) => {
           titles: player.titles || []
         }))
       }
-      
+
       if (data.playerCount !== undefined && data.playerCount !== null) {
         totalPlayerCount.value = Number(data.playerCount)
         pagination.total = totalPlayerCount.value
@@ -425,7 +368,7 @@ const fetchPlayerList = async (page = 1, silent = false) => {
         totalPlayerCount.value = estimatedTotal
         pagination.total = estimatedTotal
       }
-      
+
       pagination.current = page
     }
   } catch (error) {
@@ -506,7 +449,7 @@ const handlePermanentChange = (index, checked) => {
     formState.titles[index].validDate = null
     formState.titles[index].validTime = 0
   } else {
-    const defaultDate = dayjs().add(30, 'day')
+    const defaultDate = dayjs().add(7, 'day')
     formState.titles[index].validDate = defaultDate
     formState.titles[index].validTime = defaultDate.unix()
   }
@@ -526,17 +469,16 @@ const showEditModal = (record) => {
   formState.ls = record.ls || '0'
   formState.realm = String(record.realm) || '0'
   formState.sex = record.sex || '未设置'
-  formState.titleIndex = record.titleIndex !== undefined ? record.titleIndex : -1
-  
+  const rawTitleIndex = record.titleIndex !== undefined ? record.titleIndex : -1
+  formState.titleIndex = rawTitleIndex > 0 ? rawTitleIndex : -1
   formState.titles = (record.titles || []).map(title => ({
     title: title.title || '',
     getTime: title.getTime || 0,
-    getDate: title.getTime > 0 ? dayjs.unix(title.getTime) : null, 
+    getDate: title.getTime > 0 ? dayjs.unix(title.getTime) : null,
     validTime: title.validTime || 0,
     isPermanent: title.validTime === 0,
     validDate: title.validTime > 0 ? dayjs.unix(title.validTime) : null
   }))
-  
   modalVisible.value = true
 }
 
@@ -554,12 +496,11 @@ const addTitle = () => {
 
 const removeTitle = (index) => {
   formState.titles.splice(index, 1)
-  
   if (formState.titles.length === 0) {
     formState.titleIndex = -1
-  } else if (formState.titleIndex >= formState.titles.length) {
-    formState.titleIndex = formState.titles.length - 1
-  } else if (formState.titleIndex === index) {
+  } else if (formState.titleIndex > formState.titles.length) {
+    formState.titleIndex = formState.titles.length
+  } else if (formState.titleIndex === index + 1) {
     formState.titleIndex = -1
   }
 }
@@ -573,9 +514,7 @@ const handleSubmit = async () => {
         return
       }
     }
-    
     submitLoading.value = true
-
     const postData = {
       cult: formState.cult,
       ls: formState.ls,
@@ -588,15 +527,12 @@ const handleSubmit = async () => {
         validTime: Number(t.validTime)
       }))
     }
-
     await apiRequest(`/api/xiuxian/player?action=modify&id=${formState.id}`, {
       method: 'POST',
       body: JSON.stringify(postData)
     })
-
     message.success('玩家信息修改成功')
     modalVisible.value = false
-    
     fetchPlayerList(pagination.current, true)
   } catch (error) {
     if (error.errorFields) {
@@ -633,7 +569,7 @@ onMounted(async () => {
 
   await fetchRealmMap()
   fetchPlayerList(1, false)
-  
+
   document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
@@ -869,17 +805,17 @@ onUnmounted(() => {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .title-label {
     min-width: auto;
   }
-  
+
   .time-picker-group,
   .expire-time-group {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .remove-title-btn {
     position: static;
     align-self: flex-end;
@@ -897,6 +833,7 @@ onUnmounted(() => {
     opacity: 0;
     transform: translateX(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);

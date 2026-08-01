@@ -59,6 +59,8 @@ const help = {
       '灵石榜',
       '战力榜',
       '闭关榜',
+      '签到榜',
+      '切磋榜',
       '修仙排行'
     ]
     const result = commands.map(item => `${prefix}${item}`)

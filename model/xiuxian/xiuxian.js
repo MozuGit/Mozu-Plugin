@@ -726,7 +726,8 @@ export default new class {
     if (isSelfWin) {
       await Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
         修为: self_cult + cultAddSelf,
-        切磋冷却: Math.floor(Date.now() / 1000)
+        切磋冷却: Math.floor(Date.now() / 1000),
+        切磋次数: (parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '切磋次数'), 10) || 0) + 1
       })
       await Redis.hmset(`${PLAYER_INFO_KEY}:${selectedPlayer.id}`, {
         修为: random_cult - cultAddRandom,
@@ -776,6 +777,12 @@ export default new class {
       case '闭关':
         for (let i = 0; i < idNum; i++) {
           pipeline.hmget(`${PLAYER_INFO_KEY}:${i}`, '闭关时间', '称号', '称号列表')
+        }
+        break
+      case '签到':
+      case '切磋':
+        for (let i = 0; i < idNum; i++) {
+          pipeline.hmget(`${PLAYER_INFO_KEY}:${i}`, type + '次数', '称号', '称号列表')
         }
         break
     }
@@ -855,6 +862,30 @@ export default new class {
             : '无'
           if (retreat > 0) {
             const value = time - retreat
+            players.push({
+              id: i,
+              value: value,
+              title: title
+            })
+          }
+        }
+        break
+      case '签到':
+      case '切磋':
+        for (let i = 0; i < idNum; i++) {
+          const value = parseInt(results[i][1][0], 10)
+          const titleIndex = parseInt(results[i][1][1], 10) || 0
+          const titles = JSON.parse(results[i][1][2] || '[]')
+          const title = titleIndex !== -1
+            ? titles[titleIndex - 1]?.title
+              ? titles[titleIndex - 1].validTime === 0
+                ? titles[titleIndex - 1].title
+                : titles[titleIndex - 1].validTime > Math.floor(Date.now() / 1000)
+                  ? titles[titleIndex - 1].title
+                  : '无'
+              : '无'
+            : '无'
+          if (value > 0) {
             players.push({
               id: i,
               value: value,

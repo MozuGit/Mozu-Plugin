@@ -349,6 +349,35 @@ const commandHandlers = {
     Text.push(Button.rank)
   },
 
+  '签到榜': async (id, user_id, Text) => {
+    const value = await xiuxian.getRank("签到", id)
+    Text.push([
+      '<@' + user_id + '>',
+      '***',
+      '**签到榜**',
+      '>排行榜仅展示前10名',
+      '***',
+      ...(await buildRank(value.data.ranks, '签到次数')),
+      (value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n签到次数：${value.data.value}\n***` : ``)
+    ].join('\n'))
+    Text.push(Button.rank)
+  },
+
+  '切磋榜': async (id, user_id, Text) => {
+    const value = await xiuxian.getRank("切磋", id)
+    Text.push([
+      '<@' + user_id + '>',
+      '***',
+      '**切磋榜**',
+      '>排行榜仅展示前10名',
+      '仅主动发起随机切磋胜利统计',
+      '***',
+      ...(await buildRank(value.data.ranks, '胜利次数')),
+      (value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n胜利次数：${value.data.value}\n***` : ``)
+    ].join('\n'))
+    Text.push(Button.rank)
+  },
+
   '我的称号': async (id, user_id, Text) => {
     const userInfo = await xiuxian.getUserInfo(id)
     if (userInfo.titles.length > 0) {
@@ -957,7 +986,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /^#?(随机)?切磋/,
+    prefix: /^#?(随机)?切磋$/,
     handler: async (id, user_id, Text, msg, at, isMaster) => {
       const value = await xiuxian.pvpRandom(id, isMaster)
       switch (value.event) {
