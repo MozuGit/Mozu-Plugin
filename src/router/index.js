@@ -32,6 +32,11 @@ const routes = [
     component: () => import('../views/xiuxian/cdk.vue')
   },
   {
+    path: '/xiuxian/player',
+    name: 'xiuxianPlayer',
+    component: () => import('../views/xiuxian/player.vue')
+  },
+  {
     path: '/settings',
     name: 'settings',
     component: () => import('../views/settings.vue')

@@ -12,7 +12,6 @@ import RedisConfig from './Redis.js'
 import panel from './panel.js'
 import xiuxian from './xiuxian.js'
 import makeMessage from './makeMessage.js'
-import xiuxianTools from './xiuxian-tools.js'
 import fayan from './fayan.js'
 import openai from './openai.js'
 
@@ -20,7 +19,6 @@ export const schemas = [
   ...RedisConfig,
   ...panel,
   ...xiuxian,
-  ...xiuxianTools,
   ...makeMessage,
   ...fayan,
   ...openai
@@ -34,13 +32,6 @@ export function getConfigData() {
       login: {
         ...Config.getCfg().panel.login,
         password: ''
-      }
-    },
-    tools: {
-      title: {
-        id: 1,
-        title: "默认文本",
-        validDay: 0
       }
     }
   }

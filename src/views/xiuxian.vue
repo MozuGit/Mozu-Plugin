@@ -24,6 +24,13 @@
           </template>
           兑换码操作
         </a-button>
+        <a-button :type="currentPage === 'player' ? 'primary' : 'default'" :class="{ active: currentPage === 'player' }"
+          @click="navigateTo('player')">
+          <template #icon>
+            <team-outlined />
+          </template>
+          玩家管理
+        </a-button>
       </a-space>
     </div>
 
@@ -52,7 +59,7 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { HomeOutlined, SettingOutlined, GiftOutlined } from '@ant-design/icons-vue'
+import { HomeOutlined, SettingOutlined, GiftOutlined, TeamOutlined } from '@ant-design/icons-vue'
 
 const playerCount = ref(0)
 const sectCount = ref(0)
@@ -66,18 +73,24 @@ const route = useRoute()
 const currentPage = computed(() => {
   if (route.path === '/xiuxian/config') return 'config'
   if (route.path === '/xiuxian/cdk') return 'cdk'
+  if (route.path === '/xiuxian/player') return 'player'
   return 'xiuxian'
 })
 
 const navigateTo = (page) => {
-  const targetPath = page === 'xiuxian'
-    ? '/xiuxian'
-    : page === 'config'
-      ? '/xiuxian/config'
-      : '/xiuxian/cdk'
-
-  if (route.path !== targetPath) {
-    router.push(targetPath)
+  switch (page) {
+    case 'xiuxian':
+      router.push('/xiuxian')
+      break
+    case 'config':
+      router.push('/xiuxian/config')
+      break
+    case 'cdk':
+      router.push('/xiuxian/cdk')
+      break
+    case 'player':
+      router.push('/xiuxian/player')
+      break
   }
 }
 

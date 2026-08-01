@@ -21,6 +21,13 @@
           </template>
           兑换码操作
         </a-button>
+        <a-button :type="currentPage === 'player' ? 'primary' : 'default'" :class="{ active: currentPage === 'player' }"
+          @click="navigateTo('player')">
+          <template #icon>
+            <team-outlined />
+          </template>
+          玩家管理
+        </a-button>
       </div>
     </div>
 
@@ -126,7 +133,8 @@ import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  SyncOutlined
+  SyncOutlined,
+  TeamOutlined
 } from '@ant-design/icons-vue'
 
 const router = useRouter()
@@ -187,7 +195,6 @@ const parseCdkValue = (cdk) => {
         lsList: parsed.lsList || []
       }
     } catch (error) {
-      console.error('解析兑换码value失败:', error)
       return {
         ...cdk,
         genera: false,
@@ -229,6 +236,7 @@ const setCachedData = (data) => {
 const currentPage = computed(() => {
   if (route.path === '/xiuxian/config') return 'config'
   if (route.path === '/xiuxian/cdk') return 'cdk'
+  if (route.path === '/xiuxian/player') return 'player'
   return 'xiuxian'
 })
 
@@ -242,6 +250,9 @@ const navigateTo = (page) => {
       break
     case 'cdk':
       router.push('/xiuxian/cdk')
+      break
+    case 'player':
+      router.push('/xiuxian/player')
       break
   }
 }

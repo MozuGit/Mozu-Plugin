@@ -1,35 +1,19 @@
 <template>
   <router-view v-if="route.name === 'login'" />
   <a-layout v-else style="min-height: 100vh; background: linear-gradient(135deg, #eaea66 0%, #a936d0 100%);">
-    <div 
-      v-if="isMobile && !collapsed" 
-      class="mobile-overlay" 
-      @click="collapsed = true"
-    />
-    
-    <a-layout-sider 
-      v-model:collapsed="collapsed" 
-      :collapsible="!isMobile"
-      :trigger="null"
-      theme="light" 
-      :width="200"
-      :breakpoint="'lg'"
-      :class="{ 'mobile-sider': isMobile, 'sider-collapsed': collapsed && isMobile }"
-      style="background: #fff;"
-    >
+    <div v-if="isMobile && !collapsed" class="mobile-overlay" @click="collapsed = true" />
+
+    <a-layout-sider v-model:collapsed="collapsed" :collapsible="!isMobile" :trigger="null" theme="light" :width="200"
+      :breakpoint="'lg'" :class="{ 'mobile-sider': isMobile, 'sider-collapsed': collapsed && isMobile }"
+      style="background: #fff;">
       <div class="logo">
         <img src="../Mo.png" style="height: 32px" />
         <transition name="fade">
           <span v-if="!collapsed" class="logo-text">魔族陌管理</span>
         </transition>
       </div>
-      <a-menu 
-        v-model:selectedKeys="selectedKeys" 
-        mode="inline" 
-        :inline-collapsed="collapsed" 
-        @click="handleMenuClick"
-        style="border-right: 0;"
-      >
+      <a-menu v-model:selectedKeys="selectedKeys" mode="inline" :inline-collapsed="collapsed" @click="handleMenuClick"
+        style="border-right: 0;">
         <a-menu-item key="xiuxian">
           <AppstoreOutlined />
           <span>魔族陌修仙</span>
@@ -43,15 +27,9 @@
 
     <a-layout style="background: transparent;">
       <a-layout-header
-        style="background: rgba(255,255,255,0.9); padding: 0 16px; display: flex; justify-content: space-between; align-items: center;"
-      >
+        style="background: rgba(255,255,255,0.9); padding: 0 16px; display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <a-button 
-            v-if="isMobile"
-            type="text"
-            :icon="h(MenuOutlined)"
-            @click="collapsed = !collapsed"
-          />
+          <a-button v-if="isMobile" type="text" :icon="h(MenuOutlined)" @click="collapsed = !collapsed" />
           <h2 style="margin: 0;">{{ pageTitle }}</h2>
         </div>
         <a-button type="link" @click="logout">退出登录</a-button>
@@ -90,7 +68,7 @@ const collapsed = ref(isMobile.value)
 const selectedKeys = ref([])
 const pageTitle = ref('')
 
-const validRouteNames = ['xiuxian', 'xiuxianConfig', 'xiuxianCdk', 'about']
+const validRouteNames = ['xiuxian', 'xiuxianConfig', 'xiuxianCdk', 'xiuxianPlayer', 'about']
 
 const pageTitles = {
   index: '主页',
@@ -107,14 +85,14 @@ watch(() => route.name, (name) => {
       return
     }
     let menuKey = name
-    if (name === 'xiuxianConfig' || name === 'xiuxianCdk') {
+    if (name === 'xiuxianConfig' || name === 'xiuxianCdk' || name === 'xiuxianPlayer') {
       menuKey = 'xiuxian'
       subPageTitle = "魔族陌修仙"
     }
     selectedKeys.value = [menuKey]
     pageTitle.value = pageTitles[name] || subPageTitle
     document.title = (pageTitles[name] || subPageTitle) + ' - MozuAdmin'
-    
+
     if (isMobile.value) {
       collapsed.value = true
     }
@@ -204,6 +182,7 @@ async function logout() {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -213,15 +192,15 @@ async function logout() {
   .logo {
     margin-left: 0;
   }
-  
+
   :deep(.ant-layout-content) {
     margin: 12px !important;
   }
-  
+
   :deep(.ant-layout-header) {
     padding: 0 12px !important;
   }
-  
+
   :deep(.ant-layout-header h2) {
     font-size: 16px;
   }

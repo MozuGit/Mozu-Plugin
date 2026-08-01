@@ -3,33 +3,30 @@
     <!-- 顶部快捷栏 - 可滑动 -->
     <div class="quick-nav">
       <div class="nav-scroll">
-        <a-button 
-          :class="{ active: currentPage === 'xiuxian' }"
-          @click="navigateTo('xiuxian')"
-        >
+        <a-button :class="{ active: currentPage === 'xiuxian' }" @click="navigateTo('xiuxian')">
           <template #icon>
             <HomeOutlined />
           </template>
           首页
         </a-button>
-        <a-button 
-          type="primary"
-          :class="{ active: currentPage === 'config' }"
-          @click="navigateTo('config')"
-        >
+        <a-button type="primary" :class="{ active: currentPage === 'config' }" @click="navigateTo('config')">
           <template #icon>
             <setting-outlined />
           </template>
           修仙配置
         </a-button>
-        <a-button 
-          :class="{ active: currentPage === 'cdk' }"
-          @click="navigateTo('cdk')"
-        >
+        <a-button :class="{ active: currentPage === 'cdk' }" @click="navigateTo('cdk')">
           <template #icon>
             <gift-outlined />
           </template>
           兑换码操作
+        </a-button>
+        <a-button :type="currentPage === 'player' ? 'primary' : 'default'" :class="{ active: currentPage === 'player' }"
+          @click="navigateTo('player')">
+          <template #icon>
+            <team-outlined />
+          </template>
+          玩家管理
         </a-button>
       </div>
     </div>
@@ -44,7 +41,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { HomeOutlined, SettingOutlined, GiftOutlined } from '@ant-design/icons-vue'
+import { HomeOutlined, SettingOutlined, GiftOutlined, TeamOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -56,7 +53,7 @@ const currentPage = computed(() => {
 })
 
 const navigateTo = (page) => {
-  switch(page) {
+  switch (page) {
     case 'xiuxian':
       router.push('/xiuxian')
       break
@@ -65,6 +62,9 @@ const navigateTo = (page) => {
       break
     case 'cdk':
       router.push('/xiuxian/cdk')
+      break
+    case 'player':
+      router.push('/xiuxian/player')
       break
   }
 }
@@ -92,13 +92,16 @@ const navigateTo = (page) => {
   overflow-y: hidden;
   white-space: nowrap;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
   padding-bottom: 4px;
 }
 
 .nav-scroll::-webkit-scrollbar {
-  display: none; /* Chrome/Safari/Opera */
+  display: none;
+  /* Chrome/Safari/Opera */
 }
 
 .nav-scroll .ant-btn {
@@ -138,11 +141,11 @@ const navigateTo = (page) => {
     padding: 10px 12px;
     margin-bottom: 16px;
   }
-  
+
   .nav-scroll {
     gap: 8px;
   }
-  
+
   .nav-scroll .ant-btn {
     height: 36px;
     font-size: 13px;
@@ -161,6 +164,7 @@ const navigateTo = (page) => {
     opacity: 0;
     transform: translateX(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
