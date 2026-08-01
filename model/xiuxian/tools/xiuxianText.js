@@ -1593,7 +1593,7 @@ const prefixHandlers = [
           for (const art of value.data.sellArts) {
             sellArtsText.push([
               '>出售功法：' + art.name + ' * ' + art.count,
-              '获得功法：' + art.lsAll,
+              '获得灵石：' + art.lsAll,
               '***'
             ].join('\n'))
             sellCount += art.count

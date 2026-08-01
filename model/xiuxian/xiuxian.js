@@ -640,11 +640,14 @@ export default new class {
     let randomPlayer = null
     let left = 0
     let right = playerEntries.length / 2 - 1
+    let matchedIndex = -1
     if (self_power <= playerEntries[1]) {
       randomPlayer = [playerEntries[0], playerEntries[1]]
+      matchedIndex = 0
     } else if (self_power >= playerEntries[playerEntries.length - 1]) {
       const lastIdx = playerEntries.length - 2
       randomPlayer = [playerEntries[lastIdx], playerEntries[lastIdx + 1]]
+      matchedIndex = lastIdx / 2
     } else {
       while (left <= right) {
         const mid = Math.floor((left + right) / 2)
@@ -652,6 +655,7 @@ export default new class {
         const score = playerEntries[idx + 1]
         if (score === self_power) {
           randomPlayer = [playerEntries[idx], score]
+          matchedIndex = mid
           break
         }
         if (score < self_power) {
@@ -664,20 +668,52 @@ export default new class {
     if (!randomPlayer) {
       if (right < 0) {
         randomPlayer = [playerEntries[0], playerEntries[1]]
+        matchedIndex = 0
       } else if (left >= playerEntries.length / 2) {
         const lastIdx = playerEntries.length - 2
         randomPlayer = [playerEntries[lastIdx], playerEntries[lastIdx + 1]]
+        matchedIndex = lastIdx / 2
       } else {
         const lIdx = left * 2
         const rIdx = right * 2
         const lScore = playerEntries[lIdx + 1]
         const rScore = playerEntries[rIdx + 1]
-        randomPlayer = Math.abs(lScore - self_power) < Math.abs(rScore - self_power)
-          ? [playerEntries[lIdx], lScore]
-          : [playerEntries[rIdx], rScore]
+        if (Math.abs(lScore - self_power) < Math.abs(rScore - self_power)) {
+          randomPlayer = [playerEntries[lIdx], lScore]
+          matchedIndex = left
+        } else {
+          randomPlayer = [playerEntries[rIdx], rScore]
+          matchedIndex = right
+        }
       }
     }
-    const baseWinRate = self_power / (self_power + randomPlayer[1])
+    let selectedPlayer = null
+    if (matchedIndex >= 0) {
+      const randomOffset = Math.floor(Math.random() * 21) - 10
+      const newIndex = matchedIndex + randomOffset
+      const totalPairs = playerEntries.length / 2
+
+      let startIdx = Math.max(0, newIndex - 5)
+      let endIdx = Math.min(totalPairs - 1, newIndex + 4)
+
+      if (newIndex - startIdx < 5) {
+        endIdx = Math.min(totalPairs - 1, endIdx + (5 - (newIndex - startIdx)))
+      }
+      if (endIdx - newIndex < 4) {
+        startIdx = Math.max(0, startIdx - (4 - (endIdx - newIndex)))
+      }
+      const playersInRange = []
+      for (let i = startIdx; i <= endIdx; i++) {
+        const idx = i * 2
+        playersInRange.push({
+          id: playerEntries[idx],
+          score: playerEntries[idx + 1]
+        })
+      }
+      const randomIndex = Math.floor(Math.random() * playersInRange.length)
+      selectedPlayer = playersInRange[randomIndex]
+    }
+    const baseWinRate = self_power / (self_power + selectedPlayer.score)
     const randomFactor = 0.95 + Math.random() * 0.1
     let finalWinRate = baseWinRate * randomFactor
     finalWinRate = Math.max(0.01, Math.min(0.99, finalWinRate))
@@ -686,13 +722,13 @@ export default new class {
     const cultAddSelf = crypto.randomInt(1000, 5001)
     const cultAddRandom = crypto.randomInt(1000, 5001)
     const self_cult = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '修为'), 10)
-    const random_cult = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${randomPlayer[0]}`, '修为'), 10)
+    const random_cult = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${selectedPlayer.id}`, '修为'), 10)
     if (isSelfWin) {
       await Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
         修为: self_cult + cultAddSelf,
         切磋冷却: Math.floor(Date.now() / 1000)
       })
-      await Redis.hmset(`${PLAYER_INFO_KEY}:${randomPlayer[0]}`, {
+      await Redis.hmset(`${PLAYER_INFO_KEY}:${selectedPlayer.id}`, {
         修为: random_cult - cultAddRandom,
         被切磋冷却: Math.floor(Date.now() / 1000)
       })
@@ -701,19 +737,19 @@ export default new class {
         修为: self_cult - cultAddSelf,
         切磋冷却: Math.floor(Date.now() / 1000)
       })
-      await Redis.hmset(`${PLAYER_INFO_KEY}:${randomPlayer[0]}`, {
+      await Redis.hmset(`${PLAYER_INFO_KEY}:${selectedPlayer.id}`, {
         修为: random_cult + cultAddRandom,
         被切磋冷却: Math.floor(Date.now() / 1000)
       })
     }
     this.getPower(id)
-    this.getPower(randomPlayer[0])  //刷新战力
+    this.getPower(selectedPlayer.id)  //刷新战力
     return {
       event: "pvp_end",
       data: {
         winner: isSelfWin,
         self_power,
-        random_id: randomPlayer[0],
+        random_id: selectedPlayer.id,
         random_power: randomPlayer[1],
         cultAddSelf,
         cultAddRandom,
