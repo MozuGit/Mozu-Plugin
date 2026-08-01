@@ -55,19 +55,10 @@ export const handleCdk = async (req, res) => {
 
 const getCdkList = async (req, res) => {
   try {
-    const stream = Redis.scanStream({
-      match: "Mozu:xiuxian:cdk:*",
-      count: 100
-    })
-    let cdks = []
-    for await (const keys of stream) {
-      if (keys.length) {
-        keys.forEach(key => cdks.push(key))
-      }
-    }
+    const cdks = await Redis.smembers("Mozu:xiuxian:cdks")
     const pipeline = Redis.pipeline()
     for (const cdk of cdks) {
-      pipeline.hgetall(cdk)
+      pipeline.hgetall(`Mozu:xiuxian:cdk:${cdk}`)
     }
     const results = await pipeline.exec()
     const cdkInfos = results.map(([err, result], index) => ({

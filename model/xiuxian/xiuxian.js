@@ -2211,6 +2211,7 @@ export default new class {
     for (let cdk of cdks) {
       pipeline.hset(`Mozu:xiuxian:cdk:${cdk}`, 'value', JSON.stringify(value))
     }
+    pipeline.sadd("Mozu:xiuxian:cdks", cdks)
     await pipeline.exec()
     return {
       event: "gen_cdk_success",
@@ -2227,19 +2228,13 @@ export default new class {
       }
     }
     if (msg.includes("全部")) {
-      const stream = Redis.scanStream({
-        match: "Mozu:xiuxian:cdk:*",
-        count: 100
-      })
-      let cdks = []
-      for await (const keys of stream) {
-        if (keys.length) {
-          keys.forEach(key => cdks.push(key.replace("Mozu:xiuxian:cdk:", "")))
-          const pipeline = Redis.pipeline()
-          keys.forEach(key => pipeline.del(key))
-          await pipeline.exec()
-        }
+      const cdks = await Redis.smembers("Mozu:xiuxian:cdks")
+      const pipeline = Redis.pipeline()
+      for (let cdk of cdks) {
+        pipeline.del(`Mozu:xiuxian:cdk:${cdk}`)
       }
+      pipeline.del("Mozu:xiuxian:cdks")
+      await pipeline.exec()
       return {
         event: "del_cdks",
         data: {
