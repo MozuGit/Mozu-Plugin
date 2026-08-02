@@ -1,7 +1,6 @@
 <template>
   <div class="about-container">
     <a-card title="关于" :bordered="false" class="about-card fade-in-card">
-      <!-- 加载状态 -->
       <div v-if="loading" class="info-list">
         <div class="info-item">
           <span class="info-label">插件版本</span>
@@ -21,10 +20,19 @@
             <span class="skeleton-block" style="width: 130px;"></span>
           </span>
         </div>
+        <div class="info-item">
+          <span class="info-label">联系方式</span>
+          <span class="info-value">
+            <span class="skeleton-block" style="width: 120px;"></span>
+            <span class="separator">·</span>
+            <span class="skeleton-block" style="width: 120px;"></span>
+            <span class="separator">·</span>
+            <span class="skeleton-block" style="width: 120px;"></span>
+          </span>
+        </div>
       </div>
 
       <div v-else class="info-list">
-        <!-- 插件版本 -->
         <div class="info-item">
           <span class="info-label">插件版本</span>
           <span class="info-value">
@@ -47,7 +55,6 @@
           </span>
         </div>
 
-        <!-- 插件作者 -->
         <div class="info-item">
           <span class="info-label">插件作者</span>
           <span class="info-value">
@@ -63,7 +70,6 @@
           </span>
         </div>
 
-        <!-- 插件链接 -->
         <div class="info-item">
           <span class="info-label">插件链接</span>
           <span class="info-value link-group">
@@ -87,6 +93,33 @@
               </svg>
               <span class="badge-text">GitCode</span>
               <span class="badge-tag gitcode-tag">镜像</span>
+            </a>
+          </span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">联系方式</span>
+          <span class="info-value link-group">
+            <a href="https://qm.qq.com/q/5fKlztbHHG" target="_blank" rel="noopener noreferrer" class="link-badge qq-badge">
+              <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+              </svg>
+              <span class="badge-text">QQ</span>
+              <span class="badge-tag qq-tag">3343712589</span>
+            </a>
+            <a href="https://qun.qq.com/universal-share/share?ac=1&authKey=13%2FWEfX0G3PO77HgYt3w8yg8K%2BCSE3fYXzuA%2FOH0Vnzv5HDrENZctaRM1qkC07eD&busi_data=eyJncm91cENvZGUiOiI5NzY3MTkwMTciLCJ0b2tlbiI6Inl0NHY2b01BRTlMeHR4MXBYbWJqYWxpbmU5Wk9kT3VqZE1nM0dNYVZET1pBcjVPTVZ5WDVLMnVCaFpHNTFWVUgiLCJ1aW4iOiIzMzQzNzEyNTg5In0%3D&data=uDBsYAg-ZA2RbnkK_3yJFYKmiPRZg-XmEhn6iJ1tWmOfRPEeEIiA6N1o1e5p9-dqSJDSxCk44qnx92h62ZlrmQ&svctype=4&tempid=h5_group_info" target="_blank" rel="noopener noreferrer" class="link-badge qqgroup-badge">
+              <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+              </svg>
+              <span class="badge-text">QQ群</span>
+              <span class="badge-tag qqgroup-tag">976719017</span>
+            </a>
+            <a href="https://www.ifdian.net/a/Mozumo" target="_blank" rel="noopener noreferrer" class="link-badge ifdian-badge">
+              <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+              </svg>
+              <span class="badge-text">爱发电</span>
+              <span class="badge-tag ifdian-tag">支持</span>
             </a>
           </span>
         </div>
@@ -281,8 +314,12 @@ onMounted(() => {
   animation-delay: 0.25s;
 }
 
-.info-item:last-child {
+.info-item:nth-child(3) {
   animation-delay: 0.35s;
+}
+
+.info-item:nth-child(4) {
+  animation-delay: 0.45s;
   border-bottom: none;
   padding-bottom: 0;
 }
@@ -409,6 +446,78 @@ onMounted(() => {
   background: linear-gradient(135deg, #d6eeff 0%, #c5e6ff 100%);
   border-color: #69c0ff;
   box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+}
+
+/* QQ 徽章 */
+.qq-badge {
+  background: linear-gradient(135deg, #e8f4ff 0%, #d6ecff 100%);
+  border: 1px solid #91c8ff;
+}
+
+.qq-badge:hover {
+  background: linear-gradient(135deg, #d6ecff 0%, #c5e3ff 100%);
+  border-color: #69b1ff;
+  box-shadow: 0 4px 12px rgba(0, 120, 255, 0.2);
+}
+
+.qq-badge .badge-icon {
+  color: #0078ff;
+}
+
+.qq-badge .badge-text {
+  color: #0078ff;
+}
+
+.qq-tag {
+  background: #0078ff;
+}
+
+/* QQ群 徽章 */
+.qqgroup-badge {
+  background: linear-gradient(135deg, #fff0e6 0%, #ffe6d6 100%);
+  border: 1px solid #ffb391;
+}
+
+.qqgroup-badge:hover {
+  background: linear-gradient(135deg, #ffe6d6 0%, #ffdcc5 100%);
+  border-color: #ff8c5a;
+  box-shadow: 0 4px 12px rgba(255, 120, 0, 0.2);
+}
+
+.qqgroup-badge .badge-icon {
+  color: #ff7800;
+}
+
+.qqgroup-badge .badge-text {
+  color: #ff7800;
+}
+
+.qqgroup-tag {
+  background: #ff7800;
+}
+
+/* 爱发电 徽章 */
+.ifdian-badge {
+  background: linear-gradient(135deg, #fce4ec 0%, #f8d7e0 100%);
+  border: 1px solid #f48fb1;
+}
+
+.ifdian-badge:hover {
+  background: linear-gradient(135deg, #f8d7e0 0%, #f5c8d4 100%);
+  border-color: #f06292;
+  box-shadow: 0 4px 12px rgba(233, 30, 99, 0.2);
+}
+
+.ifdian-badge .badge-icon {
+  color: #e91e63;
+}
+
+.ifdian-badge .badge-text {
+  color: #e91e63;
+}
+
+.ifdian-tag {
+  background: #e91e63;
 }
 
 /* 徽章内图标 */

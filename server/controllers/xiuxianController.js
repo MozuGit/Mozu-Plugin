@@ -84,8 +84,14 @@ const getCdkList = async (req, res) => {
 
 const addCdk = async (req, res) => {
   try {
-    const { name, genera, forceSetting, cultList, lsList } = req.body
-    await Redis.hset(`Mozu:xiuxian:cdk:${name}`, 'value', JSON.stringify({ genera, forceSetting, cultList, lsList }))
+    const { name, genera, forceSetting, cultList, lsList, useStatus, useId, useTime } = req.body
+    await Redis.hmset(`Mozu:xiuxian:cdk:${name}`, {
+      value: JSON.stringify({ genera, forceSetting, cultList, lsList }),
+      使用状态: useStatus,
+      使用ID: useId,
+      使用时间: useTime
+    })
+    await Redis.sadd("Mozu:xiuxian:cdks", name)
     res.json({
       success: true
     })

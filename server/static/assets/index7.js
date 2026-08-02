@@ -1,1 +1,1 @@
-import{G as e,L as t,P as n,d as r,f as i,t as a}from"./index2.js";var o={};function s(a,o){let s=t(`a-card`);return n(),i(s,{title:`插件设置`},{default:e(()=>[...o[0]||=[r(`p`,null,`设置内容`,-1)]]),_:1})}var c=a(o,[[`render`,s]]);export{c as default};
+import{G as e,L as t,P as n,d as r,f as i,t as a}from"./index2.js";var o={};function s(a,o){let s=t(`a-card`);return n(),i(s,{title:`插件主页`},{default:e(()=>[...o[0]||=[r(`p`,null,`插件主页`,-1)]]),_:1})}var c=a(o,[[`render`,s]]);export{c as default};
