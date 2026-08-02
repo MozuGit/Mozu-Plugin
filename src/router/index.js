@@ -18,23 +18,38 @@ const routes = [
   },
   {
     path: '/xiuxian',
-    name: 'xiuxian',
-    component: () => import('../views/xiuxian.vue')
-  },
-  {
-    path: '/xiuxian/config',
-    name: 'xiuxianConfig',
-    component: () => import('../views/xiuxian/config.vue')
-  },
-  {
-    path: '/xiuxian/cdk',
-    name: 'xiuxianCdk',
-    component: () => import('../views/xiuxian/cdk.vue')
-  },
-  {
-    path: '/xiuxian/player',
-    name: 'xiuxianPlayer',
-    component: () => import('../views/xiuxian/player.vue')
+    component: () => import('../views/xiuxian.vue'),
+    children: [
+      {
+        path: '',
+        name: 'xiuxian',
+        component: () => import('../views/xiuxian/home.vue')
+      },
+      {
+        path: 'home',
+        redirect: '/xiuxian'
+      },
+      {
+        path: 'config',
+        name: 'xiuxianConfig',
+        component: () => import('../views/xiuxian/config.vue')
+      },
+      {
+        path: 'cdk',
+        name: 'xiuxianCdk',
+        component: () => import('../views/xiuxian/cdk.vue')
+      },
+      {
+        path: 'player',
+        name: 'xiuxianPlayer',
+        component: () => import('../views/xiuxian/player.vue')
+      },
+      {
+        path: 'backup',
+        name: 'xiuxianBackup',
+        component: () => import('../views/xiuxian/backup.vue')
+      }
+    ]
   },
   {
     path: '/settings',

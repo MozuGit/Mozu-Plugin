@@ -1,36 +1,5 @@
 <template>
-  <div class="dashboard-container">
-    <!-- 顶部快捷栏 - 可滑动 -->
-    <div class="quick-nav">
-      <div class="nav-scroll">
-        <a-button :class="{ active: currentPage === 'xiuxian' }" @click="navigateTo('xiuxian')">
-          <template #icon>
-            <HomeOutlined />
-          </template>
-          首页
-        </a-button>
-        <a-button :class="{ active: currentPage === 'config' }" @click="navigateTo('config')">
-          <template #icon>
-            <setting-outlined />
-          </template>
-          修仙配置
-        </a-button>
-        <a-button type="primary" :class="{ active: currentPage === 'cdk' }" @click="navigateTo('cdk')">
-          <template #icon>
-            <gift-outlined />
-          </template>
-          兑换码操作
-        </a-button>
-        <a-button :type="currentPage === 'player' ? 'primary' : 'default'" :class="{ active: currentPage === 'player' }"
-          @click="navigateTo('player')">
-          <template #icon>
-            <team-outlined />
-          </template>
-          玩家管理
-        </a-button>
-      </div>
-    </div>
-
+  <div class="cdk-container">
     <!-- 兑换码操作内容 -->
     <a-card title="兑换码操作" class="fade-in-card" :bordered="false">
       <!-- 顶部操作栏 -->
@@ -98,8 +67,8 @@
     <a-modal v-model:visible="modalVisible" :title="isEdit ? '修改兑换码' : '添加兑换码'" :ok-text="isEdit ? '修改' : '添加'"
       cancel-text="取消" @ok="handleSubmit" @cancel="handleCancel" :confirm-loading="submitLoading" width="600px">
       <a-form ref="formRef" :model="formState" :rules="formRules" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="兑换码名称" name="name">
-          <a-input v-model:value="formState.name" placeholder="请输入兑换码名称" :disabled="isEdit" />
+        <a-form-item label="兑换码" name="name">
+          <a-input v-model:value="formState.name" placeholder="请输入兑换码" :disabled="isEdit" />
         </a-form-item>
 
         <a-form-item label="通用开关" name="genera">
@@ -123,22 +92,17 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import {
-  HomeOutlined,
-  SettingOutlined,
-  GiftOutlined,
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  SyncOutlined,
-  TeamOutlined
+  SyncOutlined
 } from '@ant-design/icons-vue'
 
 const router = useRouter()
-const route = useRoute()
 
 const CACHE_KEY = 'xiuxian_cdk_list_cache'
 const CACHE_TIME_KEY = 'xiuxian_cdk_list_cache_time'
@@ -233,30 +197,6 @@ const setCachedData = (data) => {
   }
 }
 
-const currentPage = computed(() => {
-  if (route.path === '/xiuxian/config') return 'config'
-  if (route.path === '/xiuxian/cdk') return 'cdk'
-  if (route.path === '/xiuxian/player') return 'player'
-  return 'xiuxian'
-})
-
-const navigateTo = (page) => {
-  switch (page) {
-    case 'xiuxian':
-      router.push('/xiuxian')
-      break
-    case 'config':
-      router.push('/xiuxian/config')
-      break
-    case 'cdk':
-      router.push('/xiuxian/cdk')
-      break
-    case 'player':
-      router.push('/xiuxian/player')
-      break
-  }
-}
-
 const loading = ref(false)
 const cdkList = ref([])
 const selectedRowKeys = ref([])
@@ -264,7 +204,7 @@ const isUpdating = ref(false)
 
 const columns = [
   {
-    title: '兑换码名称',
+    title: '兑换码',
     dataIndex: 'name',
     key: 'name',
     ellipsis: true,
@@ -327,6 +267,7 @@ const rowSelection = {
 const handleTableChange = (pag, filters, sorter) => {
   console.log('排序变化:', sorter)
 }
+
 const fetchCdkList = async (silent = false) => {
   if (!silent) {
     loading.value = true
@@ -425,7 +366,7 @@ const formState = reactive({
 
 const formRules = {
   name: [
-    { required: true, message: '请输入兑换码名称', trigger: 'blur' }
+    { required: true, message: '请输入兑换码', trigger: 'blur' }
   ]
 }
 
@@ -548,64 +489,8 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.dashboard-container {
+.cdk-container {
   width: 100%;
-}
-
-.quick-nav {
-  margin-bottom: 24px;
-  padding: 12px 16px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-}
-
-.nav-scroll {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding-bottom: 4px;
-}
-
-.nav-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.nav-scroll .ant-btn {
-  height: 40px;
-  border-radius: 8px;
-  font-size: 15px;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.nav-scroll .ant-btn:not(.ant-btn-primary) {
-  background: #f5f7fa;
-  border-color: #e8eaed;
-  color: #5f6368;
-}
-
-.nav-scroll .ant-btn:not(.ant-btn-primary):hover {
-  background: #e8f0fe;
-  border-color: #b8d4fe;
-  color: #1a73e8;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.2);
-}
-
-.nav-scroll .ant-btn.active {
-  background: #e8f0fe;
-  border-color: #1a73e8;
-  color: #1a73e8;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.15);
 }
 
 .toolbar {
@@ -660,23 +545,6 @@ onUnmounted(() => {
 
 :deep(.ant-table-row-selected:hover > td:last-child) {
   background: #dcebf8;
-}
-
-@media (max-width: 768px) {
-  .quick-nav {
-    padding: 10px 12px;
-    margin-bottom: 16px;
-  }
-
-  .quick-nav .ant-btn {
-    height: 36px;
-    font-size: 13px;
-    padding: 4px 12px;
-  }
-
-  .nav-scroll-container {
-    gap: 8px !important;
-  }
 }
 
 .fade-in-card {

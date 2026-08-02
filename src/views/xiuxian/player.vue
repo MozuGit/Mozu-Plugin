@@ -1,35 +1,5 @@
 <template>
-  <div class="dashboard-container">
-    <!-- 顶部快捷栏 - 可滑动 -->
-    <div class="quick-nav">
-      <div class="nav-scroll">
-        <a-button :class="{ active: currentPage === 'xiuxian' }" @click="navigateTo('xiuxian')">
-          <template #icon>
-            <HomeOutlined />
-          </template>
-          首页
-        </a-button>
-        <a-button :class="{ active: currentPage === 'config' }" @click="navigateTo('config')">
-          <template #icon>
-            <setting-outlined />
-          </template>
-          修仙配置
-        </a-button>
-        <a-button :class="{ active: currentPage === 'cdk' }" @click="navigateTo('cdk')">
-          <template #icon>
-            <gift-outlined />
-          </template>
-          兑换码操作
-        </a-button>
-        <a-button type="primary" :class="{ active: currentPage === 'player' }" @click="navigateTo('player')">
-          <template #icon>
-            <team-outlined />
-          </template>
-          玩家管理
-        </a-button>
-      </div>
-    </div>
-
+  <div class="player-container">
     <a-card :bordered="false" class="fade-in-card">
       <div class="card-header">
         <span class="card-title">玩家管理</span>
@@ -164,14 +134,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 import {
-  HomeOutlined,
-  SettingOutlined,
-  GiftOutlined,
   TeamOutlined,
   PlusOutlined,
   EditOutlined,
@@ -180,7 +147,6 @@ import {
 } from '@ant-design/icons-vue'
 
 const router = useRouter()
-const route = useRoute()
 
 const tableLocale = {
   triggerAsc: '',
@@ -219,30 +185,6 @@ const apiRequest = async (url, options = {}) => {
     return data
   } else {
     throw new Error(data.message || '操作失败')
-  }
-}
-
-const currentPage = computed(() => {
-  if (route.path === '/xiuxian/config') return 'config'
-  if (route.path === '/xiuxian/cdk') return 'cdk'
-  if (route.path === '/xiuxian/player') return 'player'
-  return 'xiuxian'
-})
-
-const navigateTo = (page) => {
-  switch (page) {
-    case 'xiuxian':
-      router.push('/xiuxian')
-      break
-    case 'config':
-      router.push('/xiuxian/config')
-      break
-    case 'cdk':
-      router.push('/xiuxian/cdk')
-      break
-    case 'player':
-      router.push('/xiuxian/player')
-      break
   }
 }
 
@@ -331,11 +273,6 @@ const getRealmName = (realmValue) => {
   if (!realmValue && realmValue !== '0') return '-'
   const key = String(realmValue)
   return realmMap.value[key] || `未知境界(${key})`
-}
-
-const formatTimestamp = (timestamp) => {
-  if (!timestamp || timestamp === 0) return '-'
-  return dayjs.unix(timestamp).format('YYYY-MM-DD HH:mm:ss')
 }
 
 const fetchPlayerList = async (page = 1, silent = false) => {
@@ -579,64 +516,8 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.dashboard-container {
+.player-container {
   width: 100%;
-}
-
-.quick-nav {
-  margin-bottom: 24px;
-  padding: 12px 16px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-}
-
-.nav-scroll {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding-bottom: 4px;
-}
-
-.nav-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.nav-scroll .ant-btn {
-  height: 40px;
-  border-radius: 8px;
-  font-size: 15px;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.nav-scroll .ant-btn:not(.ant-btn-primary) {
-  background: #f5f7fa;
-  border-color: #e8eaed;
-  color: #5f6368;
-}
-
-.nav-scroll .ant-btn:not(.ant-btn-primary):hover {
-  background: #e8f0fe;
-  border-color: #b8d4fe;
-  color: #1a73e8;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.2);
-}
-
-.nav-scroll .ant-btn.active {
-  background: #e8f0fe;
-  border-color: #1a73e8;
-  color: #1a73e8;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.15);
 }
 
 .card-header {
@@ -779,17 +660,6 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
-  .quick-nav {
-    padding: 10px 12px;
-    margin-bottom: 16px;
-  }
-
-  .quick-nav .ant-btn {
-    height: 36px;
-    font-size: 13px;
-    padding: 4px 12px;
-  }
-
   .card-header {
     flex-direction: column;
     gap: 12px;

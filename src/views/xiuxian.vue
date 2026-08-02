@@ -3,29 +3,51 @@
     <!-- 顶部快捷栏 -->
     <div class="quick-nav">
       <a-space :size="12" class="nav-scroll-container">
-        <a-button :type="currentPage === 'xiuxian' ? 'primary' : 'default'"
-          :class="{ active: currentPage === 'xiuxian' }" @click="navigateTo('xiuxian')">
+        <a-button
+          :type="currentPage === 'home' ? 'primary' : 'default'"
+          :class="{ active: currentPage === 'home' }"
+          @click="navigateTo('home')"
+        >
           <template #icon>
             <HomeOutlined />
           </template>
           首页
         </a-button>
-        <a-button :type="currentPage === 'config' ? 'primary' : 'default'" :class="{ active: currentPage === 'config' }"
-          @click="navigateTo('config')">
+        <a-button
+          :type="currentPage === 'backup' ? 'primary' : 'default'"
+          :class="{ active: currentPage === 'backup' }"
+          @click="navigateTo('backup')"
+        >
+          <template #icon>
+            <cloud-server-outlined />
+          </template>
+          修仙备份
+        </a-button>
+        <a-button
+          :type="currentPage === 'config' ? 'primary' : 'default'"
+          :class="{ active: currentPage === 'config' }"
+          @click="navigateTo('config')"
+        >
           <template #icon>
             <setting-outlined />
           </template>
           修仙配置
         </a-button>
-        <a-button :type="currentPage === 'cdk' ? 'primary' : 'default'" :class="{ active: currentPage === 'cdk' }"
-          @click="navigateTo('cdk')">
+        <a-button
+          :type="currentPage === 'cdk' ? 'primary' : 'default'"
+          :class="{ active: currentPage === 'cdk' }"
+          @click="navigateTo('cdk')"
+        >
           <template #icon>
             <gift-outlined />
           </template>
           兑换码操作
         </a-button>
-        <a-button :type="currentPage === 'player' ? 'primary' : 'default'" :class="{ active: currentPage === 'player' }"
-          @click="navigateTo('player')">
+        <a-button
+          :type="currentPage === 'player' ? 'primary' : 'default'"
+          :class="{ active: currentPage === 'player' }"
+          @click="navigateTo('player')"
+        >
           <template #icon>
             <team-outlined />
           </template>
@@ -34,139 +56,60 @@
       </a-space>
     </div>
 
-    <a-card title="魔族陌修仙" class="fade-in-card" :bordered="false">
-      <a-row :gutter="[16, 16]">
-        <a-col :xs="24" :sm="12">
-          <a-statistic title="修仙人数" :value="displayPlayerCount" :loading="loading" class="statistic-item">
-            <template #suffix>
-              <span style="font-size: 16px; color: #52c41a;">人</span>
-            </template>
-          </a-statistic>
-        </a-col>
-        <a-col :xs="24" :sm="12">
-          <a-statistic title="宗门数量" :value="displaySectCount" :loading="loading" class="statistic-item">
-            <template #suffix>
-              <span style="font-size: 16px; color: #1890ff;">个</span>
-            </template>
-          </a-statistic>
-        </a-col>
-      </a-row>
-    </a-card>
+    <div class="content-area">
+      <router-view />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { message } from 'ant-design-vue'
-import { HomeOutlined, SettingOutlined, GiftOutlined, TeamOutlined } from '@ant-design/icons-vue'
-
-const playerCount = ref(0)
-const sectCount = ref(0)
-const displayPlayerCount = ref(0)
-const displaySectCount = ref(0)
-const loading = ref(false)
+import {
+  HomeOutlined,
+  CloudServerOutlined,
+  SettingOutlined,
+  GiftOutlined,
+  TeamOutlined
+} from '@ant-design/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
 
 const currentPage = computed(() => {
-  if (route.path === '/xiuxian/config') return 'config'
-  if (route.path === '/xiuxian/cdk') return 'cdk'
-  if (route.path === '/xiuxian/player') return 'player'
-  return 'xiuxian'
+  const path = route.path
+  if (path === '/xiuxian' || path === '/xiuxian/') return 'home'
+  if (path.includes('/xiuxian/backup')) return 'backup'
+  if (path.includes('/xiuxian/config')) return 'config'
+  if (path.includes('/xiuxian/cdk')) return 'cdk'
+  if (path.includes('/xiuxian/player')) return 'player'
+  return 'home'
 })
 
 const navigateTo = (page) => {
+  let targetPath = '/xiuxian'
   switch (page) {
-    case 'xiuxian':
-      router.push('/xiuxian')
+    case 'home':
+      targetPath = '/xiuxian'
+      break
+    case 'backup':
+      targetPath = '/xiuxian/backup'
       break
     case 'config':
-      router.push('/xiuxian/config')
+      targetPath = '/xiuxian/config'
       break
     case 'cdk':
-      router.push('/xiuxian/cdk')
+      targetPath = '/xiuxian/cdk'
       break
     case 'player':
-      router.push('/xiuxian/player')
+      targetPath = '/xiuxian/player'
       break
   }
-}
-
-const animateNumber = (target, displayRef, duration = 1500) => {
-  const start = Math.round(displayRef.value)
-  const end = Math.round(target)
-  const diff = end - start
-  const startTime = performance.now()
-
-  const update = (currentTime) => {
-    const elapsed = currentTime - startTime
-    const progress = Math.min(elapsed / duration, 1)
-
-    const eased = 1 - Math.pow(1 - progress, 3)
-    const current = start + diff * eased
-
-    displayRef.value = Math.round(current)
-
-    if (progress < 1) {
-      requestAnimationFrame(update)
-    } else {
-      displayRef.value = end
-    }
-  }
-
-  requestAnimationFrame(update)
-}
-
-const fetchData = async () => {
-  loading.value = true
-  const token = localStorage.getItem('token')
-  try {
-    const res = await fetch('/api/xiuxian/getInfo', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-    if (res.status === 401) {
-      message.error("token过期或无效")
-      localStorage.removeItem('token')
-      router.push('/login')
-      document.title = '魔族陌 - 登录'
-      return
-    }
-    const data = await res.json()
-    if (data.success) {
-      const newPlayerCount = Math.round(data.data.playerCount || 0)
-      const newSectCount = Math.round(data.data.sectCount || 0)
-
-      playerCount.value = newPlayerCount
-      sectCount.value = newSectCount
-
-      animateNumber(newPlayerCount, displayPlayerCount)
-      setTimeout(() => {
-        animateNumber(newSectCount, displaySectCount)
-      }, 200)
-    }
-  } catch (error) {
-    message.error('获取数据失败:', error)
-  } finally {
-    loading.value = false
+  
+  if (route.path !== targetPath) {
+    router.push(targetPath)
   }
 }
-
-watch([playerCount, sectCount], ([newPlayer, newSect]) => {
-  if (newPlayer > 0 || newSect > 0) {
-    animateNumber(newPlayer, displayPlayerCount)
-    setTimeout(() => {
-      animateNumber(newSect, displaySectCount)
-    }, 200)
-  }
-})
-
-onMounted(() => {
-  fetchData()
-})
 </script>
 
 <style scoped>
@@ -200,7 +143,7 @@ onMounted(() => {
   display: none;
 }
 
-.nav-scroll-container>* {
+.nav-scroll-container > * {
   flex-shrink: 0;
 }
 
@@ -238,6 +181,22 @@ onMounted(() => {
   box-shadow: 0 2px 8px rgba(26, 115, 232, 0.15);
 }
 
+.content-area {
+  width: 100%;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 /* 移动端适配 */
 @media (max-width: 768px) {
   .quick-nav {
@@ -253,97 +212,6 @@ onMounted(() => {
 
   .nav-scroll-container {
     gap: 8px !important;
-  }
-}
-
-.fade-in-card {
-  animation: slideInItem 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  opacity: 0;
-  transform: translateX(-30px);
-}
-
-@keyframes slideInFromLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInItem {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.statistic-item {
-  animation: slideInSubItem 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  opacity: 0;
-  transform: translateX(-20px);
-}
-
-.statistic-item:first-child {
-  animation-delay: 0.15s;
-}
-
-.statistic-item:last-child {
-  animation-delay: 0.35s;
-}
-
-@keyframes slideInSubItem {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-:deep(.ant-statistic-title) {
-  font-size: 16px;
-  color: rgba(0, 0, 0, 0.85);
-}
-
-:deep(.ant-statistic-content) {
-  font-size: 28px;
-  font-weight: 600;
-}
-
-:deep(.ant-statistic-loading .ant-statistic-content) {
-  opacity: 0.6;
-}
-
-:deep(.ant-card) {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-:deep(.ant-card:hover) {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
-
-@media (max-width: 768px) {
-  :deep(.ant-statistic-content) {
-    font-size: 24px;
-  }
-
-  :deep(.ant-statistic-title) {
-    font-size: 14px;
   }
 }
 </style>
