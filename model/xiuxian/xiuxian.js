@@ -2258,6 +2258,7 @@ export default new class {
       const keysToDelete = cdkList.map(cdk => `Mozu:xiuxian:cdk:${cdk}`)
       const pipeline = Redis.pipeline()
       keysToDelete.forEach(key => pipeline.del(key))
+      keysToDelete.forEach(key => pipeline.srem("Mozu:xiuxian:cdks", key))
       await pipeline.exec()
       return {
         event: "del_cdks",

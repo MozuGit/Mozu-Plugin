@@ -100,6 +100,7 @@ const deleteCdks = async (req, res) => {
     const pipeline = Redis.pipeline()
     for (const cdk of list) {
       pipeline.del(`Mozu:xiuxian:cdk:${cdk}`)
+      pipeline.srem("Mozu:xiuxian:cdks", cdk)
     }
     await pipeline.exec()
     res.json({
