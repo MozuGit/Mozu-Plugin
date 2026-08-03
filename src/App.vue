@@ -115,7 +115,7 @@ async function logout() {
   })
   localStorage.removeItem('token')
   router.push('/login')
-  document.title = '魔族陌 - 登录'
+  document.title = '魔族陌 - MozuAdmin'
 }
 </script>
 

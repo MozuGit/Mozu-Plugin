@@ -104,9 +104,25 @@ function handleXiuxianConfig(xiuxianData) {
     if (hasRepeatedId(xiuxianData.drop.pills, xiuxianData.drop.arts)) {
       return "物品ID重复"
     }
-    Object.keys(xiuxianData.drop).forEach(key => {
-      Config.modify('xiuxian', 'drop', key, xiuxianData.drop[key])
+    const cleanRealms = xiuxianData.drop.secretRealms?.map(realm => {
+      const { pills, arts, ...cleanRealm } = realm
+      return cleanRealm
     })
+    if (cleanRealms) {
+      Config.modify('xiuxian', 'drop', 'secretRealms', cleanRealms)
+    }
+    const keysToSkip = ['secretRealms', 'pills', 'arts']
+    Object.keys(xiuxianData.drop).forEach(key => {
+      if (!keysToSkip.includes(key)) {
+        Config.modify('xiuxian', 'drop', key, xiuxianData.drop[key])
+      }
+    })
+    if (xiuxianData.drop.pills) {
+      Config.modify('xiuxian', 'drop', 'pills', xiuxianData.drop.pills)
+    }
+    if (xiuxianData.drop.arts) {
+      Config.modify('xiuxian', 'drop', 'arts', xiuxianData.drop.arts)
+    }
   }
 }
 

@@ -1,6 +1,5 @@
 <template>
   <div class="dashboard-container">
-    <!-- 顶部快捷栏 -->
     <div class="quick-nav">
       <a-space :size="12" class="nav-scroll-container">
         <a-button
@@ -23,7 +22,7 @@
           </template>
           修仙备份
         </a-button>
-        <a-button
+        <!-- <a-button
           :type="currentPage === 'config' ? 'primary' : 'default'"
           :class="{ active: currentPage === 'config' }"
           @click="navigateTo('config')"
@@ -32,7 +31,7 @@
             <setting-outlined />
           </template>
           修仙配置
-        </a-button>
+        </a-button> -->
         <a-button
           :type="currentPage === 'cdk' ? 'primary' : 'default'"
           :class="{ active: currentPage === 'cdk' }"
@@ -197,7 +196,6 @@ const navigateTo = (page) => {
   }
 }
 
-/* 移动端适配 */
 @media (max-width: 768px) {
   .quick-nav {
     padding: 10px 12px;
