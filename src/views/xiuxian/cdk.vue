@@ -68,7 +68,7 @@
           </template>
           <template v-if="column.key === 'lsList'">
             <span class="list-text">{{ Array.isArray(record.lsList) ? record.lsList.join(', ') : record.lsList || '-'
-              }}</span>
+            }}</span>
           </template>
           <template v-if="column.key === 'action'">
             <a-space :size="[4, 4]" class="action-space">
@@ -135,11 +135,11 @@
             <a-descriptions-item label="修为" :span="2">
               <span class="list-text">{{ Array.isArray(record.cultList) ? record.cultList.join(', ') : record.cultList
                 || '-'
-                }}</span>
+              }}</span>
             </a-descriptions-item>
             <a-descriptions-item label="灵石" :span="2">
               <span class="list-text">{{ Array.isArray(record.lsList) ? record.lsList.join(', ') : record.lsList || '-'
-                }}</span>
+              }}</span>
             </a-descriptions-item>
           </a-descriptions>
 

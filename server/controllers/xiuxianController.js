@@ -9,11 +9,11 @@ import { Version } from "../../model/Config/Version.js"
 
 export const getInfo = async (req, res) => {
   try {
-    const presence = await Redis.sismember("Mozu:panel:token", req.headers.authorization.substring(7))
-    if (!presence) {
+    const auth = await validateToken(req)
+    if (!auth.valid) {
       return res.status(401).json({
         success: false,
-        message: 'token过期或无效'
+        message: auth.error
       })
     }
     const playerCount = parseInt(await Redis.get("Mozu:xiuxian:openid:counter"), 10)
@@ -30,12 +30,99 @@ export const getInfo = async (req, res) => {
   }
 }
 
-export const handleCdk = async (req, res) => {
-  const presence = await Redis.sismember("Mozu:panel:token", req.headers.authorization.substring(7))
-  if (!presence) {
+export const handleBackup = async (req, res) => {
+  const auth = await validateToken(req)
+  if (!auth.valid) {
     return res.status(401).json({
       success: false,
-      message: 'token过期或无效'
+      message: auth.error
+    })
+  }
+  const { action } = req.query
+  try {
+    if (action === 'getlist') {
+      return await getBackupList(req, res)
+    }
+
+    if (action === 'restore') {
+      return await restoreBackup(req, res)
+    }
+
+    if (action === 'backup') {
+      return await Backup(req, res)
+    }
+
+    if (action === 'delete') {
+      return await deleteBackup(req, res)
+    }
+  } catch (error) {
+    res.json({
+      success: false,
+      message: error.message
+    })
+  }
+}
+
+const getBackupList = async (req, res) => {
+  try {
+    const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
+    const files = (await readdir(backupDir)).filter(item => item.endsWith('.json'))
+    res.json({
+      success: true,
+      data: {
+        backups: files
+      }
+    })
+  } catch (error) {
+    res.json({ success: false, message: error.message })
+  }
+}
+
+const restoreBackup = async (req, res) => {
+  try {
+    const { filename } = req.query
+    const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", filename + '.json')
+    if (!fs.existsSync(filePath)) {
+      return res.json({ success: false, message: "备份文件不存在" })
+    }
+    await restoreKeys(filePath)
+    res.json({ success: true })
+  } catch (error) {
+    res.json({ success: false, message: error.message })
+  }
+}
+
+const Backup = async (req, res) => {
+  try {
+    const { filename } = req.query
+    const fileTime = formatTime(Date.now())
+    const fileName = filename ? filename + '.json' : fileTime + '.json'
+    const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", fileName)
+    await backupKeys("Mozu:xiuxian:*", filePath)
+    res.json({ success: true })
+  } catch (error) {
+    res.json({ success: false, message: error.message })
+  }
+}
+
+const deleteBackup = async (req, res) => {
+  try {
+    const { files } = req.body
+    const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
+    const removeFiles = files.map(file => path.join(backupDir, file + '.json'))
+    await Promise.all(removeFiles.map(file => unlink(file)))
+    res.json({ success: true, })
+  } catch (error) {
+    res.json({ success: false, message: error.message })
+  }
+}
+
+export const handleCdk = async (req, res) => {
+  const auth = await validateToken(req)
+  if (!auth.valid) {
+    return res.status(401).json({
+      success: false,
+      message: auth.error
     })
   }
   const { action } = req.query
@@ -118,11 +205,11 @@ const deleteCdks = async (req, res) => {
 }
 
 export const handlePlayer = async (req, res) => {
-  const presence = await Redis.sismember("Mozu:panel:token", req.headers.authorization.substring(7))
-  if (!presence) {
+  const auth = await validateToken(req)
+  if (!auth.valid) {
     return res.status(401).json({
       success: false,
-      message: 'token过期或无效'
+      message: auth.error
     })
   }
   const { action } = req.query
@@ -219,30 +306,22 @@ const getRealm = async (req, res) => {
   }
 }
 
-export const handleBackup = async (req, res) => {
-  const presence = await Redis.sismember("Mozu:panel:token", req.headers.authorization.substring(7))
-  if (!presence) {
+export const handleSect = async (req, res) => {
+  const auth = await validateToken(req)
+  if (!auth.valid) {
     return res.status(401).json({
       success: false,
-      message: 'token过期或无效'
+      message: auth.error
     })
   }
   const { action } = req.query
   try {
     if (action === 'getlist') {
-      return await getBackupList(req, res)
+      return await getSectList(req, res)
     }
 
-    if (action === 'restore') {
-      return await restoreBackup(req, res)
-    }
-
-    if (action === 'backup') {
-      return await Backup(req, res)
-    }
-
-    if (action === 'delete') {
-      return await deleteBackup(req, res)
+    if (action === 'modify') {
+      return await modifySect(req, res)
     }
   } catch (error) {
     res.json({
@@ -252,14 +331,39 @@ export const handleBackup = async (req, res) => {
   }
 }
 
-const getBackupList = async (req, res) => {
+const getSectList = async (req, res) => {
   try {
-    const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
-    const files = (await readdir(backupDir)).filter(item => item.endsWith('.json'))
+    const { page } = req.query
+    const start = page * 10 + 1
+    const sectCount = parseInt(await Redis.get('Mozu:xiuxian:sectid:counter'), 10)
+    if (sectCount < start) {
+      return res.json({
+        success: true,
+        data: {
+          sects: []
+        }
+      })
+    }
+    const end = Math.min(start + 10, sectCount + 1)
+    const pipeline = Redis.pipeline()
+    for (let i = start; i < end; i++) {
+      pipeline.hgetall(`Mozu:xiuxian:sectInfo:${i}`)
+    }
+    const results = await pipeline.exec()
+    const sectInfos = results.map(([err, result], index) => ({
+      id: start + index,
+      name: result.宗门名称,
+      level: result.宗门等级,
+      desc: result.宗门简介,
+      exp: result.宗门经验,
+      noAudit: result.无需审核状态
+    }))
     res.json({
       success: true,
       data: {
-        backups: files
+        sects: sectInfos,
+        sectCount: sectCount,
+        max_level: Config.xiuxian.sect.sect_level.length
       }
     })
   } catch (error) {
@@ -267,42 +371,43 @@ const getBackupList = async (req, res) => {
   }
 }
 
-const restoreBackup = async (req, res) => {
+const modifySect = async (req, res) => {
   try {
-    const { filename } = req.query
-    const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", filename + '.json')
-    if (!fs.existsSync(filePath)) {
-      return res.json({ success: false, message: "备份文件不存在" })
+    const { sectid } = req.query
+    const { name, level, desc, exp, noAudit } = req.body
+    await Redis.hmset(`Mozu:xiuxian:sectInfo:${sectid}`, {
+      宗门名称: name,
+      宗门等级: level,
+      宗门简介: desc,
+      宗门经验: exp,
+      无需审核状态: noAudit
+    })
+    res.json({ success: true })
+  } catch (error) {
+    res.json({ success: false, message: error.message })
+  }
+}
+
+async function validateToken(req) {
+  const authHeader = req?.headers?.authorization
+  if (!authHeader) {
+    return { valid: false, error: '未登录，请先登录' }
+  }
+  if (!authHeader.startsWith('Bearer ')) {
+    return { valid: false, error: 'token 格式错误' }
+  }
+  const token = authHeader.substring(7);
+  if (!token || token.length === 0) {
+    return { valid: false, error: 'token 为空' }
+  }
+  try {
+    const presence = await Redis.sismember("Mozu:panel:token", token)
+    if (!presence) {
+      return { valid: false, error: 'token 无效或已过期' }
     }
-    await restoreKeys(filePath)
-    res.json({ success: true })
+    return { valid: true, token }
   } catch (error) {
-    res.json({ success: false, message: error.message })
-  }
-}
-
-const Backup = async (req, res) => {
-  try {
-    const { filename } = req.query
-    const fileTime = formatTime(Date.now())
-    const fileName = filename ? filename + '.json' : fileTime + '.json'
-    const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", fileName)
-    await backupKeys("Mozu:xiuxian:*", filePath)
-    res.json({ success: true })
-  } catch (error) {
-    res.json({ success: false, message: error.message })
-  }
-}
-
-const deleteBackup = async (req, res) => {
-  try {
-    const { files } = req.body
-    const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
-    const removeFiles = files.map(file => path.join(backupDir, file + '.json'))
-    await Promise.all(removeFiles.map(file => unlink(file)))
-    res.json({ success: true, })
-  } catch (error) {
-    res.json({ success: false, message: error.message })
+    return { valid: false, error: '认证服务异常' }
   }
 }
 

@@ -2,21 +2,15 @@
   <div class="dashboard-container">
     <div class="quick-nav">
       <a-space :size="12" class="nav-scroll-container">
-        <a-button
-          :type="currentPage === 'home' ? 'primary' : 'default'"
-          :class="{ active: currentPage === 'home' }"
-          @click="navigateTo('home')"
-        >
+        <a-button :type="currentPage === 'home' ? 'primary' : 'default'" :class="{ active: currentPage === 'home' }"
+          @click="navigateTo('home')">
           <template #icon>
             <HomeOutlined />
           </template>
           首页
         </a-button>
-        <a-button
-          :type="currentPage === 'backup' ? 'primary' : 'default'"
-          :class="{ active: currentPage === 'backup' }"
-          @click="navigateTo('backup')"
-        >
+        <a-button :type="currentPage === 'backup' ? 'primary' : 'default'" :class="{ active: currentPage === 'backup' }"
+          @click="navigateTo('backup')">
           <template #icon>
             <cloud-server-outlined />
           </template>
@@ -32,25 +26,26 @@
           </template>
           修仙配置
         </a-button> -->
-        <a-button
-          :type="currentPage === 'cdk' ? 'primary' : 'default'"
-          :class="{ active: currentPage === 'cdk' }"
-          @click="navigateTo('cdk')"
-        >
+        <a-button :type="currentPage === 'cdk' ? 'primary' : 'default'" :class="{ active: currentPage === 'cdk' }"
+          @click="navigateTo('cdk')">
           <template #icon>
             <gift-outlined />
           </template>
           兑换码操作
         </a-button>
-        <a-button
-          :type="currentPage === 'player' ? 'primary' : 'default'"
-          :class="{ active: currentPage === 'player' }"
-          @click="navigateTo('player')"
-        >
+        <a-button :type="currentPage === 'player' ? 'primary' : 'default'" :class="{ active: currentPage === 'player' }"
+          @click="navigateTo('player')">
           <template #icon>
             <team-outlined />
           </template>
           玩家管理
+        </a-button>
+        <a-button :type="currentPage === 'sect' ? 'primary' : 'default'" :class="{ active: currentPage === 'sect' }"
+          @click="navigateTo('sect')">
+          <template #icon>
+            <CompassOutlined />
+          </template>
+          宗门管理
         </a-button>
       </a-space>
     </div>
@@ -69,7 +64,8 @@ import {
   CloudServerOutlined,
   SettingOutlined,
   GiftOutlined,
-  TeamOutlined
+  TeamOutlined,
+  CompassOutlined
 } from '@ant-design/icons-vue'
 
 const router = useRouter()
@@ -82,6 +78,7 @@ const currentPage = computed(() => {
   if (path.includes('/xiuxian/config')) return 'config'
   if (path.includes('/xiuxian/cdk')) return 'cdk'
   if (path.includes('/xiuxian/player')) return 'player'
+  if (path.includes('/xiuxian/sect')) return 'sect'
   return 'home'
 })
 
@@ -103,8 +100,11 @@ const navigateTo = (page) => {
     case 'player':
       targetPath = '/xiuxian/player'
       break
+    case 'sect':
+      targetPath = '/xiuxian/sect'
+      break
   }
-  
+
   if (route.path !== targetPath) {
     router.push(targetPath)
   }
@@ -116,7 +116,6 @@ const navigateTo = (page) => {
   width: 100%;
 }
 
-/* 顶部快捷栏样式 */
 .quick-nav {
   margin-bottom: 24px;
   padding: 12px 16px;
@@ -142,7 +141,7 @@ const navigateTo = (page) => {
   display: none;
 }
 
-.nav-scroll-container > * {
+.nav-scroll-container>* {
   flex-shrink: 0;
 }
 

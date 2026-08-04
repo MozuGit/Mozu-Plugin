@@ -30,6 +30,11 @@ const routes = [
         redirect: '/xiuxian'
       },
       {
+        path: 'backup',
+        name: 'xiuxianBackup',
+        component: () => import('../views/xiuxian/backup.vue')
+      },
+      {
         path: 'config',
         name: 'xiuxianConfig',
         component: () => import('../views/xiuxian/config.vue')
@@ -45,9 +50,9 @@ const routes = [
         component: () => import('../views/xiuxian/player.vue')
       },
       {
-        path: 'backup',
-        name: 'xiuxianBackup',
-        component: () => import('../views/xiuxian/backup.vue')
+        path: 'sect',
+        name: 'xiuxianSect',
+        component: () => import('../views/xiuxian/sect.vue')
       }
     ]
   },

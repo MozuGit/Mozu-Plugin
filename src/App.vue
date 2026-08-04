@@ -68,7 +68,7 @@ const collapsed = ref(isMobile.value)
 const selectedKeys = ref([])
 const pageTitle = ref('')
 
-const validRouteNames = ['xiuxian', 'xiuxianHome', 'xiuxianConfig', 'xiuxianCdk', 'xiuxianPlayer', 'xiuxianBackup', 'about']
+const validRouteNames = ['xiuxian', 'xiuxianHome', 'xiuxianBackup', 'xiuxianConfig', 'xiuxianCdk', 'xiuxianPlayer', 'xiuxianSect', 'about']
 
 const pageTitles = {
   index: '主页',
@@ -85,7 +85,7 @@ watch(() => route.name, (name) => {
       return
     }
     let menuKey = name
-    if (name === 'xiuxianHome' || name === 'xiuxianConfig' || name === 'xiuxianCdk' || name === 'xiuxianPlayer' || name === 'xiuxianBackup') {
+    if (name === 'xiuxianHome' || name === 'xiuxianConfig' || name === 'xiuxianCdk' || name === 'xiuxianPlayer' || name === 'xiuxianBackup' || name === 'xiuxianSect') {
       menuKey = 'xiuxian'
       subPageTitle = "魔族陌修仙"
     }
