@@ -756,7 +756,7 @@ const commandHandlers = {
           let membersList = []
           for (let member of value.data.membersList) {
             membersList.push([
-              '>**ID：' + member.id + '     ' + (await mqqapi.command('[同意]', '同意宗门成员' + member.id)) + '     ' + (await mqqapi.command('[拒绝]', '拒绝宗门成员' + member.id)) + '**',
+              '>**ID：' + member.id + '     ' + (await mqqapi.command('[同意]', '同意宗门成员' + member.id, true)) + '     ' + (await mqqapi.command('[拒绝]', '拒绝宗门成员' + member.id, true)) + '**',
               '**修为：' + member.cult + '**',
               '**境界：' + member.realm + '**',
               '***'
@@ -781,7 +781,7 @@ const commandHandlers = {
         ].join('\n'))
         break
     }
-    Text.push(Button.sectAdmin)
+    Text.push(Button.sectMember)
   }
 }
 
@@ -2069,6 +2069,42 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.sect)
+    }
+  },
+  {
+    prefix: /^#?设置宗门(无需|需要)审核/,
+    handler: async (id, user_id, Text, msg) => {
+      const value = await xiuxian.sectSetAudit(id, msg.includes('无需'))
+      switch (value.event) {
+        case 'sect_set_audit_success':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**设置宗门审核成功**',
+            '>当前宗门加入方式：' + (msg.includes('无需') ? '无需审核' : '需要审核'),
+            '***'
+          ].join('\n'))
+          break
+        case 'no_permission':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**你的宗门权限不足**',
+            '>需副宗主及以上可操作',
+            '***'
+          ].join('\n'))
+          break
+        case 'no_sect':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**你还没加入宗门呢**',
+            '>点击' + (await mqqapi.command('加入宗门')),
+            '***'
+          ].join('\n'))
+          break
+      }
+      Text.push(Button.sectAdmin)
     }
   },
   {

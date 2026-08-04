@@ -433,6 +433,7 @@ export default new class {
     if (retreatStart === 0) {
       const time = Math.floor(Date.now() / 1000)
       Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '闭关时间', time)
+      Redis.zrem('Mozu:xiuxian:random:pvp', id)
       return {
         event: "start_retreat",
         data: {
@@ -462,6 +463,7 @@ export default new class {
         修为: cult,
         闭关时间: 0
       })
+      this.power(id) //刷新战力
       return {
         event: "end_retreat",
         data: {
@@ -1885,6 +1887,26 @@ export default new class {
     } else {
       return {
         event: "invalid_lsNum"
+      }
+    }
+  }
+
+  async sectSetAudit(id, noAudit) {
+    const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
+    if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
+      return {
+        event: "no_sect"
+      }
+    }
+    const membersPermission = JSON.parse(await Redis.hget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员等级'))
+    if (membersPermission.find(item => item.id === id)?.permission >= 9) {
+      Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '无需审核状态', noAudit ? 1 : 0)
+      return {
+        event: "sect_set_audit_success"
+      }
+    } else {
+      return {
+        event: "no_permission"
       }
     }
   }
