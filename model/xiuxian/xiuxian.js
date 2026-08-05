@@ -463,7 +463,7 @@ export default new class {
         修为: cult,
         闭关时间: 0
       })
-      this.power(id) //刷新战力
+      this.getPower(id) //刷新战力
       return {
         event: "end_retreat",
         data: {
