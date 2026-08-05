@@ -1,4 +1,5 @@
 import fs from "node:fs"
+import { rm, cp } from 'fs/promises'
 import path from "path"
 import { readdir, unlink } from "node:fs/promises"
 
@@ -6,6 +7,8 @@ import Redis from '#Redis'
 import Config from "#Config"
 import { backupKeys, restoreKeys } from "../../scripts/backup.js"
 import { Version } from "../../model/Config/Version.js"
+
+import xiuxianElements from "../../guoba/schemas/xiuxian.js"
 
 export const getInfo = async (req, res) => {
   try {
@@ -30,7 +33,7 @@ export const getInfo = async (req, res) => {
   }
 }
 
-export const handleBackup = async (req, res) => {
+export const handleConfig = async (req, res) => {
   const auth = await validateToken(req)
   if (!auth.valid) {
     return res.status(401).json({
@@ -40,20 +43,28 @@ export const handleBackup = async (req, res) => {
   }
   const { action } = req.query
   try {
-    if (action === 'getlist') {
-      return await getBackupList(req, res)
+    if (action === 'get_config') {
+      return await getConfig(req, res)
     }
 
-    if (action === 'restore') {
-      return await restoreBackup(req, res)
+    if (action === 'get_config_elements') {
+      return await getConfigElements(req, res)
     }
 
-    if (action === 'backup') {
-      return await Backup(req, res)
+    if (action === 'save_config') {
+      return await saveConfig(req, res)
     }
 
-    if (action === 'delete') {
-      return await deleteBackup(req, res)
+    if (action === 'reset') {
+      return await resetConfig(req, res)
+    }
+
+    if (action === 'get_groups') {
+      return await getGroups(req, res)
+    }
+
+    if (action === 'get_friend') {
+      return await getFriends(req, res)
     }
   } catch (error) {
     res.json({
@@ -63,14 +74,12 @@ export const handleBackup = async (req, res) => {
   }
 }
 
-const getBackupList = async (req, res) => {
+const getConfig = async (req, res) => {
   try {
-    const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
-    const files = (await readdir(backupDir)).filter(item => item.endsWith('.json'))
     res.json({
       success: true,
       data: {
-        backups: files
+        config: Config.getCfg().xiuxian
       }
     })
   } catch (error) {
@@ -78,43 +87,142 @@ const getBackupList = async (req, res) => {
   }
 }
 
-const restoreBackup = async (req, res) => {
+const getConfigElements = async (req, res) => {
   try {
-    const { filename } = req.query
-    const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", filename + '.json')
-    if (!fs.existsSync(filePath)) {
-      return res.json({ success: false, message: "备份文件不存在" })
+    res.json({
+      success: true,
+      data: {
+        elements: xiuxianElements
+      }
+    })
+  } catch (error) {
+    res.json({ success: false, message: error.message })
+  }
+}
+
+const saveConfig = async (req, res) => {
+  try {
+    const xiuxianData = req.body
+    if (!xiuxianData) return
+    const configMappings = [
+      { file: 'setting', data: xiuxianData.setting },
+      { file: 'sect', data: xiuxianData.sect },
+      { file: 'title', data: xiuxianData.title },
+      { file: 'beast', data: xiuxianData.beast },
+    ]
+    for (const { file, data } of configMappings) {
+      if (data && typeof data === 'object') {
+        Object.keys(data).forEach(key => {
+          Config.modify('xiuxian', file, key, data[key])
+        })
+      }
     }
-    await restoreKeys(filePath)
-    res.json({ success: true })
+    if (xiuxianData.xiuxian && typeof xiuxianData.xiuxian === 'object') {
+      Object.keys(xiuxianData.xiuxian).forEach(key => {
+        if (key === "range") {
+          const rangeData = xiuxianData.xiuxian.range
+          if (rangeData && typeof rangeData === 'object') {
+            Object.keys(rangeData).forEach(rangeKey => {
+              Config.modify('xiuxian', rangeKey, rangeData[rangeKey])
+            })
+          }
+        } else {
+          Config.modify('xiuxian', key, xiuxianData.xiuxian[key])
+        }
+      })
+    }
+    if (xiuxianData.realm) {
+      Config.modify('xiuxian', 'Realm', "Realms", xiuxianData.realm)
+    }
+    if (xiuxianData.drop) {
+      if (hasRepeatedId(xiuxianData.drop.pills, xiuxianData.drop.arts)) {
+        return res.json({
+          success: false,
+          message: "物品ID重复"
+        })
+      }
+      const cleanRealms = xiuxianData.drop.secretRealms?.map(realm => {
+        const { pills, arts, ...cleanRealm } = realm
+        return cleanRealm
+      })
+      if (cleanRealms) {
+        Config.modify('xiuxian', 'drop', 'secretRealms', cleanRealms)
+      }
+      const keysToSkip = ['secretRealms', 'pills', 'arts']
+      Object.keys(xiuxianData.drop).forEach(key => {
+        if (!keysToSkip.includes(key)) {
+          Config.modify('xiuxian', 'drop', key, xiuxianData.drop[key])
+        }
+      })
+      if (xiuxianData.drop.pills) {
+        Config.modify('xiuxian', 'drop', 'pills', xiuxianData.drop.pills)
+      }
+      if (xiuxianData.drop.arts) {
+        Config.modify('xiuxian', 'drop', 'arts', xiuxianData.drop.arts)
+      }
+    }
+    res.json({
+      success: true,
+      message: "保存成功喵~"
+    })
   } catch (error) {
     res.json({ success: false, message: error.message })
   }
 }
 
-const Backup = async (req, res) => {
+const resetConfig = async (req, res) => {
   try {
-    const { filename } = req.query
-    const fileTime = formatTime(Date.now())
-    const fileName = filename ? filename + '.json' : fileTime + '.json'
-    const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", fileName)
-    await backupKeys("Mozu:xiuxian:*", filePath)
-    res.json({ success: true })
+    const srcPath = path.join(Version.Plugin_Path, 'config', 'xiuxian', 'default')
+    const destPath = path.join(Version.Plugin_Path, 'config', 'xiuxian', 'config')
+
+    await rm(destPath, { recursive: true, force: true })
+    await cp(srcPath, destPath, { recursive: true })
+
+    res.json({ success: true, message: "重置修仙配置成功喵~" })
   } catch (error) {
     res.json({ success: false, message: error.message })
   }
 }
 
-const deleteBackup = async (req, res) => {
+const getGroups = async (req, res) => {
   try {
-    const { files } = req.body
-    const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
-    const removeFiles = files.map(file => path.join(backupDir, file + '.json'))
-    await Promise.all(removeFiles.map(file => unlink(file)))
-    res.json({ success: true, })
+    res.json({
+      success: true,
+      data: {
+        groups: []
+      }
+    })
   } catch (error) {
     res.json({ success: false, message: error.message })
   }
+}
+
+const getFriends = async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      data: {
+        friends: []
+      }
+    })
+  } catch (error) {
+    res.json({ success: false, message: error.message })
+  }
+}
+
+function hasRepeatedId(...args) {
+  const seen = new Set()
+  for (const arr of args) {
+    if (!Array.isArray(arr)) continue
+    for (const item of arr) {
+      if (!item?.id) continue
+      if (seen.has(item.id)) {
+        return true
+      }
+      seen.add(item.id)
+    }
+  }
+  return false
 }
 
 export const handleCdk = async (req, res) => {
@@ -383,6 +491,93 @@ const modifySect = async (req, res) => {
       无需审核状态: noAudit
     })
     res.json({ success: true })
+  } catch (error) {
+    res.json({ success: false, message: error.message })
+  }
+}
+
+export const handleBackup = async (req, res) => {
+  const auth = await validateToken(req)
+  if (!auth.valid) {
+    return res.status(401).json({
+      success: false,
+      message: auth.error
+    })
+  }
+  const { action } = req.query
+  try {
+    if (action === 'getlist') {
+      return await getBackupList(req, res)
+    }
+
+    if (action === 'restore') {
+      return await restoreBackup(req, res)
+    }
+
+    if (action === 'backup') {
+      return await Backup(req, res)
+    }
+
+    if (action === 'delete') {
+      return await deleteBackup(req, res)
+    }
+  } catch (error) {
+    res.json({
+      success: false,
+      message: error.message
+    })
+  }
+}
+
+const getBackupList = async (req, res) => {
+  try {
+    const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
+    const files = (await readdir(backupDir)).filter(item => item.endsWith('.json'))
+    res.json({
+      success: true,
+      data: {
+        backups: files
+      }
+    })
+  } catch (error) {
+    res.json({ success: false, message: error.message })
+  }
+}
+
+const restoreBackup = async (req, res) => {
+  try {
+    const { filename } = req.query
+    const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", filename + '.json')
+    if (!fs.existsSync(filePath)) {
+      return res.json({ success: false, message: "备份文件不存在" })
+    }
+    await restoreKeys(filePath)
+    res.json({ success: true })
+  } catch (error) {
+    res.json({ success: false, message: error.message })
+  }
+}
+
+const Backup = async (req, res) => {
+  try {
+    const { filename } = req.query
+    const fileTime = formatTime(Date.now())
+    const fileName = filename ? filename + '.json' : fileTime + '.json'
+    const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", fileName)
+    await backupKeys("Mozu:xiuxian:*", filePath)
+    res.json({ success: true })
+  } catch (error) {
+    res.json({ success: false, message: error.message })
+  }
+}
+
+const deleteBackup = async (req, res) => {
+  try {
+    const { files } = req.body
+    const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
+    const removeFiles = files.map(file => path.join(backupDir, file + '.json'))
+    await Promise.all(removeFiles.map(file => unlink(file)))
+    res.json({ success: true, })
   } catch (error) {
     res.json({ success: false, message: error.message })
   }

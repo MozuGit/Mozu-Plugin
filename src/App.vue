@@ -68,7 +68,7 @@ const collapsed = ref(isMobile.value)
 const selectedKeys = ref([])
 const pageTitle = ref('')
 
-const validRouteNames = ['xiuxian', 'xiuxianHome', 'xiuxianBackup', 'xiuxianConfig', 'xiuxianCdk', 'xiuxianPlayer', 'xiuxianSect', 'about']
+const validRouteNames = ['xiuxian', 'xiuxianHome', 'xiuxianConfig', 'xiuxianCdk', 'xiuxianPlayer', 'xiuxianSect', 'xiuxianBackup', 'about']
 
 const pageTitles = {
   index: '主页',

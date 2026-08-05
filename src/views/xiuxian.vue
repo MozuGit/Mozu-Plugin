@@ -9,23 +9,13 @@
           </template>
           首页
         </a-button>
-        <a-button :type="currentPage === 'backup' ? 'primary' : 'default'" :class="{ active: currentPage === 'backup' }"
-          @click="navigateTo('backup')">
-          <template #icon>
-            <cloud-server-outlined />
-          </template>
-          修仙备份
-        </a-button>
-        <!-- <a-button
-          :type="currentPage === 'config' ? 'primary' : 'default'"
-          :class="{ active: currentPage === 'config' }"
-          @click="navigateTo('config')"
-        >
+        <a-button :type="currentPage === 'config' ? 'primary' : 'default'" :class="{ active: currentPage === 'config' }"
+          @click="navigateTo('config')">
           <template #icon>
             <setting-outlined />
           </template>
           修仙配置
-        </a-button> -->
+        </a-button>
         <a-button :type="currentPage === 'cdk' ? 'primary' : 'default'" :class="{ active: currentPage === 'cdk' }"
           @click="navigateTo('cdk')">
           <template #icon>
@@ -46,6 +36,13 @@
             <CompassOutlined />
           </template>
           宗门管理
+        </a-button>
+        <a-button :type="currentPage === 'backup' ? 'primary' : 'default'" :class="{ active: currentPage === 'backup' }"
+          @click="navigateTo('backup')">
+          <template #icon>
+            <cloud-server-outlined />
+          </template>
+          修仙备份
         </a-button>
       </a-space>
     </div>
