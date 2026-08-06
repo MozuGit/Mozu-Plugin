@@ -139,50 +139,6 @@ export const actions = {
     } catch (error) {
       return Result.error('重置配置失败: ' + error.message)
     }
-  },
-  removeCdk: async (cdks, { Result }) => {
-    if (!cdks?.length || (cdks.length === 1 && cdks[0] === "[object Object]")) {
-      return Result.error("未选中兑换码")
-    }
-    const pipeline = Redis.pipeline()
-    for (const cdk of cdks) {
-      pipeline.del(`Mozu:xiuxian:cdk:${cdk}`)
-    }
-    await pipeline.exec()
-    return Result.ok({}, "删除兑换码成功")
-  },
-  addTitle: async (params, { Result }) => {
-    const [title, id, validDay] = params
-    if (!title || !id || !validDay) {
-      return Result.error("参数缺失")
-    }
-    const days = parseInt(validDay, 10)
-    if (isNaN(days)) {
-      return Result.error("有效天数必须是数字")
-    }
-    const playerKey = `Mozu:xiuxian:playerInfo:${id}`
-    const exists = await Redis.exists(playerKey)
-    if (exists === 0) {
-      return Result.error("修仙ID不存在")
-    }
-    const nowTime = Math.floor(Date.now() / 1000)
-    const titleList = JSON.parse(await Redis.hget(playerKey, '称号列表') || '[]')
-    const existingTitle = titleList.find(item => item.title === title)
-    const validTime = days !== 0 ? nowTime + days * 86400 : 0
-    if (existingTitle) {
-      existingTitle.validTime = validTime
-    } else {
-      titleList.push({
-        title,
-        getTime: nowTime,
-        validTime
-      })
-    }
-    await Promise.all([
-      Redis.hset(playerKey, '称号列表', JSON.stringify(titleList)),
-      Redis.sadd('Mozu:xiuxian:title:owners', id)
-    ])
-    return Result.ok({}, "给予称号成功")
   }
 }
 
