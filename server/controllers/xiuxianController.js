@@ -62,10 +62,6 @@ export const handleConfig = async (req, res) => {
     if (action === 'get_groups') {
       return await getGroups(req, res)
     }
-
-    if (action === 'get_friend') {
-      return await getFriends(req, res)
-    }
   } catch (error) {
     res.json({
       success: false,
@@ -186,23 +182,16 @@ const resetConfig = async (req, res) => {
 
 const getGroups = async (req, res) => {
   try {
+    const result = Array.from(Bot.gl.values())
+      .filter(item => item.group_id !== "stdin")
+      .map(item => ({
+        groupId: item.group_id,
+        name: item.group_name || item.nickname || item.group_id
+      }))
     res.json({
       success: true,
       data: {
-        groups: []
-      }
-    })
-  } catch (error) {
-    res.json({ success: false, message: error.message })
-  }
-}
-
-const getFriends = async (req, res) => {
-  try {
-    res.json({
-      success: true,
-      data: {
-        friends: []
+        groups: result
       }
     })
   } catch (error) {
