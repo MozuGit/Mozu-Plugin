@@ -2446,7 +2446,7 @@ const prefixHandlers = [
     }
   },
   {
-    prefix: /^#?设置性别\s*(男|女)/,
+    prefix: /^#?设置性别/,
     handler: async (id, user_id, Text, msg) => {
       const value = await xiuxian.setSex(id, msg.replace(/#?设置性别/, '').trim())
       switch (value.event) {
