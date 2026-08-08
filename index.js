@@ -46,7 +46,7 @@ for (let i in files) {
     continue
   }
   const keys = Object.keys(ret[i].value)
-  const validKey = keys.find(key => key.toLowerCase() === appName.toLowerCase()) || keys[0] // 如果没有同名的键，默认取第一个
+  const validKey = keys.find(key => key.toLowerCase() === appName.toLowerCase()) || keys[0]
   apps[name] = ret[i].value[validKey]
 }
 
