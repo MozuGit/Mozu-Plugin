@@ -7,10 +7,10 @@ export class MozuFayan extends plugin {
       name: '魔族陌:发言统计',
       dsc: '记录群友发言次数将其排序',
       event: 'message',
-      priority: -1,
+      priority: 1145,
       rule: [
         {
-          reg: '^#?发言榜(日榜|月榜|周榜|昨日|上周)?$',
+          reg: '^#?发言榜(日榜|月榜|周榜)?\s*(\d*)',
           fnc: 'fayan'
         },
         {
@@ -27,23 +27,19 @@ export class MozuFayan extends plugin {
 
   async fayan(e) {
     if (!Config.config.fayan.enable || !this.e.group) return false
-    const type = this.e.msg.match(/^#?发言榜(日榜|月榜|周榜|昨日|上周)?$/)?.[1] || "日榜"
+    const match = this.e.msg.match(/^#?发言榜(日榜|月榜|周榜)?\s*(\d*)/)
+    const type = match?.[1] || "日榜"
+    const num = match?.[2] || 0
     let date
     switch (type) {
       case '日榜':
-        date = await gettoday()
+        date = await gettoday(num)
         break
       case '月榜':
-        date = await getmonth()
+        date = await getmonth(num)
         break
       case '周榜':
-        date = await getweek()
-        break
-      case '昨日':
-        date = await gettoday(1)
-        break
-      case '上周':
-        date = await getweek(1)
+        date = await getweek(num)
         break
     }
     const key = `Mozu:msg:${date}:group:${this.e.self_id}:${this.e.group_id.replace(e.self_id + ':', '')}`
@@ -53,7 +49,41 @@ export class MozuFayan extends plugin {
       Redis.zrevrank(key, this.e.user_id)
     ])
     const userIds = list.filter((_, i) => i % 2 === 0)
-    if (userIds.length === 0) return false
+    if (userIds.length === 0) {
+      let message
+      let msg = []
+      if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.config.fayan.sendMarkdown) {
+        msg.push([
+          '<@' + this.e.user_id.replace(this.e.self_id + ':', '') + '>',
+          '***',
+          '**本群发言榜' + type + '**',
+          '>数据仅供参考  请以实际发言为准',
+          '日期：' + date,
+          '***',
+          '>暂无数据',
+          '***'
+        ].join('\n'))
+        const Button = segment.button(
+          [
+            { text: "日榜", input: "发言榜日榜" },
+            { text: "月榜", input: "发言榜月榜" },
+            { text: "周榜", input: "发言榜周榜" },
+          ]
+        )
+        message = [segment.markdown(msg.join('\n')), Button]
+      } else {
+        msg.push([
+          '本群发言榜' + type,
+          '--------',
+          '数据仅供参考  请以实际发言为准',
+          '日期：' + date,
+          '--------',
+          '暂无数据'
+        ].join('\n'))
+        message = msg.join('\n')
+      }
+      return await this.e.reply(message)
+    }
     const names = await Redis.hmget(`Mozu:username`, ...userIds)
     let message
     let msg = []
@@ -63,6 +93,7 @@ export class MozuFayan extends plugin {
         '***',
         '**本群发言榜' + type + '**',
         '>数据仅供参考  请以实际发言为准',
+        '日期：' + date,
         '***'
       ].join('\n'))
       for (let i = 0; i < list.length; i += 2) {
@@ -83,10 +114,6 @@ export class MozuFayan extends plugin {
           { text: "日榜", input: "发言榜日榜" },
           { text: "月榜", input: "发言榜月榜" },
           { text: "周榜", input: "发言榜周榜" },
-        ],
-        [
-          { text: "昨日", input: "发言榜昨日" },
-          { text: "上周", input: "发言榜上周" },
         ]
       )
       message = [segment.markdown(msg.join('\n')), Button]
@@ -95,6 +122,7 @@ export class MozuFayan extends plugin {
         '本群发言榜' + type,
         '--------',
         '数据仅供参考  请以实际发言为准',
+        '日期：' + date,
         '--------'
       ].join('\n'))
       for (let i = 0; i < list.length; i += 2) {
@@ -230,8 +258,11 @@ async function gettoday(num = 0) {
   return date_time
 }
 
-async function getmonth() {
+async function getmonth(num = 0) {
   const currentDate = new Date()
+  if (num !== 0) {
+    currentDate.setMonth(currentDate.getMonth() - num)
+  }
   const year = currentDate.getFullYear()
   const month = (currentDate.getMonth() + 1).toString().padStart(2, '0')
   const date_time = `${year}-${month}`
