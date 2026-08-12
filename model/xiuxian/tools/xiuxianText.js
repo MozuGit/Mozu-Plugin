@@ -3,6 +3,7 @@ import util from 'util'
 import Config from "#Config"
 import { Button, xiuxian } from "../index.js"
 import { mqqapi, qagent } from "./protocol.js"
+import { Version } from '../../Config/Version.js'
 
 async function xiuxianText(msg, user_id, at, isMaster) {
   msg = msg.trim()
@@ -28,6 +29,7 @@ async function xiuxianText(msg, user_id, at, isMaster) {
         '<@' + user_id + '>',
         '***',
         '**功能开发中，即将上线**',
+        '>版本：' + Version.Plugin_Version,
         '>催一催作者：' + (await qagent(Config.xiuxian.setting.contact.peerUid, Config.xiuxian.setting.contact.peerName)),
         '***',
       ].join('\n'))
@@ -2798,16 +2800,16 @@ function formatTime(timestamp) {
  * @returns {string} 格式化时间
  */
 function secondsToTimeText(seconds) {
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
+  const days = Math.floor(seconds / 86400)
+  const hours = Math.floor((seconds % 86400) / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = seconds % 60
 
-  const parts = [];
-  if (days > 0) parts.push(`${days}天`);
-  if (hours > 0 || days > 0) parts.push(`${hours}小时`);
-  if (minutes > 0 || hours > 0 || days > 0) parts.push(`${minutes}分钟`);
-  if (days < 1) parts.push(`${secs}秒`);
+  const parts = []
+  if (days > 0) parts.push(`${days}天`)
+  if (hours > 0 || days > 0) parts.push(`${hours}小时`)
+  if (minutes > 0 || hours > 0 || days > 0) parts.push(`${minutes}分钟`)
+  if (days < 1) parts.push(`${secs}秒`)
 
-  return parts.join('');
+  return parts.join('')
 }

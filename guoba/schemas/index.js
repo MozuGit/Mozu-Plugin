@@ -14,6 +14,7 @@ import xiuxian from './xiuxian.js'
 import makeMessage from './makeMessage.js'
 import fayan from './fayan.js'
 import openai from './openai.js'
+import _interface from './interface.js'
 
 export const schemas = [
   ...RedisConfig,
@@ -21,7 +22,8 @@ export const schemas = [
   ...xiuxian,
   ...makeMessage,
   ...fayan,
-  ...openai
+  ...openai,
+  ..._interface
 ]
 
 export function getConfigData() {
@@ -49,6 +51,7 @@ export function setConfigData(data, { Result }) {
     { dir: 'config', file: 'makeMessage', data: nested.config.makeMessage },
     { dir: 'config', file: 'fayan', data: nested.config.fayan },
     { dir: 'config', file: 'openai', data: nested.config.openai },
+    { dir: 'config', file: 'interface', data: nested.config.interface },
     { dir: 'panel', file: 'login', data: nested.panel.login },
   ])
   const xiuxianError = handleXiuxianConfig(nested.xiuxian)
