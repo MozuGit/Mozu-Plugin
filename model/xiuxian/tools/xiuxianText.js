@@ -129,8 +129,8 @@ const commandHandlers = {
           '>签到次数：' + userInfo.signNum + '天',
           '***',
           '**每日签到奖励**',
-          '>修为' + value.data.addcult,
-          '灵石' + value.data.addls,
+          '>修为：' + value.data.addcult,
+          '灵石：' + value.data.addls,
           '***'
         ].join('\n'))
         break
