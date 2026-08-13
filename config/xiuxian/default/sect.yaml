@@ -1,11 +1,13 @@
-#宗门等级
+# 宗门等级
 sect_level:
-  - up_exp: 0  #宗门升级需要的宗门经验
-    memberMax: 10  #宗门人数上限
-    sign:  #签到奖励
-      cult: 10888  #签到奖励：修为
-      ls: 10888  #签到奖励：灵石
-      sectExp: 100  #签到奖励：宗门经验
+  - up_exp: 0  # 宗门升级需要的宗门经验
+    memberMax: 10  # 宗门人数上限
+    sign:  # 签到奖励
+      cult: 10888  # 签到奖励：修为
+      ls: 10888  # 签到奖励：灵石
+      sectExp: 100  # 签到奖励：宗门经验
+    store_commodity:  # 宗门商店配置
+      discount: 1.00  # 商品折扣
   - up_exp: 1000
     memberMax: 20
     sign:
@@ -61,22 +63,33 @@ sect_level:
       ls: 188888
       sectExp: 5000
 
-#宗门名称简介配置
+# 宗门名称简介配置
 sect_validation:
   audit:
-    mode: 0  #审核模式 0 - 手动审核   1 - AI审核   2 - 关键词审核   3 - 无需审核
-    keywords: []  #设置关键词审核时触发  数组形式  黑名单词
+    mode: 0  # 审核模式 0 - 手动审核   1 - AI审核   2 - 关键词审核   3 - 无需审核
+    keywords: []  # 设置关键词审核时触发  数组形式  黑名单词
   name:
-    max: 8  #宗门设置名称字符上限  -1表示无上限
-    min: 1  #宗门设置名称字符下限
-    newline: false  #是否允许换行
+    max: 8  # 宗门设置名称字符上限  -1表示无上限
+    min: 1  # 宗门设置名称字符下限
+    newline: false  # 是否允许换行
   desc:
-    max: 100  #宗门设置简介字符上限  -1表示无上限
-    min: 0  #宗门设置简介字符下限
-    newline: true  #是否允许换行
+    max: 100  # 宗门设置简介字符上限  -1表示无上限
+    min: 0  # 宗门设置简介字符下限
+    newline: true  # 是否允许换行
 
-#宗门升级后经验重置
+# 宗门升级后经验重置
 sect_up_reset: false
 
-#创建宗门需要灵石
+# 创建宗门需要灵石
 create_sect_ls: 200000
+
+# 宗门商店商品列表
+sect_store_commodity:
+  - id: 101
+    name: "探灵珠"
+    ls: 100000
+    limit: 1  # 每日限制购买数量  -1表示无上限
+  - id: 102
+    name: "洗根水"
+    ls: 5000
+    limit: 10

@@ -1,15 +1,15 @@
-#秘境等级限制
+# 秘境等级限制
 secretRealm_limit:
   easy: 1
   medium: 45
   hard: 81
 
-#秘境列表
+# 秘境列表
 secretRealms:
-  - name: 翠风林地  #秘境名称
-    level: easy  #秘境难度等级（等级类型：easy、medium、hard）
-    cost_ls: 200  #消耗灵石
-    drop_rate: 20  #掉落概率（%）
+  - name: 翠风林地  # 秘境名称
+    level: easy  # 秘境难度等级（等级类型：easy、medium、hard）
+    cost_ls: 200  # 消耗灵石
+    drop_rate: 20  # 掉落概率（%）
   - name: 碧波浅滩
     level: easy
     cost_ls: 300
@@ -43,13 +43,13 @@ secretRealms:
     cost_ls: 30000
     drop_rate: 20
 
-#丹药列表
+# 丹药列表
 pills:
-  - id: 1  #物品ID
-    name: 翠风露  #丹药名称
-    cult: 100  #使用丹药获得的修为
-    sell_ls: 120  #出售丹药获得的灵石
-    fromSecretRealmID: 1  #来源秘境ID
+  - id: 1  # 物品ID
+    name: 翠风露  # 丹药名称
+    cult: 100  # 使用丹药获得的修为
+    sell_ls: 120  # 出售丹药获得的灵石
+    fromSecretRealmID: 1  # 来源秘境ID
   - id: 2
     name: 木灵散
     cult: 100
@@ -181,15 +181,15 @@ pills:
     sell_ls: 36000
     fromSecretRealmID: 9
 
-#功法列表
+# 功法列表
 arts:
-  - id: 10001  #物品ID
-    name: 翠风心决  #功法名称
-    rate: 50  #学习功法成功率（%）
-    deduct_cult: 100  #学习失败反噬修为
-    addition: 1  #功法加成（%）
-    sell_ls: 120  #出售功法获得的灵石
-    fromSecretRealmID: 1  #来源秘境ID
+  - id: 10001  # 物品ID
+    name: 翠风心决  # 功法名称
+    rate: 50  # 学习功法成功率（%）
+    deduct_cult: 100  # 学习失败反噬修为
+    addition: 1  # 功法加成（%）
+    sell_ls: 120  # 出售功法获得的灵石
+    fromSecretRealmID: 1  # 来源秘境ID
   - id: 10002
     name: 木灵化气
     rate: 50

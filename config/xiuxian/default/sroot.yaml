@@ -1,0 +1,69 @@
+# 灵根概率（单位：%）
+root_drop:
+  five_elements: 49
+  advanced: 35
+  supreme: 15
+  mozumo: 1
+
+# 灵根列表
+sroot:
+  - name: 金灵根  # 灵根名称
+    addition: 1.0  # 灵根加成
+    level: five_elements  # 灵根掉落概率等级
+  - name: 木灵根
+    addition: 1.0
+    level: five_elements
+  - name: 水灵根
+    addition: 1.0
+    level: five_elements
+  - name: 火灵根
+    addition: 1.0
+    level: five_elements
+  - name: 土灵根
+    addition: 1.0
+    level: five_elements
+  
+  - name: 冰灵根
+    addition: 1.1
+    level: advanced
+  - name: 风灵根
+    addition: 1.2
+    level: advanced
+  - name: 雷灵根
+    addition: 1.3
+    level: advanced
+  - name: 虚灵根
+    addition: 1.4
+    level: advanced
+  - name: 天灵根
+    addition: 1.5
+    level: advanced
+  - name: 地灵根
+    addition: 1.6
+    level: advanced
+  - name: 空灵根
+    addition: 1.8
+    level: advanced
+  - name: 废灵根
+    addition: 0.1
+    level: advanced
+
+  - name: 玄冰冥炎根
+    addition: 3.5
+    level: supreme
+  - name: 九霄神雷根
+    addition: 3.6
+    level: supreme
+  - name: 镜花水月根
+    addition: 3.8
+    level: supreme
+  - name: 大梦千秋根
+    addition: 3.9
+    level: supreme
+  - name: 太初鸿蒙根
+    addition: 4.0
+    level: supreme
+  
+  - name: 至臻陌灵根
+    addition: 10.0
+    level: mozumo

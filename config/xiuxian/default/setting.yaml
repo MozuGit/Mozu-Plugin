@@ -1,34 +1,34 @@
-#修仙全局开关
+# 修仙全局开关
 enable: true
 
-#主人不受冷却限制
+# 主人不受冷却限制
 master_no_cd: false
 
-#是否强制用#触发
+# 是否强制用#触发
 forceSharp: false
 
-#是否启用群黑白名单 0 - 无   1 - 黑名单   2 - 白名单
+# 是否启用群黑白名单 0 - 无   1 - 黑名单   2 - 白名单
 group: 0
 
-#黑名单群
+# 黑名单群
 blackGroup: []
 
-#白名单群
+# 白名单群
 whiteGroup: []
 
-#输出文本样式 0 - 普通文本   1 - Markdown
+# 输出文本样式 0 - 普通文本   1 - Markdown
 TextStyle: 1
 
-#指令优先级（数字越小，优先级越大）
+# 指令优先级（数字越小，优先级越大）
 priority: 1000
 
-#修仙定时备份cron表达式
+# 修仙定时备份cron表达式
 cronBackup: 0 0 * * * *
 
-#修仙备份文件上限
+# 修仙备份文件上限
 maxBackupFile: 10
 
-#联系主人
+# 联系主人
 contact:
   peerUid: u_KX6qPA4vv-EbmUhf0enyNg
   peerName: 魔族陌

@@ -1,8 +1,8 @@
 Realms:
-  - name: "练气初期"
-    value: 500
-    success: 100
-    failed: 0
+  - name: "练气初期"  # 境界名称
+    value: 500  # 突破境界所需的修为
+    success: 100  # 突破成功概率（单位：%）
+    failed: 0  # 突破失败损失的修为
   - name: "练气中期"
     value: 1000
     success: 95

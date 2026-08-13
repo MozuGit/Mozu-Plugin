@@ -1,7 +1,7 @@
-#猎杀妖兽CD（秒）
+# 猎杀妖兽CD（秒）
 huntBeastCD: 600
 
-#修仙妖兽配置
+# 修仙妖兽配置
 beasts:
   - name: "暗影狼"
     power: 5000
