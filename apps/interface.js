@@ -60,8 +60,12 @@ export class MozuInterface extends plugin {
             mute_expire_at: expireTime
           }]
         }
-        const { data: result } = await bot.sdk.request.post(`/v2/groups/${group_id}/restrict_chat_setting`, requestBody)
-        return !!result
+        try {
+          await bot.sdk.request.post(`/v2/groups/${group_id}/restrict_chat_setting`, requestBody)
+        } catch (err) {
+          return false
+        }
+        return true
       }
     }
     return false
