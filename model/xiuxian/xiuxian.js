@@ -1530,7 +1530,7 @@ export default new class {
             宗门等级: level
           })
         } else {
-          Redis.hset(`${SECT_INFO_KEY}:${id}`, '宗门等级', level)
+          Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门等级', level)
         }
         return {
           event: "sect_level_up"
