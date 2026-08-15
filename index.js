@@ -57,10 +57,10 @@ const RGB = [
 ]
 RGB.sort(() => Math.random() - 0.5)
 
-logger.info(logger.rgb(...RGB)("━━━━━━━━━━━━━━━━━━━━"))
-logger.info(logger.rgb(...RGB)("Mozu-Plugin 载入成功"))
-logger.info(logger.rgb(...RGB)("版本：v" + Version.Plugin_Version))
-logger.info(logger.rgb(...RGB)("交流群：976719017"))
-logger.info(logger.rgb(...RGB)("━━━━━━━━━━━━━━━━━━━━"))
+logger.info(logger.rgb(...RGB)("━━━━━━━━━━━━━━━━━━━━━━"))
+logger.info(logger.rgb(...RGB)("┃ Mozu-Plugin 载入成功"))
+logger.info(logger.rgb(...RGB)("┃ 版本：v" + Version.Plugin_Version))
+logger.info(logger.rgb(...RGB)("┃ 交流群：976719017"))
+logger.info(logger.rgb(...RGB)("━━━━━━━━━━━━━━━━━━━━━━"))
 
 export { apps }
