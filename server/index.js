@@ -25,19 +25,25 @@ const displayHost = Config.panel.login.host === 'auto'
   ? (remoteIp || 'localhost')
   : Config.panel.login.host
 
+const RGB = [[255, 107, 107], [255, 165, 107], [255, 231, 107], [107, 255, 150], [107, 200, 255], [180, 107, 255], [255, 107, 200]]
+
 app.listen(Config.panel.login.port || 11451, '0.0.0.0', () => {
-  const RGB = [
-    Math.floor(Math.random() * 155 + 100),
-    Math.floor(Math.random() * 155 + 100),
-    Math.floor(Math.random() * 155 + 100)
-  ]
-  RGB.sort(() => Math.random() - 0.5)
-  logger.info(logger.rgb(...RGB)("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"))
-  logger.info(logger.rgb(...RGB)("┃ ") + logger.rgb(131, 224, 255)("[魔族陌] 启动成功喵~"))
-  logger.info(logger.rgb(...RGB)("┃ ") + logger.rgb(118, 255, 118)(`外网地址：http://${displayHost}:${Config.panel.login.port || 11451}`))
-  logger.info(logger.rgb(...RGB)("┃ ") + logger.rgb(118, 255, 118)(`本地地址：http://127.0.0.1:${Config.panel.login.port || 11451}`))
-  logger.info(logger.rgb(...RGB)("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"))
+  logger.info(buildLoggerRGB("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"))
+  logger.info(buildLoggerRGB("┃ [魔族陌] 启动成功喵~"))
+  logger.info(buildLoggerRGB(`┃ 外网地址：http://${displayHost}:${Config.panel.login.port || 11451}`))
+  logger.info(buildLoggerRGB(`┃ 本地地址：http://127.0.0.1:${Config.panel.login.port || 11451}`))
+  logger.info(buildLoggerRGB("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"))
 })
+
+function buildLoggerRGB(message) {
+  let index = 0
+  let result = ""
+  for (const ch of message) {
+    result += logger.rgb(...(RGB[index++]))(ch)
+    if (index >= RGB.length) index = 0
+  }
+  return result
+}
 
 async function getRemoteIp() {
   let cacheData = await Redis.get("Mozu:remote-ip")

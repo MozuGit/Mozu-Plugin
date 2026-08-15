@@ -50,17 +50,22 @@ for (let i in files) {
   apps[name] = ret[i].value[validKey]
 }
 
-const RGB = [
-  Math.floor(Math.random() * 155 + 100),
-  Math.floor(Math.random() * 155 + 100),
-  Math.floor(Math.random() * 155 + 100)
-]
-RGB.sort(() => Math.random() - 0.5)
+const RGB = [[255, 107, 107], [255, 165, 107], [255, 231, 107], [107, 255, 150], [107, 200, 255], [180, 107, 255], [255, 107, 200]]
 
-logger.info(logger.rgb(...RGB)("━━━━━━━━━━━━━━━━━━━━━━"))
-logger.info(logger.rgb(...RGB)("┃ Mozu-Plugin 载入成功"))
-logger.info(logger.rgb(...RGB)("┃ 版本：v" + Version.Plugin_Version))
-logger.info(logger.rgb(...RGB)("┃ 交流群：976719017"))
-logger.info(logger.rgb(...RGB)("━━━━━━━━━━━━━━━━━━━━━━"))
+logger.info(buildLoggerRGB("━━━━━━━━━━━━━━━━━━━━━━"))
+logger.info(buildLoggerRGB("┃ Mozu-Plugin 载入成功"))
+logger.info(buildLoggerRGB("┃ 版本：v" + Version.Plugin_Version))
+logger.info(buildLoggerRGB("┃ 交流群：976719017"))
+logger.info(buildLoggerRGB("━━━━━━━━━━━━━━━━━━━━━━"))
+
+function buildLoggerRGB(message) {
+  let index = 0
+  let result = ""
+  for (const ch of message) {
+    result += logger.rgb(...(RGB[index++]))(ch)
+    if (index >= RGB.length) index = 0
+  }
+  return result
+}
 
 export { apps }
