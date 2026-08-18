@@ -55,7 +55,7 @@ const RGB = [[255, 107, 107], [255, 165, 107], [255, 231, 107], [107, 255, 150],
 logger.info(buildLoggerRGB("━━━━━━━━━━━━━━━━━━━━━━"))
 logger.info(buildLoggerRGB("┃ Mozu-Plugin 载入成功"))
 logger.info(buildLoggerRGB("┃ 版本：v" + Version.Plugin_Version))
-logger.info(buildLoggerRGB("┃ 交流群：976719017"))
+logger.info(buildLoggerRGB("┃ 陌陌の小窝：976719017"))
 logger.info(buildLoggerRGB("━━━━━━━━━━━━━━━━━━━━━━"))
 
 function buildLoggerRGB(message) {
