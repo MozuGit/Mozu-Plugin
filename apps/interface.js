@@ -34,18 +34,10 @@ export class MozuInterface extends plugin {
     }
     if (groupBotState.member_role === 'admin') this.e.group.is_admin = true
 
-    //入群申请列表拉取
-    let groupJoinList = JSON.parse(await Redis.get(`Mozu:groupjoinlist:${group_id}`))
-    if (!groupJoinList && this.e.group.is_admin) {
-      ({ data: groupJoinList } = await bot.sdk.request.get(`/v2/groups/${group_id}/join_request_list`))
-      Redis.set(`Mozu:groupjoinlist:${group_id}`, JSON.stringify(groupJoinList), 'EX', 300)
-    }
-
     if (!this.e.group.info) {
       this.e.group.info = {
         ...groupInfo,
-        group_bot_state: groupBotState,
-        group_join_request_list: groupJoinList
+        group_bot_state: groupBotState
       }
     }
 
@@ -66,6 +58,18 @@ export class MozuInterface extends plugin {
           return false
         }
         return true
+      }
+    }
+
+    //获取入群申请列表
+    if (!this.e.group.getJoinList) {
+      this.e.group.getJoinList = async () => {
+        try {
+          const { result } = await bot.sdk.request.get(`/v2/groups/${group_id}/join_request_list`)
+          return result
+        } catch (err) {
+          return false
+        }
       }
     }
     return false
