@@ -1383,6 +1383,18 @@ export default new class {
     }
   }
 
+  async obtainSroot(id) {
+
+  }
+
+  async washSroot(id) {
+    
+  }
+
+  async awakenSroot(id) {
+    
+  }
+
   async createSect(id) {
     let [ls, sectId, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '宗门ID', '闭关时间')
     ls = parseInt(ls, 10)
@@ -1887,6 +1899,27 @@ export default new class {
     } else {
       return {
         event: "invalid_lsNum"
+      }
+    }
+  }
+
+  async sectStore(id, page = 0) {
+    const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
+    if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
+      return {
+        event: "no_sect"
+      }
+    }
+    let products = JSON.parse(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门商品购买数量'))
+    if (products?.date !== gettoday()) {
+      products.date = gettoday()
+      products.data = {}
+      Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '宗门商品购买数量', JSON.stringify(products))
+    }
+    return {
+      event: "sect_store",
+      data: {
+        products: products
       }
     }
   }

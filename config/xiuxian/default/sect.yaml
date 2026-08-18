@@ -6,8 +6,6 @@ sect_level:
       cult: 10888  # 签到奖励：修为
       ls: 10888  # 签到奖励：灵石
       sectExp: 100  # 签到奖励：宗门经验
-    store_commodity:  # 宗门商店配置
-      discount: 1.00  # 商品折扣
   - up_exp: 1000
     memberMax: 20
     sign:
@@ -82,14 +80,3 @@ sect_up_reset: false
 
 # 创建宗门需要灵石
 create_sect_ls: 200000
-
-# 宗门商店商品列表
-sect_store_commodity:
-  - id: 101
-    name: "探灵珠"
-    ls: 100000
-    limit: 1  # 每日限制购买数量  -1表示无上限
-  - id: 102
-    name: "洗根水"
-    ls: 5000
-    limit: 10
