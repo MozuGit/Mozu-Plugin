@@ -102,13 +102,15 @@ export class MozuFayan extends plugin {
           '>发言次数：' + list[i + 1] + '次'
         ].join('\n'))
       }
-      msg.push([
-        '***',
-        '**你的发言**',
-        '>排名：第' + (rank + 1) + '名',
-        '发言次数：' + score + '次',
-        '***'
-      ].join('\n'))
+      msg.push('***')
+      if (rank) {
+        msg.push([
+          '**你的发言**',
+          '>排名：第' + (rank + 1) + '名',
+          '发言次数：' + score + '次',
+          '***'
+        ].join('\n'))
+      }
       const Button = segment.button(
         [
           { text: "日榜", input: "发言榜日榜" },
@@ -130,10 +132,13 @@ export class MozuFayan extends plugin {
           '第' + (i / 2 + 1) + '名：' + names[i / 2] + '•' + list[i + 1] + '次',
         ].join('\n'))
       }
-      msg.push([
-        '--------',
-        '你的排名：第' + (rank + 1) + '名•' + score + '次',
-      ].join('\n'))
+      msg.push('--------')
+      if (rank) {
+        msg.push([
+          '你的排名：第' + (rank + 1) + '名 • ' + score + ' 次',
+          '--------'
+        ].join('\n'))
+      }
       message = msg.join('\n')
     }
     await this.e.reply(message)

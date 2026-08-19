@@ -1,6 +1,6 @@
 import Config from '#Config'
 import Button from '../button.js'
-import { mqqapi } from './protocol.js'
+import { mqqapi } from '../../../lib/protocol.js'
 
 const prefix = Config.xiuxian.setting.forceSharp ? '/' : ''
 

@@ -1388,11 +1388,11 @@ export default new class {
   }
 
   async washSroot(id) {
-    
+
   }
 
   async awakenSroot(id) {
-    
+
   }
 
   async createSect(id) {

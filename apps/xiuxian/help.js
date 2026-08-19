@@ -1,5 +1,5 @@
 import Config from "#Config"
-import { mqqapi, qagent } from "../../model/xiuxian/tools/protocol.js"
+import { mqqapi, qagent } from "../../lib/protocol.js"
 import { help, Button } from "../../model/xiuxian/index.js"
 
 export class MozuXiuxianHelp extends plugin {

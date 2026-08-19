@@ -2,7 +2,7 @@ import util from 'util'
 
 import Config from "#Config"
 import { Button, xiuxian } from "../index.js"
-import { mqqapi, qagent } from "./protocol.js"
+import { mqqapi, qagent } from "../../../lib/protocol.js"
 import { Version } from '../../Config/Version.js'
 
 async function xiuxianText(msg, user_id, at, isMaster) {

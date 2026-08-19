@@ -3,7 +3,7 @@ import path from "path"
 import { readdir, unlink } from "node:fs/promises"
 
 import Config from "#Config"
-import { mqqapi } from "../../model/xiuxian/tools/protocol.js"
+import { mqqapi } from "../../lib/protocol.js"
 import { backupKeys, restoreKeys } from "../../scripts/backup.js"
 import { Version } from "../../model/Config/Version.js"
 import { Button } from "../../model/xiuxian/index.js"

@@ -62,8 +62,7 @@ function buildLoggerRGB(message) {
   let index = 0
   let result = ""
   for (const ch of message) {
-    result += logger.rgb(...(RGB[index++]))(ch)
-    if (index >= RGB.length) index = 0
+    result += logger.rgb(...(RGB[index++ % RGB.length]))(ch)
   }
   return result
 }
