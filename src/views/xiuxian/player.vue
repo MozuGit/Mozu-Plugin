@@ -11,15 +11,116 @@
         </div>
       </div>
 
+      <div class="search-area">
+        <a-space wrap>
+          <a-input
+            v-model:value="searchParams.id"
+            placeholder="修仙ID"
+            allow-clear
+            style="width: 120px"
+            @input="handleInstantSearch"
+          >
+            <template #prefix>
+              <search-outlined />
+            </template>
+          </a-input>
+          
+          <a-space-compact>
+            <a-select
+              v-model:value="searchParams.cultOperator"
+              style="width: 80px"
+              @change="handleInstantSearch"
+            >
+              <a-select-option value="contains">包含</a-select-option>
+              <a-select-option value="equals">=</a-select-option>
+              <a-select-option value="greater">></a-select-option>
+              <a-select-option value="less"><</a-select-option>
+              <a-select-option value="gte">>=</a-select-option>
+              <a-select-option value="lte"><=</a-select-option>
+            </a-select>
+            <a-input
+              v-model:value="searchParams.cult"
+              placeholder="修为"
+              allow-clear
+              style="width: 100px"
+              @input="handleInstantSearch"
+            />
+          </a-space-compact>
+          
+          <a-space-compact>
+            <a-select
+              v-model:value="searchParams.lsOperator"
+              style="width: 80px"
+              @change="handleInstantSearch"
+            >
+              <a-select-option value="contains">包含</a-select-option>
+              <a-select-option value="equals">=</a-select-option>
+              <a-select-option value="greater">></a-select-option>
+              <a-select-option value="less"><</a-select-option>
+              <a-select-option value="gte">>=</a-select-option>
+              <a-select-option value="lte"><=></a-select-option>
+            </a-select>
+            <a-input
+              v-model:value="searchParams.ls"
+              placeholder="灵石"
+              allow-clear
+              style="width: 100px"
+              @input="handleInstantSearch"
+            />
+          </a-space-compact>
+
+          <a-select
+            v-model:value="searchParams.realm"
+            placeholder="境界"
+            allow-clear
+            show-search
+            option-filter-prop="label"
+            style="width: 150px"
+            :options="realmOptions"
+            @change="handleInstantSearch"
+          />
+          
+          <a-select
+            v-model:value="searchParams.sex"
+            placeholder="性别"
+            allow-clear
+            style="width: 100px"
+            @change="handleInstantSearch"
+          >
+            <a-select-option value="男">男</a-select-option>
+            <a-select-option value="女">女</a-select-option>
+            <a-select-option value="未设置">未设置</a-select-option>
+          </a-select>
+          
+          <a-button @click="handleReset">
+            <template #icon>
+              <reload-outlined />
+            </template>
+            重置
+          </a-button>
+        </a-space>
+      </div>
+
       <div class="toolbar">
-        <span v-if="isUpdating" class="update-hint">
+        <span v-if="isLoadingAllData" class="update-hint">
+          <sync-outlined spin /> 正在加载全部数据... {{ loadedCount }}/{{ totalPlayerCount }}
+        </span>
+        <span v-else-if="isUpdating" class="update-hint">
           <sync-outlined spin /> 更新中...
         </span>
         <span v-else class="update-hint-placeholder"></span>
       </div>
 
-      <a-table :columns="columns" :data-source="playerList" :loading="loading && playerList.length === 0"
-        :pagination="pagination" :locale="tableLocale" row-key="id" class="player-table" @change="handleTableChange">
+      <a-table 
+        :columns="columns" 
+        :data-source="displayPlayerList" 
+        :loading="loading && playerList.length === 0"
+        :pagination="displayPagination" 
+        :locale="tableLocale" 
+        row-key="id" 
+        class="player-table" 
+        @change="handleTableChange"
+      >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'currentTitle'">
             <a-tag
@@ -134,7 +235,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
@@ -143,7 +244,9 @@ import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  SyncOutlined
+  SyncOutlined,
+  SearchOutlined,
+  ReloadOutlined
 } from '@ant-design/icons-vue'
 
 const router = useRouter()
@@ -190,17 +293,121 @@ const apiRequest = async (url, options = {}) => {
 
 const loading = ref(false)
 const isUpdating = ref(false)
+const isLoadingAllData = ref(false)
+const allPlayerList = ref([])
 const playerList = ref([])
 const realmMap = ref({})
 const realmOptions = ref([])
 const totalPlayerCount = ref(0)
+const loadedCount = ref(0)
+const currentPage = ref(1)
+const pageSize = 10
+const isLoadingAll = ref(false)
+const isSearchMode = ref(false)
 
-const pagination = reactive({
-  current: 1,
-  pageSize: 10,
-  total: 0,
-  showSizeChanger: false,
-  showTotal: (total) => `本页 ${playerList.value.length} 条，共 ${totalPlayerCount.value} 名玩家`
+const searchParams = reactive({
+  id: '',
+  cult: '',
+  cultOperator: 'contains',
+  ls: '',
+  lsOperator: 'contains',
+  realm: undefined,
+  sex: undefined
+})
+
+const hasSearchCondition = computed(() => {
+  return searchParams.id.trim() !== '' ||
+    searchParams.cult.trim() !== '' ||
+    searchParams.ls.trim() !== '' ||
+    (searchParams.realm !== undefined && searchParams.realm !== null && searchParams.realm !== '') ||
+    (searchParams.sex !== undefined && searchParams.sex !== null && searchParams.sex !== '')
+})
+
+const compareValues = (playerValue, searchValue, operator) => {
+  const playerNum = Number(playerValue)
+  const searchNum = Number(searchValue)
+
+  if (isNaN(playerNum) || isNaN(searchNum)) {
+    return false
+  }
+
+  switch (operator) {
+    case 'equals':
+      return playerNum === searchNum
+    case 'greater':
+      return playerNum > searchNum
+    case 'less':
+      return playerNum < searchNum
+    case 'gte':
+      return playerNum >= searchNum
+    case 'lte':
+      return playerNum <= searchNum
+    case 'contains':
+      return String(playerValue).includes(String(searchValue))
+    default:
+      return String(playerValue).includes(String(searchValue))
+  }
+}
+
+const displayPlayerList = computed(() => {
+  if (isSearchMode.value) {
+    let filtered = allPlayerList.value
+
+    if (searchParams.id && searchParams.id.trim()) {
+      const idFilter = searchParams.id.trim()
+      filtered = filtered.filter(player =>
+        String(player.id).includes(idFilter)
+      )
+    }
+
+    if (searchParams.cult && searchParams.cult.trim()) {
+      filtered = filtered.filter(player =>
+        compareValues(player.cult, searchParams.cult.trim(), searchParams.cultOperator)
+      )
+    }
+
+    if (searchParams.ls && searchParams.ls.trim()) {
+      filtered = filtered.filter(player =>
+        compareValues(player.ls, searchParams.ls.trim(), searchParams.lsOperator)
+      )
+    }
+
+    if (searchParams.realm !== undefined && searchParams.realm !== null && searchParams.realm !== '') {
+      filtered = filtered.filter(player =>
+        String(player.realm) === String(searchParams.realm)
+      )
+    }
+
+    if (searchParams.sex !== undefined && searchParams.sex !== null && searchParams.sex !== '') {
+      filtered = filtered.filter(player =>
+        String(player.sex) === String(searchParams.sex)
+      )
+    }
+
+    return filtered
+  } else {
+    return playerList.value
+  }
+})
+
+const displayPagination = computed(() => {
+  if (isSearchMode.value) {
+    return {
+      current: currentPage.value,
+      pageSize: pageSize,
+      total: displayPlayerList.value.length,
+      showSizeChanger: false,
+      showTotal: (total) => `本页 ${Math.min(displayPlayerList.value.length, pageSize)} 条，共 ${total} 名玩家`
+    }
+  } else {
+    return {
+      current: currentPage.value,
+      pageSize: pageSize,
+      total: totalPlayerCount.value,
+      showSizeChanger: false,
+      showTotal: (total) => `本页 ${playerList.value.length} 条，共 ${total} 名玩家`
+    }
+  }
 })
 
 const columns = [
@@ -275,6 +482,84 @@ const getRealmName = (realmValue) => {
   return realmMap.value[key] || `未知境界(${key})`
 }
 
+const fetchPageData = async (page) => {
+  const data = await apiRequest(`/api/xiuxian/player?action=getlist&page=${page}`)
+  return data
+}
+
+const loadAllData = async () => {
+  if (isLoadingAll.value) return
+
+  isLoadingAll.value = true
+  isLoadingAllData.value = true
+
+  try {
+    const firstPageData = await fetchPageData(0)
+
+    if (!firstPageData) {
+      message.error("获取数据失败")
+      return
+    }
+
+    if (firstPageData.playerCount !== undefined && firstPageData.playerCount !== null) {
+      totalPlayerCount.value = Number(firstPageData.playerCount)
+    }
+
+    allPlayerList.value = []
+
+    if (firstPageData.players && firstPageData.players.length > 0) {
+      const mappedPlayers = firstPageData.players.map(player => ({
+        ...player,
+        titleIndex: player.titleIndex !== undefined ? Number(player.titleIndex) : -1,
+        titles: player.titles || []
+      }))
+
+      allPlayerList.value = mappedPlayers
+      loadedCount.value = mappedPlayers.length
+    }
+
+    const totalPages = Math.ceil(totalPlayerCount.value / pageSize)
+
+    for (let page = 1; page < totalPages; page++) {
+      if (!isLoadingAll.value) break
+
+      const pageData = await fetchPageData(page)
+
+      if (pageData && pageData.players && pageData.players.length > 0) {
+        const mappedPlayers = pageData.players.map(player => ({
+          ...player,
+          titleIndex: player.titleIndex !== undefined ? Number(player.titleIndex) : -1,
+          titles: player.titles || []
+        }))
+
+        mergePlayers(mappedPlayers)
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+
+    loadedCount.value = allPlayerList.value.length
+
+  } catch (error) {
+    if (error.message !== '未授权') {
+      message.error(error.message || '加载数据失败')
+    }
+  } finally {
+    isLoadingAll.value = false
+    isLoadingAllData.value = false
+  }
+}
+
+const mergePlayers = (newPlayers) => {
+  const existingIds = new Set(allPlayerList.value.map(p => p.id))
+  const playersToAdd = newPlayers.filter(p => !existingIds.has(p.id))
+
+  if (playersToAdd.length > 0) {
+    allPlayerList.value = [...allPlayerList.value, ...playersToAdd]
+    loadedCount.value = allPlayerList.value.length
+  }
+}
+
 const fetchPlayerList = async (page = 1, silent = false) => {
   if (!silent) {
     loading.value = true
@@ -283,30 +568,24 @@ const fetchPlayerList = async (page = 1, silent = false) => {
   }
 
   try {
-    const data = await apiRequest(`/api/xiuxian/player?action=getlist&page=${page - 1}`)
+    const data = await fetchPageData(page - 1)
 
     if (data) {
       if (data.players) {
-        playerList.value = data.players.map(player => ({
+        const mappedPlayers = data.players.map(player => ({
           ...player,
           titleIndex: player.titleIndex !== undefined ? Number(player.titleIndex) : -1,
           titles: player.titles || []
         }))
+
+        playerList.value = mappedPlayers
       }
 
       if (data.playerCount !== undefined && data.playerCount !== null) {
         totalPlayerCount.value = Number(data.playerCount)
-        pagination.total = totalPlayerCount.value
-      } else if (pagination.total === 0 || totalPlayerCount.value === 0) {
-        const estimatedTotal = Math.max(
-          (page - 1) * pagination.pageSize + playerList.value.length,
-          playerList.value.length
-        )
-        totalPlayerCount.value = estimatedTotal
-        pagination.total = estimatedTotal
       }
 
-      pagination.current = page
+      currentPage.value = page
     }
   } catch (error) {
     if (error.message !== '未授权') {
@@ -323,9 +602,45 @@ const fetchPlayerList = async (page = 1, silent = false) => {
   }
 }
 
+const handleInstantSearch = () => {
+  currentPage.value = 1
+
+  if (hasSearchCondition.value) {
+    isSearchMode.value = true
+
+    if (loadedCount.value < totalPlayerCount.value) {
+      loadAllData()
+    }
+  } else {
+    isSearchMode.value = false
+    fetchPlayerList(1, false)
+  }
+}
+
+const handleReset = () => {
+  searchParams.id = ''
+  searchParams.cult = ''
+  searchParams.cultOperator = 'contains'
+  searchParams.ls = ''
+  searchParams.lsOperator = 'contains'
+  searchParams.realm = undefined
+  searchParams.sex = undefined
+  currentPage.value = 1
+
+  isLoadingAll.value = false
+  isLoadingAllData.value = false
+  isSearchMode.value = false
+
+  fetchPlayerList(1, false)
+}
+
 const handleTableChange = (pag, filters, sorter) => {
-  if (pag.current !== pagination.current) {
-    fetchPlayerList(pag.current, false)
+  if (pag.current !== currentPage.value) {
+    currentPage.value = pag.current
+
+    if (!isSearchMode.value) {
+      fetchPlayerList(pag.current, false)
+    }
   }
 }
 
@@ -470,7 +785,12 @@ const handleSubmit = async () => {
     })
     message.success('玩家信息修改成功')
     modalVisible.value = false
-    fetchPlayerList(pagination.current, true)
+
+    if (isSearchMode.value && loadedCount.value >= totalPlayerCount.value) {
+      await loadAllData()
+    } else {
+      fetchPlayerList(currentPage.value, true)
+    }
   } catch (error) {
     if (error.errorFields) {
       return
@@ -478,7 +798,6 @@ const handleSubmit = async () => {
     if (error.message !== '未授权') {
       message.error(error.message || '修改失败')
     }
-    console.error('Error:', error)
   } finally {
     submitLoading.value = false
   }
@@ -491,7 +810,11 @@ const handleCancel = () => {
 
 const handleVisibilityChange = () => {
   if (document.visibilityState === 'visible') {
-    fetchPlayerList(pagination.current, true)
+    if (isSearchMode.value && loadedCount.value >= totalPlayerCount.value) {
+      loadAllData()
+    } else {
+      fetchPlayerList(currentPage.value, true)
+    }
   }
 }
 
@@ -512,6 +835,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   document.removeEventListener('visibilitychange', handleVisibilityChange)
+  isLoadingAll.value = false
 })
 </script>
 
@@ -560,11 +884,20 @@ onUnmounted(() => {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
+.search-area {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+}
+
 .toolbar {
   margin-bottom: 16px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  min-height: 24px;
 }
 
 .update-hint {
@@ -669,6 +1002,29 @@ onUnmounted(() => {
   .player-count-badge {
     width: 100%;
     justify-content: center;
+  }
+
+  .search-area {
+    padding: 12px;
+  }
+
+  .search-area :deep(.ant-space) {
+    width: 100%;
+  }
+
+  .search-area :deep(.ant-space-item) {
+    width: 100%;
+  }
+
+  .search-area :deep(.ant-input-affix-wrapper),
+  .search-area :deep(.ant-select),
+  .search-area :deep(.ant-input),
+  .search-area :deep(.ant-space-compact) {
+    width: 100% !important;
+  }
+
+  .search-area :deep(.ant-btn) {
+    width: 100%;
   }
 
   .title-field {

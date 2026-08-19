@@ -105,14 +105,14 @@
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
               </svg>
               <span class="badge-text">QQ</span>
-              <span class="badge-tag qq-tag">3343712589</span>
+              <span class="badge-tag qq-tag">魔族陌</span>
             </a>
             <a href="https://qun.qq.com/universal-share/share?ac=1&authKey=13%2FWEfX0G3PO77HgYt3w8yg8K%2BCSE3fYXzuA%2FOH0Vnzv5HDrENZctaRM1qkC07eD&busi_data=eyJncm91cENvZGUiOiI5NzY3MTkwMTciLCJ0b2tlbiI6Inl0NHY2b01BRTlMeHR4MXBYbWJqYWxpbmU5Wk9kT3VqZE1nM0dNYVZET1pBcjVPTVZ5WDVLMnVCaFpHNTFWVUgiLCJ1aW4iOiIzMzQzNzEyNTg5In0%3D&data=uDBsYAg-ZA2RbnkK_3yJFYKmiPRZg-XmEhn6iJ1tWmOfRPEeEIiA6N1o1e5p9-dqSJDSxCk44qnx92h62ZlrmQ&svctype=4&tempid=h5_group_info" target="_blank" rel="noopener noreferrer" class="link-badge qqgroup-badge">
               <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
               </svg>
               <span class="badge-text">QQ群</span>
-              <span class="badge-tag qqgroup-tag">976719017</span>
+              <span class="badge-tag qqgroup-tag">陌陌の小窝</span>
             </a>
             <a href="https://www.ifdian.net/a/Mozumo" target="_blank" rel="noopener noreferrer" class="link-badge ifdian-badge">
               <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor">
