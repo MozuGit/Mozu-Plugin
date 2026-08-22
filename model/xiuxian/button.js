@@ -31,6 +31,24 @@ const Button = {
       ]
     )
   },
+  get sroot() {
+    return segment.button(
+      [
+        { text: "修炼", input: prefix + "修炼" },
+        { text: "开采", input: prefix + "开采" },
+        { text: "信息", input: prefix + "修仙个人信息" },
+        { text: "签到", input: prefix + "修仙签到" }
+      ],
+      [
+        { text: "获取灵根", input: prefix + "获取灵根" },
+        { text: "灵根觉醒", input: prefix + "灵根觉醒" }
+      ],
+      [
+        { text: "洗灵根", input: prefix + "洗灵根" },
+        { text: "洗灵根十次", input: prefix + "洗灵根十次" }
+      ]
+    )
+  },
   get sect() {
     return segment.button(
       [

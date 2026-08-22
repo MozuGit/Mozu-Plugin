@@ -2,7 +2,7 @@ import util from 'util'
 
 import Config from "#Config"
 import { Button, xiuxian } from "../index.js"
-import { mqqapi, qagent } from "../../../lib/protocol.js"
+import { mqqapi } from "../../../lib/protocol.js"
 import { Version } from '../../Config/Version.js'
 
 async function xiuxianText(msg, user_id, at, isMaster) {
@@ -30,7 +30,7 @@ async function xiuxianText(msg, user_id, at, isMaster) {
         '***',
         '**功能开发中，即将上线**',
         '>版本：' + Version.Plugin_Version,
-        '>催一催作者：' + (await qagent(Config.xiuxian.setting.contact.peerUid, Config.xiuxian.setting.contact.peerName)),
+        '>催一催作者：' + (await mqqapi.command('魔族陌', '3343712589', true)),
         '***',
       ].join('\n'))
       Text.push(Button.author)
@@ -41,7 +41,7 @@ async function xiuxianText(msg, user_id, at, isMaster) {
       '<@' + user_id + '>',
       '***',
       '**系统错误，请稍后重试**',
-      '>联系主人：' + (await qagent(Config.xiuxian.setting.contact.peerUid, Config.xiuxian.setting.contact.peerName)),
+      '>联系主人：' + (await mqqapi.command('魔族陌', '3343712589', true)),
       '***',
     ].join('\n'))
     Text.push(Button.author)
@@ -160,8 +160,8 @@ const commandHandlers = {
       '**' + (await mqqapi.command('修为：' + userInfo.cult, '修炼', true)) + '**',
       '**' + (await mqqapi.command('灵石：' + userInfo.ls, '修炼', true)) + '**',
       '***',
-      '>灵根：无',
-      '灵根加成：0 %',
+      '>灵根：' + userInfo.sroot.name,
+      '灵根加成：' + userInfo.sroot.addition + ' %',
       '功法加成：' + userInfo.addition.art + ' %',
       '***'
     ].join('\n'))
@@ -488,6 +488,44 @@ const commandHandlers = {
       '***'
     ].join('\n'))
     Text.push(Button.bag)
+  },
+
+  '获取灵根': async (id, user_id, Text) => {
+    const value = await xiuxian.obtainSroot(id)
+    const userInfo = await xiuxian.getUserInfo(id)
+    switch (value.event) {
+      case 'obtain_sroot':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**获取灵根成功**',
+          '>灵根：' + value.data.sroot.name,
+          '灵根加成：' + value.data.sroot.addition + ' %',
+          '***'
+        ].join('\n'))
+        break
+      case 'lack_ls':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**灵石不足**',
+          '>获取灵根需要灵石：' + Config.xiuxian.sroot.obtain_sroot_ls,
+          '当前灵石：' + userInfo.ls,
+          '***'
+        ].join('\n'))
+        break
+      case 'is_sroot':
+        Text.push([
+          '<@' + user_id + '>',
+          '***',
+          '**已拥有灵根**',
+          '>如需重新获取灵根',
+          '请进行' + (await mqqapi.command('洗灵根', '洗灵根', true)),
+          '***'
+        ].join('\n'))
+        break
+    }
+    Text.push(Button.sroot)
   },
 
   '我的宗门': async (id, user_id, Text) => {
@@ -1078,8 +1116,8 @@ const prefixHandlers = [
           '**' + (await mqqapi.command('修为：' + userInfo.cult, '修炼', true)) + '**',
           '**' + (await mqqapi.command('灵石：' + userInfo.ls, '开采', true)) + '**',
           '***',
-          '>灵根：无',
-          '灵根加成：0 %',
+          '>灵根：' + userInfo.sroot.name,
+          '灵根加成：' + userInfo.sroot.addition + ' %',
           '功法加成：' + userInfo.addition.art + ' %',
           '***'
         ].join('\n'))

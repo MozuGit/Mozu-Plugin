@@ -52,7 +52,7 @@ export default new class {
     if ((await Redis.exists(`${PLAYER_INFO_KEY}:${id}`)) === 0) {
       return false
     }
-    let [cult, ls, realm, signNum, retreatStartTime, sex, titleIndex, titles, arts, sectId] = await Redis.hmget(key, '修为', '灵石', '境界', '签到次数', '闭关时间', '性别', '称号', '称号列表', '功法列表', '宗门ID')
+    let [cult, ls, realm, signNum, retreatStartTime, sex, titleIndex, titles, arts, sroot, sectId] = await Redis.hmget(key, '修为', '灵石', '境界', '签到次数', '闭关时间', '性别', '称号', '称号列表', '功法列表', '灵根', '宗门ID')
     cult = parseInt(cult, 10) || 0
     ls = parseInt(ls, 10) || 0
     realm = parseInt(realm, 10) || 0
@@ -60,6 +60,7 @@ export default new class {
     retreatStartTime = parseInt(retreatStartTime, 10) || 0
     sectId = parseInt(sectId, 10) || 0
     arts = JSON.parse(arts || '[]')
+    sroot = Config.xiuxian.sroot.sroot.find(s => s.id == sroot)
     titles = JSON.parse(titles || '[]')
     titleIndex = parseInt(titleIndex, 10) || -1
     const title = titleIndex !== -1
@@ -78,7 +79,8 @@ export default new class {
       art: arts.reduce((addition, id) => {
         const art = artsMap.get(id)
         return addition + (art ? art.addition : 0)
-      }, 0)
+      }, 0),
+      sroot: sroot.addition
     }
 
     const realmName = (Config.xiuxian.Realm.Realms.length >= realm) ? Config.xiuxian.Realm.Realms[realm - 1]?.name || '无' : Config.xiuxian.Realm.Realms[Config.xiuxian.Realm.Realms.length].name || '未命名'
@@ -116,6 +118,7 @@ export default new class {
       sex: sex || '未设置',
       title,
       titles,
+      sroot,
       addition,
       sectInfo,
       retreat,
@@ -192,7 +195,7 @@ export default new class {
 
   async getPower(id) {
     const key = `${PLAYER_INFO_KEY}:${id}`
-    let [cult, realm, arts] = await Redis.hmget(key, '修为', '境界', '功法列表')
+    let [cult, realm, sroot, arts] = await Redis.hmget(key, '修为', '境界', '灵根', '功法列表')
     cult = parseInt(cult, 10)
     realm = parseInt(realm, 10) || 0.75
     arts = JSON.parse(arts || '[]')
@@ -200,9 +203,9 @@ export default new class {
     const addition = arts.reduce((addition, id) => {
       const art = artsMap.get(id)
       return addition + (art ? art.addition : 0)
-    }, 0)
+    }, 0) + (Config.xiuxian.sroot.sroot.find(s => s.id == sroot)?.addition || 0)
     let power = Math.floor(evaluate(Config.xiuxian.xiuxian.powerFormula, { cult: cult, realm: realm }))
-    power = Math.floor(power + power * (addition / 100))
+    if (addition) power = Math.floor(power + power * (addition / 100))
     if (cult > 5000) {
       Redis.zadd('Mozu:xiuxian:random:pvp', power, id)
     } else {
@@ -773,7 +776,7 @@ export default new class {
         break
       case '战力':
         for (let i = 0; i < idNum; i++) {
-          pipeline.hmget(`${PLAYER_INFO_KEY}:${i}`, '修为', '境界', '称号', '称号列表', '功法列表')
+          pipeline.hmget(`${PLAYER_INFO_KEY}:${i}`, '修为', '境界', '称号', '称号列表', '功法列表', '灵根')
         }
         break
       case '闭关':
@@ -824,7 +827,7 @@ export default new class {
           const addition = arts.reduce((addition, id) => {
             const art = artsMap.get(id)
             return addition + (art ? art.addition : 0)
-          }, 0)
+          }, 0) + (Config.xiuxian.sroot.sroot.find(s => s.id == results[i][1][5])?.addition || 0)
           const power = Math.floor(evaluate(Config.xiuxian.xiuxian.powerFormula, { cult: cult, realm: realm }))
           const value = Math.floor(power + power * (addition / 100))
           const titleIndex = parseInt(results[i][1][2], 10) || 0
@@ -1384,14 +1387,42 @@ export default new class {
   }
 
   async obtainSroot(id) {
-
+    let [ls, sroot, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '灵根', '闭关时间')
+    ls = parseInt(ls, 10)
+    sroot = parseInt(sroot, 10) || 0
+    retreatStart = parseInt(retreatStart, 10) || 0
+    if (retreatStart !== 0) {
+      return {
+        event: "in_retreat"
+      }
+    }
+    if (!sroot) {
+      if (ls >= Config.xiuxian.sroot.obtain_sroot_ls) {
+        const srootList = Config.xiuxian.sroot.sroot.filter(item => item.level === 'five_elements')
+        sroot = srootList[crypto.randomInt(0, srootList.length)]
+        Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
+          灵石: ls - Config.xiuxian.sroot.obtain_sroot_ls,
+          灵根: sroot.id
+        })
+        return {
+          event: "obtain_sroot",
+          data: {
+            sroot: sroot
+          }
+        }
+      } else {
+        return {
+          event: "lack_ls"
+        }
+      }
+    } else {
+      return {
+        event: "is_sroot"
+      }
+    }
   }
 
   async washSroot(id) {
-
-  }
-
-  async awakenSroot(id) {
 
   }
 
