@@ -160,8 +160,8 @@ const commandHandlers = {
       '**' + (await mqqapi.command('修为：' + userInfo.cult, '修炼', true)) + '**',
       '**' + (await mqqapi.command('灵石：' + userInfo.ls, '修炼', true)) + '**',
       '***',
-      '>灵根：' + userInfo.sroot.name,
-      '灵根加成：' + userInfo.sroot.addition + ' %',
+      '>灵根：' + (userInfo.sroot?.name || '无'),
+      '灵根加成：' + (userInfo.sroot?.addition || 0) + ' %',
       '功法加成：' + userInfo.addition.art + ' %',
       '***'
     ].join('\n'))
@@ -1116,8 +1116,8 @@ const prefixHandlers = [
           '**' + (await mqqapi.command('修为：' + userInfo.cult, '修炼', true)) + '**',
           '**' + (await mqqapi.command('灵石：' + userInfo.ls, '开采', true)) + '**',
           '***',
-          '>灵根：' + userInfo.sroot.name,
-          '灵根加成：' + userInfo.sroot.addition + ' %',
+          '>灵根：' + (userInfo.sroot?.name || '无'),
+          '灵根加成：' + (userInfo.sroot?.addition || 0) + ' %',
           '功法加成：' + userInfo.addition.art + ' %',
           '***'
         ].join('\n'))

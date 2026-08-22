@@ -80,7 +80,7 @@ export default new class {
         const art = artsMap.get(id)
         return addition + (art ? art.addition : 0)
       }, 0),
-      sroot: sroot.addition
+      sroot: sroot?.addition || 0
     }
 
     const realmName = (Config.xiuxian.Realm.Realms.length >= realm) ? Config.xiuxian.Realm.Realms[realm - 1]?.name || '无' : Config.xiuxian.Realm.Realms[Config.xiuxian.Realm.Realms.length].name || '未命名'
