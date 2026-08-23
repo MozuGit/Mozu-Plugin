@@ -46,6 +46,10 @@ const Button = {
       [
         { text: "洗灵根", input: prefix + "洗灵根" },
         { text: "洗灵根十次", input: prefix + "洗灵根十次" }
+      ],
+      [
+        { text: "替换灵根 + 编号", input: prefix + "替换灵根" },
+        { text: "取消替换灵根", input: prefix + "取消替换灵根" }
       ]
     )
   },

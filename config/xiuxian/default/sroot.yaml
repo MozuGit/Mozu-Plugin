@@ -1,8 +1,8 @@
 # 灵根概率（单位：%）
 root_drop:
-  five_elements: 49
-  advanced: 35
-  supreme: 15
+  five_elements: 79
+  advanced: 15
+  supreme: 5
   mozumo: 1
 
 # 灵根列表
@@ -91,4 +91,4 @@ sroot:
 obtain_sroot_ls: 100000
 
 # 洗灵根需要的灵石
-wash_sroot_ls: 5000
+wash_sroot_ls: 50000

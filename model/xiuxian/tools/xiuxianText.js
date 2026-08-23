@@ -2,7 +2,7 @@ import util from 'util'
 
 import Config from "#Config"
 import { Button, xiuxian } from "../index.js"
-import { mqqapi } from "../../../lib/protocol.js"
+import { mqqapi, laTex } from "../../../lib/protocol.js"
 import { Version } from '../../Config/Version.js'
 
 async function xiuxianText(msg, user_id, at, isMaster) {
@@ -1713,6 +1713,144 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.art)
+    }
+  },
+  {
+    prefix: /^#?洗灵根(十次)?/,
+    handler: async (id, user_id, Text, msg, at) => {
+      const count = msg.includes("十次") ? 10 : 1
+      const value = await xiuxian.washSroot(id, count)
+      const userInfo = await xiuxian.getUserInfo(id)
+      let srootText = []
+      let index = 1
+      if (value.event === 'wash_sroot' || value.event === 'select_sroot') {
+        const srootLevel = new Map([
+          ['five_elements', '五行灵根'],
+          ['advanced', '高级灵根'],
+          ['supreme', '极品灵根'],
+          ['mozumo', await laTex.colorize('至臻灵根', false, ['purple'])]
+        ])
+        for (let sroot of value.data.washsroot) {
+          srootText.push([
+            '>【' + srootLevel.get(sroot.level) + '】',
+            '>灵根：' + (sroot.level === 'mozumo' ? laTex.colorize(sroot.name, false, ['purple']) : sroot.name),
+            '加成：' + sroot.addition + ' %',
+            (await mqqapi.command('[点击替换]', '替换灵根' + index++, true)),
+            '***'
+          ].join('\n'))
+        }
+      }
+      switch (value.event) {
+        case 'wash_sroot':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**洗灵根完成**',
+            '>消耗灵石：' + (Config.xiuxian.sroot.wash_sroot_ls * count),
+            '请选择是否替换灵根',
+            '当前灵根：' + value.data.sroot.name,
+            '加成：' + value.data.sroot.addition + ' %',
+            (await mqqapi.command('[取消替换]', '取消替换灵根', true)),
+            '***',
+            ...srootText
+          ].join('\n'))
+          break
+        case 'select_sroot':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**请先选择是否替换灵根**',
+            '>再进行洗灵根操作',
+            '当前灵根：' + value.data.sroot.name,
+            '加成：' + value.data.sroot.addition + ' %',
+            (await mqqapi.command('[取消替换]', '取消替换灵根', true)),
+            '***',
+            ...srootText
+          ].join('\n'))
+          break
+        case 'lack_ls':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**灵石不足**',
+            '>灵石：' + userInfo.ls,
+            '需要灵石：' + (Config.xiuxian.sroot.wash_sroot_ls * count),
+            '***'
+          ].join('\n'))
+          break
+        case 'not_sroot':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**你还未拥有灵根**',
+            '>请先' + (await mqqapi.command('获取灵根', '获取灵根', true)),
+            '***'
+          ].join('\n'))
+          break
+        case 'in_retreat':
+          Text.push(await retreatText())
+          break
+      }
+      Text.push(Button.sroot)
+    }
+  },
+  {
+    prefix: /^#?(取消)?替换灵根\s*\d*/,
+    handler: async (id, user_id, Text, msg, at) => {
+      const srootIndex = msg.includes('取消') ? 0 : ((msg.match(/\d+/g) || []).join('') || 0)
+      const value = await xiuxian.replaceSroot(id, srootIndex)
+      switch (value.event) {
+        case 'replace_sroot':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**替换灵根成功**',
+            '>当前灵根：' + value.data.sroot.name,
+            '加成：' + value.data.sroot.addition + ' %',
+            '***'
+          ].join('\n'))
+          break
+        case 'cancel_replace_sroot':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**取消替换灵根**',
+            '>已取消替换灵根',
+            '***'
+          ].join('\n'))
+          break
+        case 'invaild_sroot':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**灵根不存在**',
+            '>灵根ID不存在',
+            '***'
+          ].join('\n'))
+          break
+        case 'not_select_sroot':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**请先进行洗灵根**',
+            '>点击' + (await mqqapi.command('洗灵根', '洗灵根', true)),
+            '***'
+          ].join('\n'))
+          break
+        case 'not_sroot':
+          Text.push([
+            '<@' + user_id + '>',
+            '***',
+            '**你还未拥有灵根**',
+            '>请先' + (await mqqapi.command('获取灵根', '获取灵根', true)),
+            '***'
+          ].join('\n'))
+          break
+        case 'in_retreat':
+          Text.push(await retreatText())
+          break
+      }
+      Text.push(Button.sroot)
     }
   },
   {

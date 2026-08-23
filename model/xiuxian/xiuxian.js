@@ -1422,8 +1422,120 @@ export default new class {
     }
   }
 
-  async washSroot(id) {
+  async washSroot(id, count = 1) {
+    let [ls, sroot, washsroot, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '灵根', '洗灵根', '闭关时间')
+    ls = parseInt(ls, 10)
+    sroot = parseInt(sroot, 10) || 0
+    washsroot = JSON.parse(washsroot || '[]')
+    retreatStart = parseInt(retreatStart, 10) || 0
+    if (retreatStart !== 0) {
+      return {
+        event: "in_retreat"
+      }
+    }
+    if (sroot) {
+      if (!washsroot.length) {
+        if (ls >= Config.xiuxian.sroot.wash_sroot_ls * count) {
+          const srootList = Config.xiuxian.sroot.sroot
+          for (let i = 0; i < count; i++) {
+            const random = crypto.randomInt(1, 101)
+            const pushSroot = function (level) {
+              const randomSrootList = srootList.filter(item => item.level === level)
+              if (randomSrootList.length <= 1) {
+                washsroot.push(randomSrootList[0])
+              } else {
+                const randomSroot = crypto.randomInt(0, randomSrootList.length - 1)
+                washsroot.push(randomSrootList[randomSroot])
+              }
+            }
+            if (random <= Config.xiuxian.sroot.root_drop.five_elements) {
+              pushSroot("five_elements")
+            } else if (random <= Config.xiuxian.sroot.root_drop.five_elements + Config.xiuxian.sroot.root_drop.advanced) {
+              pushSroot("advanced")
+            } else if (random <= Config.xiuxian.sroot.root_drop.five_elements + Config.xiuxian.sroot.root_drop.advanced + Config.xiuxian.sroot.root_drop.supreme) {
+              pushSroot("supreme")
+            } else if (random <= Config.xiuxian.sroot.root_drop.five_elements + Config.xiuxian.sroot.root_drop.advanced + Config.xiuxian.sroot.root_drop.supreme + Config.xiuxian.sroot.root_drop.mozumo) {
+              pushSroot("mozumo")
+            }
+          }
+          Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
+            灵石: ls - Config.xiuxian.sroot.wash_sroot_ls * count,
+            洗灵根: JSON.stringify(washsroot)
+          })
+          return {
+            event: "wash_sroot",
+            data: {
+              sroot: Config.xiuxian.sroot.sroot.find(s => s.id == sroot),
+              washsroot: washsroot
+            }
+          }
+        } else {
+          return {
+            event: "lack_ls"
+          }
+        }
+      } else {
+        return {
+          event: "select_sroot",
+          data: {
+            sroot: Config.xiuxian.sroot.sroot.find(s => s.id == sroot),
+            washsroot: washsroot
+          }
+        }
+      }
+    } else {
+      return {
+        event: "not_sroot"
+      }
+    }
+  }
 
+  async replaceSroot(id, srootIndex) {
+    let [sroot, washsroot, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵根', '洗灵根', '闭关时间')
+    sroot = parseInt(sroot, 10) || 0
+    washsroot = JSON.parse(washsroot || '[]')
+    retreatStart = parseInt(retreatStart, 10) || 0
+    if (retreatStart !== 0) {
+      return {
+        event: "in_retreat"
+      }
+    }
+    if (sroot) {
+      if (washsroot.length) {
+        if (srootIndex) {
+          if (washsroot.length >= srootIndex) {
+            sroot = washsroot[srootIndex - 1]
+            Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
+              灵根: sroot.id,
+              洗灵根: '[]'
+            })
+            return {
+              event: "replace_sroot",
+              data: {
+                sroot: sroot
+              }
+            }
+          } else {
+            return {
+              event: "invaild_sroot"
+            }
+          }
+        } else {
+          Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '洗灵根', '[]')
+          return {
+            event: "cancel_replace_sroot"
+          }
+        }
+      } else {
+        return {
+          event: "not_select_sroot"
+        }
+      }
+    } else {
+      return {
+        event: "not_sroot"
+      }
+    }
   }
 
   async createSect(id) {
