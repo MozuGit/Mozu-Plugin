@@ -16,6 +16,7 @@
 
 一个适用于 [TRSS-Yunzai 框架](https://github.com/TimeRainStarSky/Yunzai) 的 **自用** 机器人娱乐插件
   - 可用 **锅巴面板** 进行配置
+  - 由于作者精力有限，代码未经过深度测试，有问题请提交到[Issues](https://github.com/MozuGit/Mozu-Plugin/issues)
 
 ## 安装教程
 

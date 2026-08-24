@@ -1121,7 +1121,7 @@ export default [
             options: [
               { label: "初级", value: "easy" },
               { label: "进阶", value: "medium" },
-              { label: "高级", value: "hard" },
+              { label: "高级", value: "hard" }
             ]
           },
           required: true
@@ -1323,6 +1323,188 @@ export default [
           component: "Select",
           componentProps: {
             options: getSecretRealmList()
+          },
+          required: true
+        }
+      ]
+    },
+    required: true
+  },
+  {
+    component: "Divider",
+    label: "修仙灵根设置",
+    componentProps: {
+      type: "horizontal",
+      style: {
+        fontWeight: "bold",
+        color: "rgb(76, 113, 201)",
+        fontSize: "16px"
+      },
+      orientation: "left",
+      plain: true
+    }
+  },
+  {
+    field: "xiuxian.sroot.obtain_sroot_ls",
+    label: "获取灵根灵石",
+    bottomHelpMessage: "获取灵根需要的灵石数量",
+    component: "InputNumber",
+    componentProps: {
+      placeholder: "请输入灵石数量",
+      min: 0,
+      step: 1000,
+      style: {
+        width: "150px"
+      }
+    }
+  },
+  {
+    field: "xiuxian.sroot.wash_sroot_ls",
+    label: "洗灵根灵石",
+    bottomHelpMessage: "洗灵根需要的灵石数量",
+    component: "InputNumber",
+    componentProps: {
+      placeholder: "请输入灵石数量",
+      min: 0,
+      step: 1000,
+      style: {
+        width: "150px"
+      }
+    }
+  },
+  {
+    field: "xiuxian.sroot.root_drop",
+    label: "灵根掉落概率",
+    component: "GSubForm",
+    componentProps: {
+      modalProps: {
+        title: "灵根掉落概率配置"
+      },
+      style: {
+        maxHeight: "200px",
+        overflowY: "auto"
+      },
+      schemas: [
+        {
+          field: "five_elements",
+          label: "五行灵根",
+          bottomHelpMessage: "概率总和需要等于100",
+          component: "InputNumber",
+          componentProps: {
+            min: 0,
+            step: 100,
+            placeholder: "请输入概率 单位：%",
+            style: {
+              width: "120px"
+            }
+          },
+          required: true
+        },
+        {
+          field: "advanced",
+          label: "高级灵根",
+          bottomHelpMessage: "概率总和需要等于100",
+          component: "InputNumber",
+          componentProps: {
+            min: 0,
+            step: 100,
+            placeholder: "请输入概率 单位：%",
+            style: {
+              width: "120px"
+            }
+          },
+          required: true
+        },
+        {
+          field: "supreme",
+          label: "极品灵根",
+          bottomHelpMessage: "概率总和需要等于100",
+          component: "InputNumber",
+          componentProps: {
+            min: 0,
+            step: 100,
+            placeholder: "请输入概率 单位：%",
+            style: {
+              width: "120px"
+            }
+          },
+          required: true
+        },
+        {
+          field: "mozumo",
+          label: "至臻灵根",
+          bottomHelpMessage: "概率总和需要等于100",
+          component: "InputNumber",
+          componentProps: {
+            min: 0,
+            step: 100,
+            placeholder: "请输入概率 单位：%",
+            style: {
+              width: "120px"
+            }
+          },
+          required: true
+        }
+      ]
+    }
+  },
+  {
+    field: "xiuxian.sroot.sroot",
+    label: "修仙灵根配置",
+    component: "GSubForm",
+    componentProps: {
+      multiple: true,
+      schemas: [
+        {
+          field: "id",
+          label: "灵根ID",
+          component: "Input",
+          bottomHelpMessage: "灵根唯一ID，不和物品ID冲突",
+          componentProps: {
+            placeholder: "请输入灵根ID",
+            min: 1,
+            step: 1,
+            style: {
+              width: "180px"
+            }
+          },
+          required: true
+        },
+        {
+          field: "name",
+          label: "灵根名称",
+          component: "Input",
+          componentProps: {
+            placeholder: "请输入灵根名称"
+          },
+          required: true
+        },
+        {
+          field: "addition",
+          label: "灵根加成",
+          bottomHelpMessage: "灵根提供的战力加成 单位：%",
+          component: "InputNumber",
+          componentProps: {
+            placeholder: "请输入灵根加成",
+            min: 0,
+            step: 1,
+            style: {
+              width: "180px"
+            }
+          },
+          required: true
+        },
+        {
+          field: "level",
+          label: "灵根等级",
+          component: "RadioGroup",
+          componentProps: {
+            options: [
+              { label: "五行灵根", value: "five_elements" },
+              { label: "高级灵根", value: "advanced" },
+              { label: "极品灵根", value: "supreme" },
+              { label: "至臻灵根", value: "mozumo" }
+            ]
           },
           required: true
         }

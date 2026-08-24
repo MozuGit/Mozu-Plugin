@@ -58,7 +58,7 @@
               <a-select-option value="greater">></a-select-option>
               <a-select-option value="less"><</a-select-option>
               <a-select-option value="gte">>=</a-select-option>
-              <a-select-option value="lte"><=></a-select-option>
+              <a-select-option value="lte"><=</a-select-option>
             </a-select>
             <a-input
               v-model:value="searchParams.ls"
@@ -77,6 +77,17 @@
             option-filter-prop="label"
             style="width: 150px"
             :options="realmOptions"
+            @change="handleInstantSearch"
+          />
+
+          <a-select
+            v-model:value="searchParams.sroot"
+            placeholder="灵根"
+            allow-clear
+            show-search
+            option-filter-prop="label"
+            style="width: 150px"
+            :options="srootOptions"
             @change="handleInstantSearch"
           />
           
@@ -135,6 +146,10 @@
             <span>{{ getRealmName(record.realm) }}</span>
           </template>
 
+          <template v-if="column.key === 'sroot'">
+            <span>{{ getSrootName(record.sroot) }}</span>
+          </template>
+
           <template v-if="column.key === 'action'">
             <a-button type="link" size="small" @click="showEditModal(record)">
               <template #icon>
@@ -165,6 +180,11 @@
         <a-form-item label="境界" name="realm">
           <a-select v-model:value="formState.realm" placeholder="请选择境界" show-search option-filter-prop="label"
             :options="realmOptions" />
+        </a-form-item>
+
+        <a-form-item label="灵根" name="sroot">
+          <a-select v-model:value="formState.sroot" placeholder="请选择灵根" show-search option-filter-prop="label"
+            :options="srootOptions" />
         </a-form-item>
 
         <a-form-item label="性别" name="sex">
@@ -298,6 +318,8 @@ const allPlayerList = ref([])
 const playerList = ref([])
 const realmMap = ref({})
 const realmOptions = ref([])
+const srootMap = ref({})
+const srootOptions = ref([])
 const totalPlayerCount = ref(0)
 const loadedCount = ref(0)
 const currentPage = ref(1)
@@ -312,6 +334,7 @@ const searchParams = reactive({
   ls: '',
   lsOperator: 'contains',
   realm: undefined,
+  sroot: undefined,
   sex: undefined
 })
 
@@ -320,6 +343,7 @@ const hasSearchCondition = computed(() => {
     searchParams.cult.trim() !== '' ||
     searchParams.ls.trim() !== '' ||
     (searchParams.realm !== undefined && searchParams.realm !== null && searchParams.realm !== '') ||
+    (searchParams.sroot !== undefined && searchParams.sroot !== null && searchParams.sroot !== '') ||
     (searchParams.sex !== undefined && searchParams.sex !== null && searchParams.sex !== '')
 })
 
@@ -375,6 +399,12 @@ const displayPlayerList = computed(() => {
     if (searchParams.realm !== undefined && searchParams.realm !== null && searchParams.realm !== '') {
       filtered = filtered.filter(player =>
         String(player.realm) === String(searchParams.realm)
+      )
+    }
+
+    if (searchParams.sroot !== undefined && searchParams.sroot !== null && searchParams.sroot !== '') {
+      filtered = filtered.filter(player =>
+        String(player.sroot) === String(searchParams.sroot)
       )
     }
 
@@ -439,6 +469,13 @@ const columns = [
     ellipsis: true
   },
   {
+    title: '灵根',
+    dataIndex: 'sroot',
+    key: 'sroot',
+    width: 130,
+    ellipsis: true
+  },
+  {
     title: '性别',
     dataIndex: 'sex',
     key: 'sex',
@@ -476,10 +513,35 @@ const fetchRealmMap = async () => {
   }
 }
 
+const fetchSrootMap = async () => {
+  try {
+    const data = await apiRequest('/api/xiuxian/player?action=getsroot')
+    if (data && Array.isArray(data)) {
+      srootMap.value = {}
+      data.forEach(item => {
+        srootMap.value[item.id] = item.name
+      })
+      srootOptions.value = data.map(item => ({
+        value: String(item.id),
+        label: item.name
+      }))
+    }
+  } catch (error) {
+    console.warn('灵根数据加载失败:', error)
+    srootOptions.value = []
+  }
+}
+
 const getRealmName = (realmValue) => {
   if (!realmValue && realmValue !== '0') return '-'
   const key = String(realmValue)
   return realmMap.value[key] || `未知境界(${key})`
+}
+
+const getSrootName = (srootValue) => {
+  if (srootValue === undefined || srootValue === null || srootValue === '') return '-'
+  const key = String(srootValue)
+  return srootMap.value[key] || `未知灵根(${key})`
 }
 
 const fetchPageData = async (page) => {
@@ -624,6 +686,7 @@ const handleReset = () => {
   searchParams.ls = ''
   searchParams.lsOperator = 'contains'
   searchParams.realm = undefined
+  searchParams.sroot = undefined
   searchParams.sex = undefined
   currentPage.value = 1
 
@@ -653,6 +716,7 @@ const formState = reactive({
   cult: '',
   ls: '',
   realm: '',
+  sroot: '',
   sex: '未设置',
   titleIndex: -1,
   titles: []
@@ -669,6 +733,9 @@ const formRules = {
   ],
   realm: [
     { required: true, message: '请选择境界', trigger: 'change' }
+  ],
+  sroot: [
+    { required: true, message: '请选择灵根', trigger: 'change' }
   ],
   sex: [
     { required: true, message: '请选择性别', trigger: 'change' }
@@ -720,6 +787,7 @@ const showEditModal = (record) => {
   formState.cult = record.cult || '0'
   formState.ls = record.ls || '0'
   formState.realm = String(record.realm) || '0'
+  formState.sroot = String(record.sroot ?? '0')
   formState.sex = record.sex || '未设置'
   const rawTitleIndex = record.titleIndex !== undefined ? record.titleIndex : -1
   formState.titleIndex = rawTitleIndex > 0 ? rawTitleIndex : -1
@@ -771,6 +839,7 @@ const handleSubmit = async () => {
       cult: formState.cult,
       ls: formState.ls,
       realm: formState.realm,
+      sroot: Number(formState.sroot),
       sex: formState.sex,
       titleIndex: formState.titleIndex,
       titles: formState.titles.map(t => ({
@@ -827,7 +896,7 @@ onMounted(async () => {
     return
   }
 
-  await fetchRealmMap()
+  await Promise.all([fetchRealmMap(), fetchSrootMap()])
   fetchPlayerList(1, false)
 
   document.addEventListener('visibilitychange', handleVisibilityChange)

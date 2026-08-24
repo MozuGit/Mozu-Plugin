@@ -127,6 +127,17 @@ function handleXiuxianConfig(xiuxianData) {
       Config.modify('xiuxian', 'drop', 'arts', xiuxianData.drop.arts)
     }
   }
+  if (xiuxianData.sroot) {
+    if (hasRepeatedId(xiuxianData.sroot.sroot)) {
+      return "灵根ID重复"
+    }
+    if (Object.values(xiuxianData.sroot.root_drop).reduce((a, b) => a + b, 0) !== 100) {
+      return "灵根概率总和不等于100"
+    }
+    Object.keys(xiuxianData.sroot).forEach(key => {
+      Config.modify('xiuxian', 'sroot', key, xiuxianData.sroot[key])
+    })
+  }
 }
 
 export const actions = {

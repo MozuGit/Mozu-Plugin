@@ -157,6 +157,23 @@ const saveConfig = async (req, res) => {
         Config.modify('xiuxian', 'drop', 'arts', xiuxianData.drop.arts)
       }
     }
+    if (xiuxianData.sroot) {
+      if (hasRepeatedId(xiuxianData.sroot.sroot)) {
+        return res.json({
+          success: false,
+          message: "灵根ID重复"
+        })
+      }
+      if (Object.values(xiuxianData.sroot.root_drop).reduce((a, b) => a + b, 0) !== 100) {
+        return res.json({
+          success: false,
+          message: "灵根概率总和不等于100"
+        })
+      }
+      Object.keys(xiuxianData.sroot).forEach(key => {
+        Config.modify('xiuxian', 'sroot', key, xiuxianData.sroot[key])
+      })
+    }
     res.json({
       success: true,
       message: "保存成功喵~"
@@ -322,6 +339,10 @@ export const handlePlayer = async (req, res) => {
     if (action === 'getrealm') {
       return await getRealm(req, res)
     }
+
+    if (action === 'getsroot') {
+      return await getSroot(req, res)
+    }
   } catch (error) {
     res.json({
       success: false,
@@ -356,7 +377,8 @@ const getPlayerList = async (req, res) => {
       realm: result.境界,
       sex: result.性别,
       titleIndex: result.称号,
-      titles: JSON.parse(result.称号列表 || '[]')
+      titles: JSON.parse(result.称号列表 || '[]'),
+      sroot: result.灵根
     }))
     res.json({
       success: true,
@@ -376,14 +398,15 @@ const modifyPlayer = async (req, res) => {
     if ((await Redis.exists(`Mozu:xiuxian:playerInfo:${id}`)) === 0) {
       res.json({ success: false, message: "修仙玩家不存在" })
     }
-    const { cult, ls, realm, sex, titleIndex, titles } = req.body
+    const { cult, ls, realm, sex, titleIndex, titles, sroot } = req.body
     await Redis.hmset(`Mozu:xiuxian:playerInfo:${id}`, {
       修为: cult,
       灵石: ls,
       境界: realm,
       性别: sex,
       称号: titleIndex,
-      称号列表: JSON.stringify(titles)
+      称号列表: JSON.stringify(titles),
+      灵根: sroot
     })
     res.json({ success: true })
   } catch (error) {
@@ -397,6 +420,24 @@ const getRealm = async (req, res) => {
     res.json({
       success: true,
       data: ['无', ...data]
+    })
+  } catch (error) {
+    res.json({ success: false, message: error.message })
+  }
+}
+
+const getSroot = async (req, res) => {
+  try {
+    const data = [{ id: 0, name: "无" }]
+    Config.xiuxian.sroot.sroot.forEach(realm => {
+      data.push({
+        id: realm.id,
+        name: realm.name
+      })
+    })
+    res.json({
+      success: true,
+      data: data
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
