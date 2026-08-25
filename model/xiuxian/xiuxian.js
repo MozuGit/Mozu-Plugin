@@ -214,6 +214,22 @@ export default new class {
     return power
   }
 
+  async recordDayActive(openid) {
+    Redis.sadd(`Mozu:xiuxian:active:${gettoday()}`, openid)
+  }
+
+  async getPlayerCount() {
+    const count = await Redis.get('Mozu:xiuxian:openid:counter')
+    const countDay = await Redis.scard(`Mozu:xiuxian:active:${gettoday()}`)
+    return {
+      event: "get_player_count",
+      data: {
+        count: count,
+        countDay: countDay
+      }
+    }
+  }
+
   async xiulian(id, isMaster) {
     let [cult, last, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '上次修炼时间', '闭关时间')
     cult = parseInt(cult, 10)

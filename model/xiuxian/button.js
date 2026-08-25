@@ -27,7 +27,7 @@ const Button = {
         { text: "秘境", input: prefix + "秘境列表" },
         { text: "排行", input: prefix + "修仙排行" },
         { text: "储物", input: prefix + "储物袋" },
-        { text: "更多", input: prefix + "修仙更多" }
+        { text: "人数", input: prefix + "修仙者人数" }
       ]
     )
   },

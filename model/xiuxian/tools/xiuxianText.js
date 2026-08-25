@@ -18,6 +18,7 @@ async function xiuxianText(msg, user_id, at, isMaster) {
         '***',
       ].join('\n'))
     }
+    xiuxian.recordDayActive(user_id)
     const id = userData.data.id
     const handler = commandHandlers[msg] ||
       prefixHandlers.find(h => h.prefix.test(msg))?.handler
@@ -282,6 +283,19 @@ const commandHandlers = {
         break
     }
     Text.push(Button.stopRetreat)
+  },
+
+  '修仙者人数': async (id, user_id, Text) => {
+    const value = await xiuxian.getPlayerCount()
+    Text.push([
+      '<@' + user_id + '>',
+      '***',
+      '**修仙者人数**',
+      '>修仙者人数：' + value.data.count + ' 人',
+      '修仙今日活跃：' + value.data.countDay + ' 人',
+      '***'
+    ].join('\n'))
+    Text.push(Button.xiuxian)
   },
 
   '修仙排行': async (id, user_id, Text) => {

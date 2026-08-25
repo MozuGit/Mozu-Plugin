@@ -33,6 +33,7 @@ const help = {
       '替换灵根',
       '取消替换灵根',
       '查询修仙者',
+      '修仙者人数',
       '修仙个人信息'
     ]
     const result = commands.map(item => `${prefix}${item}`)
