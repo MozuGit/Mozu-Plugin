@@ -36,7 +36,7 @@ export const handleLogin = async (req, res) => {
 // 获取验证码
 const handleGetCode = async (req, res) => {
   const ip = getIP(req)
-  if (await Redis.get(`Mozu:panel:code:${ip}`) && ip !== '127.0.0.1') {
+  if (await Redis.get(`Mozu:panel:code:${ip}`)) {
     return res.json({
       success: false,
       message: '获取验证码频繁，请稍后再试'
@@ -99,9 +99,17 @@ const handleNormalLogin = async (req, res) => {
     })
   }
 
+  if (parseInt(await Redis.get("Mozu:panel:password:error")) >= 10) {
+    return res.json({
+      success: false,
+      message: '密码连续错误，请60秒后重试'
+    })
+  }
+
   if (password === Config.panel.login.password || (await hashSHA256(password)) === Config.panel.login.password) {
     const token = crypto.randomBytes(32).toString('hex')
     await Redis.sadd("Mozu:panel:token", token)
+    Redis.del("Mozu:panel:password:error")
     res.json({
       success: true,
       message: '登录成功',
@@ -110,6 +118,8 @@ const handleNormalLogin = async (req, res) => {
       }
     })
   } else {
+    Redis.set("Mozu:panel:password:error", 0, 'EX', 60, 'NX')
+    Redis.incr("Mozu:panel:password:error")
     res.json({
       success: false,
       message: '密码错误'
