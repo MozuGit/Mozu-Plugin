@@ -21,11 +21,47 @@ export const getInfo = async (req, res) => {
     }
     const playerCount = parseInt(await Redis.get("Mozu:xiuxian:openid:counter"), 10)
     const sectCount = parseInt(await Redis.get("Mozu:xiuxian:sectid:counter"), 10)
+    const pipeline = Redis.pipeline()
+    for (let i = 0; i < 10; i++) {
+      pipeline.scard(`Mozu:xiuxian:active:${gettoday(i)}`)
+    }
+    const results = await pipeline.exec()
+    const todayActive = results.map(([err, result]) => err ? 0 : result)
     res.json({
       success: true,
       data: {
         playerCount: playerCount,
+        todayActive: todayActive.reverse(),
         sectCount: sectCount
+      }
+    })
+  } catch (error) {
+    res.json({ success: false, message: error.message })
+  }
+}
+
+export const getActivePlayers = async (req, res) => {
+  try {
+    const auth = await validateToken(req)
+    if (!auth.valid) {
+      return res.status(401).json({
+        success: false,
+        message: auth.error
+      })
+    }
+    const openids = await Redis.smembers(`Mozu:xiuxian:active:${req.query.date ? req.query.date : gettoday()}`)
+    const pipeline = Redis.pipeline()
+    for (const openid of openids) {
+      pipeline.hget("Mozu:xiuxian:openid:forward", openid)
+    }
+    const results = await pipeline.exec()
+    const data = openids.map((openid, index) => {
+      return [openid, results[index][1]]
+    })
+    res.json({
+      success: true,
+      data: {
+        players: data
       }
     })
   } catch (error) {
@@ -634,6 +670,16 @@ async function validateToken(req) {
   } catch (error) {
     return { valid: false, error: '认证服务异常' }
   }
+}
+
+function gettoday(num = 0) {
+  const currentDate = new Date()
+  currentDate.setDate(currentDate.getDate() - num)
+  const year = currentDate.getFullYear()
+  const month = (currentDate.getMonth() + 1).toString().padStart(2, '0')
+  const day = currentDate.getDate().toString().padStart(2, '0')
+  const date_time = `${year}-${month}-${day}`
+  return date_time
 }
 
 /**

@@ -1,6 +1,6 @@
 {
   "name": "Mozu-Plugin",
-  "version": "1.2.8-beta.2",
+  "version": "1.2.8-beta.3",
   "description": "适用于TRSS-Yunzai的插件，主要功能有修仙、伪造聊天、发言统计等",
   "homepage": "https://localhost.js.cn",
   "main": "index.js",
@@ -19,6 +19,7 @@
     "axios": "^1.18.0",
     "chokidar": "^5.0.0",
     "dayjs": "^1.11.21",
+    "echarts": "^6.1.0",
     "express": "^5.2.1",
     "flat": "^6.0.1",
     "ioredis": "^5.10.0",
