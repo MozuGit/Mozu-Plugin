@@ -31,11 +31,12 @@
         </a-col>
       </a-row>
 
-      <div ref="chartRef" class="chart-container"></div>
+      <div ref="chartRef" class="chart-container" @click="handleContainerClick" @touchend="handleContainerTouch"></div>
     </a-card>
 
-    <a-modal v-model:open="modalVisible" :title="`📋 ${selectedDate} 活跃玩家列表`" width="800px" :footer="null"
-      class="player-modal" :body-style="{ padding: '24px' }">
+    <a-modal v-model:open="modalVisible" :title="`${selectedDate} 活跃玩家列表`" width="800px" :footer="null"
+      class="player-modal" :mask-closable="true" :destroy-on-close="false" :z-index="1000" :centered="true"
+      :body-style="{ padding: '24px', maxHeight: '70vh', overflowY: 'auto' }">
       <div class="modal-content">
         <div class="modal-stats">
           <a-statistic title="总活跃人数" :value="sortedPlayerList.length"
@@ -50,7 +51,7 @@
               </template>
               <template v-if="column.key === 'openid'">
                 <a-tag color="purple" class="openid-tag" @click.stop="copyOpenid(record.openid)">
-                  {{ record.openid }}
+                  <span class="openid-text">{{ record.openid }}</span>
                   <a-tooltip title="点击复制">
                     <copy-outlined class="copy-icon" />
                   </a-tooltip>
@@ -106,7 +107,7 @@ const playerColumns = [
     align: 'center'
   },
   {
-    title: 'OpenID',
+    title: 'openid',
     dataIndex: 'openid',
     key: 'openid',
     width: '70%',
@@ -192,9 +193,6 @@ const fetchActivePlayers = async (dateStr) => {
         openid: item[0],
         playerId: item[1]
       }))
-      if (playerList.value.length === 0) {
-        message.info('该日暂无活跃玩家')
-      }
     } else {
       message.error(data.message || '获取活跃玩家失败')
     }
@@ -210,13 +208,63 @@ const initChart = () => {
 
   if (chartInstance) {
     chartInstance.dispose()
+    chartInstance = null
   }
 
   chartInstance = echarts.init(chartRef.value)
 
-  window.addEventListener('resize', () => {
-    chartInstance && chartInstance.resize()
-  })
+  window.removeEventListener('resize', handleResize)
+  window.addEventListener('resize', handleResize)
+}
+
+const showPlayerList = (index) => {
+  if (index >= 0 && index < activeTrend.value.length) {
+    const fullDate = getFullDate(9 - index)
+    selectedDate.value = fullDate
+    modalVisible.value = true
+    fetchActivePlayers(fullDate)
+  }
+}
+
+const handleContainerClick = (event) => {
+  if (!chartInstance || !chartRef.value) return
+
+  const rect = chartRef.value.getBoundingClientRect()
+  const x = event.clientX - rect.left
+  const y = event.clientY - rect.top
+
+  const pointInGrid = chartInstance.convertFromPixel('grid', [x, y])
+
+  if (pointInGrid && pointInGrid[0] !== undefined && pointInGrid[0] !== null) {
+    const xIndex = Math.round(pointInGrid[0])
+    if (xIndex >= 0 && xIndex < activeTrend.value.length) {
+      showPlayerList(xIndex)
+    }
+  }
+}
+
+const handleContainerTouch = (event) => {
+  if (!chartInstance || !chartRef.value) return
+
+  const touch = event.changedTouches[0]
+  if (!touch) return
+
+  const rect = chartRef.value.getBoundingClientRect()
+  const x = touch.clientX - rect.left
+  const y = touch.clientY - rect.top
+
+  setTimeout(() => {
+    if (!chartInstance) return
+
+    const pointInGrid = chartInstance.convertFromPixel('grid', [x, y])
+
+    if (pointInGrid && pointInGrid[0] !== undefined && pointInGrid[0] !== null) {
+      const xIndex = Math.round(pointInGrid[0])
+      if (xIndex >= 0 && xIndex < activeTrend.value.length) {
+        showPlayerList(xIndex)
+      }
+    }
+  }, 50)
 }
 
 const updateChart = (data) => {
@@ -238,6 +286,7 @@ const updateChart = (data) => {
   const option = {
     tooltip: {
       trigger: 'axis',
+      confine: true,
       formatter: (params) => {
         const param = params[0]
         return `<div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">${param.name}</div>
@@ -354,36 +403,6 @@ const updateChart = (data) => {
 
   chartInstance.setOption(option, true)
   chartInstance.resize()
-
-  chartInstance.off('click')
-
-  chartInstance.on('click', (params) => {
-    if (params.componentType === 'series') {
-      const dateStr = params.name
-      const index = activeTrend.value.findIndex(item => item.date === dateStr)
-      if (index !== -1) {
-        const fullDate = getFullDate(9 - index)
-        selectedDate.value = fullDate
-        modalVisible.value = true
-        fetchActivePlayers(fullDate)
-      }
-    }
-  })
-
-  chartInstance.getZr().on('click', (event) => {
-    const pointInPixel = [event.offsetX, event.offsetY]
-    const pointInGrid = chartInstance.convertFromPixel('grid', pointInPixel)
-    if (pointInGrid && pointInGrid[0] !== undefined && pointInGrid[0] !== null) {
-      const xIndex = Math.round(pointInGrid[0])
-      if (xIndex >= 0 && xIndex < activeTrend.value.length) {
-        const dateStr = activeTrend.value[xIndex].date
-        const fullDate = getFullDate(9 - xIndex)
-        selectedDate.value = fullDate
-        modalVisible.value = true
-        fetchActivePlayers(fullDate)
-      }
-    }
-  })
 }
 
 const fetchData = async () => {
@@ -475,6 +494,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .dashboard-container {
   width: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .fade-in-card {
@@ -566,21 +586,40 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 280px;
   cursor: pointer;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  pointer-events: auto;
 }
 
 .chart-container:hover {
   opacity: 0.95;
 }
 
+.chart-container :deep(canvas) {
+  pointer-events: none !important;
+}
+
 .player-modal :deep(.ant-modal-header) {
   border-bottom: 1px solid #f0f0f0;
   padding: 16px 24px;
+  flex-shrink: 0;
 }
 
 .player-modal :deep(.ant-modal-title) {
   font-size: 18px;
   font-weight: 600;
   color: #1890ff;
+}
+
+.player-modal :deep(.ant-modal-body) {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.player-modal :deep(.ant-modal-content) {
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
 }
 
 .modal-content {
@@ -593,11 +632,13 @@ onBeforeUnmount(() => {
   background: #fafafa;
   border-radius: 8px;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .table-wrapper {
-  max-height: 450px;
-  overflow: hidden;
+  max-height: 50vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   position: relative;
 }
 
@@ -624,8 +665,9 @@ onBeforeUnmount(() => {
 }
 
 .player-table :deep(.ant-table-body) {
-  max-height: 400px;
+  max-height: 40vh !important;
   overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 .player-table :deep(.ant-table-body::-webkit-scrollbar) {
@@ -663,15 +705,20 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transform: translateZ(0);
-  will-change: transform;
-  backface-visibility: hidden;
+  max-width: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .openid-tag:hover {
   background: #f0f0ff !important;
   border-color: #722ed1 !important;
-  transform: scale(1.02) translateZ(0);
+}
+
+.openid-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
 }
 
 .copy-icon {
@@ -679,6 +726,7 @@ onBeforeUnmount(() => {
   opacity: 0.6;
   transition: opacity 0.3s ease;
   pointer-events: none;
+  flex-shrink: 0;
 }
 
 .openid-tag:hover .copy-icon {
@@ -701,6 +749,15 @@ onBeforeUnmount(() => {
   .player-modal :deep(.ant-modal) {
     max-width: 95%;
     margin: 10px auto;
+    top: 20px;
+  }
+
+  .player-modal :deep(.ant-modal-content) {
+    max-height: 85vh;
+  }
+
+  .player-modal :deep(.ant-modal-body) {
+    padding: 16px !important;
   }
 
   .player-table :deep(.ant-table) {
@@ -712,12 +769,16 @@ onBeforeUnmount(() => {
     padding: 2px 8px;
   }
 
+  .openid-text {
+    max-width: 120px;
+  }
+
   .table-wrapper {
-    max-height: 350px;
+    max-height: 55vh;
   }
 
   .player-table :deep(.ant-table-body) {
-    max-height: 300px;
+    max-height: 45vh !important;
   }
 }
 </style>
