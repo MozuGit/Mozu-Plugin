@@ -21,11 +21,19 @@
 
     <a-card title="修仙活跃分析" class="fade-in-card trend-card" :bordered="false" style="margin-top: 16px;">
       <a-row :gutter="[16, 16]" style="margin-bottom: 20px;">
-        <a-col :span="24">
+        <a-col :xs="24" :sm="12">
           <a-statistic title="今日活跃人数" :value="displayTodayActive" :loading="loading"
             class="statistic-item active-statistic">
             <template #suffix>
               <span style="font-size: 16px; color: #faad14;">人</span>
+            </template>
+          </a-statistic>
+        </a-col>
+        <a-col :xs="24" :sm="12">
+          <a-statistic title="近10天平均人数" :value="displayAvgActive" :loading="loading"
+            class="statistic-item avg-statistic">
+            <template #suffix>
+              <span style="font-size: 16px; color: #722ed1;">人</span>
             </template>
           </a-statistic>
         </a-col>
@@ -75,10 +83,12 @@ import * as echarts from 'echarts'
 const playerCount = ref(0)
 const sectCount = ref(0)
 const todayActiveCount = ref(0)
+const avgActiveCount = ref(0)
 const activeTrend = ref([])
 const displayPlayerCount = ref(0)
 const displaySectCount = ref(0)
 const displayTodayActive = ref(0)
+const displayAvgActive = ref(0)
 const loading = ref(false)
 const chartRef = ref(null)
 let chartInstance = null
@@ -448,9 +458,14 @@ const fetchData = async () => {
         }
       }
 
+      const newAvgActive = trendArray.length > 0
+        ? Math.round(trendArray.reduce((sum, item) => sum + item.active, 0) / trendArray.length)
+        : 0
+
       playerCount.value = newPlayerCount
       sectCount.value = newSectCount
       todayActiveCount.value = newTodayActive
+      avgActiveCount.value = newAvgActive
       activeTrend.value = trendArray
 
       animateNumber(newPlayerCount, displayPlayerCount)
@@ -460,6 +475,9 @@ const fetchData = async () => {
       setTimeout(() => {
         animateNumber(newTodayActive, displayTodayActive)
       }, 400)
+      setTimeout(() => {
+        animateNumber(newAvgActive, displayAvgActive)
+      }, 600)
       await nextTick()
       initChart()
       updateChart(trendArray)
@@ -525,11 +543,11 @@ onBeforeUnmount(() => {
   transform: translateX(-20px);
 }
 
-.statistic-item:first-child {
+.statistic-item:nth-child(1) {
   animation-delay: 0.15s;
 }
 
-.statistic-item:last-child {
+.statistic-item:nth-child(2) {
   animation-delay: 0.35s;
 }
 
@@ -538,6 +556,13 @@ onBeforeUnmount(() => {
   opacity: 0;
   transform: translateX(-20px);
   animation-delay: 0.3s;
+}
+
+.avg-statistic {
+  animation: slideInSubItem 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  opacity: 0;
+  transform: translateX(-20px);
+  animation-delay: 0.5s;
 }
 
 @keyframes slideInSubItem {
