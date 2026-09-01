@@ -640,9 +640,18 @@ const Backup = async (req, res) => {
 const deleteBackup = async (req, res) => {
   try {
     const { files } = req.body
+    if (!Array.isArray(files) || files.length === 0) {
+      return res.json({ success: false, message: "请指定要删除的备份文件" })
+    }
     const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
-    const removeFiles = files.map(file => path.join(backupDir, file + '.json'))
-    await Promise.all(removeFiles.map(file => unlink(file)))
+    const removeFiles = files.map(file => {
+      const safeFile = path.basename(String(file))
+      if (!safeFile || safeFile === '.' || safeFile === '..') {
+        return null
+      }
+      return path.join(backupDir, safeFile + '.json')
+    }).filter(file => file !== null)
+    await Promise.allSettled(removeFiles.map(file => unlink(file)))
     res.json({ success: true, })
   } catch (error) {
     res.json({ success: false, message: error.message })
