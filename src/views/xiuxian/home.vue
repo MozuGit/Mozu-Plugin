@@ -1,16 +1,26 @@
 <template>
   <div class="dashboard-container">
-    <a-card title="魔族陌修仙" class="fade-in-card" :bordered="false">
+    <a-card class="fade-in-card" :bordered="false">
+      <template #title>
+        <span>魔族陌修仙</span>
+      </template>
+      <template #extra>
+        <a-button type="text" :loading="refreshing" @click="refreshBasicData" class="refresh-btn">
+          <template #icon>
+            <reload-outlined :spin="refreshing" />
+          </template>
+        </a-button>
+      </template>
       <a-row :gutter="[16, 16]">
         <a-col :xs="24" :sm="12">
-          <a-statistic title="修仙人数" :value="displayPlayerCount" :loading="loading" class="statistic-item">
+          <a-statistic title="修仙人数" :value="displayPlayerCount" class="statistic-item">
             <template #suffix>
               <span style="font-size: 16px; color: #52c41a;">人</span>
             </template>
           </a-statistic>
         </a-col>
         <a-col :xs="24" :sm="12">
-          <a-statistic title="宗门数量" :value="displaySectCount" :loading="loading" class="statistic-item">
+          <a-statistic title="宗门数量" :value="displaySectCount" class="statistic-item">
             <template #suffix>
               <span style="font-size: 16px; color: #1890ff;">个</span>
             </template>
@@ -19,19 +29,20 @@
       </a-row>
     </a-card>
 
-    <a-card title="修仙活跃分析" class="fade-in-card trend-card" :bordered="false" style="margin-top: 16px;">
+    <a-card class="fade-in-card trend-card" :bordered="false" style="margin-top: 16px;">
+      <template #title>
+        <span>修仙活跃分析</span>
+      </template>
       <a-row :gutter="[16, 16]" style="margin-bottom: 20px;">
         <a-col :xs="24" :sm="12">
-          <a-statistic title="今日活跃人数" :value="displayTodayActive" :loading="loading"
-            class="statistic-item active-statistic">
+          <a-statistic title="今日活跃人数" :value="displayTodayActive" class="statistic-item active-statistic">
             <template #suffix>
               <span style="font-size: 16px; color: #faad14;">人</span>
             </template>
           </a-statistic>
         </a-col>
         <a-col :xs="24" :sm="12">
-          <a-statistic title="近10天平均人数" :value="displayAvgActive" :loading="loading"
-            class="statistic-item avg-statistic">
+          <a-statistic title="近10天平均人数" :value="displayAvgActive" class="statistic-item avg-statistic">
             <template #suffix>
               <span style="font-size: 16px; color: #722ed1;">人</span>
             </template>
@@ -77,7 +88,7 @@
 import { ref, onMounted, nextTick, onBeforeUnmount, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { CopyOutlined } from '@ant-design/icons-vue'
+import { CopyOutlined, ReloadOutlined } from '@ant-design/icons-vue'
 import * as echarts from 'echarts'
 
 const playerCount = ref(0)
@@ -90,6 +101,7 @@ const displaySectCount = ref(0)
 const displayTodayActive = ref(0)
 const displayAvgActive = ref(0)
 const loading = ref(false)
+const refreshing = ref(false)
 const chartRef = ref(null)
 let chartInstance = null
 
@@ -286,14 +298,35 @@ const updateChart = (data) => {
 
   const dates = data.map(item => item.date)
   const values = data.map(item => item.active)
-
-  const maxValue = Math.max(...values, 10)
-  const minValue = Math.min(...values, 0)
-  const range = maxValue - minValue
-  const yMax = maxValue + range * 0.15
-  const yMin = Math.max(0, minValue - range * 0.15)
+  const maxValue = Math.max(...values)
+  let yMax
+  if (maxValue <= 10) {
+    yMax = Math.ceil(maxValue * 1.5)
+  } else if (maxValue <= 100) {
+    yMax = Math.ceil(maxValue / 10) * 10 + 10
+  } else if (maxValue <= 1000) {
+    yMax = Math.ceil(maxValue / 50) * 50 + 50
+  } else {
+    yMax = Math.ceil(maxValue / 100) * 100 + 100
+  }
+  const yMin = 0
+  let interval
+  if (yMax <= 10) {
+    interval = 1
+  } else if (yMax <= 50) {
+    interval = 5
+  } else if (yMax <= 100) {
+    interval = 10
+  } else if (yMax <= 500) {
+    interval = 50
+  } else if (yMax <= 1000) {
+    interval = 100
+  } else {
+    interval = Math.ceil(yMax / 10)
+  }
 
   const option = {
+    animation: true,
     tooltip: {
       trigger: 'axis',
       confine: true,
@@ -315,7 +348,7 @@ const updateChart = (data) => {
       left: '3%',
       right: '4%',
       bottom: '8%',
-      top: '6%',
+      top: '15%',
       containLabel: true
     },
     xAxis: {
@@ -340,6 +373,7 @@ const updateChart = (data) => {
       type: 'value',
       min: yMin,
       max: yMax,
+      interval: interval,
       splitLine: {
         lineStyle: {
           color: '#f0f0f0',
@@ -351,9 +385,9 @@ const updateChart = (data) => {
         fontSize: 12,
         formatter: (value) => {
           if (value >= 1000) {
-            return (value / 1000) + 'k'
+            return (value / 1000).toFixed(1) + 'k'
           }
-          return value
+          return Math.round(value)
         }
       },
       name: '活跃人数',
@@ -369,7 +403,7 @@ const updateChart = (data) => {
         data: values,
         smooth: true,
         symbol: 'circle',
-        symbolSize: 10,
+        symbolSize: 12,
         lineStyle: {
           width: 3,
           color: '#faad14'
@@ -404,7 +438,17 @@ const updateChart = (data) => {
             width: 4
           }
         },
-        symbolSize: 12,
+        label: {
+          show: true,
+          position: 'top',
+          distance: 8,
+          color: '#faad14',
+          fontSize: 12,
+          fontWeight: 600,
+          formatter: (params) => {
+            return params.value
+          }
+        },
         z: 10,
         hoverAnimation: true
       }
@@ -415,8 +459,13 @@ const updateChart = (data) => {
   chartInstance.resize()
 }
 
-const fetchData = async () => {
-  loading.value = true
+const fetchData = async (isSilent = false) => {
+  if (!isSilent) {
+    loading.value = true
+  } else {
+    refreshing.value = true
+  }
+
   const token = localStorage.getItem('token')
   try {
     const res = await fetch('/api/xiuxian/getInfo', {
@@ -468,25 +517,42 @@ const fetchData = async () => {
       avgActiveCount.value = newAvgActive
       activeTrend.value = trendArray
 
-      animateNumber(newPlayerCount, displayPlayerCount)
+      const animationDuration = isSilent ? 800 : 1500
+
+      animateNumber(newPlayerCount, displayPlayerCount, animationDuration)
       setTimeout(() => {
-        animateNumber(newSectCount, displaySectCount)
-      }, 200)
+        animateNumber(newSectCount, displaySectCount, animationDuration)
+      }, isSilent ? 100 : 200)
       setTimeout(() => {
-        animateNumber(newTodayActive, displayTodayActive)
-      }, 400)
+        animateNumber(newTodayActive, displayTodayActive, animationDuration)
+      }, isSilent ? 200 : 400)
       setTimeout(() => {
-        animateNumber(newAvgActive, displayAvgActive)
-      }, 600)
+        animateNumber(newAvgActive, displayAvgActive, animationDuration)
+      }, isSilent ? 300 : 600)
+
       await nextTick()
       initChart()
       updateChart(trendArray)
+
+      if (isSilent) {
+        message.success('数据已更新')
+      }
     }
   } catch (error) {
-    message.error('获取数据失败:', error)
+    if (isSilent) {
+      message.error('刷新失败，请重试')
+    } else {
+      message.error('获取数据失败:', error)
+    }
   } finally {
     loading.value = false
+    refreshing.value = false
   }
+}
+
+const refreshBasicData = async () => {
+  if (refreshing.value) return
+  await fetchData(true)
 }
 
 const handleResize = () => {
@@ -585,10 +651,6 @@ onBeforeUnmount(() => {
 :deep(.ant-statistic-content) {
   font-size: 28px;
   font-weight: 600;
-}
-
-:deep(.ant-statistic-loading .ant-statistic-content) {
-  opacity: 0.6;
 }
 
 :deep(.ant-card) {
@@ -758,6 +820,41 @@ onBeforeUnmount(() => {
   opacity: 1;
 }
 
+.refresh-btn {
+  color: #666;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.refresh-btn:hover {
+  color: #1890ff;
+  background: rgba(24, 144, 255, 0.1);
+  transform: rotate(180deg);
+}
+
+.refresh-btn:active {
+  transform: rotate(360deg) scale(0.9);
+}
+
+:deep(.ant-card-head) {
+  min-height: 56px;
+}
+
+:deep(.ant-card-extra) {
+  padding: 0;
+}
+
+:deep(.ant-card-head-title) {
+  font-size: 17px;
+  font-weight: 600;
+}
+
 @media (max-width: 768px) {
   :deep(.ant-statistic-content) {
     font-size: 24px;
@@ -804,6 +901,16 @@ onBeforeUnmount(() => {
 
   .player-table :deep(.ant-table-body) {
     max-height: 45vh !important;
+  }
+
+  .refresh-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  :deep(.ant-card-head) {
+    min-height: 48px;
+    padding: 0 16px;
   }
 }
 </style>

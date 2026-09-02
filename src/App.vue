@@ -6,35 +6,42 @@
     <a-layout-sider v-model:collapsed="collapsed" :collapsible="!isMobile" :trigger="null" theme="light" :width="200"
       :breakpoint="'lg'" :class="{ 'mobile-sider': isMobile, 'sider-collapsed': collapsed && isMobile }"
       style="background: #fff;">
-      <div class="logo">
-        <img src="../Mo.png" style="height: 32px" />
-        <transition name="fade">
-          <span v-if="!collapsed" class="logo-text">魔族陌管理</span>
-        </transition>
+      <div class="sider-content">
+        <div class="logo">
+          <img src="../Mo.png" style="height: 32px" />
+          <transition name="fade">
+            <span v-if="!collapsed" class="logo-text">魔族陌管理</span>
+          </transition>
+        </div>
+
+        <a-menu v-model:selectedKeys="selectedKeys" mode="inline" :inline-collapsed="collapsed" @click="handleMenuClick"
+          style="border-right: 0; flex: 1;">
+          <a-menu-item key="xiuxian">
+            <AppstoreOutlined />
+            <span>魔族陌修仙</span>
+          </a-menu-item>
+          <a-menu-item key="about">
+            <InfoCircleOutlined />
+            <span>关于</span>
+          </a-menu-item>
+        </a-menu>
+
+        <div class="logout-wrapper">
+          <a-button block @click="logout" class="logout-btn">
+            <LogoutOutlined />
+            <span v-if="!collapsed">退出登录</span>
+          </a-button>
+        </div>
       </div>
-      <a-menu v-model:selectedKeys="selectedKeys" mode="inline" :inline-collapsed="collapsed" @click="handleMenuClick"
-        style="border-right: 0;">
-        <a-menu-item key="xiuxian">
-          <AppstoreOutlined />
-          <span>魔族陌修仙</span>
-        </a-menu-item>
-        <a-menu-item key="about">
-          <InfoCircleOutlined />
-          <span>关于</span>
-        </a-menu-item>
-      </a-menu>
     </a-layout-sider>
 
     <a-layout style="background: transparent;">
-      <a-layout-header
-        style="background: rgba(255,255,255,0.9); padding: 0 16px; display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <a-button v-if="isMobile" type="text" :icon="h(MenuOutlined)" @click="collapsed = !collapsed" />
-          <h2 style="margin: 0;">{{ pageTitle }}</h2>
-        </div>
-        <a-button type="link" @click="logout">退出登录</a-button>
-      </a-layout-header>
-      <a-layout-content style="margin: 16px;">
+      <a-layout-content style="margin: 16px; position: relative;">
+        <a-button v-if="isMobile && collapsed" class="mobile-menu-btn" shape="circle" size="large"
+          @click="collapsed = false">
+          <MenuOutlined />
+        </a-button>
+
         <router-view />
       </a-layout-content>
     </a-layout>
@@ -44,7 +51,7 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { HomeOutlined, AppstoreOutlined, SettingOutlined, MenuOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
+import { HomeOutlined, AppstoreOutlined, SettingOutlined, MenuOutlined, InfoCircleOutlined, LogoutOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -66,7 +73,6 @@ onBeforeUnmount(() => {
 
 const collapsed = ref(isMobile.value)
 const selectedKeys = ref([])
-const pageTitle = ref('')
 
 const validRouteNames = ['xiuxian', 'xiuxianHome', 'xiuxianConfig', 'xiuxianCdk', 'xiuxianPlayer', 'xiuxianSect', 'xiuxianBackup', 'about']
 
@@ -90,7 +96,6 @@ watch(() => route.name, (name) => {
       subPageTitle = "魔族陌修仙"
     }
     selectedKeys.value = [menuKey]
-    pageTitle.value = pageTitles[name] || subPageTitle
     document.title = (pageTitles[name] || subPageTitle) + ' - MozuAdmin'
 
     if (isMobile.value) {
@@ -108,18 +113,29 @@ function handleMenuClick({ key }) {
 
 async function logout() {
   const token = localStorage.getItem('token')
-  const res = await fetch('/login/exit', {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  })
-  localStorage.removeItem('token')
-  router.push('/login')
-  document.title = '魔族陌 - MozuAdmin'
+  try {
+    const res = await fetch('/login/exit', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+  } catch (error) {
+    console.error('退出登录失败:', error)
+  } finally {
+    localStorage.removeItem('token')
+    router.push('/login')
+    document.title = '魔族陌 - MozuAdmin'
+  }
 }
 </script>
 
 <style scoped>
+.sider-content {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
 .logo {
   height: 64px;
   display: flex;
@@ -141,6 +157,53 @@ async function logout() {
   font-weight: bold;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+.logout-wrapper {
+  padding: 12px;
+  margin-top: auto;
+  border-top: 1px solid #f0f0f0;
+}
+
+.logout-btn {
+  background-color: #ff4d4f !important;
+  border-color: #ff4d4f !important;
+  color: #fff !important;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.logout-btn:hover,
+.logout-btn:focus {
+  background-color: #ff7875 !important;
+  border-color: #ff7875 !important;
+  color: #fff !important;
+}
+
+.logout-btn span {
+  margin-left: 8px;
+}
+
+.mobile-menu-btn {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  z-index: 998;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid #d9d9d9 !important;
+  color: #666 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.mobile-menu-btn:hover,
+.mobile-menu-btn:focus {
+  background: rgba(255, 255, 255, 1) !important;
+  border-color: #bfbfbf !important;
+  color: #333 !important;
 }
 
 .fade-enter-active,
