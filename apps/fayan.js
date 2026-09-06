@@ -42,12 +42,8 @@ export class MozuFayan extends plugin {
         date = await getweek(num)
         break
     }
-    const key = `Mozu:msg:${date}:group:${this.e.self_id}:${this.e.group_id.replace(e.self_id + ':', '')}`
+    const key = getGroupKey(date, this.e.self_id, this.e.group_id)
     let list = await Redis.zrevrange(key, 0, Config.config.fayan.count - 1, 'WITHSCORES')
-    let [score, rank] = await Promise.all([
-      Redis.zscore(key, this.e.user_id),
-      Redis.zrevrank(key, this.e.user_id)
-    ])
     const userIds = list.filter((_, i) => i % 2 === 0)
     if (userIds.length === 0) {
       let message
@@ -84,6 +80,10 @@ export class MozuFayan extends plugin {
       }
       return await this.e.reply(message)
     }
+    let [score, rank] = await Promise.all([
+      Redis.zscore(key, this.e.user_id),
+      Redis.zrevrank(key, this.e.user_id)
+    ])
     const names = await Redis.hmget(`Mozu:username`, ...userIds)
     let message
     let msg = []
@@ -150,9 +150,9 @@ export class MozuFayan extends plugin {
     let month = await getmonth()
     let week = await getweek()
     const pipeline = Redis.pipeline()
-    pipeline.del(`Mozu:msg:${date}:group:${this.e.group_id}`)
-    pipeline.del(`Mozu:msg:${month}:group:${this.e.group_id}`)
-    pipeline.del(`Mozu:msg:${week}:group:${this.e.group_id}`)
+    pipeline.del(getGroupKey(date, this.e.self_id, this.e.group_id))
+    pipeline.del(getGroupKey(month, this.e.self_id, this.e.group_id))
+    pipeline.del(getGroupKey(week, this.e.self_id, this.e.group_id))
     await pipeline.exec()
     if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.config.fayan.sendMarkdown) {
       const message = segment.markdown([
@@ -209,9 +209,9 @@ export class MozuFayan extends plugin {
       }
       return true
     }
-    pipeline.zrem(`Mozu:msg:${date}:group:${this.e.group_id}`, AtQQ)
-    pipeline.zrem(`Mozu:msg:${month}:group:${this.e.group_id}`, AtQQ)
-    pipeline.zrem(`Mozu:msg:${week}:group:${this.e.group_id}`, AtQQ)
+    pipeline.zrem(getGroupKey(date, this.e.self_id, this.e.group_id), AtQQ)
+    pipeline.zrem(getGroupKey(month, this.e.self_id, this.e.group_id), AtQQ)
+    pipeline.zrem(getGroupKey(week, this.e.self_id, this.e.group_id), AtQQ)
     await pipeline.exec()
     if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.config.fayan.sendMarkdown) {
       const message = segment.markdown([
@@ -244,9 +244,9 @@ Bot.on?.('message', async (e) => {
   let month = await getmonth()
   let week = await getweek()
   const pipeline = Redis.pipeline()
-  pipeline.zincrby(`Mozu:msg:${date}:group:${e.self_id}:${e.group_id.replace(e.self_id + ':', '')}`, 1, e.user_id)
-  pipeline.zincrby(`Mozu:msg:${month}:group:${e.group_id}`, 1, e.user_id)
-  pipeline.zincrby(`Mozu:msg:${week}:group:${e.group_id}`, 1, e.user_id)
+  pipeline.zincrby(getGroupKey(date, e.self_id, e.group_id), 1, e.user_id)
+  pipeline.zincrby(getGroupKey(month, e.self_id, e.group_id), 1, e.user_id)
+  pipeline.zincrby(getGroupKey(week, e.self_id, e.group_id), 1, e.user_id)
   pipeline.hset(`Mozu:username`, e.user_id, e?.nickname || e?.sender?.nickname)
   await pipeline.exec()
 })
@@ -283,4 +283,8 @@ async function getweek(num = 0) {
   const firstDay = new Date(year, 0, 1)
   const week = Math.ceil(((d - firstDay) / 86400000 + firstDay.getDay() + 1) / 7)
   return `${year}-Week${week.toString().padStart(2, '0')}`
+}
+
+function getGroupKey(date, self_id, group_id) {
+  return `Mozu:msg:${date}:group:${self_id}:${group_id.replace(self_id + ':', '')}`
 }
