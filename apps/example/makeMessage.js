@@ -1,4 +1,3 @@
-import Redis from '#Redis'
 import Config from "#Config"
 
 export class MozuMakeMessage extends plugin {
