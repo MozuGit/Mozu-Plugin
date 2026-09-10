@@ -666,7 +666,7 @@ async function validateToken(req) {
   if (!authHeader.startsWith('Bearer ')) {
     return { valid: false, error: 'token 格式错误' }
   }
-  const token = authHeader.substring(7);
+  const token = authHeader.substring(7)
   if (!token || token.length === 0) {
     return { valid: false, error: 'token 为空' }
   }

@@ -1,3 +1,5 @@
+import TwoFactorAuth from '../../model/server/TwoFactorAuth.js'
+
 import Redis from '#Redis'
 import Config from '#Config'
 import crypto from 'crypto'
@@ -106,10 +108,10 @@ const handleNormalLogin = async (req, res) => {
     })
   }
 
-  if (password === Config.panel.login.password || (await hashSHA256(password)) === Config.panel.login.password) {
+  if (((await hashSHA256(password)) === Config.panel.login.password || password === Config.panel.login.password) && (!Config.panel.totp.enabled || TwoFactorAuth.verifyToken(Config.panel.totp.secret, req.body.token))) {
     const token = crypto.randomBytes(32).toString('hex')
     await Redis.sadd("Mozu:panel:token", token)
-    Redis.del("Mozu:panel:password:error")
+    await Redis.del("Mozu:panel:password:error")
     res.json({
       success: true,
       message: '登录成功',
@@ -117,12 +119,17 @@ const handleNormalLogin = async (req, res) => {
         token: token
       }
     })
-  } else {
-    Redis.set("Mozu:panel:password:error", 0, 'EX', 60, 'NX')
-    Redis.incr("Mozu:panel:password:error")
+  } else if ((await hashSHA256(password)) !== Config.panel.login.password && password !== Config.panel.login.password) {
+    await Redis.set("Mozu:panel:password:error", 0, 'EX', 60, 'NX')
+    await Redis.incr("Mozu:panel:password:error")
     res.json({
       success: false,
       message: '密码错误'
+    })
+  } else {
+    res.json({
+      success: false,
+      message: 'TOTP 验证码错误'
     })
   }
 }
@@ -137,6 +144,137 @@ const handleExitLogin = async (req, res) => {
       success: true,
       message: '退出登录成功'
     })
+  }
+}
+
+export const handle2FA = async (req, res) => {
+  const auth = await validateToken(req)
+  if (!auth.valid) {
+    return res.status(401).json({
+      success: false,
+      message: auth.error
+    })
+  }
+  const { action } = req.query
+
+  try {
+    // 启用 TOTP 双因素认证密钥
+    if (action === 'create') {
+      return await handleCreateTotp(req, res)
+    }
+
+    // 启用验证 TOTP 双因素认证
+    if (action === 'enable') {
+      return await handleEnableTotp(req, res)
+    }
+
+    // 删除 TOTP 双因素认证
+    if (action === 'delete') {
+      return await handleDeleteTotp(req, res)
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: '无效的操作',
+    })
+  } catch (error) {
+    res.json({
+      success: false,
+      message: error.message
+    })
+  }
+}
+
+const handleCreateTotp = async (req, res) => {
+  if (Config.panel.totp.enabled) {
+    return res.status(409).json({
+      success: false,
+      message: 'TOTP 双因素认证已启用'
+    })
+  }
+  const secret = TwoFactorAuth.generateSecret()
+  await Redis.set("Mozu:panel:totp:secret", secret.base32, 'EX', 300)
+  res.json({
+    success: true,
+    data: {
+      secret: secret.base32,
+      otpauth_url: secret.otpauth_url
+    }
+  })
+}
+
+const handleEnableTotp = async (req, res) => {
+  if (Config.panel.totp.enabled) {
+    return res.status(409).json({
+      success: false,
+      message: 'TOTP 双因素认证已启用'
+    })
+  }
+  const secret = await Redis.get("Mozu:panel:totp:secret")
+  if (!secret) {
+    return res.status(400).json({
+      success: false,
+      message: '密钥未创建或已过期',
+    })
+  }
+  const ok = TwoFactorAuth.verifyToken(secret, req.body.token)
+  if (!ok) {
+    return res.json({
+      success: false,
+      message: 'TOTP 验证码错误'
+    })
+  }
+  Config.modify('panel', 'totp', 'enabled', true)
+  Config.modify('panel', 'totp', 'secret', secret)
+  await Redis.del("Mozu:panel:totp:secret")
+  res.json({
+    success: true,
+    message: 'TOTP 双因素认证启用成功'
+  })
+}
+
+const handleDeleteTotp = async (req, res) => {
+  if (!Config.panel.totp.enabled) {
+    return res.json({
+      success: false,
+      message: 'TOTP 双因素认证未启用'
+    })
+  }
+  const ok = TwoFactorAuth.verifyToken(Config.panel.totp.secret, req.body.token)
+  if (!ok) {
+    return res.json({
+      success: false,
+      message: 'TOTP 验证码错误'
+    })
+  }
+  Config.modify('panel', 'totp', 'enabled', false)
+  Config.modify('panel', 'totp', 'secret', '')
+  res.json({
+    success: true,
+    message: 'TOTP 双因素认证关闭成功'
+  })
+}
+
+async function validateToken(req) {
+  const authHeader = req?.headers?.authorization
+  if (!authHeader) {
+    return { valid: false, error: '未登录，请先登录' }
+  }
+  if (!authHeader.startsWith('Bearer ')) {
+    return { valid: false, error: 'token 格式错误' }
+  }
+  const token = authHeader.substring(7)
+  if (!token || token.length === 0) {
+    return { valid: false, error: 'token 为空' }
+  }
+  try {
+    const presence = await Redis.sismember("Mozu:panel:token", token)
+    if (!presence) {
+      return { valid: false, error: 'token 无效或已过期' }
+    }
+    return { valid: true, token }
+  } catch (error) {
+    return { valid: false, error: '认证服务异常' }
   }
 }
 

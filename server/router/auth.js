@@ -1,8 +1,10 @@
 import express from 'express'
-import { handleLogin } from '../controllers/authController.js'
+import { handleLogin, handle2FA } from '../controllers/authController.js'
 
 const router = express.Router()
 
 router.post('/', handleLogin)
+router.get('/tfa', handle2FA)
+router.post('/tfa', handle2FA)
 
 export default router
