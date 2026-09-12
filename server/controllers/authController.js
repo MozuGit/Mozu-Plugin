@@ -1,4 +1,4 @@
-import TwoFactorAuth from '../../model/server/TwoFactorAuth.js'
+import TwoFactorAuth from '../../lib/TwoFactorAuth.js'
 
 import Redis from '#Redis'
 import Config from '#Config'
