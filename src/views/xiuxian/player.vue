@@ -278,6 +278,16 @@ const tableLocale = {
   emptyText: '暂无玩家数据'
 }
 
+const debounce = (fn, delay = 300) => {
+  let timer = null
+  return function (...args) {
+    if (timer) clearTimeout(timer)
+    timer = setTimeout(() => {
+      fn.apply(this, args)
+    }, delay)
+  }
+}
+
 const apiRequest = async (url, options = {}) => {
   const token = localStorage.getItem('token')
   const headers = {
@@ -326,6 +336,7 @@ const currentPage = ref(1)
 const pageSize = 10
 const isLoadingAll = ref(false)
 const isSearchMode = ref(false)
+const isPartialLoaded = ref(false)
 
 const searchParams = reactive({
   id: '',
@@ -549,6 +560,97 @@ const fetchPageData = async (page) => {
   return data
 }
 
+const estimatePageById = (id, pageSize = 10) => {
+  const numericId = Number(id)
+  if (isNaN(numericId) || numericId <= 0) return null
+  return Math.max(0, Math.floor((numericId - 1) / pageSize))
+}
+
+const getPageRangeById = (id, totalPages) => {
+  const numericId = Number(id)
+  if (isNaN(numericId) || numericId <= 0) return null
+  const targetPage = estimatePageById(numericId)
+  if (targetPage === null) return null
+  const digitLength = String(numericId).length
+  let range = 1
+  if (digitLength <= 2) range = 0
+  else if (digitLength <= 4) range = 1
+  else range = 2
+
+  const startPage = Math.max(0, targetPage - range)
+  const endPage = Math.min(totalPages - 1, targetPage + range)
+
+  return { startPage, endPage, targetPage }
+}
+
+const searchByIdWithPaging = async (idFilter) => {
+  const numericId = Number(idFilter)
+
+  if (isNaN(numericId) || numericId <= 0 || !/^\d+$/.test(idFilter)) {
+    return false
+  }
+
+  if (totalPlayerCount.value === 0 || loadedCount.value >= totalPlayerCount.value) {
+    return false
+  }
+
+  const totalPages = Math.ceil(totalPlayerCount.value / pageSize)
+  const range = getPageRangeById(numericId, totalPages)
+  if (!range) return false
+
+  isLoadingAll.value = true
+  isLoadingAllData.value = true
+  loadedCount.value = 0
+
+  try {
+    const newAllList = []
+    for (let page = range.startPage; page <= range.endPage; page++) {
+      if (!isLoadingAll.value) break
+      const pageData = await fetchPageData(page)
+      if (pageData?.players?.length > 0) {
+        const mapped = pageData.players.map(player => ({
+          ...player,
+          titleIndex: player.titleIndex !== undefined ? Number(player.titleIndex) : -1,
+          titles: player.titles || []
+        }))
+        newAllList.push(...mapped)
+      }
+      if (range.endPage - range.startPage > 2) {
+        await new Promise(resolve => setTimeout(resolve, 50))
+      }
+    }
+
+    const seen = new Set()
+    allPlayerList.value = newAllList.filter(p => {
+      if (seen.has(p.id)) return false
+      seen.add(p.id)
+      return true
+    })
+
+    loadedCount.value = allPlayerList.value.length
+    if (allPlayerList.value.length === 0) {
+      return false
+    }
+
+    const hasTarget = allPlayerList.value.some(p => String(p.id).includes(idFilter))
+    if (!hasTarget) {
+      return false
+    }
+
+    isPartialLoaded.value = true
+
+    return true
+  } catch (error) {
+    if (error.message !== '未授权') {
+      message.error(error.message || '精准搜索失败')
+    }
+    return false
+  } finally {
+    isLoadingAll.value = false
+    isLoadingAllData.value = false
+  }
+}
+
 const loadAllData = async () => {
   if (isLoadingAll.value) return
 
@@ -601,6 +703,7 @@ const loadAllData = async () => {
     }
 
     loadedCount.value = allPlayerList.value.length
+    isPartialLoaded.value = false
 
   } catch (error) {
     if (error.message !== '未授权') {
@@ -664,19 +767,44 @@ const fetchPlayerList = async (page = 1, silent = false) => {
   }
 }
 
-const handleInstantSearch = () => {
+const handleInstantSearch = async () => {
   currentPage.value = 1
 
   if (hasSearchCondition.value) {
     isSearchMode.value = true
+    const isOnlyIdSearch =
+      searchParams.id.trim() !== '' &&
+      searchParams.cult.trim() === '' &&
+      searchParams.ls.trim() === '' &&
+      (searchParams.realm === undefined || searchParams.realm === null || searchParams.realm === '') &&
+      (searchParams.sroot === undefined || searchParams.sroot === null || searchParams.sroot === '') &&
+      (searchParams.sex === undefined || searchParams.sex === null || searchParams.sex === '')
 
-    if (loadedCount.value < totalPlayerCount.value) {
-      loadAllData()
+    if (isOnlyIdSearch) {
+      if (loadedCount.value >= totalPlayerCount.value && totalPlayerCount.value > 0) {
+        isPartialLoaded.value = false
+        return
+      }
+
+      const success = await searchByIdWithPaging(searchParams.id.trim())
+      if (success) return
+    }
+
+    if (loadedCount.value < totalPlayerCount.value && !isLoadingAll.value) {
+      await loadAllData()
+    } else {
+      isPartialLoaded.value = false
     }
   } else {
     isSearchMode.value = false
+    isPartialLoaded.value = false
     fetchPlayerList(1, false)
   }
+}
+
+const handleInstantSearchDebounced = debounce(handleInstantSearch, 300)
+const handleInputSearch = () => {
+  handleInstantSearchDebounced()
 }
 
 const handleReset = () => {
@@ -693,6 +821,7 @@ const handleReset = () => {
   isLoadingAll.value = false
   isLoadingAllData.value = false
   isSearchMode.value = false
+  isPartialLoaded.value = false
 
   fetchPlayerList(1, false)
 }
@@ -825,6 +954,50 @@ const removeTitle = (index) => {
   }
 }
 
+const buildUpdatedPlayer = (response) => {
+  const serverPlayer = response?.player || response?.data || null
+  if (serverPlayer && serverPlayer.id !== undefined) {
+    return {
+      ...serverPlayer,
+      titleIndex: serverPlayer.titleIndex !== undefined ? Number(serverPlayer.titleIndex) : -1,
+      titles: serverPlayer.titles || []
+    }
+  }
+
+  return {
+    id: formState.id,
+    cult: formState.cult,
+    ls: formState.ls,
+    realm: formState.realm,
+    sroot: Number(formState.sroot),
+    sex: formState.sex,
+    titleIndex: formState.titleIndex,
+    titles: formState.titles.map(t => ({
+      title: t.title,
+      getTime: Number(t.getTime),
+      validTime: Number(t.validTime)
+    }))
+  }
+}
+
+const updatePlayerInCache = (updatedPlayer) => {
+  const targetId = updatedPlayer.id
+
+  const allIndex = allPlayerList.value.findIndex(p => String(p.id) === String(targetId))
+  if (allIndex !== -1) {
+    const newAllList = [...allPlayerList.value]
+    newAllList[allIndex] = { ...newAllList[allIndex], ...updatedPlayer }
+    allPlayerList.value = newAllList
+  }
+
+  const pageIndex = playerList.value.findIndex(p => String(p.id) === String(targetId))
+  if (pageIndex !== -1) {
+    const newPageList = [...playerList.value]
+    newPageList[pageIndex] = { ...newPageList[pageIndex], ...updatedPlayer }
+    playerList.value = newPageList
+  }
+}
+
 const handleSubmit = async () => {
   try {
     await formRef.value.validate()
@@ -848,18 +1021,15 @@ const handleSubmit = async () => {
         validTime: Number(t.validTime)
       }))
     }
-    await apiRequest(`/api/xiuxian/player?action=modify&id=${formState.id}`, {
+    const response = await apiRequest(`/api/xiuxian/player?action=modify&id=${formState.id}`, {
       method: 'POST',
       body: JSON.stringify(postData)
     })
+
+    const updatedPlayer = buildUpdatedPlayer(response)
+    updatePlayerInCache(updatedPlayer)
     message.success('玩家信息修改成功')
     modalVisible.value = false
-
-    if (isSearchMode.value && loadedCount.value >= totalPlayerCount.value) {
-      await loadAllData()
-    } else {
-      fetchPlayerList(currentPage.value, true)
-    }
   } catch (error) {
     if (error.errorFields) {
       return
@@ -879,6 +1049,9 @@ const handleCancel = () => {
 
 const handleVisibilityChange = () => {
   if (document.visibilityState === 'visible') {
+    if (isPartialLoaded.value) {
+      return
+    }
     if (isSearchMode.value && loadedCount.value >= totalPlayerCount.value) {
       loadAllData()
     } else {
