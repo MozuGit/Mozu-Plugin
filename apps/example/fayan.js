@@ -247,7 +247,7 @@ Bot.on?.('message', async (e) => {
   pipeline.zincrby(getGroupKey(date, e.self_id, e.group_id), 1, e.user_id)
   pipeline.zincrby(getGroupKey(month, e.self_id, e.group_id), 1, e.user_id)
   pipeline.zincrby(getGroupKey(week, e.self_id, e.group_id), 1, e.user_id)
-  pipeline.hset(`Mozu:username`, e.user_id, e?.nickname || e?.sender?.nickname)
+  pipeline.hset(`Mozu:username`, e.user_id, (e?.nickname || e?.sender?.nickname).replace(/[^\P{C}\s]/gu, ''))
   await pipeline.exec()
 })
 
