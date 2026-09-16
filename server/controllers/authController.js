@@ -6,22 +6,27 @@ import crypto from 'crypto'
 
 // 统一处理登录相关请求
 export const handleLogin = async (req, res) => {
-  const { reset } = req.query
+  const { action } = req.query
 
   try {
     // 处理获取验证码
-    if (reset === 'get_code') {
+    if (action === 'get_code') {
       return await handleGetCode(req, res)
     }
 
     // 处理获取验证码剩余时间
-    if (reset === 'get_code_ttl') {
+    if (action === 'get_code_ttl') {
       return await handleGetCodeTTL(req, res)
     }
 
     // 处理重置密码
-    if (reset === 'reset_password') {
+    if (action === 'reset_password') {
       return await handleResetPassword(req, res)
+    }
+
+    //退出登录
+    if (action === 'exit') {
+      return await handleExitLogin(req, res)
     }
 
     // 登录
@@ -30,7 +35,7 @@ export const handleLogin = async (req, res) => {
   } catch (error) {
     res.json({
       success: false,
-      message: error.message
+      message: "服务器内部错误"
     })
   }
 }

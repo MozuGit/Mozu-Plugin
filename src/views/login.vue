@@ -161,7 +161,7 @@ function openResetPanel() {
 
 async function fetchTTL() {
   try {
-    const res = await fetch('/api/login?reset=get_code_ttl', {
+    const res = await fetch('/api/login?action=get_code_ttl', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     })
@@ -217,7 +217,7 @@ async function handleGetCode() {
   if (countdown.value > 0 || sendingCode.value) return
   sendingCode.value = true
   try {
-    const res = await fetch('/api/login?reset=get_code', {
+    const res = await fetch('/api/login?action=get_code', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     })
@@ -253,7 +253,7 @@ async function handleResetPassword() {
   resetting.value = true
   try {
     const hashedPassword = await hashSHA256(resetForm.newPassword)
-    const res = await fetch('/api/login?reset=reset_password', {
+    const res = await fetch('/api/login?action=reset_password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

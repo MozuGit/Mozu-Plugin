@@ -114,7 +114,7 @@ function handleMenuClick({ key }) {
 async function logout() {
   const token = localStorage.getItem('token')
   try {
-    const res = await fetch('/login/exit', {
+    await fetch('/api/login?action=exit', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
