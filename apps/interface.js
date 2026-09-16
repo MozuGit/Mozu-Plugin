@@ -88,6 +88,6 @@ Bot.on?.("notice.group.member", async (e) => {
   let groupInfo = JSON.parse(await Redis.get(`Mozu:groupinfo:${e.group_id}`))
   if (groupInfo) {
     groupInfo.group_member_num += e.sub_type === 'member.increase' ? 1 : -1
-    Redis.set(`Mozu:groupinfo:${group_id}`, JSON.stringify(groupInfo))
+    Redis.set(`Mozu:groupinfo:${group_id}`, JSON.stringify(groupInfo), 'EX', 3600)
   }
 })

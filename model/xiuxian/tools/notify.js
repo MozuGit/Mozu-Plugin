@@ -82,7 +82,7 @@ export default new class {
         '>您有一条新的宗门简介审核',
         '宗门ID：' + sectId,
         '申请简介：' + sectDesc,
-        (await mqqapi.command('[审核通过]', '宗门简介审核通过' + sectId, true)) + '      ' + (await mqqapi.command('[驳回审核]', '宗门简介审核通过' + sectId, true)),
+        (await mqqapi.command('[审核通过]', '宗门简介审核通过' + sectId, true)) + '      ' + (await mqqapi.command('[驳回审核]', '宗门简介审核拒绝' + sectId, true)),
         '***'
       ].join('\n')
     }

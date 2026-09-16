@@ -49,7 +49,7 @@ const handleGetCode = async (req, res) => {
       message: '获取验证码频繁，请稍后再试'
     })
   }
-  const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0')
+  const code = String(crypto.randomInt(0, 1000000)).padStart(8, '0')
   logger.info(logger.yellow(`[魔族陌面版][验证码][来自IP：${ip}] ${code}`))
   await Redis.set(`Mozu:panel:code:${ip}`, code, 'EX', 300)
   res.json({
@@ -79,8 +79,17 @@ const handleResetPassword = async (req, res) => {
   }
 
   const ip = getIP(req)
+  if (parseInt(await Redis.get(`Mozu:panel:code:${ip}:count`)) >= 5) {
+    await Redis.del(`Mozu:panel:code:${ip}`)
+    await Redis.del(`Mozu:panel:code:${ip}:count`)
+    return res.json({
+      success: false,
+      message: '验证码连续错误，请重新获取验证码'
+    })
+  }
   const savedCode = await Redis.get(`Mozu:panel:code:${ip}`)
   if (code !== savedCode) {
+    await Redis.incr(`Mozu:panel:code:${ip}:count`)
     return res.json({
       success: false,
       message: '验证码错误'
@@ -89,7 +98,7 @@ const handleResetPassword = async (req, res) => {
 
   Config.modify('panel', 'login', 'password', newPassword)
   await Redis.del(`Mozu:panel:code:${ip}`)
-
+  await Redis.del(`Mozu:panel:code:${ip}:count`)
   res.json({
     success: true
   })

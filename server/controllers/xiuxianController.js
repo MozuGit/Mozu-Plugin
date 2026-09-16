@@ -613,7 +613,8 @@ const getBackupList = async (req, res) => {
 const restoreBackup = async (req, res) => {
   try {
     const { filename } = req.query
-    const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", filename + '.json')
+    const safeFile = path.basename(String(filename))
+    const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", safeFile + '.json')
     if (!fs.existsSync(filePath)) {
       return res.json({ success: false, message: "备份文件不存在" })
     }
@@ -627,11 +628,14 @@ const restoreBackup = async (req, res) => {
 const Backup = async (req, res) => {
   try {
     const { filename } = req.query
-    const fileTime = formatTime(Date.now())
-    const fileName = filename ? filename + '.json' : fileTime + '.json'
+    const rawName = typeof filename === 'string' ? filename.trim() : ''
+    const base = rawName ? path.basename(rawName) : ''
+    const fileName = (base && base !== '.' && base !== '..')
+      ? base + '.json'
+      : formatTime(Date.now()) + '.json'
     const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", fileName)
     await backupKeys("Mozu:xiuxian:*", filePath)
-    res.json({ success: true })
+    res.json({ success: true, data: { filename: fileName.replace(/\.json$/, '') } })
   } catch (error) {
     res.json({ success: false, message: error.message })
   }

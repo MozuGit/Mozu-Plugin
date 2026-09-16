@@ -6,39 +6,51 @@ import Config from "#Config"
 import openai from '../ai/openai.js'
 import notify from './tools/notify.js'
 
+Redis.defineCommand('xiuxianInit', {
+  numberOfKeys: 4,
+  lua: `
+local id = redis.call('HGET', KEYS[1], ARGV[1])
+local created = 0
+if not id then
+  id = redis.call('INCR', KEYS[3])
+  redis.call('HSET', KEYS[1], ARGV[1], id)
+  redis.call('HSET', KEYS[2], id, ARGV[1])
+  created = 1
+end
+local infoKey = KEYS[4] .. id
+if redis.call('EXISTS', infoKey) == 0 then
+  local argv = {}
+  for i = 2, #ARGV do argv[#argv + 1] = ARGV[i] end
+  redis.call('HSET', infoKey, unpack(argv))
+end
+return { tonumber(id), created }
+`
+})
+
 const PLAYER_INFO_KEY = "Mozu:xiuxian:playerInfo"  //玩家信息KEY
 const PLAYER_BAG_KEY = "Mozu:xiuxian:playerBag"  //玩家背包KEY
 const SECT_INFO_KEY = "Mozu:xiuxian:sectInfo"  //宗门信息KEY
 
 export default new class {
   async init(openid) {
-    const exists = await Redis.hget('Mozu:xiuxian:openid:forward', openid)
-    if (!exists) {
-      const id = await Redis.incr('Mozu:xiuxian:openid:counter')
-      Redis.hset('Mozu:xiuxian:openid:forward', openid, id)
-      Redis.hset('Mozu:xiuxian:openid:reverse', id, openid)
-      Redis.hset(`${PLAYER_INFO_KEY}:${id}`, {
-        修为: 0,
-        灵石: 0,
-        境界: 0,
-        称号: -1,
-        性别: "未设置",
-        宗门ID: 0,
-        签到次数: 0,
-        注册时间: Math.floor(Date.now() / 1000)
-      })
-      return {
-        event: "user_init",
-        data: {
-          id: parseInt(id, 10)
-        }
-      }
-    }
+    const [id, created] = await Redis.xiuxianInit(
+      'Mozu:xiuxian:openid:forward',
+      'Mozu:xiuxian:openid:reverse',
+      'Mozu:xiuxian:openid:counter',
+      `${PLAYER_INFO_KEY}:`,
+      openid,
+      '修为', 0,
+      '灵石', 0,
+      '境界', 0,
+      '称号', -1,
+      '性别', '未设置',
+      '宗门ID', 0,
+      '签到次数', 0,
+      '注册时间', Math.floor(Date.now() / 1000)
+    )
     return {
-      event: "user_login",
-      data: {
-        id: parseInt(exists, 10)
-      }
+      event: created ? 'user_init' : 'user_login',
+      data: { id: parseInt(id, 10) }
     }
   }
 
@@ -1303,12 +1315,12 @@ export default new class {
           if (crypto.randomInt(1, 101) <= artInfo.rate) {
             arts.add(artId)
             state = true
-            Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '功法列表', artsData)
+            Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '功法列表', JSON.stringify([...arts]))
           } else {
             state = false
             Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '修为', cult - artInfo.deduct_cult)
           }
-          Redis.hset(`${PLAYER_BAG_KEY}:${id}`, '功法', JSON.stringify([...arts]))
+          Redis.hset(`${PLAYER_BAG_KEY}:${id}`, '功法', JSON.stringify(artsData))
           return {
             event: "learn_art",
             data: {
@@ -1317,7 +1329,9 @@ export default new class {
             }
           }
         } else {
-          event: "no_art"
+          return {
+            event: "no_art"
+          }
         }
       } else {
         return {
@@ -1371,7 +1385,7 @@ export default new class {
               const index = artsData.findIndex(p => p.id === art.id)
               artsData.splice(index, 1)
             }
-            Redis.hset(`${PLAYER_BAG_KEY}:${id}`, '丹药', JSON.stringify(artsData))
+            Redis.hset(`${PLAYER_BAG_KEY}:${id}`, '功法', JSON.stringify(artsData))
             Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '灵石', ls + addls)
             return {
               event: "sell_art",
@@ -1457,12 +1471,9 @@ export default new class {
             const random = crypto.randomInt(1, 101)
             const pushSroot = function (level) {
               const randomSrootList = srootList.filter(item => item.level === level)
-              if (randomSrootList.length <= 1) {
-                washsroot.push(randomSrootList[0])
-              } else {
-                const randomSroot = crypto.randomInt(0, randomSrootList.length - 1)
-                washsroot.push(randomSrootList[randomSroot])
-              }
+              if (!randomSrootList.length) return false
+              washsroot.push(randomSrootList[crypto.randomInt(0, randomSrootList.length)])
+              return true
             }
             if (random <= Config.xiuxian.sroot.root_drop.five_elements) {
               pushSroot("five_elements")
