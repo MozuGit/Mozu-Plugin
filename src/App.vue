@@ -1,6 +1,6 @@
 <template>
   <router-view v-if="route.name === 'login'" />
-  <a-layout v-else style="min-height: 100vh; background: linear-gradient(135deg, #eaea66 0%, #a936d0 100%);">
+  <a-layout v-else style="min-height: 100vh; background: linear-gradient(135deg, #fff600 0%, #6a0eab 100%);">
     <div v-if="isMobile && !collapsed" class="mobile-overlay" @click="collapsed = true" />
 
     <a-layout-sider v-model:collapsed="collapsed" :collapsible="!isMobile" :trigger="null" theme="light" :width="200"
