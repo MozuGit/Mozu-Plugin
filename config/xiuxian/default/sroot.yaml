@@ -1,0 +1,94 @@
+# 灵根概率（单位：%）
+root_drop:
+  five_elements: 79
+  advanced: 15
+  supreme: 5
+  mozumo: 1
+
+# 灵根列表
+sroot:
+  - id: 1  #灵根ID
+    name: 金灵根  # 灵根名称
+    addition: 1.0  # 灵根加成
+    level: five_elements  # 灵根掉落概率等级
+  - id: 2
+    name: 木灵根
+    addition: 1.0
+    level: five_elements
+  - id: 3
+    name: 水灵根
+    addition: 1.0
+    level: five_elements
+  - id: 4
+    name: 火灵根
+    addition: 1.0
+    level: five_elements
+  - id: 5
+    name: 土灵根
+    addition: 1.0
+    level: five_elements
+  
+  - id: 6
+    name: 冰灵根
+    addition: 1.1
+    level: advanced
+  - id: 7
+    name: 风灵根
+    addition: 1.2
+    level: advanced
+  - id: 8
+    name: 雷灵根
+    addition: 1.3
+    level: advanced
+  - id: 9
+    name: 虚灵根
+    addition: 1.4
+    level: advanced
+  - id: 10
+    name: 天灵根
+    addition: 1.5
+    level: advanced
+  - id: 11
+    name: 地灵根
+    addition: 1.6
+    level: advanced
+  - id: 12
+    name: 空灵根
+    addition: 1.8
+    level: advanced
+  - id: 13
+    name: 废灵根
+    addition: 0.1
+    level: advanced
+
+  - id: 14
+    name: 玄冰冥炎根
+    addition: 3.5
+    level: supreme
+  - id: 15
+    name: 九霄神雷根
+    addition: 3.6
+    level: supreme
+  - id: 16
+    name: 镜花水月根
+    addition: 3.8
+    level: supreme
+  - id: 17
+    name: 大梦千秋根
+    addition: 3.9
+    level: supreme
+  - id: 18
+    name: 太初鸿蒙根
+    addition: 4.0
+    level: supreme
+  
+  - id: 19
+    name: 至臻陌灵根
+    addition: 10.0
+    level: mozumo
+
+# 获取灵根时需要的灵石
+obtain_sroot_ls: 100000
+
+# 洗灵根需要的灵石
+wash_sroot_ls: 50000

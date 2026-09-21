@@ -1,0 +1,86 @@
+import Config from "#Config"
+
+const prefix = Config.xiuxian.setting.forceSharp ? '/' : ''
+
+const help = {
+  get xiuxian() {
+    const commands = [
+      '修炼',
+      '开采',
+      '突破',
+      '切磋',
+      '储物袋',
+      '修仙签到',
+      '开始闭关',
+      '结束闭关',
+      '随机切磋',
+      '我的称号',
+      '设置称号',
+      '妖兽列表',
+      '查看妖兽',
+      '猎杀妖兽',
+      '秘境列表',
+      '查看秘境',
+      '探索秘境',
+      '丹药背包',
+      '功法背包',
+      '使用丹药',
+      '出售丹药',
+      '学习功法',
+      '出售功法',
+      '洗灵根',
+      '获取灵根',
+      '替换灵根',
+      '取消替换灵根',
+      '查询修仙者',
+      '修仙者人数',
+      '修仙个人信息'
+    ]
+    const result = commands.map(item => `${prefix}${item}`)
+    return result
+  },
+  get sect() {
+    const commands = [
+      '创建宗门',
+      '我的宗门',
+      '加入宗门',
+      '查询宗门',
+      '宗门列表',
+      '宗门签到',
+      '宗门审核',
+      '宗门成员',
+      '宗门供奉',
+      '宗门升级',
+      '同意宗门成员',
+      '拒绝宗门成员',
+      '全部同意宗门成员',
+      '全部拒绝宗门成员'
+    ]
+    const result = commands.map(item => `${prefix}${item}`)
+    return result
+  },
+  get rank() {
+    const commands = [
+      '修为榜',
+      '灵石榜',
+      '战力榜',
+      '闭关榜',
+      '签到榜',
+      '切磋榜',
+      '修仙排行'
+    ]
+    const result = commands.map(item => `${prefix}${item}`)
+    return result
+  },
+  get cdk() {
+    let commands = [
+      '使用兑换码',
+      '生成兑换码',
+      '删除兑换码'
+    ]
+    const result = commands.map(item => `${prefix}${item}`)
+    return result
+  }
+}
+
+export default help
