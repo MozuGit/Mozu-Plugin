@@ -6,3 +6,6 @@ port: 11451
 
 # 登录密码
 password: ""
+
+# 是否启用2FA
+enable: false

@@ -1,3 +1,8 @@
-/node_modules/
+# 依赖包目录
+node_modules/
+
+# 配置项
 /config/*/config
+
+# 备份文件
 /backup/xiuxian/*
