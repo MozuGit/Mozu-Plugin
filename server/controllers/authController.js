@@ -122,7 +122,7 @@ const handleNormalLogin = async (req, res) => {
     })
   }
 
-  if (((await hashSHA256(password)) === Config.panel.login.password || password === Config.panel.login.password) && (!Config.panel.totp.enabled || TwoFactorAuth.verifyToken(Config.panel.totp.secret, req.body.token))) {
+  if (((await hashSHA256(password)) === Config.panel.login.password || password === Config.panel.login.password) && (!isTotpEnabled() || TwoFactorAuth.verifyToken(Config.panel.totp.secret, req.body.token))) {
     const token = crypto.randomBytes(32).toString('hex')
     await Redis.sadd("Mozu:panel:token", token)
     await Redis.del("Mozu:panel:password:error")
@@ -172,6 +172,11 @@ export const handle2FA = async (req, res) => {
   const { action } = req.query
 
   try {
+    // 获取 TOTP 双因素认证状态
+    if (action === 'status') {
+      return await handleGetTotpStatus(req, res)
+    }
+
     // 启用 TOTP 双因素认证密钥
     if (action === 'create') {
       return await handleCreateTotp(req, res)
@@ -199,8 +204,17 @@ export const handle2FA = async (req, res) => {
   }
 }
 
+const handleGetTotpStatus = async (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      enabled: isTotpEnabled()
+    }
+  })
+}
+
 const handleCreateTotp = async (req, res) => {
-  if (Config.panel.totp.enabled) {
+  if (isTotpEnabled()) {
     return res.status(409).json({
       success: false,
       message: 'TOTP 双因素认证已启用'
@@ -218,7 +232,7 @@ const handleCreateTotp = async (req, res) => {
 }
 
 const handleEnableTotp = async (req, res) => {
-  if (Config.panel.totp.enabled) {
+  if (isTotpEnabled()) {
     return res.status(409).json({
       success: false,
       message: 'TOTP 双因素认证已启用'
@@ -248,7 +262,7 @@ const handleEnableTotp = async (req, res) => {
 }
 
 const handleDeleteTotp = async (req, res) => {
-  if (!Config.panel.totp.enabled) {
+  if (!isTotpEnabled()) {
     return res.json({
       success: false,
       message: 'TOTP 双因素认证未启用'
@@ -267,6 +281,11 @@ const handleDeleteTotp = async (req, res) => {
     success: true,
     message: 'TOTP 双因素认证关闭成功'
   })
+}
+
+// 判断 TOTP 是否启用（配置缺键时按未启用处理，避免读取 undefined 抛错导致登录失败）
+function isTotpEnabled() {
+  return Config.panel.totp?.enabled === true
 }
 
 async function validateToken(req) {

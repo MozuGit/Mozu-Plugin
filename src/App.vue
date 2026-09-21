@@ -20,6 +20,10 @@
             <AppstoreOutlined />
             <span>魔族陌修仙</span>
           </a-menu-item>
+          <a-menu-item key="settings">
+            <SettingOutlined />
+            <span>设置</span>
+          </a-menu-item>
           <a-menu-item key="about">
             <InfoCircleOutlined />
             <span>关于</span>
@@ -74,7 +78,7 @@ onBeforeUnmount(() => {
 const collapsed = ref(isMobile.value)
 const selectedKeys = ref([])
 
-const validRouteNames = ['xiuxian', 'xiuxianHome', 'xiuxianConfig', 'xiuxianCdk', 'xiuxianPlayer', 'xiuxianSect', 'xiuxianBackup', 'about']
+const validRouteNames = ['xiuxian', 'xiuxianHome', 'xiuxianConfig', 'xiuxianCdk', 'xiuxianPlayer', 'xiuxianSect', 'xiuxianBackup', 'settings', 'about']
 
 const pageTitles = {
   index: '主页',

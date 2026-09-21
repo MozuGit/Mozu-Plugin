@@ -30,13 +30,20 @@
       <!-- 登录卡片 -->
       <div class="login-box" :class="{ 'fade-out': showResetPanel }">
         <h1>魔族陌登录</h1>
-        <a-form :model="form" @finish="handleLogin">
+        <a-form ref="formRef" :model="form" @finish="handleLogin">
           <a-form-item style="margin-bottom: 0;">
             <a-input-password v-model:value="form.password" placeholder="密码" size="large">
               <template #prefix>
                 <LockOutlined />
               </template>
             </a-input-password>
+          </a-form-item>
+          <a-form-item v-if="totpRequired" style="margin-bottom: 0; margin-top: 10px;">
+            <a-input v-model:value="form.token" placeholder="6 位动态验证码" maxlength="6" size="large" ref="totpInputRef">
+              <template #prefix>
+                <SafetyOutlined />
+              </template>
+            </a-input>
           </a-form-item>
           <div style="text-align: right; margin-bottom: 5px; margin-top: 0; line-height: 1;">
             <a-button type="link" @click="openResetPanel"
@@ -67,7 +74,7 @@
         <a-form :model="resetForm" @finish="handleResetPassword" size="default">
           <a-form-item style="margin-bottom: 12px;">
             <div style="display: flex; gap: 8px;">
-              <a-input v-model:value="resetForm.code" placeholder="验证码" size="default" style="flex: 1;" maxlength="6"
+              <a-input v-model:value="resetForm.code" placeholder="验证码" size="default" style="flex: 1;" maxlength="8"
                 @input="handleCodeInput">
                 <template #prefix>
                   <SafetyOutlined />
@@ -99,7 +106,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch } from 'vue'
+import { reactive, ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { LockOutlined, SafetyOutlined, ArrowLeftOutlined } from '@ant-design/icons-vue'
@@ -114,8 +121,13 @@ const countdown = ref(0)
 let timer = null
 
 const form = reactive({
-  password: ''
+  password: '',
+  token: ''
 })
+
+const formRef = ref()
+const totpInputRef = ref()
+const totpRequired = ref(false)
 
 const resetForm = reactive({
   code: '',
@@ -125,8 +137,8 @@ const resetForm = reactive({
 function handleCodeInput(e) {
   let value = e.target.value
   value = value.replace(/[^\d]/g, '')
-  if (value.length > 6) {
-    value = value.slice(0, 6)
+  if (value.length > 8) {
+    value = value.slice(0, 8)
   }
   resetForm.code = value
 }
@@ -191,6 +203,13 @@ async function handleLogin() {
     const payload = {
       password: hashedPassword
     }
+    if (totpRequired.value) {
+      if (!/^\d{6}$/.test(form.token)) {
+        loading.value = false
+        return message.error('请输入 6 位动态验证码')
+      }
+      payload.token = form.token
+    }
     const res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -200,10 +219,19 @@ async function handleLogin() {
 
     if (data.success) {
       localStorage.setItem('token', data.data.token)
+      formRef.value?.resetFields()
+      totpRequired.value = false
       message.success('登录成功')
       router.push('/xiuxian')
     } else {
-      message.error(data.message || '登录失败')
+      const msg = data.message || '登录失败'
+      // 服务端返回 TOTP 相关错误时展开验证码输入框，避免启用 2FA 后无法登录
+      if (msg.includes('TOTP')) {
+        totpRequired.value = true
+        form.token = ''
+        nextTick(() => totpInputRef.value?.focus())
+      }
+      message.error(msg)
     }
   } catch (e) {
     message.error('网络错误，请重试')
