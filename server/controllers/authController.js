@@ -122,7 +122,7 @@ const handleNormalLogin = async (req, res) => {
     })
   }
 
-  if (((await hashSHA256(password)) === Config.panel.login.password || password === Config.panel.login.password) && (!isTotpEnabled() || TwoFactorAuth.verifyToken(Config.panel.totp.secret, req.body.token))) {
+  if (((await hashSHA256(password)) === Config.panel.login.password || password === Config.panel.login.password) && (!isTotpEnabled() || TwoFactorAuth.verifyToken(Config.panel.login.totp.secret, req.body.token))) {
     const token = crypto.randomBytes(32).toString('hex')
     await Redis.sadd("Mozu:panel:token", token)
     await Redis.del("Mozu:panel:password:error")
@@ -252,7 +252,6 @@ const handleEnableTotp = async (req, res) => {
       message: 'TOTP 验证码错误'
     })
   }
-  // 注意：Config.modify 的第三个参数是 YAML 文件名，TOTP 配置存在 login.yaml 中
   const saved = saveTotpConfig(true, secret)
   if (!saved) {
     return res.json({
@@ -274,7 +273,7 @@ const handleDeleteTotp = async (req, res) => {
       message: 'TOTP 双因素认证未启用'
     })
   }
-  const ok = TwoFactorAuth.verifyToken(Config.panel.totp.secret, req.body.token)
+  const ok = TwoFactorAuth.verifyToken(Config.panel.login.totp.secret, req.body.token)
   if (!ok) {
     return res.json({
       success: false,
@@ -294,14 +293,10 @@ const handleDeleteTotp = async (req, res) => {
   })
 }
 
-// 判断 TOTP 是否启用（配置缺键时按未启用处理，避免读取 undefined 抛错导致登录失败）
 function isTotpEnabled() {
-  return Config.panel.totp?.enabled === true
+  return Config.panel.login.totp?.enabled === true
 }
 
-// 写入 TOTP 配置
-// 注意：Config.modify(dirCfgName, name, key, value) 的 name 是 YAML 文件名而非配置节，
-// TOTP 配置位于 login.yaml，键路径需写成 'totp.enabled' 形式，否则会静默写入不存在的 totp.yaml
 function saveTotpConfig(enabled, secret) {
   const okEnabled = Config.modify('panel', 'login', 'totp.enabled', enabled)
   const okSecret = Config.modify('panel', 'login', 'totp.secret', secret)

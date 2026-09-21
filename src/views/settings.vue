@@ -137,7 +137,6 @@ const creating = ref(false)
 const enabling = ref(false)
 const disabling = ref(false)
 
-// a-form 必须绑定 model，否则其 submit 处理不会 emit finish 事件
 const enableForm = reactive({
   token: ''
 })
@@ -552,7 +551,6 @@ onBeforeUnmount(() => {
   font-weight: 500;
 }
 
-/* 黑金渐变按钮 */
 .gold-black-btn {
   background: linear-gradient(135deg, #1a1a1a 0%, #333333 30%, #ffd700 50%, #ffed4a 70%, #1a1a1a 100%) !important;
   background-size: 200% 200% !important;

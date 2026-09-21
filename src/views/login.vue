@@ -19,7 +19,7 @@
         <div class="slogan">
           <div class="main-title">Mozu-Plugin</div>
           <div class="sub-title">
-            不知道写什么
+            适用于TRSS-Yunzai的插件，主要功能有修仙、伪造聊天、发言统计等
           </div>
         </div>
       </div>
@@ -225,7 +225,6 @@ async function handleLogin() {
       router.push('/xiuxian')
     } else {
       const msg = data.message || '登录失败'
-      // 服务端返回 TOTP 相关错误时展开验证码输入框，避免启用 2FA 后无法登录
       if (msg.includes('TOTP')) {
         totpRequired.value = true
         form.token = ''
@@ -329,7 +328,6 @@ async function hashSHA256(password) {
   overflow: hidden;
 }
 
-/* GitHub 图标 - 右上角 */
 .github-link {
   position: absolute;
   top: 30px;
@@ -348,7 +346,6 @@ async function hashSHA256(password) {
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
 }
 
-/* 左侧内容 */
 .left-content {
   flex: 1;
   display: flex;
@@ -365,7 +362,6 @@ async function hashSHA256(password) {
   align-items: center;
 }
 
-/* 图片样式 - 无立体感 */
 .logo-image {
   animation: slideUp 0.8s ease-out forwards;
   opacity: 0;
@@ -382,7 +378,6 @@ async function hashSHA256(password) {
   background: transparent;
 }
 
-/* 字幕样式 */
 .slogan {
   text-align: center;
   animation: slideUp 0.8s ease-out forwards;
@@ -411,7 +406,6 @@ async function hashSHA256(password) {
   opacity: 0;
 }
 
-/* 整体上滑动画 */
 @keyframes slideUp {
   0% {
     opacity: 0;
@@ -424,7 +418,6 @@ async function hashSHA256(password) {
   }
 }
 
-/* 淡入动画 */
 @keyframes fadeIn {
   0% {
     opacity: 0;
@@ -435,14 +428,12 @@ async function hashSHA256(password) {
   }
 }
 
-/* 右侧面板容器 - 保持位置不变 */
 .right-panel-wrapper {
   width: 400px;
   position: relative;
   flex-shrink: 0;
 }
 
-/* 登录框与重置面板共用样式 */
 .login-box {
   width: 100%;
   padding: 40px;
@@ -453,7 +444,6 @@ async function hashSHA256(password) {
   box-sizing: border-box;
 }
 
-/* 登录卡片保持相对定位，始终占据空间 */
 .login-box:not(.reset-panel) {
   position: relative;
   z-index: 1;
@@ -464,7 +454,6 @@ async function hashSHA256(password) {
   pointer-events: none;
 }
 
-/* 重置卡片绝对定位，覆盖在登录卡片上方，保持相同尺寸 */
 .reset-panel {
   position: absolute;
   top: 0;
@@ -491,13 +480,11 @@ async function hashSHA256(password) {
   color: #333;
 }
 
-/* 重置面板标题样式 */
 .reset-panel h2 {
   color: #333;
   font-weight: 600;
 }
 
-/* 黑金渐变按钮样式 */
 .gold-black-btn {
   background: linear-gradient(135deg, #1a1a1a 0%, #333333 30%, #ffd700 50%, #ffed4a 70%, #1a1a1a 100%) !important;
   background-size: 200% 200% !important;
@@ -529,7 +516,6 @@ async function hashSHA256(password) {
   animation: none;
 }
 
-/* 渐变移动动画 */
 @keyframes gradientShift {
   0% {
     background-position: 0% 50%;
@@ -544,7 +530,6 @@ async function hashSHA256(password) {
   }
 }
 
-/* 响应式适配 */
 @media (max-width: 1024px) {
   .login-container {
     padding: 0 5%;

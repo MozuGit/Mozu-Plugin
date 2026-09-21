@@ -153,6 +153,15 @@ export const actions = {
     } catch (error) {
       return Result.error('重置配置失败: ' + error.message)
     }
+  },
+  forceClose: async (params, { Result }) => {
+    try {
+      Config.modify('panel', 'login', 'totp.enabled', false)
+      Config.modify('panel', 'login', 'totp.secret', '')
+      return Result.ok({}, "强制关闭TOTP成功喵~")
+    } catch (error) {
+      return Result.error('强制关闭失败: ' + error.message)
+    }
   }
 }
 

@@ -8,9 +8,6 @@ port: 11451
 password: ""
 
 # 双因素认证（TOTP）
-# 注意：enabled 与 secret 必须同时存在，配置为浅合并，缺键会导致另一方被覆盖
 totp:
-  # 是否启用2FA
-  enabled: false
-  # TOTP 密钥（Base32），启用后由面版自动写入，请勿手动修改
-  secret: ""
+  enabled: false  # 是否启用2FA
+  secret: ""  # TOTP 密钥

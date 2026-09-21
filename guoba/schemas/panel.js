@@ -33,5 +33,24 @@ export default [
     componentProps: {
       placeholder: '敏感信息不会展示在前端'
     }
+  },{
+    field: 'actions',
+    label: '强制关闭TOTP',
+    component: 'GButtons',
+    componentProps: {
+      buttons: [
+        {
+          label: '强制关闭',
+          action: 'forceClose',
+          type: 'default',
+          danger: true,
+          icon: "ant-design:delete-filled",
+          confirm: {
+            title: '强制关闭',
+            content: '可用于验证器无法使用的情况'
+          }
+        }
+      ]
+    }
   }
 ]
