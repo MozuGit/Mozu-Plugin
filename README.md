@@ -20,23 +20,26 @@
 
 ## 安装教程
 
-- 使用 github
-
 ```sh
 git clone https://github.com/MozuGit/Mozu-Plugin ./plugins/Mozu-Plugin
 ```
 
-- 使用 gitee
+<details>
+<summary>GitHub 打不开？点这里换源</summary>
+
+### Gitee
 
 ```sh
 git clone https://gitee.com/MozuGit/Mozu-Plugin ./plugins/Mozu-Plugin
 ```
 
-- 使用 gitcode
+### GitCode
 
 ```sh
 git clone https://gitcode.com/MozuGit/Mozu-Plugin ./plugins/Mozu-Plugin
 ```
+
+</details>
 
 2. 安装依赖
 
