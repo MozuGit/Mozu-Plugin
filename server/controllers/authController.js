@@ -252,8 +252,14 @@ const handleEnableTotp = async (req, res) => {
       message: 'TOTP 验证码错误'
     })
   }
-  Config.modify('panel', 'totp', 'enabled', true)
-  Config.modify('panel', 'totp', 'secret', secret)
+  // 注意：Config.modify 的第三个参数是 YAML 文件名，TOTP 配置存在 login.yaml 中
+  const saved = saveTotpConfig(true, secret)
+  if (!saved) {
+    return res.json({
+      success: false,
+      message: 'TOTP 配置写入失败，请检查 config/panel 目录权限'
+    })
+  }
   await Redis.del("Mozu:panel:totp:secret")
   res.json({
     success: true,
@@ -275,8 +281,13 @@ const handleDeleteTotp = async (req, res) => {
       message: 'TOTP 验证码错误'
     })
   }
-  Config.modify('panel', 'totp', 'enabled', false)
-  Config.modify('panel', 'totp', 'secret', '')
+  const saved = saveTotpConfig(false, '')
+  if (!saved) {
+    return res.json({
+      success: false,
+      message: 'TOTP 配置写入失败，请检查 config/panel 目录权限'
+    })
+  }
   res.json({
     success: true,
     message: 'TOTP 双因素认证关闭成功'
@@ -286,6 +297,15 @@ const handleDeleteTotp = async (req, res) => {
 // 判断 TOTP 是否启用（配置缺键时按未启用处理，避免读取 undefined 抛错导致登录失败）
 function isTotpEnabled() {
   return Config.panel.totp?.enabled === true
+}
+
+// 写入 TOTP 配置
+// 注意：Config.modify(dirCfgName, name, key, value) 的 name 是 YAML 文件名而非配置节，
+// TOTP 配置位于 login.yaml，键路径需写成 'totp.enabled' 形式，否则会静默写入不存在的 totp.yaml
+function saveTotpConfig(enabled, secret) {
+  const okEnabled = Config.modify('panel', 'login', 'totp.enabled', enabled)
+  const okSecret = Config.modify('panel', 'login', 'totp.secret', secret)
+  return okEnabled && okSecret
 }
 
 async function validateToken(req) {
