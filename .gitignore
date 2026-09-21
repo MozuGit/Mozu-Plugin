@@ -1,9 +1,0 @@
-# 依赖包目录
-node_modules/
-.pnpm-store/
-
-# 配置项
-/config/*/config
-
-# 备份文件
-/backup/xiuxian/*

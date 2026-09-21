@@ -1,1 +1,0 @@
-import{F as e,K as t,R as n,d as r,f as i,t as a}from"./index2.js";var o={};function s(a,o){let s=n(`a-card`);return e(),i(s,{title:`插件主页`},{default:t(()=>[...o[0]||=[r(`p`,null,`插件主页`,-1)]]),_:1})}var c=a(o,[[`render`,s]]);export{c as default};
