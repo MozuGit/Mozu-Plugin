@@ -7,6 +7,13 @@
 [![Version](https://img.shields.io/github/package-json/v/MozuGit/Mozu-Plugin?style=flat)](package.json)
 [![License](https://img.shields.io/github/license/MozuGit/Mozu-Plugin?style=flat)](LICENSE)
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/MozuGit/MozuGit/output/github-contribution-grid-snake-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/MozuGit/MozuGit/output/github-contribution-grid-snake.svg">
+  <img alt="github contribution grid snake animation" src="https://raw.githubusercontent.com/MozuGit/MozuGit/output/github-contribution-grid-snake.svg">
+</picture>
+
+
 </div>
 
 > [!TIP]
@@ -76,8 +83,7 @@ pnpm install
   - **QQ：** [魔族陌](https://qm.qq.com/q/5fKlztbHHG)
   - **QQ群：** [陌陌の小窝](https://qun.qq.com/universal-share/share?ac=1&authKey=13%2FWEfX0G3PO77HgYt3w8yg8K%2BCSE3fYXzuA%2FOH0Vnzv5HDrENZctaRM1qkC07eD&busi_data=eyJncm91cENvZGUiOiI5NzY3MTkwMTciLCJ0b2tlbiI6Inl0NHY2b01BRTlMeHR4MXBYbWJqYWxpbmU5Wk9kT3VqZE1nM0dNYVZET1pBcjVPTVZ5WDVLMnVCaFpHNTFWVUgiLCJ1aW4iOiIzMzQzNzEyNTg5In0%3D&data=uDBsYAg-ZA2RbnkK_3yJFYKmiPRZg-XmEhn6iJ1tWmOfRPEeEIiA6N1o1e5p9-dqSJDSxCk44qnx92h62ZlrmQ&svctype=4&tempid=h5_group_info)
   - **GitHub：** [MozuGit](https://github.com/MozuGit)
-  - **Discord：** [魔族陌](https://discord.gg/5EbwKQVcC)
-  - **爱发电：** [魔族陌](https://www.ifdian.net/a/Mozumo)
+  - **爱发电：** [赞助开发者](https://www.ifdian.net/a/Mozumo)
 
 ## 鸣谢
 
