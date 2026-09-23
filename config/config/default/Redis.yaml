@@ -9,4 +9,4 @@ keepAlive: 3000  # 心跳间隔（毫秒）
 noDelay: true # 禁用Nagle算法，降低延迟
 
 # 特殊功能
-gloabl: false # 将Redis挂载到云崽global上
+global: false # 将Redis挂载到云崽global上
