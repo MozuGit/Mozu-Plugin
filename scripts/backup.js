@@ -2,6 +2,16 @@ import Redis from "#Redis"
 import fs from "node:fs"
 import { Writable } from "node:stream"
 
+const MOZU_PREFIX = "Mozu:"
+
+function isMozuKey(key) {
+  return typeof key === "string" && key.startsWith(MOZU_PREFIX)
+}
+
+function isMozuPattern(pattern) {
+  return typeof pattern === "string" && pattern.startsWith(MOZU_PREFIX)
+}
+
 class JsonArrayFileWritable extends Writable {
   constructor(filePath) {
     super({ objectMode: true })
@@ -70,6 +80,11 @@ function endAsync(writable) {
 }
 
 async function backupKeys(pattern, outputFile) {
+  if (!isMozuPattern(pattern)) {
+    logger.warn(`backupKeys: 非法 pattern "${pattern}"，必须以 "${MOZU_PREFIX}" 开头`)
+    return null
+  }
+
   const target = new JsonArrayFileWritable(outputFile)
 
   const getValueByType = async (key, type) => {
@@ -85,14 +100,17 @@ async function backupKeys(pattern, outputFile) {
 
   try {
     for await (const keys of Redis.scanStream({ match: pattern, count: 100 })) {
+      const validKeys = keys.filter(isMozuKey)
+      if (validKeys.length === 0) continue
+
       const pipeline = Redis.pipeline()
-      keys.forEach((key) => {
+      validKeys.forEach((key) => {
         pipeline.type(key)
         pipeline.ttl(key)
       })
       const typeTtlResults = await pipeline.exec()
 
-      const valuePromises = keys.map(async (key, index) => {
+      const valuePromises = validKeys.map(async (key, index) => {
         const type = typeTtlResults[index * 2][1]
         const ttl = typeTtlResults[index * 2 + 1][1]
         const value = await getValueByType(key, type)
@@ -103,6 +121,7 @@ async function backupKeys(pattern, outputFile) {
 
       for (const record of records) {
         if (record.value === null) continue
+        if (!isMozuKey(record.key)) continue
         await writeAsync(target, record)
       }
     }
@@ -116,7 +135,7 @@ async function backupKeys(pattern, outputFile) {
   }
 }
 
-async function scanAllKeys(pattern = "*") {
+async function scanAllKeys(pattern) {
   return new Promise((resolve, reject) => {
     const keys = []
     const stream = Redis.scanStream({ match: pattern, count: 100 })
@@ -127,7 +146,12 @@ async function scanAllKeys(pattern = "*") {
 }
 
 async function restoreKeys(backupFile, options = {}) {
-  const { purge = true, pattern = "*" } = options
+  const { purge = true, pattern = `${MOZU_PREFIX}*` } = options
+
+  if (!isMozuPattern(pattern)) {
+    logger.warn(`restoreKeys: 非法 pattern "${pattern}"，必须以 "${MOZU_PREFIX}" 开头`)
+    return null
+  }
 
   try {
     let content = fs.readFileSync(backupFile, "utf8").trim()
@@ -136,6 +160,15 @@ async function restoreKeys(backupFile, options = {}) {
     content = content.replace(/,\s*([}\]])/g, "$1").replace(/,\s*,/g, ",")
 
     const data = JSON.parse(content)
+
+    const invalidRecord = data.find((r) => !isMozuKey(r.key))
+    if (invalidRecord) {
+      logger.warn(
+        `restoreKeys: 备份文件中存在非法 key "${invalidRecord.key}"，必须以 "${MOZU_PREFIX}" 开头`
+      )
+      return null
+    }
+
     let restoredCount = 0
     const BATCH_SIZE = 100
 
@@ -144,7 +177,9 @@ async function restoreKeys(backupFile, options = {}) {
     let deletedCount = 0
     if (purge) {
       const existingKeys = await scanAllKeys(pattern)
-      const keysToDelete = existingKeys.filter((k) => !backupKeySet.has(k))
+      const keysToDelete = existingKeys.filter(
+        (k) => isMozuKey(k) && !backupKeySet.has(k)
+      )
 
       for (let i = 0; i < keysToDelete.length; i += BATCH_SIZE) {
         const batch = keysToDelete.slice(i, i + BATCH_SIZE)
