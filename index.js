@@ -1,4 +1,4 @@
-import fs, { appendFile } from "fs"
+import fs from "fs"
 import path from "path"
 import { fileURLToPath, pathToFileURL } from 'url'
 import { Version } from './model/Config/Version.js'
