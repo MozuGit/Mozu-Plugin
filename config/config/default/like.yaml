@@ -1,0 +1,17 @@
+# 定时点赞开关
+enable: false
+
+# 定时点赞cron
+cron: 0 0 8 * * ?
+
+# 点赞目标
+targets: []
+
+# 点赞批次
+batchCount: 5
+
+# 单批点赞次数
+times: 10
+
+# 批次间隔（ms）
+interval: 200

@@ -15,6 +15,7 @@ import makeMessage from './makeMessage.js'
 import fayan from './fayan.js'
 import openai from './openai.js'
 import _interface from './interface.js'
+import like from './like.js'
 
 export const schemas = [
   ...RedisConfig,
@@ -22,6 +23,7 @@ export const schemas = [
   ...xiuxian,
   ...makeMessage,
   ...fayan,
+  ...like,
   ...openai,
   ..._interface
 ]
