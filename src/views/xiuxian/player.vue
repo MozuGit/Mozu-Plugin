@@ -4,7 +4,7 @@
       <div class="card-header">
         <span class="card-title">玩家管理</span>
         <div class="player-count-badge">
-          <team-outlined style="margin-right: 4px;" />
+          <team-outlined style="margin-right: 4px" />
           <span>当前玩家总数：</span>
           <span class="count-number">{{ totalPlayerCount }}</span>
           <span>人</span>
@@ -24,13 +24,9 @@
               <search-outlined />
             </template>
           </a-input>
-          
+
           <a-space-compact>
-            <a-select
-              v-model:value="searchParams.cultOperator"
-              style="width: 80px"
-              @change="handleInstantSearch"
-            >
+            <a-select v-model:value="searchParams.cultOperator" style="width: 80px" @change="handleInstantSearch">
               <a-select-option value="contains">包含</a-select-option>
               <a-select-option value="equals">=</a-select-option>
               <a-select-option value="greater">></a-select-option>
@@ -46,13 +42,9 @@
               @input="handleInstantSearch"
             />
           </a-space-compact>
-          
+
           <a-space-compact>
-            <a-select
-              v-model:value="searchParams.lsOperator"
-              style="width: 80px"
-              @change="handleInstantSearch"
-            >
+            <a-select v-model:value="searchParams.lsOperator" style="width: 80px" @change="handleInstantSearch">
               <a-select-option value="contains">包含</a-select-option>
               <a-select-option value="equals">=</a-select-option>
               <a-select-option value="greater">></a-select-option>
@@ -90,7 +82,7 @@
             :options="srootOptions"
             @change="handleInstantSearch"
           />
-          
+
           <a-select
             v-model:value="searchParams.sex"
             placeholder="性别"
@@ -102,7 +94,7 @@
             <a-select-option value="女">女</a-select-option>
             <a-select-option value="未设置">未设置</a-select-option>
           </a-select>
-          
+
           <a-button @click="handleReset">
             <template #icon>
               <reload-outlined />
@@ -116,30 +108,35 @@
         <span v-if="isLoadingAllData" class="update-hint">
           <sync-outlined spin /> 正在加载全部数据... {{ loadedCount }}/{{ totalPlayerCount }}
         </span>
-        <span v-else-if="isUpdating" class="update-hint">
-          <sync-outlined spin /> 更新中...
-        </span>
+        <span v-else-if="isUpdating" class="update-hint"> <sync-outlined spin /> 更新中... </span>
         <span v-else class="update-hint-placeholder"></span>
       </div>
 
-      <a-table 
-        :columns="columns" 
-        :data-source="displayPlayerList" 
+      <a-table
+        :columns="columns"
+        :data-source="displayPlayerList"
         :loading="loading && playerList.length === 0"
-        :pagination="displayPagination" 
-        :locale="tableLocale" 
-        row-key="id" 
-        class="player-table" 
+        :pagination="displayPagination"
+        :locale="tableLocale"
+        row-key="id"
+        class="player-table"
         @change="handleTableChange"
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'currentTitle'">
             <a-tag
-              v-if="record.titleIndex !== undefined && record.titleIndex !== null && record.titleIndex > 0 && record.titles && record.titles[record.titleIndex - 1]"
-              color="purple">
+              v-if="
+                record.titleIndex !== undefined &&
+                record.titleIndex !== null &&
+                record.titleIndex > 0 &&
+                record.titles &&
+                record.titles[record.titleIndex - 1]
+              "
+              color="purple"
+            >
               {{ record.titles[record.titleIndex - 1].title }}
             </a-tag>
-            <span v-else style="color: #999;">-</span>
+            <span v-else style="color: #999">-</span>
           </template>
 
           <template v-if="column.key === 'realm'">
@@ -162,8 +159,17 @@
       </a-table>
     </a-card>
 
-    <a-modal v-model:visible="modalVisible" title="编辑玩家信息" ok-text="保存" cancel-text="取消" @ok="handleSubmit"
-      @cancel="handleCancel" :confirm-loading="submitLoading" width="700px" :destroyOnClose="true">
+    <a-modal
+      v-model:visible="modalVisible"
+      title="编辑玩家信息"
+      ok-text="保存"
+      cancel-text="取消"
+      @ok="handleSubmit"
+      @cancel="handleCancel"
+      :confirm-loading="submitLoading"
+      width="700px"
+      :destroyOnClose="true"
+    >
       <a-form ref="formRef" :model="formState" :rules="formRules" :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }">
         <a-form-item label="修仙ID">
           <a-input v-model:value="formState.id" disabled />
@@ -178,13 +184,23 @@
         </a-form-item>
 
         <a-form-item label="境界" name="realm">
-          <a-select v-model:value="formState.realm" placeholder="请选择境界" show-search option-filter-prop="label"
-            :options="realmOptions" />
+          <a-select
+            v-model:value="formState.realm"
+            placeholder="请选择境界"
+            show-search
+            option-filter-prop="label"
+            :options="realmOptions"
+          />
         </a-form-item>
 
         <a-form-item label="灵根" name="sroot">
-          <a-select v-model:value="formState.sroot" placeholder="请选择灵根" show-search option-filter-prop="label"
-            :options="srootOptions" />
+          <a-select
+            v-model:value="formState.sroot"
+            placeholder="请选择灵根"
+            show-search
+            option-filter-prop="label"
+            :options="srootOptions"
+          />
         </a-form-item>
 
         <a-form-item label="性别" name="sex">
@@ -198,8 +214,12 @@
         <a-form-item label="当前使用称号" name="titleIndex">
           <a-select v-model:value="formState.titleIndex" placeholder="请选择当前使用的称号">
             <a-select-option :value="-1">无</a-select-option>
-            <a-select-option v-for="(title, index) in formState.titles" :key="index" :value="index + 1"
-              :disabled="!title.title || title.title.trim() === ''">
+            <a-select-option
+              v-for="(title, index) in formState.titles"
+              :key="index"
+              :value="index + 1"
+              :disabled="!title.title || title.title.trim() === ''"
+            >
               {{ title.title || `未命名称号${index + 1}` }}
             </a-select-option>
           </a-select>
@@ -211,29 +231,48 @@
               <div class="title-row">
                 <div class="title-field">
                   <label class="title-label">称号名称：</label>
-                  <a-input v-model:value="title.title" placeholder="请输入称号名称" style="flex: 1;"
-                    @change="updateTitleOptions" />
+                  <a-input
+                    v-model:value="title.title"
+                    placeholder="请输入称号名称"
+                    style="flex: 1"
+                    @change="updateTitleOptions"
+                  />
                 </div>
 
                 <div class="title-field">
                   <label class="title-label">获得时间：</label>
                   <div class="time-picker-group">
-                    <a-date-picker v-model:value="title.getDate" show-time format="YYYY-MM-DD HH:mm:ss"
-                      placeholder="选择获得时间" style="flex: 1;" @change="(date) => handleGetDateChange(index, date)" />
-                    <a-button size="small" @click="setCurrentTime(index)" title="设置为当前时间">
-                      现在
-                    </a-button>
+                    <a-date-picker
+                      v-model:value="title.getDate"
+                      show-time
+                      format="YYYY-MM-DD HH:mm:ss"
+                      placeholder="选择获得时间"
+                      style="flex: 1"
+                      @change="(date) => handleGetDateChange(index, date)"
+                    />
+                    <a-button size="small" @click="setCurrentTime(index)" title="设置为当前时间"> 现在 </a-button>
                   </div>
                 </div>
 
                 <div class="title-field">
                   <label class="title-label">到期时间：</label>
                   <div class="expire-time-group">
-                    <a-switch v-model:checked="title.isPermanent" checked-children="永久" un-checked-children="限时"
-                      @change="(checked) => handlePermanentChange(index, checked)" />
-                    <a-date-picker v-if="!title.isPermanent" v-model:value="title.validDate" show-time
-                      format="YYYY-MM-DD HH:mm:ss" placeholder="选择到期时间" style="flex: 1;" :disabledDate="disabledDate"
-                      @change="(date) => handleValidDateChange(index, date)" />
+                    <a-switch
+                      v-model:checked="title.isPermanent"
+                      checked-children="永久"
+                      un-checked-children="限时"
+                      @change="(checked) => handlePermanentChange(index, checked)"
+                    />
+                    <a-date-picker
+                      v-if="!title.isPermanent"
+                      v-model:value="title.validDate"
+                      show-time
+                      format="YYYY-MM-DD HH:mm:ss"
+                      placeholder="选择到期时间"
+                      style="flex: 1"
+                      :disabledDate="disabledDate"
+                      @change="(date) => handleValidDateChange(index, date)"
+                    />
                   </div>
                 </div>
 
@@ -243,7 +282,7 @@
               </div>
             </div>
 
-            <a-button type="dashed" block @click="addTitle" style="margin-top: 12px;">
+            <a-button type="dashed" block @click="addTitle" style="margin-top: 12px">
               <template #icon><plus-outlined /></template>
               添加称号
             </a-button>
@@ -266,7 +305,7 @@ import {
   DeleteOutlined,
   SyncOutlined,
   SearchOutlined,
-  ReloadOutlined
+  ReloadOutlined,
 } from '@ant-design/icons-vue'
 
 const router = useRouter()
@@ -275,7 +314,7 @@ const tableLocale = {
   triggerAsc: '',
   triggerDesc: '',
   cancelSort: '取消排序',
-  emptyText: '暂无玩家数据'
+  emptyText: '暂无玩家数据',
 }
 
 const debounce = (fn, delay = 300) => {
@@ -291,7 +330,7 @@ const debounce = (fn, delay = 300) => {
 const apiRequest = async (url, options = {}) => {
   const token = localStorage.getItem('token')
   const headers = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
@@ -300,8 +339,8 @@ const apiRequest = async (url, options = {}) => {
     ...options,
     headers: {
       ...headers,
-      ...options.headers
-    }
+      ...options.headers,
+    },
   }
   const res = await fetch(url, config)
   if (res.status === 401) {
@@ -346,16 +385,18 @@ const searchParams = reactive({
   lsOperator: 'contains',
   realm: undefined,
   sroot: undefined,
-  sex: undefined
+  sex: undefined,
 })
 
 const hasSearchCondition = computed(() => {
-  return searchParams.id.trim() !== '' ||
+  return (
+    searchParams.id.trim() !== '' ||
     searchParams.cult.trim() !== '' ||
     searchParams.ls.trim() !== '' ||
     (searchParams.realm !== undefined && searchParams.realm !== null && searchParams.realm !== '') ||
     (searchParams.sroot !== undefined && searchParams.sroot !== null && searchParams.sroot !== '') ||
     (searchParams.sex !== undefined && searchParams.sex !== null && searchParams.sex !== '')
+  )
 })
 
 const compareValues = (playerValue, searchValue, operator) => {
@@ -390,39 +431,29 @@ const displayPlayerList = computed(() => {
 
     if (searchParams.id && searchParams.id.trim()) {
       const idFilter = searchParams.id.trim()
-      filtered = filtered.filter(player =>
-        String(player.id).includes(idFilter)
-      )
+      filtered = filtered.filter((player) => String(player.id).includes(idFilter))
     }
 
     if (searchParams.cult && searchParams.cult.trim()) {
-      filtered = filtered.filter(player =>
+      filtered = filtered.filter((player) =>
         compareValues(player.cult, searchParams.cult.trim(), searchParams.cultOperator)
       )
     }
 
     if (searchParams.ls && searchParams.ls.trim()) {
-      filtered = filtered.filter(player =>
-        compareValues(player.ls, searchParams.ls.trim(), searchParams.lsOperator)
-      )
+      filtered = filtered.filter((player) => compareValues(player.ls, searchParams.ls.trim(), searchParams.lsOperator))
     }
 
     if (searchParams.realm !== undefined && searchParams.realm !== null && searchParams.realm !== '') {
-      filtered = filtered.filter(player =>
-        String(player.realm) === String(searchParams.realm)
-      )
+      filtered = filtered.filter((player) => String(player.realm) === String(searchParams.realm))
     }
 
     if (searchParams.sroot !== undefined && searchParams.sroot !== null && searchParams.sroot !== '') {
-      filtered = filtered.filter(player =>
-        String(player.sroot) === String(searchParams.sroot)
-      )
+      filtered = filtered.filter((player) => String(player.sroot) === String(searchParams.sroot))
     }
 
     if (searchParams.sex !== undefined && searchParams.sex !== null && searchParams.sex !== '') {
-      filtered = filtered.filter(player =>
-        String(player.sex) === String(searchParams.sex)
-      )
+      filtered = filtered.filter((player) => String(player.sex) === String(searchParams.sex))
     }
 
     return filtered
@@ -438,7 +469,7 @@ const displayPagination = computed(() => {
       pageSize: pageSize,
       total: displayPlayerList.value.length,
       showSizeChanger: false,
-      showTotal: (total) => `本页 ${Math.min(displayPlayerList.value.length, pageSize)} 条，共 ${total} 名玩家`
+      showTotal: (total) => `本页 ${Math.min(displayPlayerList.value.length, pageSize)} 条，共 ${total} 名玩家`,
     }
   } else {
     return {
@@ -446,7 +477,7 @@ const displayPagination = computed(() => {
       pageSize: pageSize,
       total: totalPlayerCount.value,
       showSizeChanger: false,
-      showTotal: (total) => `本页 ${playerList.value.length} 条，共 ${total} 名玩家`
+      showTotal: (total) => `本页 ${playerList.value.length} 条，共 ${total} 名玩家`,
     }
   }
 })
@@ -456,56 +487,56 @@ const columns = [
     title: '修仙ID',
     dataIndex: 'id',
     key: 'id',
-    width: 95
+    width: 95,
   },
   {
     title: '修为',
     dataIndex: 'cult',
     key: 'cult',
     width: 120,
-    ellipsis: true
+    ellipsis: true,
   },
   {
     title: '灵石',
     dataIndex: 'ls',
     key: 'ls',
     width: 120,
-    ellipsis: true
+    ellipsis: true,
   },
   {
     title: '境界',
     dataIndex: 'realm',
     key: 'realm',
     width: 130,
-    ellipsis: true
+    ellipsis: true,
   },
   {
     title: '灵根',
     dataIndex: 'sroot',
     key: 'sroot',
     width: 130,
-    ellipsis: true
+    ellipsis: true,
   },
   {
     title: '性别',
     dataIndex: 'sex',
     key: 'sex',
     width: 80,
-    align: 'center'
+    align: 'center',
   },
   {
     title: '当前称号',
     key: 'currentTitle',
     width: 120,
-    ellipsis: true
+    ellipsis: true,
   },
   {
     title: '操作',
     key: 'action',
     width: 100,
     align: 'center',
-    fixed: 'right'
-  }
+    fixed: 'right',
+  },
 ]
 
 const fetchRealmMap = async () => {
@@ -515,7 +546,7 @@ const fetchRealmMap = async () => {
       realmMap.value = data
       const options = Object.entries(data).map(([key, value]) => ({
         value: key,
-        label: value
+        label: value,
       }))
       realmOptions.value = options.sort((a, b) => parseInt(a.value) - parseInt(b.value))
     }
@@ -529,12 +560,12 @@ const fetchSrootMap = async () => {
     const data = await apiRequest('/api/xiuxian/player?action=getsroot')
     if (data && Array.isArray(data)) {
       srootMap.value = {}
-      data.forEach(item => {
+      data.forEach((item) => {
         srootMap.value[item.id] = item.name
       })
-      srootOptions.value = data.map(item => ({
+      srootOptions.value = data.map((item) => ({
         value: String(item.id),
-        label: item.name
+        label: item.name,
       }))
     }
   } catch (error) {
@@ -608,20 +639,20 @@ const searchByIdWithPaging = async (idFilter) => {
       if (!isLoadingAll.value) break
       const pageData = await fetchPageData(page)
       if (pageData?.players?.length > 0) {
-        const mapped = pageData.players.map(player => ({
+        const mapped = pageData.players.map((player) => ({
           ...player,
           titleIndex: player.titleIndex !== undefined ? Number(player.titleIndex) : -1,
-          titles: player.titles || []
+          titles: player.titles || [],
         }))
         newAllList.push(...mapped)
       }
       if (range.endPage - range.startPage > 2) {
-        await new Promise(resolve => setTimeout(resolve, 50))
+        await new Promise((resolve) => setTimeout(resolve, 50))
       }
     }
 
     const seen = new Set()
-    allPlayerList.value = newAllList.filter(p => {
+    allPlayerList.value = newAllList.filter((p) => {
       if (seen.has(p.id)) return false
       seen.add(p.id)
       return true
@@ -632,7 +663,7 @@ const searchByIdWithPaging = async (idFilter) => {
       return false
     }
 
-    const hasTarget = allPlayerList.value.some(p => String(p.id).includes(idFilter))
+    const hasTarget = allPlayerList.value.some((p) => String(p.id).includes(idFilter))
     if (!hasTarget) {
       return false
     }
@@ -661,7 +692,7 @@ const loadAllData = async () => {
     const firstPageData = await fetchPageData(0)
 
     if (!firstPageData) {
-      message.error("获取数据失败")
+      message.error('获取数据失败')
       return
     }
 
@@ -672,10 +703,10 @@ const loadAllData = async () => {
     allPlayerList.value = []
 
     if (firstPageData.players && firstPageData.players.length > 0) {
-      const mappedPlayers = firstPageData.players.map(player => ({
+      const mappedPlayers = firstPageData.players.map((player) => ({
         ...player,
         titleIndex: player.titleIndex !== undefined ? Number(player.titleIndex) : -1,
-        titles: player.titles || []
+        titles: player.titles || [],
       }))
 
       allPlayerList.value = mappedPlayers
@@ -690,21 +721,20 @@ const loadAllData = async () => {
       const pageData = await fetchPageData(page)
 
       if (pageData && pageData.players && pageData.players.length > 0) {
-        const mappedPlayers = pageData.players.map(player => ({
+        const mappedPlayers = pageData.players.map((player) => ({
           ...player,
           titleIndex: player.titleIndex !== undefined ? Number(player.titleIndex) : -1,
-          titles: player.titles || []
+          titles: player.titles || [],
         }))
 
         mergePlayers(mappedPlayers)
       }
 
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
     }
 
     loadedCount.value = allPlayerList.value.length
     isPartialLoaded.value = false
-
   } catch (error) {
     if (error.message !== '未授权') {
       message.error(error.message || '加载数据失败')
@@ -716,8 +746,8 @@ const loadAllData = async () => {
 }
 
 const mergePlayers = (newPlayers) => {
-  const existingIds = new Set(allPlayerList.value.map(p => p.id))
-  const playersToAdd = newPlayers.filter(p => !existingIds.has(p.id))
+  const existingIds = new Set(allPlayerList.value.map((p) => p.id))
+  const playersToAdd = newPlayers.filter((p) => !existingIds.has(p.id))
 
   if (playersToAdd.length > 0) {
     allPlayerList.value = [...allPlayerList.value, ...playersToAdd]
@@ -737,10 +767,10 @@ const fetchPlayerList = async (page = 1, silent = false) => {
 
     if (data) {
       if (data.players) {
-        const mappedPlayers = data.players.map(player => ({
+        const mappedPlayers = data.players.map((player) => ({
           ...player,
           titleIndex: player.titleIndex !== undefined ? Number(player.titleIndex) : -1,
-          titles: player.titles || []
+          titles: player.titles || [],
         }))
 
         playerList.value = mappedPlayers
@@ -848,35 +878,28 @@ const formState = reactive({
   sroot: '',
   sex: '未设置',
   titleIndex: -1,
-  titles: []
+  titles: [],
 })
 
 const formRules = {
   cult: [
     { required: true, message: '请输入修为值', trigger: 'blur' },
-    { pattern: /^\d+$/, message: '请输入有效数字', trigger: 'blur' }
+    { pattern: /^\d+$/, message: '请输入有效数字', trigger: 'blur' },
   ],
   ls: [
     { required: true, message: '请输入灵石数量', trigger: 'blur' },
-    { pattern: /^\d+$/, message: '请输入有效数字', trigger: 'blur' }
+    { pattern: /^\d+$/, message: '请输入有效数字', trigger: 'blur' },
   ],
-  realm: [
-    { required: true, message: '请选择境界', trigger: 'change' }
-  ],
-  sroot: [
-    { required: true, message: '请选择灵根', trigger: 'change' }
-  ],
-  sex: [
-    { required: true, message: '请选择性别', trigger: 'change' }
-  ]
+  realm: [{ required: true, message: '请选择境界', trigger: 'change' }],
+  sroot: [{ required: true, message: '请选择灵根', trigger: 'change' }],
+  sex: [{ required: true, message: '请选择性别', trigger: 'change' }],
 }
 
 const disabledDate = (current) => {
   return current && current < dayjs().startOf('day')
 }
 
-const updateTitleOptions = () => {
-}
+const updateTitleOptions = () => {}
 
 const setCurrentTime = (index) => {
   const now = dayjs()
@@ -920,13 +943,13 @@ const showEditModal = (record) => {
   formState.sex = record.sex || '未设置'
   const rawTitleIndex = record.titleIndex !== undefined ? record.titleIndex : -1
   formState.titleIndex = rawTitleIndex > 0 ? rawTitleIndex : -1
-  formState.titles = (record.titles || []).map(title => ({
+  formState.titles = (record.titles || []).map((title) => ({
     title: title.title || '',
     getTime: title.getTime || 0,
     getDate: title.getTime > 0 ? dayjs.unix(title.getTime) : null,
     validTime: title.validTime || 0,
     isPermanent: title.validTime === 0,
-    validDate: title.validTime > 0 ? dayjs.unix(title.validTime) : null
+    validDate: title.validTime > 0 ? dayjs.unix(title.validTime) : null,
   }))
   modalVisible.value = true
 }
@@ -939,7 +962,7 @@ const addTitle = () => {
     getDate: now,
     validTime: 0,
     isPermanent: true,
-    validDate: null
+    validDate: null,
   })
 }
 
@@ -960,7 +983,7 @@ const buildUpdatedPlayer = (response) => {
     return {
       ...serverPlayer,
       titleIndex: serverPlayer.titleIndex !== undefined ? Number(serverPlayer.titleIndex) : -1,
-      titles: serverPlayer.titles || []
+      titles: serverPlayer.titles || [],
     }
   }
 
@@ -972,25 +995,25 @@ const buildUpdatedPlayer = (response) => {
     sroot: Number(formState.sroot),
     sex: formState.sex,
     titleIndex: formState.titleIndex,
-    titles: formState.titles.map(t => ({
+    titles: formState.titles.map((t) => ({
       title: t.title,
       getTime: Number(t.getTime),
-      validTime: Number(t.validTime)
-    }))
+      validTime: Number(t.validTime),
+    })),
   }
 }
 
 const updatePlayerInCache = (updatedPlayer) => {
   const targetId = updatedPlayer.id
 
-  const allIndex = allPlayerList.value.findIndex(p => String(p.id) === String(targetId))
+  const allIndex = allPlayerList.value.findIndex((p) => String(p.id) === String(targetId))
   if (allIndex !== -1) {
     const newAllList = [...allPlayerList.value]
     newAllList[allIndex] = { ...newAllList[allIndex], ...updatedPlayer }
     allPlayerList.value = newAllList
   }
 
-  const pageIndex = playerList.value.findIndex(p => String(p.id) === String(targetId))
+  const pageIndex = playerList.value.findIndex((p) => String(p.id) === String(targetId))
   if (pageIndex !== -1) {
     const newPageList = [...playerList.value]
     newPageList[pageIndex] = { ...newPageList[pageIndex], ...updatedPlayer }
@@ -1015,15 +1038,15 @@ const handleSubmit = async () => {
       sroot: Number(formState.sroot),
       sex: formState.sex,
       titleIndex: formState.titleIndex,
-      titles: formState.titles.map(t => ({
+      titles: formState.titles.map((t) => ({
         title: t.title,
         getTime: Number(t.getTime),
-        validTime: Number(t.validTime)
-      }))
+        validTime: Number(t.validTime),
+      })),
     }
     const response = await apiRequest(`/api/xiuxian/player?action=modify&id=${formState.id}`, {
       method: 'POST',
-      body: JSON.stringify(postData)
+      body: JSON.stringify(postData),
     })
 
     const updatedPlayer = buildUpdatedPlayer(response)
@@ -1311,7 +1334,9 @@ onUnmounted(() => {
 :deep(.ant-card) {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
 }
 
 :deep(.ant-card:hover) {

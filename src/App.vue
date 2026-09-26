@@ -1,11 +1,18 @@
 <template>
   <router-view v-if="route.name === 'login'" />
-  <a-layout v-else style="min-height: 100vh; background: linear-gradient(135deg, #fff600 0%, #6a0eab 100%);">
+  <a-layout v-else style="min-height: 100vh; background: linear-gradient(135deg, #fff600 0%, #6a0eab 100%)">
     <div v-if="isMobile && !collapsed" class="mobile-overlay" @click="collapsed = true" />
 
-    <a-layout-sider v-model:collapsed="collapsed" :collapsible="!isMobile" :trigger="null" theme="light" :width="200"
-      :breakpoint="'lg'" :class="{ 'mobile-sider': isMobile, 'sider-collapsed': collapsed && isMobile }"
-      style="background: #fff;">
+    <a-layout-sider
+      v-model:collapsed="collapsed"
+      :collapsible="!isMobile"
+      :trigger="null"
+      theme="light"
+      :width="200"
+      :breakpoint="'lg'"
+      :class="{ 'mobile-sider': isMobile, 'sider-collapsed': collapsed && isMobile }"
+      style="background: #fff"
+    >
       <div class="sider-content">
         <div class="logo">
           <img src="../Mo.png" style="height: 32px" />
@@ -14,8 +21,13 @@
           </transition>
         </div>
 
-        <a-menu v-model:selectedKeys="selectedKeys" mode="inline" :inline-collapsed="collapsed" @click="handleMenuClick"
-          style="border-right: 0; flex: 1;">
+        <a-menu
+          v-model:selectedKeys="selectedKeys"
+          mode="inline"
+          :inline-collapsed="collapsed"
+          @click="handleMenuClick"
+          style="border-right: 0; flex: 1"
+        >
           <a-menu-item key="xiuxian">
             <AppstoreOutlined />
             <span>魔族陌修仙</span>
@@ -39,10 +51,15 @@
       </div>
     </a-layout-sider>
 
-    <a-layout style="background: transparent;">
-      <a-layout-content style="margin: 16px; position: relative;">
-        <a-button v-if="isMobile && collapsed" class="mobile-menu-btn" shape="circle" size="large"
-          @click="collapsed = false">
+    <a-layout style="background: transparent">
+      <a-layout-content style="margin: 16px; position: relative">
+        <a-button
+          v-if="isMobile && collapsed"
+          class="mobile-menu-btn"
+          shape="circle"
+          size="large"
+          @click="collapsed = false"
+        >
           <MenuOutlined />
         </a-button>
 
@@ -55,7 +72,14 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { HomeOutlined, AppstoreOutlined, SettingOutlined, MenuOutlined, InfoCircleOutlined, LogoutOutlined } from '@ant-design/icons-vue'
+import {
+  HomeOutlined,
+  AppstoreOutlined,
+  SettingOutlined,
+  MenuOutlined,
+  InfoCircleOutlined,
+  LogoutOutlined,
+} from '@ant-design/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -78,35 +102,56 @@ onBeforeUnmount(() => {
 const collapsed = ref(isMobile.value)
 const selectedKeys = ref([])
 
-const validRouteNames = ['xiuxian', 'xiuxianHome', 'xiuxianConfig', 'xiuxianCdk', 'xiuxianPlayer', 'xiuxianSect', 'xiuxianBackup', 'settings', 'about']
+const validRouteNames = [
+  'xiuxian',
+  'xiuxianHome',
+  'xiuxianConfig',
+  'xiuxianCdk',
+  'xiuxianPlayer',
+  'xiuxianSect',
+  'xiuxianBackup',
+  'settings',
+  'about',
+]
 
 const pageTitles = {
   index: '主页',
   xiuxian: '魔族陌修仙',
   settings: '设置',
-  about: '关于'
+  about: '关于',
 }
 
-watch(() => route.name, (name) => {
-  if (name !== 'login') {
-    let subPageTitle = ""
-    if (!validRouteNames.includes(name)) {
-      router.push('/xiuxian')
-      return
-    }
-    let menuKey = name
-    if (name === 'xiuxianHome' || name === 'xiuxianConfig' || name === 'xiuxianCdk' || name === 'xiuxianPlayer' || name === 'xiuxianBackup' || name === 'xiuxianSect') {
-      menuKey = 'xiuxian'
-      subPageTitle = "魔族陌修仙"
-    }
-    selectedKeys.value = [menuKey]
-    document.title = (pageTitles[name] || subPageTitle) + ' - MozuAdmin'
+watch(
+  () => route.name,
+  (name) => {
+    if (name !== 'login') {
+      let subPageTitle = ''
+      if (!validRouteNames.includes(name)) {
+        router.push('/xiuxian')
+        return
+      }
+      let menuKey = name
+      if (
+        name === 'xiuxianHome' ||
+        name === 'xiuxianConfig' ||
+        name === 'xiuxianCdk' ||
+        name === 'xiuxianPlayer' ||
+        name === 'xiuxianBackup' ||
+        name === 'xiuxianSect'
+      ) {
+        menuKey = 'xiuxian'
+        subPageTitle = '魔族陌修仙'
+      }
+      selectedKeys.value = [menuKey]
+      document.title = (pageTitles[name] || subPageTitle) + ' - MozuAdmin'
 
-    if (isMobile.value) {
-      collapsed.value = true
+      if (isMobile.value) {
+        collapsed.value = true
+      }
     }
-  }
-}, { immediate: true })
+  },
+  { immediate: true }
+)
 
 function handleMenuClick({ key }) {
   router.push(`/${key}`)
@@ -120,8 +165,8 @@ async function logout() {
   try {
     await fetch('/api/login?action=exit', {
       headers: {
-        'Authorization': `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     })
   } catch (error) {
     console.error('退出登录失败:', error)

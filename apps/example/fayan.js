@@ -1,5 +1,5 @@
 import Redis from '#Redis'
-import Config from "#Config"
+import Config from '#Config'
 
 export class MozuFayan extends plugin {
   constructor() {
@@ -11,24 +11,24 @@ export class MozuFayan extends plugin {
       rule: [
         {
           reg: '^#?发言榜(日榜|月榜|周榜)?\s*(\d*)',
-          fnc: 'fayan'
+          fnc: 'fayan',
         },
         {
           reg: '^#?(清空|清除)(本群|群聊)发言(记录|榜)?$',
-          fnc: 'clearAll'
+          fnc: 'clearAll',
         },
         {
           reg: '^#?清除发言(记录|榜)?',
-          fnc: 'clearAt'
-        }
-      ]
+          fnc: 'clearAt',
+        },
+      ],
     })
   }
 
   async fayan(e) {
     if (!Config.example.fayan.enable || !this.e.group) return false
     const match = this.e.msg.match(/^#?发言榜(日榜|月榜|周榜)?\s*(\d*)/)
-    const type = match?.[1] || "日榜"
+    const type = match?.[1] || '日榜'
     const num = match?.[2] || 0
     let date
     switch (type) {
@@ -49,95 +49,77 @@ export class MozuFayan extends plugin {
       let message
       let msg = []
       if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.example.fayan.sendMarkdown) {
-        msg.push([
+        msg.push(
+          [
+            '<@' + this.e.user_id.replace(this.e.self_id + ':', '') + '>',
+            '***',
+            '**本群发言榜' + type + '**',
+            '>数据仅供参考  请以实际发言为准',
+            '日期：' + date,
+            '***',
+            '>暂无数据',
+            '***',
+          ].join('\n')
+        )
+        const Button = segment.button([
+          { text: '日榜', input: '发言榜日榜' },
+          { text: '月榜', input: '发言榜月榜' },
+          { text: '周榜', input: '发言榜周榜' },
+        ])
+        message = [segment.markdown(msg.join('\n')), Button]
+      } else {
+        msg.push(
+          [
+            '本群发言榜' + type,
+            '--------',
+            '数据仅供参考  请以实际发言为准',
+            '日期：' + date,
+            '--------',
+            '暂无数据',
+          ].join('\n')
+        )
+        message = msg.join('\n')
+      }
+      return await this.e.reply(message)
+    }
+    let [score, rank] = await Promise.all([Redis.zscore(key, this.e.user_id), Redis.zrevrank(key, this.e.user_id)])
+    const names = await Redis.hmget(`Mozu:username`, ...userIds)
+    let message
+    let msg = []
+    if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.example.fayan.sendMarkdown) {
+      msg.push(
+        [
           '<@' + this.e.user_id.replace(this.e.self_id + ':', '') + '>',
           '***',
           '**本群发言榜' + type + '**',
           '>数据仅供参考  请以实际发言为准',
           '日期：' + date,
           '***',
-          '>暂无数据',
-          '***'
-        ].join('\n'))
-        const Button = segment.button(
-          [
-            { text: "日榜", input: "发言榜日榜" },
-            { text: "月榜", input: "发言榜月榜" },
-            { text: "周榜", input: "发言榜周榜" },
-          ]
-        )
-        message = [segment.markdown(msg.join('\n')), Button]
-      } else {
-        msg.push([
-          '本群发言榜' + type,
-          '--------',
-          '数据仅供参考  请以实际发言为准',
-          '日期：' + date,
-          '--------',
-          '暂无数据'
-        ].join('\n'))
-        message = msg.join('\n')
-      }
-      return await this.e.reply(message)
-    }
-    let [score, rank] = await Promise.all([
-      Redis.zscore(key, this.e.user_id),
-      Redis.zrevrank(key, this.e.user_id)
-    ])
-    const names = await Redis.hmget(`Mozu:username`, ...userIds)
-    let message
-    let msg = []
-    if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.example.fayan.sendMarkdown) {
-      msg.push([
-        '<@' + this.e.user_id.replace(this.e.self_id + ':', '') + '>',
-        '***',
-        '**本群发言榜' + type + '**',
-        '>数据仅供参考  请以实际发言为准',
-        '日期：' + date,
-        '***'
-      ].join('\n'))
+        ].join('\n')
+      )
       for (let i = 0; i < list.length; i += 2) {
-        msg.push([
-          '**No.' + (i / 2 + 1) + '  ' + names[i / 2] + '**',
-          '>发言次数：' + list[i + 1] + '次'
-        ].join('\n'))
+        msg.push(['**No.' + (i / 2 + 1) + '  ' + names[i / 2] + '**', '>发言次数：' + list[i + 1] + '次'].join('\n'))
       }
       msg.push('***')
       if (rank) {
-        msg.push([
-          '**你的发言**',
-          '>排名：第' + (rank + 1) + '名',
-          '发言次数：' + score + '次',
-          '***'
-        ].join('\n'))
+        msg.push(['**你的发言**', '>排名：第' + (rank + 1) + '名', '发言次数：' + score + '次', '***'].join('\n'))
       }
-      const Button = segment.button(
-        [
-          { text: "日榜", input: "发言榜日榜" },
-          { text: "月榜", input: "发言榜月榜" },
-          { text: "周榜", input: "发言榜周榜" },
-        ]
-      )
+      const Button = segment.button([
+        { text: '日榜', input: '发言榜日榜' },
+        { text: '月榜', input: '发言榜月榜' },
+        { text: '周榜', input: '发言榜周榜' },
+      ])
       message = [segment.markdown(msg.join('\n')), Button]
     } else {
-      msg.push([
-        '本群发言榜' + type,
-        '--------',
-        '数据仅供参考  请以实际发言为准',
-        '日期：' + date,
-        '--------'
-      ].join('\n'))
+      msg.push(
+        ['本群发言榜' + type, '--------', '数据仅供参考  请以实际发言为准', '日期：' + date, '--------'].join('\n')
+      )
       for (let i = 0; i < list.length; i += 2) {
-        msg.push([
-          '第' + (i / 2 + 1) + '名：' + names[i / 2] + '•' + list[i + 1] + '次',
-        ].join('\n'))
+        msg.push(['第' + (i / 2 + 1) + '名：' + names[i / 2] + '•' + list[i + 1] + '次'].join('\n'))
       }
       msg.push('--------')
       if (rank) {
-        msg.push([
-          '你的排名：第' + (rank + 1) + '名 • ' + score + ' 次',
-          '--------'
-        ].join('\n'))
+        msg.push(['你的排名：第' + (rank + 1) + '名 • ' + score + ' 次', '--------'].join('\n'))
       }
       message = msg.join('\n')
     }
@@ -155,25 +137,22 @@ export class MozuFayan extends plugin {
     pipeline.del(getGroupKey(week, this.e.self_id, this.e.group_id))
     await pipeline.exec()
     if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.example.fayan.sendMarkdown) {
-      const message = segment.markdown([
-        '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
-        '***',
-        '**已清除本群所有发言**',
-        '***'
-      ].join('\n'))
+      const message = segment.markdown(
+        ['<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>', '***', '**已清除本群所有发言**', '***'].join(
+          '\n'
+        )
+      )
       const Button = segment.button(
+        [{ text: '清除本群发言', input: '清除本群发言' }],
         [
-          { text: "清除本群发言", input: "清除本群发言" }
-        ],
-        [
-          { text: "日榜", input: "发言榜日榜" },
-          { text: "月榜", input: "发言榜月榜" },
-          { text: "周榜", input: "发言榜周榜" },
+          { text: '日榜', input: '发言榜日榜' },
+          { text: '月榜', input: '发言榜月榜' },
+          { text: '周榜', input: '发言榜周榜' },
         ]
       )
       await this.e.reply([message, Button])
     } else {
-      await this.e.reply("已清除本群所有发言")
+      await this.e.reply('已清除本群所有发言')
     }
   }
 
@@ -186,26 +165,26 @@ export class MozuFayan extends plugin {
     const AtQQ = this.e?.at
     if (!AtQQ) {
       if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.example.fayan.sendMarkdown) {
-        const message = segment.markdown([
-          '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
-          '***',
-          '**未获取到艾特数据**',
-          '>正确格式：清除发言 @123',
-          '***'
-        ].join('\n'))
+        const message = segment.markdown(
+          [
+            '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
+            '***',
+            '**未获取到艾特数据**',
+            '>正确格式：清除发言 @123',
+            '***',
+          ].join('\n')
+        )
         const Button = segment.button(
+          [{ text: '清除发言', input: '清除发言' }],
           [
-            { text: "清除发言", input: "清除发言" }
-          ],
-          [
-            { text: "日榜", input: "发言榜日榜" },
-            { text: "月榜", input: "发言榜月榜" },
-            { text: "周榜", input: "发言榜周榜" },
+            { text: '日榜', input: '发言榜日榜' },
+            { text: '月榜', input: '发言榜月榜' },
+            { text: '周榜', input: '发言榜周榜' },
           ]
         )
         await this.e.reply([message, Button])
       } else {
-        await this.e.reply("未获取到艾特数据", true)
+        await this.e.reply('未获取到艾特数据', true)
       }
       return true
     }
@@ -214,26 +193,26 @@ export class MozuFayan extends plugin {
     pipeline.zrem(getGroupKey(week, this.e.self_id, this.e.group_id), AtQQ)
     await pipeline.exec()
     if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.example.fayan.sendMarkdown) {
-      const message = segment.markdown([
-        '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
-        '***',
-        '**清除发言成功**',
-        '>已清除 <@' + AtQQ.replace(`${this.e.self_id}:`, '') + '> 的发言记录',
-        '***'
-      ].join('\n'))
+      const message = segment.markdown(
+        [
+          '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
+          '***',
+          '**清除发言成功**',
+          '>已清除 <@' + AtQQ.replace(`${this.e.self_id}:`, '') + '> 的发言记录',
+          '***',
+        ].join('\n')
+      )
       const Button = segment.button(
+        [{ text: '清除发言', input: '清除发言' }],
         [
-          { text: "清除发言", input: "清除发言" }
-        ],
-        [
-          { text: "日榜", input: "发言榜日榜" },
-          { text: "月榜", input: "发言榜月榜" },
-          { text: "周榜", input: "发言榜周榜" },
+          { text: '日榜', input: '发言榜日榜' },
+          { text: '月榜', input: '发言榜月榜' },
+          { text: '周榜', input: '发言榜周榜' },
         ]
       )
       await this.e.reply([message, Button])
     } else {
-      await this.e.reply("已清除 " + segment.at(AtQQ) + " 的发言记录")
+      await this.e.reply('已清除 ' + segment.at(AtQQ) + ' 的发言记录')
     }
   }
 }
@@ -247,7 +226,7 @@ Bot.on?.('message', async (e) => {
   pipeline.zincrby(getGroupKey(date, e.self_id, e.group_id), 1, e.user_id)
   pipeline.zincrby(getGroupKey(month, e.self_id, e.group_id), 1, e.user_id)
   pipeline.zincrby(getGroupKey(week, e.self_id, e.group_id), 1, e.user_id)
-  pipeline.hset(`Mozu:username`, e.user_id, (e?.nickname || e?.sender?.nickname))
+  pipeline.hset(`Mozu:username`, e.user_id, e?.nickname || e?.sender?.nickname)
   await pipeline.exec()
 })
 

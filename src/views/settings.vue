@@ -10,15 +10,18 @@
             <a-tag v-else-if="!loading" class="status-tag">未启用</a-tag>
             <a-spin v-else size="small" class="status-tag" />
           </div>
-          <div class="setting-desc">
-            开启后登录除密码外，还需输入验证器 App 中的 6 位动态验证码。
-          </div>
+          <div class="setting-desc">开启后登录除密码外，还需输入验证器 App 中的 6 位动态验证码。</div>
         </div>
 
         <!-- 未启用 -->
         <div v-if="!loading && !enabled" class="setting-body">
-          <a-alert type="warning" show-icon class="tip-alert" message="请勿删除或更换验证器，密钥丢失将无法登录面版"
-            description="密钥丢失后只能通过服务器终端获取验证码后重置密码，请务必妥善备份密钥。" />
+          <a-alert
+            type="warning"
+            show-icon
+            class="tip-alert"
+            message="请勿删除或更换验证器，密钥丢失将无法登录面版"
+            description="密钥丢失后只能通过服务器终端获取验证码后重置密码，请务必妥善备份密钥。"
+          />
 
           <div v-if="!pendingSecret" class="idle-area">
             <a-button type="primary" class="gold-black-btn" :loading="creating" @click="handleCreate">
@@ -30,8 +33,12 @@
           </div>
 
           <div v-else class="pending-area">
-            <a-alert type="info" show-icon class="tip-alert"
-              :message="countdown > 0 ? `密钥有效期剩余 ${countdown} 秒，超时后请重新生成` : '密钥已过期，请重新生成'" />
+            <a-alert
+              type="info"
+              show-icon
+              class="tip-alert"
+              :message="countdown > 0 ? `密钥有效期剩余 ${countdown} 秒，超时后请重新生成` : '密钥已过期，请重新生成'"
+            />
 
             <div class="qr-area">
               <div class="qr-box">
@@ -61,8 +68,13 @@
             <div class="enable-area">
               <a-form layout="inline" :model="enableForm" @finish="handleEnable">
                 <a-form-item>
-                  <a-input v-model:value="enableForm.token" placeholder="6 位验证码" maxlength="6" size="large"
-                    class="token-input">
+                  <a-input
+                    v-model:value="enableForm.token"
+                    placeholder="6 位验证码"
+                    maxlength="6"
+                    size="large"
+                    class="token-input"
+                  >
                     <template #prefix>
                       <SafetyOutlined />
                     </template>
@@ -101,13 +113,31 @@
       </div>
     </a-card>
 
-    <a-modal v-model:visible="disableVisible" title="关闭双因素认证" ok-text="确认关闭" cancel-text="取消"
-      :confirm-loading="disabling" :width="isMobile ? '95%' : '440px'" @ok="handleDelete"
-      @cancel="resetDisableModal">
-      <a-alert type="error" show-icon class="tip-alert" message="关闭后登录仅需密码，安全等级会降低"
-        description="请输入验证器 App 中当前的 6 位验证码以确认身份。" />
-      <a-input v-model:value="disableToken" placeholder="6 位验证码" maxlength="6" size="large" class="disable-input"
-        @press-enter="handleDelete">
+    <a-modal
+      v-model:visible="disableVisible"
+      title="关闭双因素认证"
+      ok-text="确认关闭"
+      cancel-text="取消"
+      :confirm-loading="disabling"
+      :width="isMobile ? '95%' : '440px'"
+      @ok="handleDelete"
+      @cancel="resetDisableModal"
+    >
+      <a-alert
+        type="error"
+        show-icon
+        class="tip-alert"
+        message="关闭后登录仅需密码，安全等级会降低"
+        description="请输入验证器 App 中当前的 6 位验证码以确认身份。"
+      />
+      <a-input
+        v-model:value="disableToken"
+        placeholder="6 位验证码"
+        maxlength="6"
+        size="large"
+        class="disable-input"
+        @press-enter="handleDelete"
+      >
         <template #prefix>
           <SafetyOutlined />
         </template>
@@ -121,12 +151,7 @@ import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import QRCode from 'qrcode'
-import {
-  SafetyOutlined,
-  SafetyCertificateOutlined,
-  QrcodeOutlined,
-  StopOutlined
-} from '@ant-design/icons-vue'
+import { SafetyOutlined, SafetyCertificateOutlined, QrcodeOutlined, StopOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 
@@ -138,7 +163,7 @@ const enabling = ref(false)
 const disabling = ref(false)
 
 const enableForm = reactive({
-  token: ''
+  token: '',
 })
 
 const pendingSecret = ref('')
@@ -157,7 +182,7 @@ const checkMobile = () => {
 const apiRequest = async (url, options = {}) => {
   const authToken = localStorage.getItem('token')
   const headers = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   }
   if (authToken) {
     headers['Authorization'] = `Bearer ${authToken}`
@@ -166,8 +191,8 @@ const apiRequest = async (url, options = {}) => {
     ...options,
     headers: {
       ...headers,
-      ...options.headers
-    }
+      ...options.headers,
+    },
   }
 
   try {
@@ -207,18 +232,22 @@ const fetchStatus = async () => {
 
 const fetchQrcode = (otpauthUrl) => {
   return new Promise((resolve, reject) => {
-    QRCode.toDataURL(otpauthUrl, {
-      errorCorrectionLevel: 'M',
-      margin: 1,
-      width: 220,
-      color: {
-        dark: '#000000',
-        light: '#ffffff'
+    QRCode.toDataURL(
+      otpauthUrl,
+      {
+        errorCorrectionLevel: 'M',
+        margin: 1,
+        width: 220,
+        color: {
+          dark: '#000000',
+          light: '#ffffff',
+        },
+      },
+      (error, url) => {
+        if (error) return reject(error)
+        resolve(url)
       }
-    }, (error, url) => {
-      if (error) return reject(error)
-      resolve(url)
-    })
+    )
   })
 }
 
@@ -301,7 +330,7 @@ const handleEnable = async () => {
   try {
     const response = await apiRequest('/api/login/tfa?action=enable', {
       method: 'POST',
-      body: JSON.stringify({ token: enableForm.token.trim() })
+      body: JSON.stringify({ token: enableForm.token.trim() }),
     })
 
     if (response.success) {
@@ -339,7 +368,7 @@ const handleDelete = async () => {
   try {
     const response = await apiRequest('/api/login/tfa?action=delete', {
       method: 'POST',
-      body: JSON.stringify({ token: disableToken.value.trim() })
+      body: JSON.stringify({ token: disableToken.value.trim() }),
     })
 
     if (response.success) {
@@ -376,7 +405,9 @@ onBeforeUnmount(() => {
   width: 100%;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
   border: 1px solid #f0f0f0;
 }
 
@@ -558,7 +589,9 @@ onBeforeUnmount(() => {
   color: #fff !important;
   font-weight: 600 !important;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
-  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  box-shadow:
+    0 4px 15px rgba(255, 215, 0, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.3) !important;
   transition: all 0.3s ease !important;
   animation: gradientShift 3s ease infinite;
 }
@@ -566,13 +599,17 @@ onBeforeUnmount(() => {
 .gold-black-btn:hover {
   background: linear-gradient(135deg, #333333 0%, #1a1a1a 30%, #ffed4a 50%, #ffd700 70%, #333333 100%) !important;
   background-size: 200% 200% !important;
-  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  box-shadow:
+    0 6px 20px rgba(255, 215, 0, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.4) !important;
   transform: translateY(-2px);
 }
 
 .gold-black-btn:active {
   transform: translateY(0);
-  box-shadow: 0 2px 10px rgba(255, 215, 0, 0.2), 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+  box-shadow:
+    0 2px 10px rgba(255, 215, 0, 0.2),
+    0 1px 4px rgba(0, 0, 0, 0.3) !important;
 }
 
 @keyframes gradientShift {
@@ -604,7 +641,9 @@ onBeforeUnmount(() => {
 :deep(.ant-card) {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
 }
 
 :deep(.ant-card:hover) {

@@ -1,1 +1,1 @@
-export { supportGuoba } from "./guoba/index.js"
+export { supportGuoba } from './guoba/index.js'

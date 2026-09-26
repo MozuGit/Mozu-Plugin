@@ -1,5 +1,13 @@
 import express from 'express'
-import { getInfo, handleConfig, handleBackup, handleCdk, handlePlayer, handleSect, getActivePlayers } from '../controllers/xiuxianController.js'
+import {
+  getInfo,
+  handleConfig,
+  handleBackup,
+  handleCdk,
+  handlePlayer,
+  handleSect,
+  getActivePlayers,
+} from '../controllers/xiuxianController.js'
 
 const router = express.Router()
 
@@ -10,11 +18,11 @@ const routes = [
   { path: '/cdk', methods: ['get', 'post'], handler: handleCdk },
   { path: '/player', methods: ['get', 'post'], handler: handlePlayer },
   { path: '/sect', methods: ['get', 'post'], handler: handleSect },
-  { path: '/backup', methods: ['get', 'post'], handler: handleBackup }
+  { path: '/backup', methods: ['get', 'post'], handler: handleBackup },
 ]
 
 routes.forEach(({ path, methods, handler }) => {
-  methods.forEach(method => {
+  methods.forEach((method) => {
     router[method](path, handler)
   })
 })

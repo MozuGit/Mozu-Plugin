@@ -16,13 +16,19 @@
             批量删除
           </a-button>
         </a-space>
-        <span v-if="isUpdating" class="update-hint">
-          <sync-outlined spin /> 更新中...
-        </span>
+        <span v-if="isUpdating" class="update-hint"> <sync-outlined spin /> 更新中... </span>
       </div>
 
-      <a-table :columns="columns" :data-source="backupList" :loading="loading && backupList.length === 0"
-        :row-selection="rowSelection" :pagination="false" :locale="tableLocale" row-key="filename" class="backup-table">
+      <a-table
+        :columns="columns"
+        :data-source="backupList"
+        :loading="loading && backupList.length === 0"
+        :row-selection="rowSelection"
+        :pagination="false"
+        :locale="tableLocale"
+        row-key="filename"
+        class="backup-table"
+      >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'size'">
             <span>{{ record.size || '-' }}</span>
@@ -47,8 +53,15 @@
       </a-table>
     </a-card>
 
-    <a-modal v-model:visible="backupModalVisible" title="手动备份" ok-text="开始备份" cancel-text="取消" @ok="handleCreateBackup"
-      :confirm-loading="backupLoading" width="450px">
+    <a-modal
+      v-model:visible="backupModalVisible"
+      title="手动备份"
+      ok-text="开始备份"
+      cancel-text="取消"
+      @ok="handleCreateBackup"
+      :confirm-loading="backupLoading"
+      width="450px"
+    >
       <a-form :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="备份文件名" help="留空则自动生成时间格式文件名">
           <a-input v-model:value="backupFilename" placeholder="例如：2026-01-01_12:00" />
@@ -56,33 +69,54 @@
       </a-form>
     </a-modal>
 
-    <a-modal v-model:visible="restoreModalVisible" title="确认还原备份" @ok="executeRestore" ok-text="确认还原" cancel-text="取消"
-      :confirm-loading="restoreLoading" width="480px">
+    <a-modal
+      v-model:visible="restoreModalVisible"
+      title="确认还原备份"
+      @ok="executeRestore"
+      ok-text="确认还原"
+      cancel-text="取消"
+      :confirm-loading="restoreLoading"
+      width="480px"
+    >
       <div class="confirm-content">
         <p><strong>备份文件：</strong>{{ currentRestoreFile?.filename }}</p>
-        <p style="color: #ff4d4f; margin-top: 12px;">
-          ⚠️ 还原操作将覆盖当前所有数据，此操作不可撤销，请谨慎操作！
-        </p>
+        <p style="color: #ff4d4f; margin-top: 12px">⚠️ 还原操作将覆盖当前所有数据，此操作不可撤销，请谨慎操作！</p>
         <p>确定要还原到此备份吗？</p>
       </div>
     </a-modal>
 
-    <a-modal v-model:visible="deleteModalVisible" title="确认删除备份" @ok="executeSingleDelete" ok-text="确认删除"
-      cancel-text="取消" :confirm-loading="deleteLoading" width="450px">
+    <a-modal
+      v-model:visible="deleteModalVisible"
+      title="确认删除备份"
+      @ok="executeSingleDelete"
+      ok-text="确认删除"
+      cancel-text="取消"
+      :confirm-loading="deleteLoading"
+      width="450px"
+    >
       <div class="confirm-content">
         <p><strong>备份文件：</strong>{{ currentDeleteFile?.filename }}</p>
         <p>删除后将无法恢复，确定要删除该备份文件吗？</p>
       </div>
     </a-modal>
 
-    <a-modal v-model:visible="batchDeleteModalVisible" title="确认批量删除" @ok="executeBatchDelete" ok-text="确认删除"
-      cancel-text="取消" :confirm-loading="batchDeleteLoading" width="480px">
+    <a-modal
+      v-model:visible="batchDeleteModalVisible"
+      title="确认批量删除"
+      @ok="executeBatchDelete"
+      ok-text="确认删除"
+      cancel-text="取消"
+      :confirm-loading="batchDeleteLoading"
+      width="480px"
+    >
       <div class="confirm-content">
-        <p><strong>已选择 {{ selectedRowKeys.length }} 个备份文件：</strong></p>
-        <ul style="max-height: 200px; overflow-y: auto; margin-top: 8px; padding-left: 20px;">
+        <p>
+          <strong>已选择 {{ selectedRowKeys.length }} 个备份文件：</strong>
+        </p>
+        <ul style="max-height: 200px; overflow-y: auto; margin-top: 8px; padding-left: 20px">
           <li v-for="key in selectedRowKeys" :key="key">{{ key }}</li>
         </ul>
-        <p style="margin-top: 12px;">批量删除后将无法恢复，确定要删除这些备份文件吗？</p>
+        <p style="margin-top: 12px">批量删除后将无法恢复，确定要删除这些备份文件吗？</p>
       </div>
     </a-modal>
   </div>
@@ -92,12 +126,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import {
-  DeleteOutlined,
-  SyncOutlined,
-  CloudUploadOutlined,
-  HistoryOutlined
-} from '@ant-design/icons-vue'
+import { DeleteOutlined, SyncOutlined, CloudUploadOutlined, HistoryOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 
@@ -108,13 +137,13 @@ const CACHE_DURATION = 5 * 60 * 1000
 const tableLocale = {
   triggerAsc: '',
   triggerDesc: '',
-  cancelSort: '取消排序'
+  cancelSort: '取消排序',
 }
 
 const apiRequest = async (url, options = {}) => {
   const token = localStorage.getItem('token')
   const headers = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
@@ -123,8 +152,8 @@ const apiRequest = async (url, options = {}) => {
     ...options,
     headers: {
       ...headers,
-      ...options.headers
-    }
+      ...options.headers,
+    },
   }
   const res = await fetch(url, config)
   if (res.status === 401) {
@@ -182,21 +211,21 @@ const columns = [
     key: 'filename',
     ellipsis: true,
     sorter: (a, b) => a.filename.localeCompare(b.filename),
-    sortDirections: ['ascend', 'descend']
+    sortDirections: ['ascend', 'descend'],
   },
   {
     title: '操作',
     key: 'action',
     width: 180,
-    align: 'center'
-  }
+    align: 'center',
+  },
 ]
 
 const rowSelection = {
   selectedRowKeys: selectedRowKeys,
   onChange: (keys) => {
     selectedRowKeys.value = keys
-  }
+  },
 }
 
 const fetchBackupList = async (silent = false) => {
@@ -209,8 +238,8 @@ const fetchBackupList = async (silent = false) => {
     const data = await apiRequest('/api/xiuxian/backup?action=getlist')
     let parsedList = []
     if (data.backups && Array.isArray(data.backups)) {
-      parsedList = data.backups.map(filename => ({
-        filename: filename.replace(/\.json$/, '')
+      parsedList = data.backups.map((filename) => ({
+        filename: filename.replace(/\.json$/, ''),
       }))
     }
     backupList.value = parsedList
@@ -251,7 +280,9 @@ const executeRestore = async () => {
 
   restoreLoading.value = true
   try {
-    await apiRequest(`/api/xiuxian/backup?action=restore&filename=${encodeURIComponent(currentRestoreFile.value.filename)}`)
+    await apiRequest(
+      `/api/xiuxian/backup?action=restore&filename=${encodeURIComponent(currentRestoreFile.value.filename)}`
+    )
     message.success(`还原备份 ${currentRestoreFile.value.filename} 成功`)
     restoreModalVisible.value = false
     currentRestoreFile.value = null
@@ -282,13 +313,13 @@ const executeSingleDelete = async () => {
     await apiRequest('/api/xiuxian/backup?action=delete', {
       method: 'POST',
       body: JSON.stringify({
-        files: [currentDeleteFile.value.filename]
-      })
+        files: [currentDeleteFile.value.filename],
+      }),
     })
 
     message.success('删除成功')
-    backupList.value = backupList.value.filter(item => item.filename !== currentDeleteFile.value.filename)
-    selectedRowKeys.value = selectedRowKeys.value.filter(key => key !== currentDeleteFile.value.filename)
+    backupList.value = backupList.value.filter((item) => item.filename !== currentDeleteFile.value.filename)
+    selectedRowKeys.value = selectedRowKeys.value.filter((key) => key !== currentDeleteFile.value.filename)
     setCachedData(backupList.value)
     deleteModalVisible.value = false
     currentDeleteFile.value = null
@@ -315,12 +346,12 @@ const executeBatchDelete = async () => {
     await apiRequest('/api/xiuxian/backup?action=delete', {
       method: 'POST',
       body: JSON.stringify({
-        files: selectedRowKeys.value
-      })
+        files: selectedRowKeys.value,
+      }),
     })
 
     message.success(`成功删除 ${selectedRowKeys.value.length} 个备份文件`)
-    backupList.value = backupList.value.filter(item => !selectedRowKeys.value.includes(item.filename))
+    backupList.value = backupList.value.filter((item) => !selectedRowKeys.value.includes(item.filename))
     selectedRowKeys.value = []
     setCachedData(backupList.value)
     batchDeleteModalVisible.value = false
@@ -489,7 +520,9 @@ onUnmounted(() => {
 :deep(.ant-card) {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
 }
 
 :deep(.ant-card:hover) {

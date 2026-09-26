@@ -18,8 +18,8 @@ export default defineConfig({
             return 'assets/index.[ext]'
           }
           return 'assets/index.[ext]'
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 })

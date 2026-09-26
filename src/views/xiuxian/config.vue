@@ -24,30 +24,46 @@
       </div>
 
       <div v-else class="config-form">
-        <a-form ref="formRef" :model="formData" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }"
-          layout="horizontal">
+        <a-form
+          ref="formRef"
+          :model="formData"
+          :label-col="{ span: 6 }"
+          :wrapper-col="{ span: 18 }"
+          layout="horizontal"
+        >
           <template v-for="element in elements" :key="element.field || element.label">
             <div v-if="element.component === 'SOFT_GROUP_BEGIN'" class="group-title">
               {{ element.label }}
             </div>
 
             <div v-else-if="element.component === 'Divider'" class="divider-wrapper">
-              <a-divider :orientation="element.componentProps?.orientation || 'left'"
-                :plain="element.componentProps?.plain !== false">
+              <a-divider
+                :orientation="element.componentProps?.orientation || 'left'"
+                :plain="element.componentProps?.plain !== false"
+              >
                 {{ element.label }}
               </a-divider>
             </div>
 
             <a-form-item v-else-if="element.component === 'GButtons'" :label="element.label" class="config-item">
-              <a-button v-for="(btn, btnIdx) in element.componentProps?.buttons" :key="btnIdx"
-                :type="btn.type || 'default'" :danger="btn.danger" @click="handleButtonAction(btn)"
-                style="margin-right: 8px;">
+              <a-button
+                v-for="(btn, btnIdx) in element.componentProps?.buttons"
+                :key="btnIdx"
+                :type="btn.type || 'default'"
+                :danger="btn.danger"
+                @click="handleButtonAction(btn)"
+                style="margin-right: 8px"
+              >
                 {{ btn.label }}
               </a-button>
             </a-form-item>
 
-            <a-form-item v-else-if="element.component === 'GSubForm'" :label="element.label"
-              :help="element.bottomHelpMessage" class="config-item subform-form-item">
+            <a-form-item
+              v-else-if="element.component === 'GSubForm'"
+              :label="element.label"
+              :help="element.bottomHelpMessage"
+              class="config-item subform-form-item"
+            >
               <div class="subform-card" @click="openSubForm(element)">
                 <template v-if="element.componentProps?.multiple">
                   <div class="card-preview">
@@ -59,13 +75,19 @@
                 </template>
 
                 <template v-else>
-                  <div v-if="getObjectData(element.field) && Object.keys(getObjectData(element.field)).length > 0"
-                    class="card-preview">
-                    <div v-for="schema in (element.componentProps?.schemas || []).slice(0, 3)" :key="schema.field"
-                      class="preview-item">
+                  <div
+                    v-if="getObjectData(element.field) && Object.keys(getObjectData(element.field)).length > 0"
+                    class="card-preview"
+                  >
+                    <div
+                      v-for="schema in (element.componentProps?.schemas || []).slice(0, 3)"
+                      :key="schema.field"
+                      class="preview-item"
+                    >
                       <span class="preview-label">{{ schema.label }}:</span>
-                      <span class="preview-value">{{ formatPreviewValue(getObjectData(element.field)[schema.field],
-                        schema) }}</span>
+                      <span class="preview-value">{{
+                        formatPreviewValue(getObjectData(element.field)[schema.field], schema)
+                      }}</span>
                     </div>
                     <div v-if="(element.componentProps?.schemas || []).length > 3" class="preview-more">
                       还有 {{ element.componentProps.schemas.length - 3 }} 项...
@@ -74,58 +96,90 @@
                   <div v-else class="card-empty">点击配置</div>
                 </template>
 
-                <div class="card-hint">
-                  <edit-outlined /> 点击编辑
-                </div>
+                <div class="card-hint"><edit-outlined /> 点击编辑</div>
               </div>
             </a-form-item>
 
-            <a-form-item v-else :label="element.label" :help="element.bottomHelpMessage" :required="element.required"
-              class="config-item">
+            <a-form-item
+              v-else
+              :label="element.label"
+              :help="element.bottomHelpMessage"
+              :required="element.required"
+              class="config-item"
+            >
               <template v-if="isNestedObjectType(element)">
                 <div class="subform-card" @click="openNestedSubForm(element)">
-                  <div v-if="getObjectData(element.field) && Object.keys(getObjectData(element.field)).length > 0"
-                    class="card-preview">
-                    <div v-for="schema in (getNestedSchemas(element) || []).slice(0, 3)" :key="schema.field"
-                      class="preview-item">
+                  <div
+                    v-if="getObjectData(element.field) && Object.keys(getObjectData(element.field)).length > 0"
+                    class="card-preview"
+                  >
+                    <div
+                      v-for="schema in (getNestedSchemas(element) || []).slice(0, 3)"
+                      :key="schema.field"
+                      class="preview-item"
+                    >
                       <span class="preview-label">{{ schema.label }}:</span>
-                      <span class="preview-value">{{ formatPreviewValue(getObjectData(element.field)[schema.field],
-                        schema) }}</span>
+                      <span class="preview-value">{{
+                        formatPreviewValue(getObjectData(element.field)[schema.field], schema)
+                      }}</span>
                     </div>
                     <div v-if="(getNestedSchemas(element) || []).length > 3" class="preview-more">
                       还有 {{ getNestedSchemas(element).length - 3 }} 项...
                     </div>
                   </div>
                   <div v-else class="card-empty">点击配置</div>
-                  <div class="card-hint">
-                    <edit-outlined /> 点击编辑
-                  </div>
+                  <div class="card-hint"><edit-outlined /> 点击编辑</div>
                 </div>
               </template>
 
               <template v-else>
                 <a-switch v-if="element.component === 'Switch'" v-model:checked="formData[element.field]" />
-                <a-input-number v-else-if="element.component === 'InputNumber'" v-model:value="formData[element.field]"
-                  v-bind="element.componentProps" style="width: 100%;" />
-                <a-input v-else-if="element.component === 'Input'" v-model:value="formData[element.field]"
-                  v-bind="element.componentProps" />
+                <a-input-number
+                  v-else-if="element.component === 'InputNumber'"
+                  v-model:value="formData[element.field]"
+                  v-bind="element.componentProps"
+                  style="width: 100%"
+                />
+                <a-input
+                  v-else-if="element.component === 'Input'"
+                  v-model:value="formData[element.field]"
+                  v-bind="element.componentProps"
+                />
                 <a-radio-group v-else-if="element.component === 'RadioGroup'" v-model:value="formData[element.field]">
                   <a-radio v-for="opt in element.componentProps?.options" :key="opt.value" :value="opt.value">
                     {{ opt.label }}
                   </a-radio>
                 </a-radio-group>
-                <a-select v-else-if="element.component === 'Select'" v-model:value="formData[element.field]"
-                  v-bind="element.componentProps" style="width: 100%;" />
-                <a-select v-else-if="element.component === 'GSelectGroup'" v-model:value="formData[element.field]"
-                  mode="multiple" placeholder="请选择群" style="width: 100%;">
+                <a-select
+                  v-else-if="element.component === 'Select'"
+                  v-model:value="formData[element.field]"
+                  v-bind="element.componentProps"
+                  style="width: 100%"
+                />
+                <a-select
+                  v-else-if="element.component === 'GSelectGroup'"
+                  v-model:value="formData[element.field]"
+                  mode="multiple"
+                  placeholder="请选择群"
+                  style="width: 100%"
+                >
                   <a-select-option v-for="group in groupOptions" :key="group.value" :value="group.value">
                     {{ group.label }}
                   </a-select-option>
                 </a-select>
-                <a-select v-else-if="element.component === 'GTags'" v-model:value="formData[element.field]" mode="tags"
-                  placeholder="输入后按回车添加" style="width: 100%;" />
-                <a-input v-else-if="element.component === 'EasyCron'" v-model:value="formData[element.field]"
-                  v-bind="element.componentProps" placeholder="*表示任意，?表示不指定（月日和星期互斥）" />
+                <a-select
+                  v-else-if="element.component === 'GTags'"
+                  v-model:value="formData[element.field]"
+                  mode="tags"
+                  placeholder="输入后按回车添加"
+                  style="width: 100%"
+                />
+                <a-input
+                  v-else-if="element.component === 'EasyCron'"
+                  v-model:value="formData[element.field]"
+                  v-bind="element.componentProps"
+                  placeholder="*表示任意，?表示不指定（月日和星期互斥）"
+                />
               </template>
             </a-form-item>
           </template>
@@ -133,56 +187,104 @@
       </div>
     </a-card>
 
-    <a-modal v-model:visible="subFormVisible" :title="subFormTitle" ok-text="确定" cancel-text="取消"
-      @ok="handleSubFormSave" @cancel="subFormVisible = false" :confirm-loading="subFormLoading" width="600px"
-      :destroyOnClose="true">
+    <a-modal
+      v-model:visible="subFormVisible"
+      :title="subFormTitle"
+      ok-text="确定"
+      cancel-text="取消"
+      @ok="handleSubFormSave"
+      @cancel="subFormVisible = false"
+      :confirm-loading="subFormLoading"
+      width="600px"
+      :destroyOnClose="true"
+    >
       <div v-if="currentSubFormSchemas && currentSubFormSchemas.length > 0" class="sub-form">
-        <a-form ref="subFormInnerRef" :model="subFormData" :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }"
-          layout="horizontal">
+        <a-form
+          ref="subFormInnerRef"
+          :model="subFormData"
+          :label-col="{ span: 8 }"
+          :wrapper-col="{ span: 16 }"
+          layout="horizontal"
+        >
           <template v-for="schema in currentSubFormSchemas" :key="schema.field">
-            <a-form-item v-if="schema.component === 'GSubForm' || isNestedObjectType(schema)" :label="schema.label"
-              :help="schema.bottomHelpMessage">
+            <a-form-item
+              v-if="schema.component === 'GSubForm' || isNestedObjectType(schema)"
+              :label="schema.label"
+              :help="schema.bottomHelpMessage"
+            >
               <div class="subform-card subform-card-inner" @click="openNestedSubSubForm(schema)">
-                <div v-if="subFormData[schema.field] && Object.keys(subFormData[schema.field]).length > 0"
-                  class="card-preview">
-                  <div v-for="subSchema in (getNestedSchemas(schema) || []).slice(0, 3)" :key="subSchema.field"
-                    class="preview-item">
+                <div
+                  v-if="subFormData[schema.field] && Object.keys(subFormData[schema.field]).length > 0"
+                  class="card-preview"
+                >
+                  <div
+                    v-for="subSchema in (getNestedSchemas(schema) || []).slice(0, 3)"
+                    :key="subSchema.field"
+                    class="preview-item"
+                  >
                     <span class="preview-label">{{ subSchema.label }}:</span>
-                    <span class="preview-value">{{ formatPreviewValue(subFormData[schema.field]?.[subSchema.field],
-                      subSchema) }}</span>
+                    <span class="preview-value">{{
+                      formatPreviewValue(subFormData[schema.field]?.[subSchema.field], subSchema)
+                    }}</span>
                   </div>
                 </div>
                 <div v-else class="card-empty">点击配置</div>
-                <div class="card-hint">
-                  <edit-outlined /> 点击编辑
-                </div>
+                <div class="card-hint"><edit-outlined /> 点击编辑</div>
               </div>
             </a-form-item>
 
-            <a-form-item v-else :label="schema.label" :required="schema.required" :help="schema.bottomHelpMessage"
-              :rules="getFormItemRules(schema)" :name="schema.field">
+            <a-form-item
+              v-else
+              :label="schema.label"
+              :required="schema.required"
+              :help="schema.bottomHelpMessage"
+              :rules="getFormItemRules(schema)"
+              :name="schema.field"
+            >
               <a-switch v-if="schema.component === 'Switch'" v-model:checked="subFormData[schema.field]" />
-              <a-input-number v-else-if="schema.component === 'InputNumber'" v-model:value="subFormData[schema.field]"
-                v-bind="schema.componentProps" style="width: 100%;" />
-              <a-input v-else-if="schema.component === 'Input'" v-model:value="subFormData[schema.field]"
-                v-bind="schema.componentProps" />
+              <a-input-number
+                v-else-if="schema.component === 'InputNumber'"
+                v-model:value="subFormData[schema.field]"
+                v-bind="schema.componentProps"
+                style="width: 100%"
+              />
+              <a-input
+                v-else-if="schema.component === 'Input'"
+                v-model:value="subFormData[schema.field]"
+                v-bind="schema.componentProps"
+              />
               <a-radio-group v-else-if="schema.component === 'RadioGroup'" v-model:value="subFormData[schema.field]">
                 <a-radio v-for="opt in schema.componentProps?.options" :key="opt.value" :value="opt.value">
                   {{ opt.label }}
                 </a-radio>
               </a-radio-group>
-              <a-select v-else-if="schema.component === 'Select'" v-model:value="subFormData[schema.field]"
-                v-bind="schema.componentProps" style="width: 100%;" />
-              <a-select v-else-if="schema.component === 'GTags'" v-model:value="subFormData[schema.field]" mode="tags"
-                style="width: 100%;" />
-              <a-select v-else-if="schema.component === 'GSelectGroup'" v-model:value="subFormData[schema.field]"
-                mode="multiple" style="width: 100%;">
+              <a-select
+                v-else-if="schema.component === 'Select'"
+                v-model:value="subFormData[schema.field]"
+                v-bind="schema.componentProps"
+                style="width: 100%"
+              />
+              <a-select
+                v-else-if="schema.component === 'GTags'"
+                v-model:value="subFormData[schema.field]"
+                mode="tags"
+                style="width: 100%"
+              />
+              <a-select
+                v-else-if="schema.component === 'GSelectGroup'"
+                v-model:value="subFormData[schema.field]"
+                mode="multiple"
+                style="width: 100%"
+              >
                 <a-select-option v-for="group in groupOptions" :key="group.value" :value="group.value">
                   {{ group.label }}
                 </a-select-option>
               </a-select>
-              <a-input v-else-if="schema.component === 'EasyCron'" v-model:value="subFormData[schema.field]"
-                placeholder="*表示任意，?表示不指定" />
+              <a-input
+                v-else-if="schema.component === 'EasyCron'"
+                v-model:value="subFormData[schema.field]"
+                placeholder="*表示任意，?表示不指定"
+              />
             </a-form-item>
           </template>
         </a-form>
@@ -192,57 +294,107 @@
       </div>
     </a-modal>
 
-    <a-modal v-model:visible="nestedSubFormVisible" :title="nestedSubFormTitle" ok-text="确定" cancel-text="取消"
-      @ok="handleNestedSubFormSave" @cancel="nestedSubFormVisible = false" :confirm-loading="nestedSubFormLoading"
-      width="600px" :destroyOnClose="true">
+    <a-modal
+      v-model:visible="nestedSubFormVisible"
+      :title="nestedSubFormTitle"
+      ok-text="确定"
+      cancel-text="取消"
+      @ok="handleNestedSubFormSave"
+      @cancel="nestedSubFormVisible = false"
+      :confirm-loading="nestedSubFormLoading"
+      width="600px"
+      :destroyOnClose="true"
+    >
       <div v-if="currentNestedSchemas && currentNestedSchemas.length > 0" class="sub-form">
-        <a-form ref="nestedFormInnerRef" :model="nestedSubFormData" :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }"
-          layout="horizontal">
+        <a-form
+          ref="nestedFormInnerRef"
+          :model="nestedSubFormData"
+          :label-col="{ span: 8 }"
+          :wrapper-col="{ span: 16 }"
+          layout="horizontal"
+        >
           <template v-for="schema in currentNestedSchemas" :key="schema.field">
-            <a-form-item v-if="schema.component === 'GSubForm' || isNestedObjectType(schema)" :label="schema.label"
-              :help="schema.bottomHelpMessage">
+            <a-form-item
+              v-if="schema.component === 'GSubForm' || isNestedObjectType(schema)"
+              :label="schema.label"
+              :help="schema.bottomHelpMessage"
+            >
               <div class="subform-card subform-card-inner" @click="openDeepNestedSubForm(schema, nestedSubFormData)">
-                <div v-if="nestedSubFormData[schema.field] && Object.keys(nestedSubFormData[schema.field]).length > 0"
-                  class="card-preview">
-                  <div v-for="subSchema in (getNestedSchemas(schema) || []).slice(0, 3)" :key="subSchema.field"
-                    class="preview-item">
+                <div
+                  v-if="nestedSubFormData[schema.field] && Object.keys(nestedSubFormData[schema.field]).length > 0"
+                  class="card-preview"
+                >
+                  <div
+                    v-for="subSchema in (getNestedSchemas(schema) || []).slice(0, 3)"
+                    :key="subSchema.field"
+                    class="preview-item"
+                  >
                     <span class="preview-label">{{ subSchema.label }}:</span>
                     <span class="preview-value">{{
-                      formatPreviewValue(nestedSubFormData[schema.field]?.[subSchema.field], subSchema) }}</span>
+                      formatPreviewValue(nestedSubFormData[schema.field]?.[subSchema.field], subSchema)
+                    }}</span>
                   </div>
                 </div>
                 <div v-else class="card-empty">点击配置</div>
-                <div class="card-hint">
-                  <edit-outlined /> 点击编辑
-                </div>
+                <div class="card-hint"><edit-outlined /> 点击编辑</div>
               </div>
             </a-form-item>
 
-            <a-form-item v-else :label="schema.label" :required="schema.required" :help="schema.bottomHelpMessage"
-              :rules="getFormItemRules(schema)" :name="schema.field">
+            <a-form-item
+              v-else
+              :label="schema.label"
+              :required="schema.required"
+              :help="schema.bottomHelpMessage"
+              :rules="getFormItemRules(schema)"
+              :name="schema.field"
+            >
               <a-switch v-if="schema.component === 'Switch'" v-model:checked="nestedSubFormData[schema.field]" />
-              <a-input-number v-else-if="schema.component === 'InputNumber'"
-                v-model:value="nestedSubFormData[schema.field]" v-bind="schema.componentProps" style="width: 100%;" />
-              <a-input v-else-if="schema.component === 'Input'" v-model:value="nestedSubFormData[schema.field]"
-                v-bind="schema.componentProps" />
-              <a-radio-group v-else-if="schema.component === 'RadioGroup'"
-                v-model:value="nestedSubFormData[schema.field]">
+              <a-input-number
+                v-else-if="schema.component === 'InputNumber'"
+                v-model:value="nestedSubFormData[schema.field]"
+                v-bind="schema.componentProps"
+                style="width: 100%"
+              />
+              <a-input
+                v-else-if="schema.component === 'Input'"
+                v-model:value="nestedSubFormData[schema.field]"
+                v-bind="schema.componentProps"
+              />
+              <a-radio-group
+                v-else-if="schema.component === 'RadioGroup'"
+                v-model:value="nestedSubFormData[schema.field]"
+              >
                 <a-radio v-for="opt in schema.componentProps?.options" :key="opt.value" :value="opt.value">
                   {{ opt.label }}
                 </a-radio>
               </a-radio-group>
-              <a-select v-else-if="schema.component === 'Select'" v-model:value="nestedSubFormData[schema.field]"
-                v-bind="schema.componentProps" style="width: 100%;" />
-              <a-select v-else-if="schema.component === 'GTags'" v-model:value="nestedSubFormData[schema.field]"
-                mode="tags" style="width: 100%;" />
-              <a-select v-else-if="schema.component === 'GSelectGroup'" v-model:value="nestedSubFormData[schema.field]"
-                mode="multiple" style="width: 100%;">
+              <a-select
+                v-else-if="schema.component === 'Select'"
+                v-model:value="nestedSubFormData[schema.field]"
+                v-bind="schema.componentProps"
+                style="width: 100%"
+              />
+              <a-select
+                v-else-if="schema.component === 'GTags'"
+                v-model:value="nestedSubFormData[schema.field]"
+                mode="tags"
+                style="width: 100%"
+              />
+              <a-select
+                v-else-if="schema.component === 'GSelectGroup'"
+                v-model:value="nestedSubFormData[schema.field]"
+                mode="multiple"
+                style="width: 100%"
+              >
                 <a-select-option v-for="group in groupOptions" :key="group.value" :value="group.value">
                   {{ group.label }}
                 </a-select-option>
               </a-select>
-              <a-input v-else-if="schema.component === 'EasyCron'" v-model:value="nestedSubFormData[schema.field]"
-                placeholder="*表示任意，?表示不指定" />
+              <a-input
+                v-else-if="schema.component === 'EasyCron'"
+                v-model:value="nestedSubFormData[schema.field]"
+                placeholder="*表示任意，?表示不指定"
+              />
             </a-form-item>
           </template>
         </a-form>
@@ -252,8 +404,15 @@
       </div>
     </a-modal>
 
-    <a-modal v-model:visible="arraySubFormVisible" :title="arraySubFormTitle" :ok-text="null" :cancel-text="null"
-      :footer="null" width="700px" :destroyOnClose="true">
+    <a-modal
+      v-model:visible="arraySubFormVisible"
+      :title="arraySubFormTitle"
+      :ok-text="null"
+      :cancel-text="null"
+      :footer="null"
+      width="700px"
+      :destroyOnClose="true"
+    >
       <div v-if="currentArraySubFormSchemas && currentArraySubFormSchemas.length > 0" class="array-modal-container">
         <div class="array-scroll-area">
           <div v-if="arraySubFormData.length === 0" class="array-empty">
@@ -264,17 +423,18 @@
             <div class="array-item-header">
               <span class="array-item-title">{{ item.name || getArrayItemDisplayName(item) }}</span>
               <div class="array-item-actions">
-                <a-button type="link" size="small" @click="editArrayItem(itemIdx)">
-                  <edit-outlined /> 编辑
-                </a-button>
+                <a-button type="link" size="small" @click="editArrayItem(itemIdx)"> <edit-outlined /> 编辑 </a-button>
                 <a-button type="text" danger size="small" @click="removeArrayItem(itemIdx)">
                   <delete-outlined />
                 </a-button>
               </div>
             </div>
             <div class="array-item-preview">
-              <div v-for="schema in (currentArraySubFormSchemas || []).slice(0, 3)" :key="schema.field"
-                class="preview-item">
+              <div
+                v-for="schema in (currentArraySubFormSchemas || []).slice(0, 3)"
+                :key="schema.field"
+                class="preview-item"
+              >
                 <span class="preview-label">{{ schema.label }}:</span>
                 <span class="preview-value">{{ formatPreviewValue(item[schema.field], schema) }}</span>
               </div>
@@ -290,9 +450,7 @@
             <template #icon><plus-outlined /></template>
             添加
           </a-button>
-          <a-button type="primary" @click="handleArrayConfirm" style="margin-left: 8px;">
-            确定
-          </a-button>
+          <a-button type="primary" @click="handleArrayConfirm" style="margin-left: 8px"> 确定 </a-button>
         </div>
       </div>
       <div v-else class="sub-form-empty">
@@ -300,54 +458,106 @@
       </div>
     </a-modal>
 
-    <a-modal v-model:visible="arrayItemEditVisible" :title="arrayItemEditTitle" ok-text="确定" cancel-text="取消"
-      @ok="handleArrayItemEditSave" @cancel="handleArrayItemEditCancel" :confirm-loading="arrayItemEditLoading"
-      width="600px" :destroyOnClose="true">
+    <a-modal
+      v-model:visible="arrayItemEditVisible"
+      :title="arrayItemEditTitle"
+      ok-text="确定"
+      cancel-text="取消"
+      @ok="handleArrayItemEditSave"
+      @cancel="handleArrayItemEditCancel"
+      :confirm-loading="arrayItemEditLoading"
+      width="600px"
+      :destroyOnClose="true"
+    >
       <div v-if="currentArrayItemSchemas && currentArrayItemSchemas.length > 0" class="sub-form">
-        <a-form ref="arrayItemFormInnerRef" :model="arrayItemEditData" :label-col="{ span: 8 }"
-          :wrapper-col="{ span: 16 }" layout="horizontal">
+        <a-form
+          ref="arrayItemFormInnerRef"
+          :model="arrayItemEditData"
+          :label-col="{ span: 8 }"
+          :wrapper-col="{ span: 16 }"
+          layout="horizontal"
+        >
           <template v-for="schema in currentArrayItemSchemas" :key="schema.field">
-            <a-form-item v-if="schema.component === 'GSubForm' || isNestedObjectType(schema)" :label="schema.label"
-              :help="schema.bottomHelpMessage">
-              <div class="subform-card subform-card-inner"
-                @click="openNestedSubSubFormForArray(schema, arrayItemEditData)">
-                <div v-if="arrayItemEditData[schema.field] && Object.keys(arrayItemEditData[schema.field]).length > 0"
-                  class="card-preview">
-                  <div v-for="subSchema in (getNestedSchemas(schema) || []).slice(0, 3)" :key="subSchema.field"
-                    class="preview-item">
+            <a-form-item
+              v-if="schema.component === 'GSubForm' || isNestedObjectType(schema)"
+              :label="schema.label"
+              :help="schema.bottomHelpMessage"
+            >
+              <div
+                class="subform-card subform-card-inner"
+                @click="openNestedSubSubFormForArray(schema, arrayItemEditData)"
+              >
+                <div
+                  v-if="arrayItemEditData[schema.field] && Object.keys(arrayItemEditData[schema.field]).length > 0"
+                  class="card-preview"
+                >
+                  <div
+                    v-for="subSchema in (getNestedSchemas(schema) || []).slice(0, 3)"
+                    :key="subSchema.field"
+                    class="preview-item"
+                  >
                     <span class="preview-label">{{ subSchema.label }}:</span>
                     <span class="preview-value">{{
-                      formatPreviewValue(arrayItemEditData[schema.field]?.[subSchema.field], subSchema) }}</span>
+                      formatPreviewValue(arrayItemEditData[schema.field]?.[subSchema.field], subSchema)
+                    }}</span>
                   </div>
                 </div>
                 <div v-else class="card-empty">点击配置</div>
-                <div class="card-hint">
-                  <edit-outlined /> 点击编辑
-                </div>
+                <div class="card-hint"><edit-outlined /> 点击编辑</div>
               </div>
             </a-form-item>
 
-            <a-form-item v-else :label="schema.label" :required="schema.required" :help="schema.bottomHelpMessage"
-              :rules="getFormItemRules(schema)" :name="schema.field">
+            <a-form-item
+              v-else
+              :label="schema.label"
+              :required="schema.required"
+              :help="schema.bottomHelpMessage"
+              :rules="getFormItemRules(schema)"
+              :name="schema.field"
+            >
               <a-switch v-if="schema.component === 'Switch'" v-model:checked="arrayItemEditData[schema.field]" />
-              <a-input-number v-else-if="schema.component === 'InputNumber'"
-                v-model:value="arrayItemEditData[schema.field]" v-bind="schema.componentProps" style="width: 100%;" />
-              <a-input v-else-if="schema.component === 'Input'" v-model:value="arrayItemEditData[schema.field]"
-                v-bind="schema.componentProps" />
-              <a-radio-group v-else-if="schema.component === 'RadioGroup'"
-                v-model:value="arrayItemEditData[schema.field]">
+              <a-input-number
+                v-else-if="schema.component === 'InputNumber'"
+                v-model:value="arrayItemEditData[schema.field]"
+                v-bind="schema.componentProps"
+                style="width: 100%"
+              />
+              <a-input
+                v-else-if="schema.component === 'Input'"
+                v-model:value="arrayItemEditData[schema.field]"
+                v-bind="schema.componentProps"
+              />
+              <a-radio-group
+                v-else-if="schema.component === 'RadioGroup'"
+                v-model:value="arrayItemEditData[schema.field]"
+              >
                 <a-radio v-for="opt in schema.componentProps?.options" :key="opt.value" :value="opt.value">
                   {{ opt.label }}
                 </a-radio>
               </a-radio-group>
-              <a-select v-else-if="schema.component === 'Select'" v-model:value="arrayItemEditData[schema.field]"
-                v-bind="schema.componentProps" style="width: 100%;" />
-              <a-select v-else-if="schema.component === 'GTags'" v-model:value="arrayItemEditData[schema.field]"
-                mode="tags" style="width: 100%;" />
-              <a-input v-else-if="schema.component === 'EasyCron'" v-model:value="arrayItemEditData[schema.field]"
-                placeholder="*表示任意，?表示不指定" />
-              <a-select v-else-if="schema.component === 'GSelectGroup'" v-model:value="arrayItemEditData[schema.field]"
-                mode="multiple" style="width: 100%;">
+              <a-select
+                v-else-if="schema.component === 'Select'"
+                v-model:value="arrayItemEditData[schema.field]"
+                v-bind="schema.componentProps"
+                style="width: 100%"
+              />
+              <a-select
+                v-else-if="schema.component === 'GTags'"
+                v-model:value="arrayItemEditData[schema.field]"
+                mode="tags"
+                style="width: 100%"
+              />
+              <a-input
+                v-else-if="schema.component === 'EasyCron'"
+                v-model:value="arrayItemEditData[schema.field]"
+                placeholder="*表示任意，?表示不指定"
+              />
+              <a-select
+                v-else-if="schema.component === 'GSelectGroup'"
+                v-model:value="arrayItemEditData[schema.field]"
+                mode="multiple"
+                style="width: 100%"
+              >
                 <a-select-option v-for="group in groupOptions" :key="group.value" :value="group.value">
                   {{ group.label }}
                 </a-select-option>
@@ -361,12 +571,18 @@
       </div>
     </a-modal>
 
-    <a-modal v-model:visible="resetModalVisible" title="确认重置" ok-text="确认重置" cancel-text="取消" ok-danger
-      @ok="handleResetConfirm" @cancel="resetModalVisible = false" :confirm-loading="resetLoading">
-      <p style="font-size: 16px; color: #ff4d4f; font-weight: bold;">
-        ⚠️ 确认重置所有修仙配置吗？
-      </p>
-      <p style="color: #666;">此操作不可撤销！所有配置将恢复为默认值。</p>
+    <a-modal
+      v-model:visible="resetModalVisible"
+      title="确认重置"
+      ok-text="确认重置"
+      cancel-text="取消"
+      ok-danger
+      @ok="handleResetConfirm"
+      @cancel="resetModalVisible = false"
+      :confirm-loading="resetLoading"
+    >
+      <p style="font-size: 16px; color: #ff4d4f; font-weight: bold">⚠️ 确认重置所有修仙配置吗？</p>
+      <p style="color: #666">此操作不可撤销！所有配置将恢复为默认值。</p>
     </a-modal>
   </div>
 </template>
@@ -375,13 +591,7 @@
 import { ref, reactive, onMounted, onActivated, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import {
-  SaveOutlined,
-  ReloadOutlined,
-  EditOutlined,
-  PlusOutlined,
-  DeleteOutlined
-} from '@ant-design/icons-vue'
+import { SaveOutlined, ReloadOutlined, EditOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 
@@ -433,7 +643,7 @@ const isNewArrayItem = ref(false)
 const apiRequest = async (url, options = {}) => {
   const token = localStorage.getItem('token')
   const headers = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
@@ -442,8 +652,8 @@ const apiRequest = async (url, options = {}) => {
     ...options,
     headers: {
       ...headers,
-      ...options.headers
-    }
+      ...options.headers,
+    },
   }
 
   try {
@@ -458,7 +668,7 @@ const apiRequest = async (url, options = {}) => {
 
     const data = await res.json()
     return data
-  } catch (error) { }
+  } catch (error) {}
 }
 
 const fetchConfigElements = async () => {
@@ -562,14 +772,14 @@ const getFormItemRules = (schema) => {
     rules.push({
       type: 'number',
       min: schema.componentProps.min,
-      message: `${schema.label}最小值为${schema.componentProps.min}`
+      message: `${schema.label}最小值为${schema.componentProps.min}`,
     })
   }
   if (schema.componentProps?.max !== undefined) {
     rules.push({
       type: 'number',
       max: schema.componentProps.max,
-      message: `${schema.label}最大值为${schema.componentProps.max}`
+      message: `${schema.label}最大值为${schema.componentProps.max}`,
     })
   }
 
@@ -582,15 +792,17 @@ const isNestedObjectType = (element) => {
   }
 
   if (element.field) {
-    const childElements = elements.value.filter(el => {
+    const childElements = elements.value.filter((el) => {
       if (!el.field) return false
       const elKeys = el.field.split('.')
       const currentKeys = element.field.split('.')
-      return elKeys.length === currentKeys.length + 1 &&
+      return (
+        elKeys.length === currentKeys.length + 1 &&
         el.field.startsWith(element.field + '.') &&
         el.component !== 'SOFT_GROUP_BEGIN' &&
         el.component !== 'Divider' &&
         el.component !== 'GSubForm'
+      )
     })
     return childElements.length > 0
   }
@@ -604,23 +816,27 @@ const getNestedSchemas = (element) => {
   }
 
   if (element.field) {
-    return elements.value.filter(el => {
-      if (!el.field) return false
-      const elKeys = el.field.split('.')
-      const currentKeys = element.field.split('.')
-      return elKeys.length === currentKeys.length + 1 &&
-        el.field.startsWith(element.field + '.') &&
-        el.component !== 'SOFT_GROUP_BEGIN' &&
-        el.component !== 'Divider' &&
-        el.component !== 'GSubForm'
-    }).map(el => ({
-      field: el.field.split('.').pop(),
-      label: el.label,
-      component: el.component,
-      componentProps: el.componentProps,
-      required: el.required,
-      bottomHelpMessage: el.bottomHelpMessage
-    }))
+    return elements.value
+      .filter((el) => {
+        if (!el.field) return false
+        const elKeys = el.field.split('.')
+        const currentKeys = element.field.split('.')
+        return (
+          elKeys.length === currentKeys.length + 1 &&
+          el.field.startsWith(element.field + '.') &&
+          el.component !== 'SOFT_GROUP_BEGIN' &&
+          el.component !== 'Divider' &&
+          el.component !== 'GSubForm'
+        )
+      })
+      .map((el) => ({
+        field: el.field.split('.').pop(),
+        label: el.label,
+        component: el.component,
+        componentProps: el.componentProps,
+        required: el.required,
+        bottomHelpMessage: el.bottomHelpMessage,
+      }))
   }
 
   return []
@@ -628,9 +844,9 @@ const getNestedSchemas = (element) => {
 
 const initFormData = (elementsList, config) => {
   const keys = Object.keys(formData)
-  keys.forEach(key => delete formData[key])
+  keys.forEach((key) => delete formData[key])
 
-  elementsList.forEach(element => {
+  elementsList.forEach((element) => {
     if (!element.field || element.component === 'SOFT_GROUP_BEGIN' || element.component === 'Divider') {
       return
     }
@@ -666,7 +882,8 @@ const loadAllData = async (forceLoadElements = false) => {
 
     const config = await fetchConfigValues()
     initFormData(elementsData, config || {})
-  } catch (error) { } finally {
+  } catch (error) {
+  } finally {
     loading.value = false
   }
 }
@@ -679,7 +896,8 @@ const refreshConfigValues = async () => {
     if (elements.value.length > 0 && config) {
       initFormData(elements.value, config)
     }
-  } catch (error) { } finally {
+  } catch (error) {
+  } finally {
     loading.value = false
   }
 }
@@ -695,7 +913,7 @@ const getArrayData = (field) => {
 
 const getObjectData = (field) => {
   const data = formData[field]
-  return (data && typeof data === 'object' && !Array.isArray(data)) ? data : {}
+  return data && typeof data === 'object' && !Array.isArray(data) ? data : {}
 }
 
 const formatPreviewValue = (value, schema) => {
@@ -706,7 +924,7 @@ const formatPreviewValue = (value, schema) => {
   }
 
   if (schema?.component === 'RadioGroup') {
-    const option = schema.componentProps?.options?.find(opt => opt.value === value)
+    const option = schema.componentProps?.options?.find((opt) => opt.value === value)
     return option?.label || String(value)
   }
 
@@ -735,7 +953,7 @@ const getArrayItemDisplayName = (item) => {
 }
 
 const copyReactiveObject = (source, target) => {
-  Object.keys(target).forEach(key => delete target[key])
+  Object.keys(target).forEach((key) => delete target[key])
   Object.entries(source).forEach(([key, value]) => {
     target[key] = deepClone(value)
   })
@@ -748,13 +966,13 @@ const openNestedSubForm = (element) => {
   const schemas = getNestedSchemas(element)
   currentNestedSchemas.value = schemas
 
-  Object.keys(nestedSubFormData).forEach(key => delete nestedSubFormData[key])
+  Object.keys(nestedSubFormData).forEach((key) => delete nestedSubFormData[key])
 
   const existingData = getObjectData(element.field)
 
   nextTick(() => {
     if (schemas.length > 0) {
-      schemas.forEach(schema => {
+      schemas.forEach((schema) => {
         if (schema.field) {
           const value = existingData[schema.field]
           if (value !== undefined) {
@@ -812,13 +1030,13 @@ const openNestedSubSubForm = (schema) => {
   const schemas = getNestedSchemas(schema)
   currentNestedSchemas.value = schemas
 
-  Object.keys(nestedSubFormData).forEach(key => delete nestedSubFormData[key])
+  Object.keys(nestedSubFormData).forEach((key) => delete nestedSubFormData[key])
 
   const existingData = subFormData[schema.field] || {}
 
   nextTick(() => {
     if (schemas.length > 0) {
-      schemas.forEach(s => {
+      schemas.forEach((s) => {
         if (s.field) {
           const value = existingData[s.field]
           if (value !== undefined) {
@@ -841,13 +1059,13 @@ const openNestedSubSubFormForArray = (schema, parentData) => {
   const schemas = getNestedSchemas(schema)
   currentNestedSchemas.value = schemas
 
-  Object.keys(nestedSubFormData).forEach(key => delete nestedSubFormData[key])
+  Object.keys(nestedSubFormData).forEach((key) => delete nestedSubFormData[key])
 
   const existingData = parentData[schema.field] || {}
 
   nextTick(() => {
     if (schemas.length > 0) {
-      schemas.forEach(s => {
+      schemas.forEach((s) => {
         if (s.field) {
           const value = existingData[s.field]
           if (value !== undefined) {
@@ -870,13 +1088,13 @@ const openDeepNestedSubForm = (schema, parentData) => {
   const schemas = getNestedSchemas(schema)
   currentNestedSchemas.value = schemas
 
-  Object.keys(nestedSubFormData).forEach(key => delete nestedSubFormData[key])
+  Object.keys(nestedSubFormData).forEach((key) => delete nestedSubFormData[key])
 
   const existingData = parentData[schema.field] || {}
 
   nextTick(() => {
     if (schemas.length > 0) {
-      schemas.forEach(s => {
+      schemas.forEach((s) => {
         if (s.field) {
           const value = existingData[s.field]
           if (value !== undefined) {
@@ -904,13 +1122,13 @@ const openSubForm = (element) => {
   const schemas = element.componentProps?.schemas || []
   currentSubFormSchemas.value = schemas
 
-  Object.keys(subFormData).forEach(key => delete subFormData[key])
+  Object.keys(subFormData).forEach((key) => delete subFormData[key])
 
   const existingData = getObjectData(element.field)
 
   nextTick(() => {
     if (schemas.length > 0) {
-      schemas.forEach(schema => {
+      schemas.forEach((schema) => {
         if (schema.field) {
           const value = existingData[schema.field]
           if (value !== undefined) {
@@ -964,7 +1182,7 @@ const openArraySubForm = (element) => {
 
 const addArrayItemAndEdit = () => {
   const newItem = {}
-  currentArraySubFormSchemas.value.forEach(schema => {
+  currentArraySubFormSchemas.value.forEach((schema) => {
     if (schema.field) {
       newItem[schema.field] = getDefaultValue(schema)
     }
@@ -992,13 +1210,13 @@ const editArrayItem = (index) => {
   arrayItemEditTitle.value = '编辑项目'
   currentArrayItemSchemas.value = currentArraySubFormSchemas.value
 
-  Object.keys(arrayItemEditData).forEach(key => delete arrayItemEditData[key])
+  Object.keys(arrayItemEditData).forEach((key) => delete arrayItemEditData[key])
 
   const itemData = arraySubFormData.value[index] || {}
 
   nextTick(() => {
     if (currentArrayItemSchemas.value.length > 0) {
-      currentArrayItemSchemas.value.forEach(schema => {
+      currentArrayItemSchemas.value.forEach((schema) => {
         if (schema.field) {
           const value = itemData[schema.field]
           if (value !== undefined) {
@@ -1063,7 +1281,7 @@ const handleResetConfirm = async () => {
 
   try {
     const response = await apiRequest('/api/xiuxian/config?action=reset', {
-      method: 'POST'
+      method: 'POST',
     })
 
     if (response.success) {
@@ -1087,7 +1305,7 @@ const handleSave = async () => {
 
   try {
     const saveData = {}
-    Object.keys(formData).forEach(key => {
+    Object.keys(formData).forEach((key) => {
       if (key === 'actions') return
 
       const keys = key.split('.')
@@ -1112,7 +1330,7 @@ const handleSave = async () => {
 
     const response = await apiRequest('/api/xiuxian/config?action=save_config', {
       method: 'POST',
-      body: JSON.stringify(saveData)
+      body: JSON.stringify(saveData),
     })
 
     if (response.success) {
@@ -1133,12 +1351,12 @@ const fetchGroups = async () => {
   try {
     const response = await apiRequest('/api/xiuxian/config?action=get_groups')
     if (response.success && response.data?.groups) {
-      groupOptions.value = response.data.groups.map(g => ({
+      groupOptions.value = response.data.groups.map((g) => ({
         label: g.name || g.groupId,
-        value: g.groupId
+        value: g.groupId,
       }))
     }
-  } catch (error) { }
+  } catch (error) {}
 }
 
 onActivated(() => {
@@ -1432,7 +1650,9 @@ onMounted(async () => {
 :deep(.ant-card) {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
 }
 
 :deep(.ant-card:hover) {

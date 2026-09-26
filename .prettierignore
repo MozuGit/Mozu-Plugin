@@ -1,0 +1,15 @@
+# 依赖包目录
+node_modules/
+.pnpm-store/
+
+# 配置项
+/config/*
+
+# 备份文件
+/backup/xiuxian/*
+
+# vite构建产物
+/server/static/*
+
+# 文件本身
+.prettierignore

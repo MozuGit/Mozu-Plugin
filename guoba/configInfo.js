@@ -4,5 +4,5 @@ export default {
   schemas,
   actions,
   getConfigData,
-  setConfigData
+  setConfigData,
 }

@@ -21,9 +21,18 @@
         </span>
       </div>
 
-      <a-table :columns="tableColumns" :data-source="cdkList" :loading="loading && cdkList.length === 0"
-        :row-selection="rowSelection" :pagination="false" :locale="tableLocale" row-key="name" class="cdk-table"
-        :scroll="{ x: 1200 }" @change="handleTableChange">
+      <a-table
+        :columns="tableColumns"
+        :data-source="cdkList"
+        :loading="loading && cdkList.length === 0"
+        :row-selection="rowSelection"
+        :pagination="false"
+        :locale="tableLocale"
+        row-key="name"
+        class="cdk-table"
+        :scroll="{ x: 1200 }"
+        @change="handleTableChange"
+      >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'genera'">
             <a-tag :color="record.genera ? 'green' : 'default'">
@@ -47,9 +56,7 @@
           </template>
           <template v-if="column.key === 'usedInfo'">
             <div v-if="record.genera">
-              <span v-if="record.useIdList && record.useIdList.length > 0">
-                {{ record.useIdList.length }}人使用
-              </span>
+              <span v-if="record.useIdList && record.useIdList.length > 0"> {{ record.useIdList.length }}人使用 </span>
               <span v-else class="text-muted">未使用</span>
             </div>
             <div v-else>
@@ -63,11 +70,13 @@
             </div>
           </template>
           <template v-if="column.key === 'cultList'">
-            <span class="list-text">{{ Array.isArray(record.cultList) ? record.cultList.join(', ') : record.cultList ||
-              '-' }}</span>
+            <span class="list-text">{{
+              Array.isArray(record.cultList) ? record.cultList.join(', ') : record.cultList || '-'
+            }}</span>
           </template>
           <template v-if="column.key === 'lsList'">
-            <span class="list-text">{{ Array.isArray(record.lsList) ? record.lsList.join(', ') : record.lsList || '-'
+            <span class="list-text">{{
+              Array.isArray(record.lsList) ? record.lsList.join(', ') : record.lsList || '-'
             }}</span>
           </template>
           <template v-if="column.key === 'action'">
@@ -90,11 +99,17 @@
       </a-table>
 
       <div class="mobile-cdk-list">
-        <a-card v-for="record in cdkList" :key="record.name" class="cdk-mobile-card"
-          :class="{ 'selected-card': selectedRowKeys.includes(record.name) }">
+        <a-card
+          v-for="record in cdkList"
+          :key="record.name"
+          class="cdk-mobile-card"
+          :class="{ 'selected-card': selectedRowKeys.includes(record.name) }"
+        >
           <div class="mobile-card-header">
-            <a-checkbox :checked="selectedRowKeys.includes(record.name)"
-              @change="(e) => toggleMobileSelection(record.name, e.target.checked)" />
+            <a-checkbox
+              :checked="selectedRowKeys.includes(record.name)"
+              @change="(e) => toggleMobileSelection(record.name, e.target.checked)"
+            />
             <span class="mobile-cdk-name">{{ record.name }}</span>
             <a-tag :color="record.genera ? 'green' : 'orange'" class="mobile-type-tag">
               {{ record.genera ? '通用' : '专属' }}
@@ -133,12 +148,13 @@
             </a-descriptions-item>
 
             <a-descriptions-item label="修为" :span="2">
-              <span class="list-text">{{ Array.isArray(record.cultList) ? record.cultList.join(', ') : record.cultList
-                || '-'
+              <span class="list-text">{{
+                Array.isArray(record.cultList) ? record.cultList.join(', ') : record.cultList || '-'
               }}</span>
             </a-descriptions-item>
             <a-descriptions-item label="灵石" :span="2">
-              <span class="list-text">{{ Array.isArray(record.lsList) ? record.lsList.join(', ') : record.lsList || '-'
+              <span class="list-text">{{
+                Array.isArray(record.lsList) ? record.lsList.join(', ') : record.lsList || '-'
               }}</span>
             </a-descriptions-item>
           </a-descriptions>
@@ -155,18 +171,32 @@
       </div>
     </a-card>
 
-    <a-modal v-model:visible="modalVisible" :title="isEdit ? '修改兑换码' : '添加兑换码'" :ok-text="isEdit ? '修改' : '添加'"
-      cancel-text="取消" @ok="handleSubmit" @cancel="handleCancel" :confirm-loading="submitLoading"
-      :width="isMobile ? '95%' : '800px'" :body-style="{ padding: isMobile ? '16px' : '24px' }">
-      <a-form ref="formRef" :model="formState" :rules="formRules" :label-col="isMobile ? { span: 24 } : { span: 6 }"
-        :wrapper-col="isMobile ? { span: 24 } : { span: 18 }" :label-align="isMobile ? 'left' : 'right'">
+    <a-modal
+      v-model:visible="modalVisible"
+      :title="isEdit ? '修改兑换码' : '添加兑换码'"
+      :ok-text="isEdit ? '修改' : '添加'"
+      cancel-text="取消"
+      @ok="handleSubmit"
+      @cancel="handleCancel"
+      :confirm-loading="submitLoading"
+      :width="isMobile ? '95%' : '800px'"
+      :body-style="{ padding: isMobile ? '16px' : '24px' }"
+    >
+      <a-form
+        ref="formRef"
+        :model="formState"
+        :rules="formRules"
+        :label-col="isMobile ? { span: 24 } : { span: 6 }"
+        :wrapper-col="isMobile ? { span: 24 } : { span: 18 }"
+        :label-align="isMobile ? 'left' : 'right'"
+      >
         <a-form-item label="兑换码" name="name">
           <a-input v-model:value="formState.name" placeholder="请输入兑换码" :disabled="isEdit" />
         </a-form-item>
 
         <a-form-item label="通用开关" name="genera">
           <a-switch v-model:checked="formState.genera" @change="handleGeneraChange" />
-          <span style="margin-left: 8px; color: #888; font-size: 12px;">
+          <span style="margin-left: 8px; color: #888; font-size: 12px">
             {{ formState.genera ? '可被多人使用' : '仅限单人使用' }}
           </span>
         </a-form-item>
@@ -176,13 +206,21 @@
         </a-form-item>
 
         <a-form-item label="修为" name="cultList">
-          <a-textarea v-model:value="cultListText" placeholder="请输入修为值，每行一个" :rows="isMobile ? 3 : 4"
-            @change="handleCultListChange" />
+          <a-textarea
+            v-model:value="cultListText"
+            placeholder="请输入修为值，每行一个"
+            :rows="isMobile ? 3 : 4"
+            @change="handleCultListChange"
+          />
         </a-form-item>
 
         <a-form-item label="灵石" name="lsList">
-          <a-textarea v-model:value="lsListText" placeholder="请输入灵石值，每行一个" :rows="isMobile ? 3 : 4"
-            @change="handleLsListChange" />
+          <a-textarea
+            v-model:value="lsListText"
+            placeholder="请输入灵石值，每行一个"
+            :rows="isMobile ? 3 : 4"
+            @change="handleLsListChange"
+          />
         </a-form-item>
 
         <template v-if="isEdit">
@@ -191,8 +229,14 @@
           <template v-if="formState.genera">
             <a-form-item label="使用记录" :wrapper-col="isMobile ? { span: 24 } : { span: 18 }">
               <div class="usage-management-inline">
-                <a-table :columns="usageTableColumns" :data-source="editUsageList" :pagination="false" size="small"
-                  bordered v-if="editUsageList.length > 0">
+                <a-table
+                  :columns="usageTableColumns"
+                  :data-source="editUsageList"
+                  :pagination="false"
+                  size="small"
+                  bordered
+                  v-if="editUsageList.length > 0"
+                >
                   <template #bodyCell="{ column, record, index }">
                     <template v-if="column.key === 'index'">
                       {{ index + 1 }}
@@ -211,7 +255,7 @@
                   </template>
                 </a-table>
 
-                <a-button type="dashed" block @click="showAddUsageModal" style="margin-top: 8px;">
+                <a-button type="dashed" block @click="showAddUsageModal" style="margin-top: 8px">
                   <plus-outlined /> 添加使用记录
                 </a-button>
               </div>
@@ -227,8 +271,13 @@
                 <a-input v-model:value="singleUseForm.useId" placeholder="请输入使用人ID" />
               </a-form-item>
               <a-form-item label="使用时间">
-                <a-date-picker v-model:value="singleUseForm.useTime" show-time format="YYYY-MM-DD HH:mm:ss"
-                  placeholder="选择使用时间" style="width: 100%;" />
+                <a-date-picker
+                  v-model:value="singleUseForm.useTime"
+                  show-time
+                  format="YYYY-MM-DD HH:mm:ss"
+                  placeholder="选择使用时间"
+                  style="width: 100%"
+                />
               </a-form-item>
             </template>
           </template>
@@ -236,13 +285,30 @@
       </a-form>
     </a-modal>
 
-    <a-modal v-model:visible="deleteUsageModalVisible" title="确认删除使用记录" ok-text="确认删除" cancel-text="取消"
-      @ok="confirmDeleteUsage" @cancel="deleteUsageModalVisible = false" :width="isMobile ? '95%' : '500px'">
+    <a-modal
+      v-model:visible="deleteUsageModalVisible"
+      title="确认删除使用记录"
+      ok-text="确认删除"
+      cancel-text="取消"
+      @ok="confirmDeleteUsage"
+      @cancel="deleteUsageModalVisible = false"
+      :width="isMobile ? '95%' : '500px'"
+    >
       <div class="delete-usage-content">
-        <a-alert message="删除确认" description="您确定要删除这条使用记录吗？此操作不可恢复！" type="warning" show-icon :closable="false"
-          style="margin-bottom: 16px;" />
-        <a-descriptions :column="1" bordered size="small"
-          v-if="deleteUsageTarget !== null && editUsageList[deleteUsageTarget]">
+        <a-alert
+          message="删除确认"
+          description="您确定要删除这条使用记录吗？此操作不可恢复！"
+          type="warning"
+          show-icon
+          :closable="false"
+          style="margin-bottom: 16px"
+        />
+        <a-descriptions
+          :column="1"
+          bordered
+          size="small"
+          v-if="deleteUsageTarget !== null && editUsageList[deleteUsageTarget]"
+        >
           <a-descriptions-item label="使用人ID">
             <span class="user-id-text">{{ editUsageList[deleteUsageTarget].userId }}</span>
           </a-descriptions-item>
@@ -253,25 +319,51 @@
       </div>
     </a-modal>
 
-    <a-modal v-model:visible="addUsageModalVisible" title="添加使用记录" ok-text="确认添加" cancel-text="取消" @ok="confirmAddUsage"
-      @cancel="addUsageModalVisible = false" :width="isMobile ? '95%' : '500px'">
+    <a-modal
+      v-model:visible="addUsageModalVisible"
+      title="添加使用记录"
+      ok-text="确认添加"
+      cancel-text="取消"
+      @ok="confirmAddUsage"
+      @cancel="addUsageModalVisible = false"
+      :width="isMobile ? '95%' : '500px'"
+    >
       <a-form :model="newUsageForm" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="使用人ID" required>
           <a-input v-model:value="newUsageForm.userId" placeholder="请输入使用人ID" />
         </a-form-item>
         <a-form-item label="使用时间" required>
-          <a-date-picker v-model:value="newUsageForm.useTime" show-time format="YYYY-MM-DD HH:mm:ss"
-            placeholder="选择使用时间" style="width: 100%;" />
+          <a-date-picker
+            v-model:value="newUsageForm.useTime"
+            show-time
+            format="YYYY-MM-DD HH:mm:ss"
+            placeholder="选择使用时间"
+            style="width: 100%"
+          />
         </a-form-item>
       </a-form>
     </a-modal>
 
-    <a-modal v-model:visible="deleteModalVisible" title="确认删除" ok-text="确认删除" cancel-text="取消" @ok="confirmDelete"
-      @cancel="cancelDelete" :confirm-loading="deleteLoading" :width="isMobile ? '95%' : '500px'"
-      :body-style="{ padding: isMobile ? '12px' : '24px' }">
+    <a-modal
+      v-model:visible="deleteModalVisible"
+      title="确认删除"
+      ok-text="确认删除"
+      cancel-text="取消"
+      @ok="confirmDelete"
+      @cancel="cancelDelete"
+      :confirm-loading="deleteLoading"
+      :width="isMobile ? '95%' : '500px'"
+      :body-style="{ padding: isMobile ? '12px' : '24px' }"
+    >
       <div class="delete-confirm-content">
-        <a-alert message="删除确认" description="您确定要删除以下兑换码吗？此操作不可恢复！" type="warning" show-icon :closable="false"
-          style="margin-bottom: 16px;" />
+        <a-alert
+          message="删除确认"
+          description="您确定要删除以下兑换码吗？此操作不可恢复！"
+          type="warning"
+          show-icon
+          :closable="false"
+          style="margin-bottom: 16px"
+        />
         <a-descriptions :column="isMobile ? 1 : 2" bordered size="small" class="delete-descriptions">
           <a-descriptions-item label="兑换码">
             <a-tag color="red">{{ deleteTarget?.name }}</a-tag>
@@ -306,16 +398,36 @@
       </div>
     </a-modal>
 
-    <a-modal v-model:visible="batchDeleteModalVisible" title="确认批量删除"
-      :ok-text="isMobile ? `删除(${selectedRowKeys.length})` : '确认删除'" cancel-text="取消" @ok="confirmBatchDelete"
-      @cancel="cancelBatchDelete" :confirm-loading="batchDeleteLoading" :width="isMobile ? '95%' : '800px'"
-      :body-style="{ padding: isMobile ? '12px' : '24px' }">
+    <a-modal
+      v-model:visible="batchDeleteModalVisible"
+      title="确认批量删除"
+      :ok-text="isMobile ? `删除(${selectedRowKeys.length})` : '确认删除'"
+      cancel-text="取消"
+      @ok="confirmBatchDelete"
+      @cancel="cancelBatchDelete"
+      :confirm-loading="batchDeleteLoading"
+      :width="isMobile ? '95%' : '800px'"
+      :body-style="{ padding: isMobile ? '12px' : '24px' }"
+    >
       <div class="delete-confirm-content">
-        <a-alert :message="`即将删除 ${selectedRowKeys.length} 个兑换码`" description="此操作不可恢复，请仔细核对以下兑换码信息！" type="error"
-          show-icon :closable="false" style="margin-bottom: 16px;" />
+        <a-alert
+          :message="`即将删除 ${selectedRowKeys.length} 个兑换码`"
+          description="此操作不可恢复，请仔细核对以下兑换码信息！"
+          type="error"
+          show-icon
+          :closable="false"
+          style="margin-bottom: 16px"
+        />
 
-        <a-table v-if="!isMobile" :columns="batchDeleteTableColumns" :data-source="batchDeleteList" :pagination="false"
-          size="small" :scroll="{ y: 300 }" bordered>
+        <a-table
+          v-if="!isMobile"
+          :columns="batchDeleteTableColumns"
+          :data-source="batchDeleteList"
+          :pagination="false"
+          size="small"
+          :scroll="{ y: 300 }"
+          bordered
+        >
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'genera'">
               <a-tag :color="record.genera ? 'green' : 'orange'" size="small">
@@ -354,7 +466,9 @@
             </div>
             <div class="delete-card-item">
               <span class="delete-label">类型：</span>
-              <a-tag :color="record.genera ? 'green' : 'orange'" size="small">{{ record.genera ? '通用' : '专属' }}</a-tag>
+              <a-tag :color="record.genera ? 'green' : 'orange'" size="small">{{
+                record.genera ? '通用' : '专属'
+              }}</a-tag>
             </div>
             <div class="delete-card-item">
               <span class="delete-label">使用状态：</span>
@@ -392,12 +506,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  SyncOutlined
-} from '@ant-design/icons-vue'
+import { PlusOutlined, EditOutlined, DeleteOutlined, SyncOutlined } from '@ant-design/icons-vue'
 import dayjs from 'dayjs'
 
 const router = useRouter()
@@ -415,7 +524,7 @@ const checkMobile = () => {
 const tableLocale = {
   triggerAsc: '',
   triggerDesc: '',
-  cancelSort: '取消排序'
+  cancelSort: '取消排序',
 }
 
 const usageTableColumns = [
@@ -423,24 +532,24 @@ const usageTableColumns = [
     title: '序号',
     key: 'index',
     width: 60,
-    align: 'center'
+    align: 'center',
   },
   {
     title: '使用人ID',
     key: 'userId',
-    ellipsis: true
+    ellipsis: true,
   },
   {
     title: '使用时间',
     key: 'usedTime',
-    width: 180
+    width: 180,
   },
   {
     title: '操作',
     key: 'action',
     width: 80,
-    align: 'center'
-  }
+    align: 'center',
+  },
 ]
 
 const deleteModalVisible = ref(false)
@@ -456,13 +565,13 @@ const addUsageModalVisible = ref(false)
 const editUsageList = ref([])
 const newUsageForm = reactive({
   userId: '',
-  useTime: null
+  useTime: null,
 })
 
 const singleUseForm = reactive({
   isUsed: false,
   useId: '',
-  useTime: null
+  useTime: null,
 })
 
 const batchDeleteTableColumns = [
@@ -470,48 +579,48 @@ const batchDeleteTableColumns = [
     title: '兑换码',
     dataIndex: 'name',
     key: 'name',
-    width: 120
+    width: 120,
   },
   {
     title: '类型',
     key: 'genera',
     width: 70,
-    align: 'center'
+    align: 'center',
   },
   {
     title: '使用状态',
     key: 'usedStatus',
     width: 80,
-    align: 'center'
+    align: 'center',
   },
   {
     title: '强制',
     key: 'forceSetting',
     width: 60,
-    align: 'center'
+    align: 'center',
   },
   {
     title: '修为',
     key: 'cultList',
     width: 120,
-    ellipsis: true
+    ellipsis: true,
   },
   {
     title: '灵石',
     key: 'lsList',
     width: 120,
-    ellipsis: true
-  }
+    ellipsis: true,
+  },
 ]
 
 const batchDeleteList = computed(() => {
-  return cdkList.value.filter(item => selectedRowKeys.value.includes(item.name))
+  return cdkList.value.filter((item) => selectedRowKeys.value.includes(item.name))
 })
 
 const apiRequest = async (url, options = {}) => {
   const token = localStorage.getItem('token')
   const headers = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
@@ -520,8 +629,8 @@ const apiRequest = async (url, options = {}) => {
     ...options,
     headers: {
       ...headers,
-      ...options.headers
-    }
+      ...options.headers,
+    },
   }
   const res = await fetch(url, config)
   if (res.status === 401) {
@@ -553,7 +662,8 @@ const parseCdkValue = (cdk) => {
     parsedValue = cdk.value
   }
 
-  const useStatus = cdk.useStatus !== undefined ? parseInt(cdk.useStatus) : (cdk['使用状态'] ? parseInt(cdk['使用状态']) : 0)
+  const useStatus =
+    cdk.useStatus !== undefined ? parseInt(cdk.useStatus) : cdk['使用状态'] ? parseInt(cdk['使用状态']) : 0
 
   let useId = cdk.useId || cdk['使用ID'] || ''
   let useIdList = []
@@ -599,7 +709,7 @@ const parseCdkValue = (cdk) => {
     useId: Array.isArray(useId) ? '' : String(useId),
     useIdList: useIdList,
     useTime: Array.isArray(useTime) ? '' : String(useTime),
-    useTimeList: useTimeList
+    useTimeList: useTimeList,
   }
 }
 
@@ -642,7 +752,7 @@ const tableColumns = [
     width: 120,
     ellipsis: true,
     sorter: (a, b) => a.name.localeCompare(b.name),
-    sortDirections: ['ascend', 'descend']
+    sortDirections: ['ascend', 'descend'],
   },
   {
     title: '类型',
@@ -650,7 +760,7 @@ const tableColumns = [
     width: 80,
     align: 'center',
     sorter: (a, b) => (a.genera === b.genera ? 0 : a.genera ? -1 : 1),
-    sortDirections: ['ascend', 'descend']
+    sortDirections: ['ascend', 'descend'],
   },
   {
     title: '强制设置',
@@ -658,18 +768,18 @@ const tableColumns = [
     width: 90,
     align: 'center',
     sorter: (a, b) => (a.forceSetting === b.forceSetting ? 0 : a.forceSetting ? -1 : 1),
-    sortDirections: ['ascend', 'descend']
+    sortDirections: ['ascend', 'descend'],
   },
   {
     title: '使用状态',
     key: 'usedStatus',
     width: 100,
-    align: 'center'
+    align: 'center',
   },
   {
     title: '使用信息',
     key: 'usedInfo',
-    width: 180
+    width: 180,
   },
   {
     title: '修为',
@@ -681,7 +791,7 @@ const tableColumns = [
       const bStr = Array.isArray(b.cultList) ? b.cultList.join(',') : ''
       return aStr.localeCompare(bStr)
     },
-    sortDirections: ['ascend', 'descend']
+    sortDirections: ['ascend', 'descend'],
   },
   {
     title: '灵石',
@@ -693,15 +803,15 @@ const tableColumns = [
       const bStr = Array.isArray(b.lsList) ? b.lsList.join(',') : ''
       return aStr.localeCompare(bStr)
     },
-    sortDirections: ['ascend', 'descend']
+    sortDirections: ['ascend', 'descend'],
   },
   {
     title: '操作',
     key: 'action',
     width: 150,
     align: 'center',
-    fixed: 'right'
-  }
+    fixed: 'right',
+  },
 ]
 
 const rowSelection = computed(() => {
@@ -712,7 +822,7 @@ const rowSelection = computed(() => {
     selectedRowKeys: selectedRowKeys,
     onChange: (keys) => {
       selectedRowKeys.value = keys
-    }
+    },
   }
 })
 
@@ -722,7 +832,7 @@ const toggleMobileSelection = (name, checked) => {
       selectedRowKeys.value = [...selectedRowKeys.value, name]
     }
   } else {
-    selectedRowKeys.value = selectedRowKeys.value.filter(key => key !== name)
+    selectedRowKeys.value = selectedRowKeys.value.filter((key) => key !== name)
   }
 }
 
@@ -764,7 +874,7 @@ const confirmAddUsage = () => {
 
   editUsageList.value.push({
     userId: newUsageForm.userId.trim(),
-    useTime: String(newUsageForm.useTime.unix())
+    useTime: String(newUsageForm.useTime.unix()),
   })
 
   addUsageModalVisible.value = false
@@ -795,9 +905,9 @@ const fetchCdkList = async (silent = false) => {
     const data = await apiRequest('/api/xiuxian/cdk?action=getlist')
     let parsedList = []
     if (data.cdks && Array.isArray(data.cdks)) {
-      parsedList = data.cdks.map(cdk => parseCdkValue(cdk))
+      parsedList = data.cdks.map((cdk) => parseCdkValue(cdk))
     } else if (Array.isArray(data)) {
-      parsedList = data.map(cdk => parseCdkValue(cdk))
+      parsedList = data.map((cdk) => parseCdkValue(cdk))
     }
     cdkList.value = parsedList
     setCachedData(parsedList)
@@ -834,13 +944,13 @@ const confirmDelete = async () => {
     await apiRequest('/api/xiuxian/cdk?action=delete', {
       method: 'POST',
       body: JSON.stringify({
-        list: [deleteTarget.value.name]
-      })
+        list: [deleteTarget.value.name],
+      }),
     })
 
     message.success('删除成功')
-    cdkList.value = cdkList.value.filter(item => item.name !== deleteTarget.value.name)
-    selectedRowKeys.value = selectedRowKeys.value.filter(key => key !== deleteTarget.value.name)
+    cdkList.value = cdkList.value.filter((item) => item.name !== deleteTarget.value.name)
+    selectedRowKeys.value = selectedRowKeys.value.filter((key) => key !== deleteTarget.value.name)
     setCachedData(cdkList.value)
     deleteModalVisible.value = false
     deleteTarget.value = null
@@ -870,11 +980,11 @@ const confirmBatchDelete = async () => {
     await apiRequest('/api/xiuxian/cdk?action=delete', {
       method: 'POST',
       body: JSON.stringify({
-        list: selectedRowKeys.value
-      })
+        list: selectedRowKeys.value,
+      }),
     })
     message.success(`成功删除 ${selectedRowKeys.value.length} 个兑换码`)
-    cdkList.value = cdkList.value.filter(item => !selectedRowKeys.value.includes(item.name))
+    cdkList.value = cdkList.value.filter((item) => !selectedRowKeys.value.includes(item.name))
     selectedRowKeys.value = []
     setCachedData(cdkList.value)
     batchDeleteModalVisible.value = false
@@ -905,13 +1015,11 @@ const formState = reactive({
   genera: false,
   forceSetting: false,
   cultList: [],
-  lsList: []
+  lsList: [],
 })
 
 const formRules = {
-  name: [
-    { required: true, message: '请输入兑换码', trigger: 'blur' }
-  ]
+  name: [{ required: true, message: '请输入兑换码', trigger: 'blur' }],
 }
 
 const setFormData = (data) => {
@@ -926,7 +1034,7 @@ const setFormData = (data) => {
   if (data.genera) {
     editUsageList.value = data.useIdList.map((userId, index) => ({
       userId: userId,
-      useTime: data.useTimeList[index] || ''
+      useTime: data.useTimeList[index] || '',
     }))
     singleUseForm.isUsed = false
     singleUseForm.useId = ''
@@ -935,7 +1043,9 @@ const setFormData = (data) => {
     editUsageList.value = []
     singleUseForm.isUsed = data.useStatus === 1
     singleUseForm.useId = data.useId || ''
-    singleUseForm.useTime = data.useTime ? dayjs.unix(typeof data.useTime === 'string' ? parseInt(data.useTime) : data.useTime) : null
+    singleUseForm.useTime = data.useTime
+      ? dayjs.unix(typeof data.useTime === 'string' ? parseInt(data.useTime) : data.useTime)
+      : null
   }
 }
 
@@ -951,7 +1061,7 @@ const showAddModal = () => {
     useId: '',
     useIdList: [],
     useTime: '',
-    useTimeList: []
+    useTimeList: [],
   })
   modalVisible.value = true
 }
@@ -965,19 +1075,25 @@ const showEditModal = (record) => {
 const handleCultListChange = (e) => {
   const text = e.target.value
   cultListText.value = text
-  formState.cultList = text.split('\n').filter(item => item.trim() !== '').map(item => {
-    const num = Number(item.trim())
-    return isNaN(num) ? 0 : num
-  })
+  formState.cultList = text
+    .split('\n')
+    .filter((item) => item.trim() !== '')
+    .map((item) => {
+      const num = Number(item.trim())
+      return isNaN(num) ? 0 : num
+    })
 }
 
 const handleLsListChange = (e) => {
   const text = e.target.value
   lsListText.value = text
-  formState.lsList = text.split('\n').filter(item => item.trim() !== '').map(item => {
-    const num = Number(item.trim())
-    return isNaN(num) ? 0 : num
-  })
+  formState.lsList = text
+    .split('\n')
+    .filter((item) => item.trim() !== '')
+    .map((item) => {
+      const num = Number(item.trim())
+      return isNaN(num) ? 0 : num
+    })
 }
 
 const handleSubmit = async () => {
@@ -993,18 +1109,18 @@ const handleSubmit = async () => {
       genera: formState.genera,
       forceSetting: formState.forceSetting,
       cultList: formState.cultList,
-      lsList: formState.lsList
+      lsList: formState.lsList,
     }
 
     if (isEdit.value || formState.genera) {
       if (formState.genera) {
         postData.useStatus = 0
-        postData.useId = editUsageList.value.length > 0
-          ? JSON.stringify(editUsageList.value.map(item => item.userId))
-          : '[]'
-        postData.useTime = editUsageList.value.length > 0
-          ? JSON.stringify(editUsageList.value.map(item => parseInt(item.useTime)))
-          : '[]'
+        postData.useId =
+          editUsageList.value.length > 0 ? JSON.stringify(editUsageList.value.map((item) => item.userId)) : '[]'
+        postData.useTime =
+          editUsageList.value.length > 0
+            ? JSON.stringify(editUsageList.value.map((item) => parseInt(item.useTime)))
+            : '[]'
       } else {
         postData.useStatus = singleUseForm.isUsed ? 1 : 0
         postData.useId = singleUseForm.isUsed ? singleUseForm.useId : ''
@@ -1014,7 +1130,7 @@ const handleSubmit = async () => {
 
     await apiRequest(url, {
       method: 'POST',
-      body: JSON.stringify(postData)
+      body: JSON.stringify(postData),
     })
 
     message.success(isEdit.value ? '修改成功' : '添加成功')
@@ -1386,7 +1502,9 @@ onUnmounted(() => {
 :deep(.ant-card) {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
 }
 
 :deep(.ant-card:hover) {

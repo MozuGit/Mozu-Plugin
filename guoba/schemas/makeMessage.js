@@ -1,23 +1,23 @@
 export default [
   {
     label: '伪造聊天',
-    component: 'SOFT_GROUP_BEGIN'
+    component: 'SOFT_GROUP_BEGIN',
   },
   {
     field: 'example.makeMessage.enable',
     label: '伪造聊天开关',
-    component: 'Switch'
+    component: 'Switch',
   },
   {
     field: 'example.makeMessage.onlyMaster',
     label: '仅主人使用',
-    component: 'Switch'
+    component: 'Switch',
   },
   {
     field: 'example.makeMessage.whiteQQList',
     label: '白名单QQ',
     bottomHelpMessage: '防止白名单QQ被伪造',
-    component: 'GSelectFriend'
+    component: 'GSelectFriend',
   },
   {
     field: 'example.makeMessage.repeatCount',
@@ -29,8 +29,8 @@ export default [
       placeholder: '请输入默认复读次数',
       min: 0,
       style: {
-        width: "162px"
-      }
-    }
-  }
+        width: '162px',
+      },
+    },
+  },
 ]

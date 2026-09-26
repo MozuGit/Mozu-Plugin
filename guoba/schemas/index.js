@@ -4,8 +4,7 @@ import path from 'node:path'
 import crypto from 'crypto'
 import { unflatten } from 'flat'
 
-import Redis from '#Redis'
-import Config from "#Config"
+import Config from '#Config'
 import { Version } from '../../model/Config/Version.js'
 
 import RedisConfig from './Redis.js'
@@ -25,7 +24,7 @@ export const schemas = [
   ...fayan,
   ...like,
   ...openai,
-  ..._interface
+  ..._interface,
 ]
 
 export function getConfigData() {
@@ -35,9 +34,9 @@ export function getConfigData() {
       ...Config.getCfg().panel,
       login: {
         ...Config.getCfg().panel.login,
-        password: ''
-      }
-    }
+        password: '',
+      },
+    },
   }
 }
 
@@ -61,14 +60,14 @@ export function setConfigData(data, { Result }) {
   if (xiuxianError) {
     return Result.error(xiuxianError)
   }
-  return Result.ok({}, "保存成功喵~")
+  return Result.ok({}, '保存成功喵~')
 }
 
 function batchModifyConfig(configs) {
   for (const { dir, file, data } of configs) {
     if (!data || typeof data !== 'object') continue
 
-    Object.keys(data).forEach(key => {
+    Object.keys(data).forEach((key) => {
       Config.modify(dir, file, key, data[key])
     })
   }
@@ -84,17 +83,17 @@ function handleXiuxianConfig(xiuxianData) {
   ]
   for (const { file, data } of configMappings) {
     if (data && typeof data === 'object') {
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         Config.modify('xiuxian', file, key, data[key])
       })
     }
   }
   if (xiuxianData.xiuxian && typeof xiuxianData.xiuxian === 'object') {
-    Object.keys(xiuxianData.xiuxian).forEach(key => {
-      if (key === "range") {
+    Object.keys(xiuxianData.xiuxian).forEach((key) => {
+      if (key === 'range') {
         const rangeData = xiuxianData.xiuxian.range
         if (rangeData && typeof rangeData === 'object') {
-          Object.keys(rangeData).forEach(rangeKey => {
+          Object.keys(rangeData).forEach((rangeKey) => {
             Config.modify('xiuxian', rangeKey, rangeData[rangeKey])
           })
         }
@@ -104,13 +103,13 @@ function handleXiuxianConfig(xiuxianData) {
     })
   }
   if (xiuxianData.realm) {
-    Config.modify('xiuxian', 'Realm', "Realms", xiuxianData.realm)
+    Config.modify('xiuxian', 'Realm', 'Realms', xiuxianData.realm)
   }
   if (xiuxianData.drop) {
     if (hasRepeatedId(xiuxianData.drop.pills, xiuxianData.drop.arts)) {
-      return "物品ID重复"
+      return '物品ID重复'
     }
-    const cleanRealms = xiuxianData.drop.secretRealms?.map(realm => {
+    const cleanRealms = xiuxianData.drop.secretRealms?.map((realm) => {
       const { pills, arts, ...cleanRealm } = realm
       return cleanRealm
     })
@@ -118,7 +117,7 @@ function handleXiuxianConfig(xiuxianData) {
       Config.modify('xiuxian', 'drop', 'secretRealms', cleanRealms)
     }
     const keysToSkip = ['secretRealms', 'pills', 'arts']
-    Object.keys(xiuxianData.drop).forEach(key => {
+    Object.keys(xiuxianData.drop).forEach((key) => {
       if (!keysToSkip.includes(key)) {
         Config.modify('xiuxian', 'drop', key, xiuxianData.drop[key])
       }
@@ -132,12 +131,12 @@ function handleXiuxianConfig(xiuxianData) {
   }
   if (xiuxianData.sroot) {
     if (hasRepeatedId(xiuxianData.sroot.sroot)) {
-      return "灵根ID重复"
+      return '灵根ID重复'
     }
     if (Object.values(xiuxianData.sroot.root_drop).reduce((a, b) => a + b, 0) !== 100) {
-      return "灵根概率总和不等于100"
+      return '灵根概率总和不等于100'
     }
-    Object.keys(xiuxianData.sroot).forEach(key => {
+    Object.keys(xiuxianData.sroot).forEach((key) => {
       Config.modify('xiuxian', 'sroot', key, xiuxianData.sroot[key])
     })
   }
@@ -152,7 +151,7 @@ export const actions = {
       await fs.rm(destPath, { recursive: true, force: true })
       await fs.cp(srcPath, destPath, { recursive: true })
 
-      return Result.ok({}, "重置修仙配置成功喵~")
+      return Result.ok({}, '重置修仙配置成功喵~')
     } catch (error) {
       return Result.error('重置配置失败: ' + error.message)
     }
@@ -161,11 +160,11 @@ export const actions = {
     try {
       Config.modify('panel', 'login', 'totp.enabled', false)
       Config.modify('panel', 'login', 'totp.secret', '')
-      return Result.ok({}, "强制关闭TOTP成功喵~")
+      return Result.ok({}, '强制关闭TOTP成功喵~')
     } catch (error) {
       return Result.error('强制关闭失败: ' + error.message)
     }
-  }
+  },
 }
 
 function hasRepeatedId(...args) {

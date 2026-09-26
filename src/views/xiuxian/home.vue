@@ -15,36 +15,36 @@
         <a-col :xs="24" :sm="12">
           <a-statistic title="修仙人数" :value="displayPlayerCount" class="statistic-item">
             <template #suffix>
-              <span style="font-size: 16px; color: #52c41a;">人</span>
+              <span style="font-size: 16px; color: #52c41a">人</span>
             </template>
           </a-statistic>
         </a-col>
         <a-col :xs="24" :sm="12">
           <a-statistic title="宗门数量" :value="displaySectCount" class="statistic-item">
             <template #suffix>
-              <span style="font-size: 16px; color: #1890ff;">个</span>
+              <span style="font-size: 16px; color: #1890ff">个</span>
             </template>
           </a-statistic>
         </a-col>
       </a-row>
     </a-card>
 
-    <a-card class="fade-in-card trend-card" :bordered="false" style="margin-top: 16px;">
+    <a-card class="fade-in-card trend-card" :bordered="false" style="margin-top: 16px">
       <template #title>
         <span>修仙活跃分析</span>
       </template>
-      <a-row :gutter="[16, 16]" style="margin-bottom: 20px;">
+      <a-row :gutter="[16, 16]" style="margin-bottom: 20px">
         <a-col :xs="24" :sm="12">
           <a-statistic title="今日活跃人数" :value="displayTodayActive" class="statistic-item active-statistic">
             <template #suffix>
-              <span style="font-size: 16px; color: #faad14;">人</span>
+              <span style="font-size: 16px; color: #faad14">人</span>
             </template>
           </a-statistic>
         </a-col>
         <a-col :xs="24" :sm="12">
           <a-statistic title="近10天平均人数" :value="displayAvgActive" class="statistic-item avg-statistic">
             <template #suffix>
-              <span style="font-size: 16px; color: #722ed1;">人</span>
+              <span style="font-size: 16px; color: #722ed1">人</span>
             </template>
           </a-statistic>
         </a-col>
@@ -53,17 +53,37 @@
       <div ref="chartRef" class="chart-container" @click="handleContainerClick" @touchend="handleContainerTouch"></div>
     </a-card>
 
-    <a-modal v-model:open="modalVisible" :title="`${selectedDate} 活跃玩家列表`" width="800px" :footer="null"
-      class="player-modal" :mask-closable="true" :destroy-on-close="false" :z-index="1000" :centered="true"
-      :body-style="{ padding: '24px', maxHeight: '70vh', overflowY: 'auto' }">
+    <a-modal
+      v-model:open="modalVisible"
+      :title="`${selectedDate} 活跃玩家列表`"
+      width="800px"
+      :footer="null"
+      class="player-modal"
+      :mask-closable="true"
+      :destroy-on-close="false"
+      :z-index="1000"
+      :centered="true"
+      :body-style="{ padding: '24px', maxHeight: '70vh', overflowY: 'auto' }"
+    >
       <div class="modal-content">
         <div class="modal-stats">
-          <a-statistic title="总活跃人数" :value="sortedPlayerList.length"
-            :value-style="{ color: '#faad14', fontSize: '24px' }" />
+          <a-statistic
+            title="总活跃人数"
+            :value="sortedPlayerList.length"
+            :value-style="{ color: '#faad14', fontSize: '24px' }"
+          />
         </div>
         <div class="table-wrapper">
-          <a-table :columns="playerColumns" :data-source="sortedPlayerList" :loading="playerLoading" :pagination="false"
-            row-key="openid" size="middle" class="player-table" :scroll="{ y: 400 }">
+          <a-table
+            :columns="playerColumns"
+            :data-source="sortedPlayerList"
+            :loading="playerLoading"
+            :pagination="false"
+            row-key="openid"
+            size="middle"
+            class="player-table"
+            :scroll="{ y: 400 }"
+          >
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'playerId'">
                 <a-tag color="purple">{{ record.playerId }}</a-tag>
@@ -126,29 +146,32 @@ const playerColumns = [
     dataIndex: 'playerId',
     key: 'playerId',
     width: '30%',
-    align: 'center'
+    align: 'center',
   },
   {
     title: 'openid',
     dataIndex: 'openid',
     key: 'openid',
     width: '70%',
-    align: 'center'
-  }
+    align: 'center',
+  },
 ]
 
 const copyOpenid = (text) => {
-  navigator.clipboard.writeText(text).then(() => {
-    message.success('OpenID已复制')
-  }).catch(() => {
-    const textarea = document.createElement('textarea')
-    textarea.value = text
-    document.body.appendChild(textarea)
-    textarea.select()
-    document.execCommand('copy')
-    document.body.removeChild(textarea)
-    message.success('OpenID已复制')
-  })
+  navigator.clipboard
+    .writeText(text)
+    .then(() => {
+      message.success('OpenID已复制')
+    })
+    .catch(() => {
+      const textarea = document.createElement('textarea')
+      textarea.value = text
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+      message.success('OpenID已复制')
+    })
 }
 
 const animateNumber = (target, displayRef, duration = 1500) => {
@@ -200,20 +223,20 @@ const fetchActivePlayers = async (dateStr) => {
   try {
     const res = await fetch(`/api/xiuxian/get_active_players?date=${dateStr}`, {
       headers: {
-        'Authorization': `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     })
     if (res.status === 401) {
-      message.error("token过期或无效")
+      message.error('token过期或无效')
       localStorage.removeItem('token')
       router.push('/login')
       return
     }
     const data = await res.json()
     if (data.success) {
-      playerList.value = data.data.players.map(item => ({
+      playerList.value = data.data.players.map((item) => ({
         openid: item[0],
-        playerId: item[1]
+        playerId: item[1],
       }))
     } else {
       message.error(data.message || '获取活跃玩家失败')
@@ -296,8 +319,8 @@ const updateChart = (data) => {
 
   if (!chartInstance) return
 
-  const dates = data.map(item => item.date)
-  const values = data.map(item => item.active)
+  const dates = data.map((item) => item.date)
+  const values = data.map((item) => item.active)
   const maxValue = Math.max(...values)
   let yMax
   if (maxValue <= 10) {
@@ -341,33 +364,33 @@ const updateChart = (data) => {
       borderWidth: 1,
       padding: [12, 16],
       textStyle: {
-        color: '#333'
-      }
+        color: '#333',
+      },
     },
     grid: {
       left: '3%',
       right: '4%',
       bottom: '8%',
       top: '15%',
-      containLabel: true
+      containLabel: true,
     },
     xAxis: {
       type: 'category',
       data: dates,
       axisLine: {
         lineStyle: {
-          color: '#e8e8e8'
-        }
+          color: '#e8e8e8',
+        },
       },
       axisLabel: {
         color: '#666',
         fontSize: 12,
-        fontWeight: 500
+        fontWeight: 500,
       },
       axisTick: {
-        alignWithLabel: true
+        alignWithLabel: true,
       },
-      boundaryGap: false
+      boundaryGap: false,
     },
     yAxis: {
       type: 'value',
@@ -377,8 +400,8 @@ const updateChart = (data) => {
       splitLine: {
         lineStyle: {
           color: '#f0f0f0',
-          type: 'dashed'
-        }
+          type: 'dashed',
+        },
       },
       axisLabel: {
         color: '#666',
@@ -388,13 +411,13 @@ const updateChart = (data) => {
             return (value / 1000).toFixed(1) + 'k'
           }
           return Math.round(value)
-        }
+        },
       },
       name: '活跃人数',
       nameTextStyle: {
         color: '#999',
-        fontSize: 12
-      }
+        fontSize: 12,
+      },
     },
     series: [
       {
@@ -406,7 +429,7 @@ const updateChart = (data) => {
         symbolSize: 12,
         lineStyle: {
           width: 3,
-          color: '#faad14'
+          color: '#faad14',
         },
         areaStyle: {
           color: {
@@ -418,25 +441,25 @@ const updateChart = (data) => {
             colorStops: [
               {
                 offset: 0,
-                color: 'rgba(250, 173, 20, 0.3)'
+                color: 'rgba(250, 173, 20, 0.3)',
               },
               {
                 offset: 1,
-                color: 'rgba(250, 173, 20, 0.02)'
-              }
-            ]
-          }
+                color: 'rgba(250, 173, 20, 0.02)',
+              },
+            ],
+          },
         },
         itemStyle: {
           color: '#faad14',
           borderColor: '#fff',
-          borderWidth: 2
+          borderWidth: 2,
         },
         emphasis: {
           focus: 'series',
           lineStyle: {
-            width: 4
-          }
+            width: 4,
+          },
         },
         label: {
           show: true,
@@ -447,12 +470,12 @@ const updateChart = (data) => {
           fontWeight: 600,
           formatter: (params) => {
             return params.value
-          }
+          },
         },
         z: 10,
-        hoverAnimation: true
-      }
-    ]
+        hoverAnimation: true,
+      },
+    ],
   }
 
   chartInstance.setOption(option, true)
@@ -470,11 +493,11 @@ const fetchData = async (isSilent = false) => {
   try {
     const res = await fetch('/api/xiuxian/getInfo', {
       headers: {
-        'Authorization': `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     })
     if (res.status === 401) {
-      message.error("token过期或无效")
+      message.error('token过期或无效')
       localStorage.removeItem('token')
       router.push('/login')
       document.title = '魔族陌 - 登录'
@@ -489,7 +512,7 @@ const fetchData = async (isSilent = false) => {
       if (data.data.todayActive && Array.isArray(data.data.todayActive)) {
         trendArray = data.data.todayActive.map((value, index) => ({
           date: formatDate(9 - index),
-          active: Math.round(value || 0)
+          active: Math.round(value || 0),
         }))
         newTodayActive = trendArray.length > 0 ? trendArray[trendArray.length - 1].active : 0
       } else {
@@ -502,14 +525,15 @@ const fetchData = async (isSilent = false) => {
           const value = Math.max(0, Math.round(baseValue * (1 + variation * (1 - i / 10))))
           trendArray.push({
             date: formatDate(i),
-            active: i === 0 ? baseValue : value
+            active: i === 0 ? baseValue : value,
           })
         }
       }
 
-      const newAvgActive = trendArray.length > 0
-        ? Math.round(trendArray.reduce((sum, item) => sum + item.active, 0) / trendArray.length)
-        : 0
+      const newAvgActive =
+        trendArray.length > 0
+          ? Math.round(trendArray.reduce((sum, item) => sum + item.active, 0) / trendArray.length)
+          : 0
 
       playerCount.value = newPlayerCount
       sectCount.value = newSectCount
@@ -520,15 +544,24 @@ const fetchData = async (isSilent = false) => {
       const animationDuration = isSilent ? 800 : 1500
 
       animateNumber(newPlayerCount, displayPlayerCount, animationDuration)
-      setTimeout(() => {
-        animateNumber(newSectCount, displaySectCount, animationDuration)
-      }, isSilent ? 100 : 200)
-      setTimeout(() => {
-        animateNumber(newTodayActive, displayTodayActive, animationDuration)
-      }, isSilent ? 200 : 400)
-      setTimeout(() => {
-        animateNumber(newAvgActive, displayAvgActive, animationDuration)
-      }, isSilent ? 300 : 600)
+      setTimeout(
+        () => {
+          animateNumber(newSectCount, displaySectCount, animationDuration)
+        },
+        isSilent ? 100 : 200
+      )
+      setTimeout(
+        () => {
+          animateNumber(newTodayActive, displayTodayActive, animationDuration)
+        },
+        isSilent ? 200 : 400
+      )
+      setTimeout(
+        () => {
+          animateNumber(newAvgActive, displayAvgActive, animationDuration)
+        },
+        isSilent ? 300 : 600
+      )
 
       await nextTick()
       initChart()
@@ -656,7 +689,9 @@ onBeforeUnmount(() => {
 :deep(.ant-card) {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
 }
 
 :deep(.ant-card:hover) {

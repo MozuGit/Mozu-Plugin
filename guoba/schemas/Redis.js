@@ -1,14 +1,14 @@
 export default [
   {
     label: 'Redis配置',
-    component: 'SOFT_GROUP_BEGIN'
+    component: 'SOFT_GROUP_BEGIN',
   },
   {
     field: 'config.Redis.global',
     label: '全局Redis',
     helpMessage: '修改后需要重启才能生效',
     bottomHelpMessage: '挂载到云崽global.Redis不和global.redis冲突',
-    component: 'Switch'
+    component: 'Switch',
   },
   {
     field: 'config.Redis.host',
@@ -17,8 +17,8 @@ export default [
     bottomHelpMessage: 'Redis服务器IP地址',
     component: 'Input',
     componentProps: {
-      placeholder: '请输入Redis服务器地址，例如：127.0.0.1'
-    }
+      placeholder: '请输入Redis服务器地址，例如：127.0.0.1',
+    },
   },
   {
     field: 'config.Redis.port',
@@ -30,8 +30,8 @@ export default [
     componentProps: {
       min: 1,
       max: 65535,
-      placeholder: '请输入端口号'
-    }
+      placeholder: '请输入端口号',
+    },
   },
   {
     field: 'config.Redis.database',
@@ -43,8 +43,8 @@ export default [
     componentProps: {
       min: 0,
       max: 15,
-      placeholder: '请输入数据库编号'
-    }
+      placeholder: '请输入数据库编号',
+    },
   },
   {
     field: 'config.Redis.connectTimeout',
@@ -57,9 +57,9 @@ export default [
       min: 0,
       step: 1000,
       style: {
-        width: "180px"
-      }
-    }
+        width: '180px',
+      },
+    },
   },
   {
     field: 'config.Redis.keepAlive',
@@ -72,15 +72,15 @@ export default [
       min: 0,
       step: 100,
       style: {
-        width: "180px"
-      }
-    }
+        width: '180px',
+      },
+    },
   },
   {
     field: 'config.Redis.noDelay',
     label: '禁用Nagle算法',
     helpMessage: '修改后需要重启才能生效',
     bottomHelpMessage: '禁用Nagle算法，降低延迟',
-    component: 'Switch'
-  }
+    component: 'Switch',
+  },
 ]

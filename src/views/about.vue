@@ -4,30 +4,30 @@
       <div v-if="loading" class="info-list">
         <div class="info-item">
           <span class="info-label">插件版本</span>
-          <span class="info-value"><span class="skeleton-block" style="width: 140px;"></span></span>
+          <span class="info-value"><span class="skeleton-block" style="width: 140px"></span></span>
         </div>
         <div class="info-item">
           <span class="info-label">插件作者</span>
-          <span class="info-value"><span class="skeleton-block" style="width: 160px;"></span></span>
+          <span class="info-value"><span class="skeleton-block" style="width: 160px"></span></span>
         </div>
         <div class="info-item">
           <span class="info-label">插件链接</span>
           <span class="info-value">
-            <span class="skeleton-block" style="width: 130px;"></span>
+            <span class="skeleton-block" style="width: 130px"></span>
             <span class="separator">·</span>
-            <span class="skeleton-block" style="width: 130px;"></span>
+            <span class="skeleton-block" style="width: 130px"></span>
             <span class="separator">·</span>
-            <span class="skeleton-block" style="width: 130px;"></span>
+            <span class="skeleton-block" style="width: 130px"></span>
           </span>
         </div>
         <div class="info-item">
           <span class="info-label">联系方式</span>
           <span class="info-value">
-            <span class="skeleton-block" style="width: 120px;"></span>
+            <span class="skeleton-block" style="width: 120px"></span>
             <span class="separator">·</span>
-            <span class="skeleton-block" style="width: 120px;"></span>
+            <span class="skeleton-block" style="width: 120px"></span>
             <span class="separator">·</span>
-            <span class="skeleton-block" style="width: 120px;"></span>
+            <span class="skeleton-block" style="width: 120px"></span>
           </span>
         </div>
       </div>
@@ -38,15 +38,15 @@
           <span class="info-value">
             <span v-if="pluginVersion" class="version-badge" :class="versionStatusClass">
               <svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
               </svg>
               <span class="badge-text">v{{ pluginVersion }}</span>
               <span class="badge-tag" :class="versionTagClass">{{ versionStatusText }}</span>
               <a-tooltip v-if="versionStatus === 'update'" :title="'最新版本：v' + latestVersion">
                 <span class="update-hint">
                   <svg class="update-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M23 4v6h-6M1 20v-6h6"/>
-                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    <path d="M23 4v6h-6M1 20v-6h6" />
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
                   </svg>
                 </span>
               </a-tooltip>
@@ -60,8 +60,8 @@
           <span class="info-value">
             <a v-if="authorName" :href="authorUrl" target="_blank" rel="noopener noreferrer" class="author-badge">
               <svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
               </svg>
               <span class="badge-text">{{ authorName }}</span>
               <span class="badge-tag author-tag">作者</span>
@@ -73,23 +73,44 @@
         <div class="info-item">
           <span class="info-label">插件链接</span>
           <span class="info-value link-group">
-            <a href="https://github.com/MozuGit/Mozu-Plugin" target="_blank" rel="noopener noreferrer" class="link-badge github-badge">
+            <a
+              href="https://github.com/MozuGit/Mozu-Plugin"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="link-badge github-badge"
+            >
               <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                <path
+                  d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                />
               </svg>
               <span class="badge-text">GitHub</span>
               <span class="badge-tag github-tag">开源</span>
             </a>
-            <a href="https://gitee.com/MozuGit/Mozu-Plugin" target="_blank" rel="noopener noreferrer" class="link-badge gitee-badge">
+            <a
+              href="https://gitee.com/MozuGit/Mozu-Plugin"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="link-badge gitee-badge"
+            >
               <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M11.984 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6.09 5.333c.328.33.51.775.51 1.275 0 .492-.176.93-.498 1.255l-5.168 5.172 5.168 5.172c.322.325.498.763.498 1.255 0 .5-.182.945-.51 1.275-.33.33-.775.51-1.275.51-.5 0-.945-.18-1.275-.51l-5.172-5.168-5.172 5.168c-.33.33-.775.51-1.275.51s-.945-.18-1.275-.51c-.33-.33-.51-.775-.51-1.275 0-.492.18-.93.51-1.255l5.168-5.172-5.168-5.172c-.33-.325-.51-.763-.51-1.255 0-.5.18-.945.51-1.275.33-.33.775-.51 1.275-.51s.945.18 1.275.51l5.172 5.168 5.172-5.168c.33-.33.775-.51 1.275-.51s.945.18 1.275.51z"/>
+                <path
+                  d="M11.984 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6.09 5.333c.328.33.51.775.51 1.275 0 .492-.176.93-.498 1.255l-5.168 5.172 5.168 5.172c.322.325.498.763.498 1.255 0 .5-.182.945-.51 1.275-.33.33-.775.51-1.275.51-.5 0-.945-.18-1.275-.51l-5.172-5.168-5.172 5.168c-.33.33-.775.51-1.275.51s-.945-.18-1.275-.51c-.33-.33-.51-.775-.51-1.275 0-.492.18-.93.51-1.255l5.168-5.172-5.168-5.172c-.33-.325-.51-.763-.51-1.255 0-.5.18-.945.51-1.275.33-.33.775-.51 1.275-.51s.945.18 1.275.51l5.172 5.168 5.172-5.168c.33-.33.775-.51 1.275-.51s.945.18 1.275.51z"
+                />
               </svg>
               <span class="badge-text">Gitee</span>
               <span class="badge-tag gitee-tag">镜像</span>
             </a>
-            <a href="https://gitcode.com/MozuGit/Mozu-Plugin" target="_blank" rel="noopener noreferrer" class="link-badge gitcode-badge">
+            <a
+              href="https://gitcode.com/MozuGit/Mozu-Plugin"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="link-badge gitcode-badge"
+            >
               <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0L1 6v12l11 6 11-6V6L12 0zm0 2.18l8.5 4.64v10.36L12 21.82l-8.5-4.64V6.82L12 2.18zm0 3.64L7 8.5v7l5 2.73 5-2.73v-7l-5-2.95z"/>
+                <path
+                  d="M12 0L1 6v12l11 6 11-6V6L12 0zm0 2.18l8.5 4.64v10.36L12 21.82l-8.5-4.64V6.82L12 2.18zm0 3.64L7 8.5v7l5 2.73 5-2.73v-7l-5-2.95z"
+                />
               </svg>
               <span class="badge-text">GitCode</span>
               <span class="badge-tag gitcode-tag">镜像</span>
@@ -100,23 +121,44 @@
         <div class="info-item">
           <span class="info-label">联系方式</span>
           <span class="info-value link-group">
-            <a href="https://qm.qq.com/q/5fKlztbHHG" target="_blank" rel="noopener noreferrer" class="link-badge qq-badge">
+            <a
+              href="https://qm.qq.com/q/5fKlztbHHG"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="link-badge qq-badge"
+            >
               <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                <path
+                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"
+                />
               </svg>
               <span class="badge-text">QQ</span>
               <span class="badge-tag qq-tag">魔族陌</span>
             </a>
-            <a href="https://qun.qq.com/universal-share/share?ac=1&authKey=13%2FWEfX0G3PO77HgYt3w8yg8K%2BCSE3fYXzuA%2FOH0Vnzv5HDrENZctaRM1qkC07eD&busi_data=eyJncm91cENvZGUiOiI5NzY3MTkwMTciLCJ0b2tlbiI6Inl0NHY2b01BRTlMeHR4MXBYbWJqYWxpbmU5Wk9kT3VqZE1nM0dNYVZET1pBcjVPTVZ5WDVLMnVCaFpHNTFWVUgiLCJ1aW4iOiIzMzQzNzEyNTg5In0%3D&data=uDBsYAg-ZA2RbnkK_3yJFYKmiPRZg-XmEhn6iJ1tWmOfRPEeEIiA6N1o1e5p9-dqSJDSxCk44qnx92h62ZlrmQ&svctype=4&tempid=h5_group_info" target="_blank" rel="noopener noreferrer" class="link-badge qqgroup-badge">
+            <a
+              href="https://qun.qq.com/universal-share/share?ac=1&authKey=13%2FWEfX0G3PO77HgYt3w8yg8K%2BCSE3fYXzuA%2FOH0Vnzv5HDrENZctaRM1qkC07eD&busi_data=eyJncm91cENvZGUiOiI5NzY3MTkwMTciLCJ0b2tlbiI6Inl0NHY2b01BRTlMeHR4MXBYbWJqYWxpbmU5Wk9kT3VqZE1nM0dNYVZET1pBcjVPTVZ5WDVLMnVCaFpHNTFWVUgiLCJ1aW4iOiIzMzQzNzEyNTg5In0%3D&data=uDBsYAg-ZA2RbnkK_3yJFYKmiPRZg-XmEhn6iJ1tWmOfRPEeEIiA6N1o1e5p9-dqSJDSxCk44qnx92h62ZlrmQ&svctype=4&tempid=h5_group_info"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="link-badge qqgroup-badge"
+            >
               <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                <path
+                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"
+                />
               </svg>
               <span class="badge-text">QQ群</span>
               <span class="badge-tag qqgroup-tag">陌陌の小窝</span>
             </a>
-            <a href="https://www.ifdian.net/a/Mozumo" target="_blank" rel="noopener noreferrer" class="link-badge ifdian-badge">
+            <a
+              href="https://www.ifdian.net/a/Mozumo"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="link-badge ifdian-badge"
+            >
               <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                <path
+                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"
+                />
               </svg>
               <span class="badge-text">爱发电</span>
               <span class="badge-tag ifdian-tag">支持</span>
@@ -179,7 +221,7 @@ const versionStatus = computed(() => {
       return {
         type: type.toLowerCase(),
         orderIndex: orderIndex >= 0 ? orderIndex : prereleaseOrder.length,
-        number: number
+        number: number,
       }
     }
     const info1 = getPrereleaseInfo(pre1)
@@ -197,25 +239,34 @@ const versionStatus = computed(() => {
 
 const versionStatusText = computed(() => {
   switch (versionStatus.value) {
-    case 'update': return '可更新'
-    case 'beta': return '测试版'
-    default: return '最新版'
+    case 'update':
+      return '可更新'
+    case 'beta':
+      return '测试版'
+    default:
+      return '最新版'
   }
 })
 
 const versionStatusClass = computed(() => {
   switch (versionStatus.value) {
-    case 'update': return 'version-update'
-    case 'beta': return 'version-beta'
-    default: return 'version-normal'
+    case 'update':
+      return 'version-update'
+    case 'beta':
+      return 'version-beta'
+    default:
+      return 'version-normal'
   }
 })
 
 const versionTagClass = computed(() => {
   switch (versionStatus.value) {
-    case 'update': return 'tag-update'
-    case 'beta': return 'tag-beta'
-    default: return 'tag-normal'
+    case 'update':
+      return 'tag-update'
+    case 'beta':
+      return 'tag-beta'
+    default:
+      return 'tag-normal'
   }
 })
 
@@ -224,7 +275,7 @@ const fetchAboutInfo = async () => {
   const token = localStorage.getItem('token')
   try {
     const headers = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     }
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
@@ -232,7 +283,7 @@ const fetchAboutInfo = async () => {
 
     const res = await fetch('/api/about/getInfo', {
       method: 'GET',
-      headers
+      headers,
     })
 
     if (res.status === 401) {
@@ -249,7 +300,7 @@ const fetchAboutInfo = async () => {
       const info = data.data
       pluginVersion.value = info.version || info.currentVersion || ''
       latestVersion.value = info.latestVersion || ''
-      
+
       if (info.author) {
         authorName.value = info.author
       }
@@ -275,7 +326,9 @@ onMounted(() => {
   width: 100%;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
   border: 1px solid #f0f0f0;
 }
 
@@ -649,7 +702,8 @@ onMounted(() => {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -709,7 +763,9 @@ onMounted(() => {
 :deep(.ant-card) {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
 }
 
 :deep(.ant-card:hover) {
@@ -725,7 +781,7 @@ onMounted(() => {
   .link-group {
     gap: 8px;
   }
-  
+
   .version-badge,
   .author-badge,
   .link-badge {

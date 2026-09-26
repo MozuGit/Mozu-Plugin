@@ -1,4 +1,4 @@
-import Config from "#Config"
+import Config from '#Config'
 
 const prefix = Config.xiuxian.setting.forceSharp ? '/' : ''
 
@@ -34,9 +34,9 @@ const help = {
       '取消替换灵根',
       '查询修仙者',
       '修仙者人数',
-      '修仙个人信息'
+      '修仙个人信息',
     ]
-    const result = commands.map(item => `${prefix}${item}`)
+    const result = commands.map((item) => `${prefix}${item}`)
     return result
   },
   get sect() {
@@ -54,33 +54,21 @@ const help = {
       '同意宗门成员',
       '拒绝宗门成员',
       '全部同意宗门成员',
-      '全部拒绝宗门成员'
+      '全部拒绝宗门成员',
     ]
-    const result = commands.map(item => `${prefix}${item}`)
+    const result = commands.map((item) => `${prefix}${item}`)
     return result
   },
   get rank() {
-    const commands = [
-      '修为榜',
-      '灵石榜',
-      '战力榜',
-      '闭关榜',
-      '签到榜',
-      '切磋榜',
-      '修仙排行'
-    ]
-    const result = commands.map(item => `${prefix}${item}`)
+    const commands = ['修为榜', '灵石榜', '战力榜', '闭关榜', '签到榜', '切磋榜', '修仙排行']
+    const result = commands.map((item) => `${prefix}${item}`)
     return result
   },
   get cdk() {
-    let commands = [
-      '使用兑换码',
-      '生成兑换码',
-      '删除兑换码'
-    ]
-    const result = commands.map(item => `${prefix}${item}`)
+    let commands = ['使用兑换码', '生成兑换码', '删除兑换码']
+    const result = commands.map((item) => `${prefix}${item}`)
     return result
-  }
+  },
 }
 
 export default help

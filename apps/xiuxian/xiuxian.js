@@ -1,6 +1,6 @@
-import Config from "#Config"
-import { RegExp } from "../../model/xiuxian/index.js"
-import { xiuxianText } from "../../model/xiuxian/tools/xiuxianText.js"
+import Config from '#Config'
+import { RegExp } from '../../model/xiuxian/index.js'
+import { xiuxianText } from '../../model/xiuxian/tools/xiuxianText.js'
 
 export class MozuXiuxian extends plugin {
   constructor() {
@@ -9,10 +9,12 @@ export class MozuXiuxian extends plugin {
       dsc: '魔族陌修仙',
       event: 'message',
       priority: Config.xiuxian.setting.priority,
-      rule: [{
-        reg: RegExp.xiuxian,
-        fnc: 'xiuxian'
-      }]
+      rule: [
+        {
+          reg: RegExp.xiuxian,
+          fnc: 'xiuxian',
+        },
+      ],
     })
   }
 
@@ -24,10 +26,15 @@ export class MozuXiuxian extends plugin {
       if (!Config.xiuxian.setting.whiteGroup.includes(this.e.group_id)) return false
     }
     const user_id = this.e.user_id.replace(`${this.e.self_id}:`, '')
-    const message = await xiuxianText(this.e.msg.replace(/^#/, ''), user_id, this.e?.at?.replace(`${this.e.self_id}:`, ''), this.e.isMaster)
+    const message = await xiuxianText(
+      this.e.msg.replace(/^#/, ''),
+      user_id,
+      this.e?.at?.replace(`${this.e.self_id}:`, ''),
+      this.e.isMaster
+    )
     let lastText = null
     for (let msg of message) {
-      if (msg.type && msg.type === "button") {
+      if (msg.type && msg.type === 'button') {
         if (lastText !== null) {
           await this.e.reply([segment.markdown(lastText), msg])
           lastText = null

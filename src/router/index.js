@@ -4,17 +4,17 @@ import login from '../views/login.vue'
 const routes = [
   {
     path: '/',
-    redirect: '/login'
+    redirect: '/login',
   },
   {
     path: '/login',
     name: 'login',
-    component: login
+    component: login,
   },
   {
     path: '/index',
     name: 'index',
-    component: () => import('../views/index.vue')
+    component: () => import('../views/index.vue'),
   },
   {
     path: '/xiuxian',
@@ -23,54 +23,54 @@ const routes = [
       {
         path: '',
         name: 'xiuxian',
-        component: () => import('../views/xiuxian/home.vue')
+        component: () => import('../views/xiuxian/home.vue'),
       },
       {
         path: 'home',
-        redirect: '/xiuxian'
+        redirect: '/xiuxian',
       },
       {
         path: 'backup',
         name: 'xiuxianBackup',
-        component: () => import('../views/xiuxian/backup.vue')
+        component: () => import('../views/xiuxian/backup.vue'),
       },
       {
         path: 'config',
         name: 'xiuxianConfig',
-        component: () => import('../views/xiuxian/config.vue')
+        component: () => import('../views/xiuxian/config.vue'),
       },
       {
         path: 'cdk',
         name: 'xiuxianCdk',
-        component: () => import('../views/xiuxian/cdk.vue')
+        component: () => import('../views/xiuxian/cdk.vue'),
       },
       {
         path: 'player',
         name: 'xiuxianPlayer',
-        component: () => import('../views/xiuxian/player.vue')
+        component: () => import('../views/xiuxian/player.vue'),
       },
       {
         path: 'sect',
         name: 'xiuxianSect',
-        component: () => import('../views/xiuxian/sect.vue')
-      }
-    ]
+        component: () => import('../views/xiuxian/sect.vue'),
+      },
+    ],
   },
   {
     path: '/settings',
     name: 'settings',
-    component: () => import('../views/settings.vue')
+    component: () => import('../views/settings.vue'),
   },
   {
     path: '/about',
     name: 'about',
-    component: () => import('../views/about.vue')
-  }
+    component: () => import('../views/about.vue'),
+  },
 ]
 
 const router = createRouter({
   history: createWebHashHistory(),
-  routes
+  routes,
 })
 
 router.beforeEach((to, from, next) => {

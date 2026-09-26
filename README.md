@@ -1,6 +1,7 @@
 <div align="center">
 
 <img src="./Mo.png" width="256" height="256" /><br>
+
 # Mozu-Plugin
 
 [![Stars](https://img.shields.io/github/stars/MozuGit/Mozu-Plugin?style=flat)](https://github.com/MozuGit/Mozu-Plugin/stargazers)
@@ -13,7 +14,6 @@
   <img alt="github contribution grid snake animation" src="https://raw.githubusercontent.com/MozuGit/MozuGit/output/github-contribution-grid-snake.svg">
 </picture>
 
-
 </div>
 
 > [!TIP]
@@ -22,8 +22,9 @@
 <br><img src="https://count.getloli.com/get/@:Mozu-Plugin?theme=rule34" /><br>
 
 一个适用于 [TRSS-Yunzai 框架](https://github.com/TimeRainStarSky/Yunzai) 的 **自用** 机器人娱乐插件
-  - 可用 **锅巴面板** 进行配置
-  - 由于作者精力有限，代码未经过深度测试，有问题请提交到[Issues](https://github.com/MozuGit/Mozu-Plugin/issues)
+
+- 可用 **锅巴面板** 进行配置
+- 由于作者精力有限，代码未经过深度测试，有问题请提交到[Issues](https://github.com/MozuGit/Mozu-Plugin/issues)
 
 ## 安装教程
 
@@ -59,33 +60,37 @@ pnpm install
 ### 插件功能实现
 
 **[伪造聊天](apps/example/makeMessage.js)**
-  - 伪造聊天  示例：#伪造聊天123456789,伪造消息内容,2026-1-1|114514,伪造消息内容
-  - 伪造复读  示例：#伪造复读测试 10
+
+- 伪造聊天 示例：#伪造聊天123456789,伪造消息内容,2026-1-1|114514,伪造消息内容
+- 伪造复读 示例：#伪造复读测试 10
 
 **[发言统计](apps/example/fayan.js)**
-  - 发言榜  可查看当前群的发言情况
-  - 清除发言  带上艾特可清除该成员的发言记录
-  - 清除本群发言  清除当前群的所有发言记录
+
+- 发言榜 可查看当前群的发言情况
+- 清除发言 带上艾特可清除该成员的发言记录
+- 清除本群发言 清除当前群的所有发言记录
 
 **[魔族陌修仙](apps/xiuxian/)**
-  - 具体指令发送`修仙帮助`获取
-  - 当前修仙还在开发中
-  - AI自动审核玩家输入文本
+
+- 具体指令发送`修仙帮助`获取
+- 当前修仙还在开发中
+- AI自动审核玩家输入文本
 
 **[QQBot接口](apps/interface.js)**
-  - QQBot适配器更新有点慢
-  - 所以我看看能不能自己加点API接口（只加了一点点）
-  - 需要去锅巴面版自行开启接口功能（默认关闭）
-  - 参考文档：[QQ机器人官方文档](https://bot.q.qq.com/wiki/develop/api-v2/autogen/api/v2_groups_group_openid_info.get.html)
-    
+
+- QQBot适配器更新有点慢
+- 所以我看看能不能自己加点API接口（只加了一点点）
+- 需要去锅巴面版自行开启接口功能（默认关闭）
+- 参考文档：[QQ机器人官方文档](https://bot.q.qq.com/wiki/develop/api-v2/autogen/api/v2_groups_group_openid_info.get.html)
+
 ## 联系方式
 
-  - **QQ：** [魔族陌](https://qm.qq.com/q/5fKlztbHHG)
-  - **QQ群：** [陌陌の小窝](https://qun.qq.com/universal-share/share?ac=1&authKey=13%2FWEfX0G3PO77HgYt3w8yg8K%2BCSE3fYXzuA%2FOH0Vnzv5HDrENZctaRM1qkC07eD&busi_data=eyJncm91cENvZGUiOiI5NzY3MTkwMTciLCJ0b2tlbiI6Inl0NHY2b01BRTlMeHR4MXBYbWJqYWxpbmU5Wk9kT3VqZE1nM0dNYVZET1pBcjVPTVZ5WDVLMnVCaFpHNTFWVUgiLCJ1aW4iOiIzMzQzNzEyNTg5In0%3D&data=uDBsYAg-ZA2RbnkK_3yJFYKmiPRZg-XmEhn6iJ1tWmOfRPEeEIiA6N1o1e5p9-dqSJDSxCk44qnx92h62ZlrmQ&svctype=4&tempid=h5_group_info)
-  - **GitHub：** [MozuGit](https://github.com/MozuGit)
-  - **爱发电：** [赞助开发者](https://www.ifdian.net/a/Mozumo)
+- **QQ：** [魔族陌](https://qm.qq.com/q/5fKlztbHHG)
+- **QQ群：** [陌陌の小窝](https://qun.qq.com/universal-share/share?ac=1&authKey=13%2FWEfX0G3PO77HgYt3w8yg8K%2BCSE3fYXzuA%2FOH0Vnzv5HDrENZctaRM1qkC07eD&busi_data=eyJncm91cENvZGUiOiI5NzY3MTkwMTciLCJ0b2tlbiI6Inl0NHY2b01BRTlMeHR4MXBYbWJqYWxpbmU5Wk9kT3VqZE1nM0dNYVZET1pBcjVPTVZ5WDVLMnVCaFpHNTFWVUgiLCJ1aW4iOiIzMzQzNzEyNTg5In0%3D&data=uDBsYAg-ZA2RbnkK_3yJFYKmiPRZg-XmEhn6iJ1tWmOfRPEeEIiA6N1o1e5p9-dqSJDSxCk44qnx92h62ZlrmQ&svctype=4&tempid=h5_group_info)
+- **GitHub：** [MozuGit](https://github.com/MozuGit)
+- **爱发电：** [赞助开发者](https://www.ifdian.net/a/Mozumo)
 
 ## 鸣谢
 
- - [Guaba-Plugin](https://github.com/guoba-yunzai/guoba-plugin)
- - [meme-plugin（链接缺失）](https:)
+- [Guaba-Plugin](https://github.com/guoba-yunzai/guoba-plugin)
+- [meme-plugin（链接缺失）](https:)

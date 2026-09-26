@@ -1,15 +1,15 @@
-import Redis from "#Redis"
-import fs from "node:fs"
-import { Writable } from "node:stream"
+import Redis from '#Redis'
+import fs from 'node:fs'
+import { Writable } from 'node:stream'
 
-const MOZU_PREFIX = "Mozu:"
+const MOZU_PREFIX = 'Mozu:'
 
 function isMozuKey(key) {
-  return typeof key === "string" && key.startsWith(MOZU_PREFIX)
+  return typeof key === 'string' && key.startsWith(MOZU_PREFIX)
 }
 
 function isMozuPattern(pattern) {
-  return typeof pattern === "string" && pattern.startsWith(MOZU_PREFIX)
+  return typeof pattern === 'string' && pattern.startsWith(MOZU_PREFIX)
 }
 
 class JsonArrayFileWritable extends Writable {
@@ -23,12 +23,12 @@ class JsonArrayFileWritable extends Writable {
 
   _construct(callback) {
     this.fileStream = fs.createWriteStream(this.filePath)
-    this.fileStream.on("error", (err) => this.destroy(err))
-    this.fileStream.write("[\n", callback)
+    this.fileStream.on('error', (err) => this.destroy(err))
+    this.fileStream.write('[\n', callback)
   }
 
   _write(record, _enc, callback) {
-    const prefix = this.firstRecord ? "" : ",\n"
+    const prefix = this.firstRecord ? '' : ',\n'
     const text = prefix + JSON.stringify(record, null, 2)
     this.firstRecord = false
     this.totalExported += 1
@@ -36,20 +36,16 @@ class JsonArrayFileWritable extends Writable {
     if (this.fileStream.write(text)) {
       callback()
     } else {
-      this.fileStream.once("drain", callback)
+      this.fileStream.once('drain', callback)
     }
   }
 
   _final(callback) {
-    this.fileStream.end("\n]", callback)
+    this.fileStream.end('\n]', callback)
   }
 
   _destroy(err, callback) {
-    if (
-      this.fileStream &&
-      !this.fileStream.destroyed &&
-      !this.fileStream.writableEnded
-    ) {
+    if (this.fileStream && !this.fileStream.destroyed && !this.fileStream.writableEnded) {
       this.fileStream.destroy()
     }
     callback(err)
@@ -59,7 +55,7 @@ class JsonArrayFileWritable extends Writable {
 function writeAsync(writable, chunk) {
   return new Promise((resolve, reject) => {
     if (writable.destroyed) {
-      return reject(new Error("writable destroyed"))
+      return reject(new Error('writable destroyed'))
     }
     const ok = writable.write(chunk, (err) => {
       if (err) reject(err)
@@ -67,8 +63,8 @@ function writeAsync(writable, chunk) {
     if (ok) {
       resolve()
     } else {
-      writable.once("drain", resolve)
-      writable.once("error", reject)
+      writable.once('drain', resolve)
+      writable.once('error', reject)
     }
   })
 }
@@ -93,7 +89,7 @@ async function backupKeys(pattern, outputFile) {
       hash: () => Redis.hgetall(key),
       list: () => Redis.lrange(key, 0, -1),
       set: () => Redis.smembers(key),
-      zset: () => Redis.zrange(key, 0, -1, "WITHSCORES"),
+      zset: () => Redis.zrange(key, 0, -1, 'WITHSCORES'),
     }
     return valueGetters[type] ? await valueGetters[type]() : null
   }
@@ -139,9 +135,9 @@ async function scanAllKeys(pattern) {
   return new Promise((resolve, reject) => {
     const keys = []
     const stream = Redis.scanStream({ match: pattern, count: 100 })
-    stream.on("data", (batch) => keys.push(...batch))
-    stream.on("end", () => resolve(keys))
-    stream.on("error", reject)
+    stream.on('data', (batch) => keys.push(...batch))
+    stream.on('end', () => resolve(keys))
+    stream.on('error', reject)
   })
 }
 
@@ -154,18 +150,16 @@ async function restoreKeys(backupFile, options = {}) {
   }
 
   try {
-    let content = fs.readFileSync(backupFile, "utf8").trim()
-    if (!content.startsWith("[")) content = "[" + content
-    if (!content.endsWith("]")) content = content + "]"
-    content = content.replace(/,\s*([}\]])/g, "$1").replace(/,\s*,/g, ",")
+    let content = fs.readFileSync(backupFile, 'utf8').trim()
+    if (!content.startsWith('[')) content = '[' + content
+    if (!content.endsWith(']')) content = content + ']'
+    content = content.replace(/,\s*([}\]])/g, '$1').replace(/,\s*,/g, ',')
 
     const data = JSON.parse(content)
 
     const invalidRecord = data.find((r) => !isMozuKey(r.key))
     if (invalidRecord) {
-      logger.warn(
-        `restoreKeys: 备份文件中存在非法 key "${invalidRecord.key}"，必须以 "${MOZU_PREFIX}" 开头`
-      )
+      logger.warn(`restoreKeys: 备份文件中存在非法 key "${invalidRecord.key}"，必须以 "${MOZU_PREFIX}" 开头`)
       return null
     }
 
@@ -177,9 +171,7 @@ async function restoreKeys(backupFile, options = {}) {
     let deletedCount = 0
     if (purge) {
       const existingKeys = await scanAllKeys(pattern)
-      const keysToDelete = existingKeys.filter(
-        (k) => isMozuKey(k) && !backupKeySet.has(k)
-      )
+      const keysToDelete = existingKeys.filter((k) => isMozuKey(k) && !backupKeySet.has(k))
 
       for (let i = 0; i < keysToDelete.length; i += BATCH_SIZE) {
         const batch = keysToDelete.slice(i, i + BATCH_SIZE)

@@ -21,5 +21,5 @@ export const Version = {
   },
   get Plugin_pkg() {
     return pkg
-  }
+  },
 }

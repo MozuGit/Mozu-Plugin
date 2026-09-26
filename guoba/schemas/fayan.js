@@ -1,18 +1,18 @@
 export default [
   {
     label: '发言统计',
-    component: 'SOFT_GROUP_BEGIN'
+    component: 'SOFT_GROUP_BEGIN',
   },
   {
     field: 'example.fayan.enable',
     label: '发言统计开关',
-    component: 'Switch'
+    component: 'Switch',
   },
   {
     field: 'example.fayan.sendMarkdown',
     label: '使用Markdown发送',
     bottomHelpMessage: '是否使用Markdown发送，仅QQBot生效',
-    component: 'Switch'
+    component: 'Switch',
   },
   {
     field: 'example.fayan.count',
@@ -24,8 +24,8 @@ export default [
       placeholder: '请输入数字',
       min: 1,
       style: {
-        width: "162px"
-      }
-    }
-  }
+        width: '162px',
+      },
+    },
+  },
 ]

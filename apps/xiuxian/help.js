@@ -1,19 +1,19 @@
-import Config from "#Config"
-import { mqqapi, qagent } from "../../lib/protocol.js"
-import { help, Button } from "../../model/xiuxian/index.js"
+import Config from '#Config'
+import { mqqapi, qagent } from '../../lib/protocol.js'
+import { help, Button } from '../../model/xiuxian/index.js'
 
 export class MozuXiuxianHelp extends plugin {
   constructor() {
     super({
-      name: "魔族陌:修仙帮助",
-      event: "message",
+      name: '魔族陌:修仙帮助',
+      event: 'message',
       priority: Config.xiuxian.setting.priority,
       rule: [
         {
-          reg: "#?(魔族陌)?修仙帮助",
-          fnc: "xiuxianHelp"
-        }
-      ]
+          reg: '#?(魔族陌)?修仙帮助',
+          fnc: 'xiuxianHelp',
+        },
+      ],
     })
   }
 
@@ -30,17 +30,17 @@ export class MozuXiuxianHelp extends plugin {
       '修仙指令帮助，bug反馈请联系主人',
       '***',
       '**🎉基础指令**',
-      (await commands(help.xiuxian)),
+      await commands(help.xiuxian),
       '***',
       '**🎄宗门指令**',
-      (await commands(help.sect)),
+      await commands(help.sect),
       '***',
       '**⭐️排行指令**',
-      (await commands(help.rank)),
+      await commands(help.rank),
       '***',
       '**🌈兑换指令**',
-      (await commands(help.cdk)),
-      '***'
+      await commands(help.cdk),
+      '***',
     ].join('\n')
     this.e.reply([message, Button.author])
   }
@@ -51,11 +51,16 @@ async function commands(commands) {
   let index = 0
   for (const item of commands) {
     const cmd = await mqqapi.command(item)
-    if ((index % 2 === 0 && index > 0) || item.length + commands[commands.length >= index ? index : index + 1].length >= 12) {
+    if (
+      (index % 2 === 0 && index > 0) ||
+      item.length + commands[commands.length >= index ? index : index + 1].length >= 12
+    ) {
       result += '\n'
     }
     result += cmd
-    index % 2 === 0 && item.length + commands[commands.length >= index ? index : index + 1].length < 12 ? result += '  |  ' : ''
+    index % 2 === 0 && item.length + commands[commands.length >= index ? index : index + 1].length < 12
+      ? (result += '  |  ')
+      : ''
     index++
   }
   return result

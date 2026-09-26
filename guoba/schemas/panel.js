@@ -1,7 +1,7 @@
 export default [
   {
     label: '魔族陌面版',
-    component: 'SOFT_GROUP_BEGIN'
+    component: 'SOFT_GROUP_BEGIN',
   },
   {
     field: 'panel.login.host',
@@ -10,9 +10,9 @@ export default [
     bottomHelpMessage: 'auto 为自动获取本机IP地址',
     component: 'Input',
     componentProps: {
-      placeholder: '请输入服务器地址'
+      placeholder: '请输入服务器地址',
     },
-    required: true
+    required: true,
   },
   {
     field: 'panel.login.port',
@@ -22,18 +22,19 @@ export default [
     componentProps: {
       min: 0,
       max: 65535,
-      placeholder: '请输入端口号'
+      placeholder: '请输入端口号',
     },
-    required: true
+    required: true,
   },
   {
     field: 'panel.login.password',
     label: '面版密码',
     component: 'Input',
     componentProps: {
-      placeholder: '敏感信息不会展示在前端'
-    }
-  },{
+      placeholder: '敏感信息不会展示在前端',
+    },
+  },
+  {
     field: 'actions',
     label: '强制关闭TOTP',
     component: 'GButtons',
@@ -44,13 +45,13 @@ export default [
           action: 'forceClose',
           type: 'default',
           danger: true,
-          icon: "ant-design:delete-filled",
+          icon: 'ant-design:delete-filled',
           confirm: {
             title: '强制关闭',
-            content: '可用于验证器无法使用的情况'
-          }
-        }
-      ]
-    }
-  }
+            content: '可用于验证器无法使用的情况',
+          },
+        },
+      ],
+    },
+  },
 ]

@@ -1,14 +1,14 @@
-import fs from "node:fs"
+import fs from 'node:fs'
 import { rm, cp } from 'fs/promises'
-import path from "path"
-import { readdir, unlink } from "node:fs/promises"
+import path from 'path'
+import { readdir, unlink } from 'node:fs/promises'
 
 import Redis from '#Redis'
-import Config from "#Config"
-import { backupKeys, restoreKeys } from "../../scripts/backup.js"
-import { Version } from "../../model/Config/Version.js"
+import Config from '#Config'
+import { backupKeys, restoreKeys } from '../../scripts/backup.js'
+import { Version } from '../../model/Config/Version.js'
 
-import xiuxianElements from "../../guoba/schemas/xiuxian.js"
+import xiuxianElements from '../../guoba/schemas/xiuxian.js'
 
 export const getInfo = async (req, res) => {
   try {
@@ -16,24 +16,24 @@ export const getInfo = async (req, res) => {
     if (!auth.valid) {
       return res.status(401).json({
         success: false,
-        message: auth.error
+        message: auth.error,
       })
     }
-    const playerCount = parseInt(await Redis.get("Mozu:xiuxian:openid:counter"), 10)
-    const sectCount = parseInt(await Redis.get("Mozu:xiuxian:sectid:counter"), 10)
+    const playerCount = parseInt(await Redis.get('Mozu:xiuxian:openid:counter'), 10)
+    const sectCount = parseInt(await Redis.get('Mozu:xiuxian:sectid:counter'), 10)
     const pipeline = Redis.pipeline()
     for (let i = 0; i < 10; i++) {
       pipeline.scard(`Mozu:xiuxian:active:${gettoday(i)}`)
     }
     const results = await pipeline.exec()
-    const todayActive = results.map(([err, result]) => err ? 0 : result)
+    const todayActive = results.map(([err, result]) => (err ? 0 : result))
     res.json({
       success: true,
       data: {
         playerCount: playerCount,
         todayActive: todayActive.reverse(),
-        sectCount: sectCount
-      }
+        sectCount: sectCount,
+      },
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -46,13 +46,13 @@ export const getActivePlayers = async (req, res) => {
     if (!auth.valid) {
       return res.status(401).json({
         success: false,
-        message: auth.error
+        message: auth.error,
       })
     }
     const openids = await Redis.smembers(`Mozu:xiuxian:active:${req.query.date ? req.query.date : gettoday()}`)
     const pipeline = Redis.pipeline()
     for (const openid of openids) {
-      pipeline.hget("Mozu:xiuxian:openid:forward", openid)
+      pipeline.hget('Mozu:xiuxian:openid:forward', openid)
     }
     const results = await pipeline.exec()
     const data = openids.map((openid, index) => {
@@ -61,8 +61,8 @@ export const getActivePlayers = async (req, res) => {
     res.json({
       success: true,
       data: {
-        players: data
-      }
+        players: data,
+      },
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -74,7 +74,7 @@ export const handleConfig = async (req, res) => {
   if (!auth.valid) {
     return res.status(401).json({
       success: false,
-      message: auth.error
+      message: auth.error,
     })
   }
   const { action } = req.query
@@ -101,7 +101,7 @@ export const handleConfig = async (req, res) => {
   } catch (error) {
     res.json({
       success: false,
-      message: error.message
+      message: error.message,
     })
   }
 }
@@ -111,8 +111,8 @@ const getConfig = async (req, res) => {
     res.json({
       success: true,
       data: {
-        config: Config.getCfg().xiuxian
-      }
+        config: Config.getCfg().xiuxian,
+      },
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -124,8 +124,8 @@ const getConfigElements = async (req, res) => {
     res.json({
       success: true,
       data: {
-        elements: xiuxianElements
-      }
+        elements: xiuxianElements,
+      },
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -144,17 +144,17 @@ const saveConfig = async (req, res) => {
     ]
     for (const { file, data } of configMappings) {
       if (data && typeof data === 'object') {
-        Object.keys(data).forEach(key => {
+        Object.keys(data).forEach((key) => {
           Config.modify('xiuxian', file, key, data[key])
         })
       }
     }
     if (xiuxianData.xiuxian && typeof xiuxianData.xiuxian === 'object') {
-      Object.keys(xiuxianData.xiuxian).forEach(key => {
-        if (key === "range") {
+      Object.keys(xiuxianData.xiuxian).forEach((key) => {
+        if (key === 'range') {
           const rangeData = xiuxianData.xiuxian.range
           if (rangeData && typeof rangeData === 'object') {
-            Object.keys(rangeData).forEach(rangeKey => {
+            Object.keys(rangeData).forEach((rangeKey) => {
               Config.modify('xiuxian', rangeKey, rangeData[rangeKey])
             })
           }
@@ -164,16 +164,16 @@ const saveConfig = async (req, res) => {
       })
     }
     if (xiuxianData.realm) {
-      Config.modify('xiuxian', 'Realm', "Realms", xiuxianData.realm)
+      Config.modify('xiuxian', 'Realm', 'Realms', xiuxianData.realm)
     }
     if (xiuxianData.drop) {
       if (hasRepeatedId(xiuxianData.drop.pills, xiuxianData.drop.arts)) {
         return res.json({
           success: false,
-          message: "物品ID重复"
+          message: '物品ID重复',
         })
       }
-      const cleanRealms = xiuxianData.drop.secretRealms?.map(realm => {
+      const cleanRealms = xiuxianData.drop.secretRealms?.map((realm) => {
         const { pills, arts, ...cleanRealm } = realm
         return cleanRealm
       })
@@ -181,7 +181,7 @@ const saveConfig = async (req, res) => {
         Config.modify('xiuxian', 'drop', 'secretRealms', cleanRealms)
       }
       const keysToSkip = ['secretRealms', 'pills', 'arts']
-      Object.keys(xiuxianData.drop).forEach(key => {
+      Object.keys(xiuxianData.drop).forEach((key) => {
         if (!keysToSkip.includes(key)) {
           Config.modify('xiuxian', 'drop', key, xiuxianData.drop[key])
         }
@@ -197,22 +197,22 @@ const saveConfig = async (req, res) => {
       if (hasRepeatedId(xiuxianData.sroot.sroot)) {
         return res.json({
           success: false,
-          message: "灵根ID重复"
+          message: '灵根ID重复',
         })
       }
       if (Object.values(xiuxianData.sroot.root_drop).reduce((a, b) => a + b, 0) !== 100) {
         return res.json({
           success: false,
-          message: "灵根概率总和不等于100"
+          message: '灵根概率总和不等于100',
         })
       }
-      Object.keys(xiuxianData.sroot).forEach(key => {
+      Object.keys(xiuxianData.sroot).forEach((key) => {
         Config.modify('xiuxian', 'sroot', key, xiuxianData.sroot[key])
       })
     }
     res.json({
       success: true,
-      message: "保存成功喵~"
+      message: '保存成功喵~',
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -227,7 +227,7 @@ const resetConfig = async (req, res) => {
     await rm(destPath, { recursive: true, force: true })
     await cp(srcPath, destPath, { recursive: true })
 
-    res.json({ success: true, message: "重置修仙配置成功喵~" })
+    res.json({ success: true, message: '重置修仙配置成功喵~' })
   } catch (error) {
     res.json({ success: false, message: error.message })
   }
@@ -236,16 +236,16 @@ const resetConfig = async (req, res) => {
 const getGroups = async (req, res) => {
   try {
     const result = Array.from(Bot.gl.values())
-      .filter(item => item.group_id !== "stdin")
-      .map(item => ({
+      .filter((item) => item.group_id !== 'stdin')
+      .map((item) => ({
         groupId: item.group_id,
-        name: item.group_name || item.nickname || item.group_id
+        name: item.group_name || item.nickname || item.group_id,
       }))
     res.json({
       success: true,
       data: {
-        groups: result
-      }
+        groups: result,
+      },
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -272,7 +272,7 @@ export const handleCdk = async (req, res) => {
   if (!auth.valid) {
     return res.status(401).json({
       success: false,
-      message: auth.error
+      message: auth.error,
     })
   }
   const { action } = req.query
@@ -291,28 +291,28 @@ export const handleCdk = async (req, res) => {
   } catch (error) {
     res.json({
       success: false,
-      message: error.message
+      message: error.message,
     })
   }
 }
 
 const getCdkList = async (req, res) => {
   try {
-    const cdks = await Redis.smembers("Mozu:xiuxian:cdks")
+    const cdks = await Redis.smembers('Mozu:xiuxian:cdks')
     const pipeline = Redis.pipeline()
     for (const cdk of cdks) {
       pipeline.hgetall(`Mozu:xiuxian:cdk:${cdk}`)
     }
     const results = await pipeline.exec()
     const cdkInfos = results.map(([err, result], index) => ({
-      name: cdks[index].replace("Mozu:xiuxian:cdk:", ""),
-      ...result
+      name: cdks[index].replace('Mozu:xiuxian:cdk:', ''),
+      ...result,
     }))
     res.json({
       success: true,
       data: {
-        cdks: cdkInfos
-      }
+        cdks: cdkInfos,
+      },
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -326,11 +326,11 @@ const addCdk = async (req, res) => {
       value: JSON.stringify({ genera, forceSetting, cultList, lsList }),
       使用状态: useStatus,
       使用ID: useId,
-      使用时间: useTime
+      使用时间: useTime,
     })
-    await Redis.sadd("Mozu:xiuxian:cdks", name)
+    await Redis.sadd('Mozu:xiuxian:cdks', name)
     res.json({
-      success: true
+      success: true,
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -343,11 +343,11 @@ const deleteCdks = async (req, res) => {
     const pipeline = Redis.pipeline()
     for (const cdk of list) {
       pipeline.del(`Mozu:xiuxian:cdk:${cdk}`)
-      pipeline.srem("Mozu:xiuxian:cdks", cdk)
+      pipeline.srem('Mozu:xiuxian:cdks', cdk)
     }
     await pipeline.exec()
     res.json({
-      success: true
+      success: true,
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -359,7 +359,7 @@ export const handlePlayer = async (req, res) => {
   if (!auth.valid) {
     return res.status(401).json({
       success: false,
-      message: auth.error
+      message: auth.error,
     })
   }
   const { action } = req.query
@@ -382,7 +382,7 @@ export const handlePlayer = async (req, res) => {
   } catch (error) {
     res.json({
       success: false,
-      message: error.message
+      message: error.message,
     })
   }
 }
@@ -396,8 +396,8 @@ const getPlayerList = async (req, res) => {
       return res.json({
         success: true,
         data: {
-          players: []
-        }
+          players: [],
+        },
       })
     }
     const end = Math.min(start + 10, id + 1)
@@ -414,14 +414,14 @@ const getPlayerList = async (req, res) => {
       sex: result.性别,
       titleIndex: result.称号,
       titles: JSON.parse(result.称号列表 || '[]'),
-      sroot: result.灵根
+      sroot: result.灵根,
     }))
     res.json({
       success: true,
       data: {
         players: playerInfos,
-        playerCount: id
-      }
+        playerCount: id,
+      },
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -432,7 +432,7 @@ const modifyPlayer = async (req, res) => {
   try {
     const { id } = req.query
     if ((await Redis.exists(`Mozu:xiuxian:playerInfo:${id}`)) === 0) {
-      res.json({ success: false, message: "修仙玩家不存在" })
+      res.json({ success: false, message: '修仙玩家不存在' })
     }
     const { cult, ls, realm, sex, titleIndex, titles, sroot } = req.body
     await Redis.hmset(`Mozu:xiuxian:playerInfo:${id}`, {
@@ -442,7 +442,7 @@ const modifyPlayer = async (req, res) => {
       性别: sex,
       称号: titleIndex,
       称号列表: JSON.stringify(titles),
-      灵根: sroot
+      灵根: sroot,
     })
     res.json({ success: true })
   } catch (error) {
@@ -452,10 +452,10 @@ const modifyPlayer = async (req, res) => {
 
 const getRealm = async (req, res) => {
   try {
-    const data = Config.xiuxian.Realm.Realms.map(realm => realm.name)
+    const data = Config.xiuxian.Realm.Realms.map((realm) => realm.name)
     res.json({
       success: true,
-      data: ['无', ...data]
+      data: ['无', ...data],
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -464,16 +464,16 @@ const getRealm = async (req, res) => {
 
 const getSroot = async (req, res) => {
   try {
-    const data = [{ id: 0, name: "无" }]
-    Config.xiuxian.sroot.sroot.forEach(realm => {
+    const data = [{ id: 0, name: '无' }]
+    Config.xiuxian.sroot.sroot.forEach((realm) => {
       data.push({
         id: realm.id,
-        name: realm.name
+        name: realm.name,
       })
     })
     res.json({
       success: true,
-      data: data
+      data: data,
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -485,7 +485,7 @@ export const handleSect = async (req, res) => {
   if (!auth.valid) {
     return res.status(401).json({
       success: false,
-      message: auth.error
+      message: auth.error,
     })
   }
   const { action } = req.query
@@ -500,7 +500,7 @@ export const handleSect = async (req, res) => {
   } catch (error) {
     res.json({
       success: false,
-      message: error.message
+      message: error.message,
     })
   }
 }
@@ -514,8 +514,8 @@ const getSectList = async (req, res) => {
       return res.json({
         success: true,
         data: {
-          sects: []
-        }
+          sects: [],
+        },
       })
     }
     const end = Math.min(start + 10, sectCount + 1)
@@ -530,15 +530,15 @@ const getSectList = async (req, res) => {
       level: result.宗门等级,
       desc: result.宗门简介,
       exp: result.宗门经验,
-      noAudit: result.无需审核状态
+      noAudit: result.无需审核状态,
     }))
     res.json({
       success: true,
       data: {
         sects: sectInfos,
         sectCount: sectCount,
-        max_level: Config.xiuxian.sect.sect_level.length
-      }
+        max_level: Config.xiuxian.sect.sect_level.length,
+      },
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -554,7 +554,7 @@ const modifySect = async (req, res) => {
       宗门等级: level,
       宗门简介: desc,
       宗门经验: exp,
-      无需审核状态: noAudit
+      无需审核状态: noAudit,
     })
     res.json({ success: true })
   } catch (error) {
@@ -567,7 +567,7 @@ export const handleBackup = async (req, res) => {
   if (!auth.valid) {
     return res.status(401).json({
       success: false,
-      message: auth.error
+      message: auth.error,
     })
   }
   const { action } = req.query
@@ -590,20 +590,20 @@ export const handleBackup = async (req, res) => {
   } catch (error) {
     res.json({
       success: false,
-      message: error.message
+      message: error.message,
     })
   }
 }
 
 const getBackupList = async (req, res) => {
   try {
-    const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
-    const files = (await readdir(backupDir)).filter(item => item.endsWith('.json'))
+    const backupDir = path.join(Version.Plugin_Path, 'backup', 'xiuxian')
+    const files = (await readdir(backupDir)).filter((item) => item.endsWith('.json'))
     res.json({
       success: true,
       data: {
-        backups: files
-      }
+        backups: files,
+      },
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -614,9 +614,9 @@ const restoreBackup = async (req, res) => {
   try {
     const { filename } = req.query
     const safeFile = path.basename(String(filename))
-    const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", safeFile + '.json')
+    const filePath = path.join(Version.Plugin_Path, 'backup', 'xiuxian', safeFile + '.json')
     if (!fs.existsSync(filePath)) {
-      return res.json({ success: false, message: "备份文件不存在" })
+      return res.json({ success: false, message: '备份文件不存在' })
     }
     await restoreKeys(filePath)
     res.json({ success: true })
@@ -630,11 +630,9 @@ const Backup = async (req, res) => {
     const { filename } = req.query
     const rawName = typeof filename === 'string' ? filename.trim() : ''
     const base = rawName ? path.basename(rawName) : ''
-    const fileName = (base && base !== '.' && base !== '..')
-      ? base + '.json'
-      : formatTime(Date.now()) + '.json'
-    const filePath = path.join(Version.Plugin_Path, "backup", "xiuxian", fileName)
-    await backupKeys("Mozu:xiuxian:*", filePath)
+    const fileName = base && base !== '.' && base !== '..' ? base + '.json' : formatTime(Date.now()) + '.json'
+    const filePath = path.join(Version.Plugin_Path, 'backup', 'xiuxian', fileName)
+    await backupKeys('Mozu:xiuxian:*', filePath)
     res.json({ success: true, data: { filename: fileName.replace(/\.json$/, '') } })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -645,18 +643,20 @@ const deleteBackup = async (req, res) => {
   try {
     const { files } = req.body
     if (!Array.isArray(files) || files.length === 0) {
-      return res.json({ success: false, message: "请指定要删除的备份文件" })
+      return res.json({ success: false, message: '请指定要删除的备份文件' })
     }
-    const backupDir = path.join(Version.Plugin_Path, "backup", "xiuxian")
-    const removeFiles = files.map(file => {
-      const safeFile = path.basename(String(file))
-      if (!safeFile || safeFile === '.' || safeFile === '..') {
-        return null
-      }
-      return path.join(backupDir, safeFile + '.json')
-    }).filter(file => file !== null)
-    await Promise.allSettled(removeFiles.map(file => unlink(file)))
-    res.json({ success: true, })
+    const backupDir = path.join(Version.Plugin_Path, 'backup', 'xiuxian')
+    const removeFiles = files
+      .map((file) => {
+        const safeFile = path.basename(String(file))
+        if (!safeFile || safeFile === '.' || safeFile === '..') {
+          return null
+        }
+        return path.join(backupDir, safeFile + '.json')
+      })
+      .filter((file) => file !== null)
+    await Promise.allSettled(removeFiles.map((file) => unlink(file)))
+    res.json({ success: true })
   } catch (error) {
     res.json({ success: false, message: error.message })
   }
@@ -675,7 +675,7 @@ async function validateToken(req) {
     return { valid: false, error: 'token 为空' }
   }
   try {
-    const presence = await Redis.sismember("Mozu:panel:token", token)
+    const presence = await Redis.sismember('Mozu:panel:token', token)
     if (!presence) {
       return { valid: false, error: 'token 无效或已过期' }
     }
@@ -705,10 +705,10 @@ function formatTime(timestamp) {
   const d = new Date(time)
 
   const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, "0")
-  const day = String(d.getDate()).padStart(2, "0")
-  const h = String(d.getHours()).padStart(2, "0")
-  const m = String(d.getMinutes()).padStart(2, "0")
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const h = String(d.getHours()).padStart(2, '0')
+  const m = String(d.getMinutes()).padStart(2, '0')
 
   return `${year}-${month}-${day}_${h}:${m}`
 }

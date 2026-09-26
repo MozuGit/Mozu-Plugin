@@ -11,14 +11,14 @@ let yzCfg
 try {
   yzCfg = (await import(Version.Plugin_Path + '/../../lib/config/config.js')).default
 } catch (e) {
-  logger.error(`[${Version.Plugin_Name}]未获取到config.js ${logger.yellow("通知所有主人")} 将无法使用`)
+  logger.error(`[${Version.Plugin_Name}]未获取到config.js ${logger.yellow('通知所有主人')} 将无法使用`)
 }
 
 class Cfg {
   constructor() {
     this.configCache = {}
     this.watcher = {}
-    this.dirCfgNames = ["config", "xiuxian", "example", "panel"]
+    this.dirCfgNames = ['config', 'xiuxian', 'example', 'panel']
     this.initCfg()
   }
 
@@ -86,15 +86,18 @@ class Cfg {
     if (this.watcher[key]) return
     const watcher = chokidar.watch(file, { persistent: true })
     this.watcher[key] = watcher
-    watcher.on('change', _.debounce(async () => {
-      const oldConfig = _.cloneDeep(this.configCache[key] || {})
-      delete this.configCache[key]
-      this.configCache[key] = new YamlReader(file).jsonData
-      const changes = this.findDifference(oldConfig, this.configCache[key])
-      for (const changeKey in changes) {
-        const value = changes[changeKey]
-      }
-    }, 500))
+    watcher.on(
+      'change',
+      _.debounce(async () => {
+        const oldConfig = _.cloneDeep(this.configCache[key] || {})
+        delete this.configCache[key]
+        this.configCache[key] = new YamlReader(file).jsonData
+        const changes = this.findDifference(oldConfig, this.configCache[key])
+        for (const changeKey in changes) {
+          const value = changes[changeKey]
+        }
+      }, 500)
+    )
   }
 
   /** 获取所有配置 */
@@ -104,8 +107,7 @@ class Cfg {
       const defCfgPath = path.join(Version.Plugin_Path, 'config', dirCfgName, 'default')
       const dirCfgPath = path.join(Version.Plugin_Path, 'config', dirCfgName, 'config')
       if (!fs.existsSync(defCfgPath)) continue
-      const files = fs.readdirSync(defCfgPath)
-        .filter((file) => file.endsWith('.yaml'))
+      const files = fs.readdirSync(defCfgPath).filter((file) => file.endsWith('.yaml'))
       for (const file of files) {
         const name = path.basename(file, '.yaml')
         const userCfgPath = path.join(dirCfgPath, file)
@@ -170,22 +172,23 @@ export default new Proxy(new Cfg(), {
       return yzCfg?.masterQQ
     }
     if (prop in target) {
-      return typeof target[prop] === 'function'
-        ? target[prop].bind(target)
-        : target[prop]
+      return typeof target[prop] === 'function' ? target[prop].bind(target) : target[prop]
     }
 
     if (typeof prop === 'string' && target.dirCfgNames.includes(prop)) {
       const dirCfgName = prop
-      return new Proxy({}, {
-        get(_, fileName) {
-          if (typeof fileName !== 'string') return undefined
-          if (fileName === 'then') return undefined
-          return target.getDefOrConfig(dirCfgName, fileName)
+      return new Proxy(
+        {},
+        {
+          get(_, fileName) {
+            if (typeof fileName !== 'string') return undefined
+            if (fileName === 'then') return undefined
+            return target.getDefOrConfig(dirCfgName, fileName)
+          },
         }
-      })
+      )
     }
 
     return undefined
-  }
+  },
 })
