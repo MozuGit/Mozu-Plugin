@@ -9,7 +9,7 @@ export class MozuLike extends plugin {
       priority: 1145,
       task: [
         {
-          cron: Config.config.like.cron || "0 0 8 * * ?",
+          cron: Config.example.like.cron || "0 0 8 * * ?",
           name: "魔族陌:定时点赞",
           fnc: () => this.like()
         }
@@ -18,18 +18,18 @@ export class MozuLike extends plugin {
   }
 
   async like() {
-    if (!Config.config.like.enable || !Config.config.like.targets.length) return false
+    if (!Config.example.like.enable || !Config.example.like.targets.length) return false
     const bots = Object.values(Bot.bots).filter(bot =>
       bot && (bot.sendApi || bot.sendLike || bot.like)
     )
     if (!bots.length) return false
-    const targets = Config.config.like.targets
+    const targets = Config.example.like.targets
     for (const bot of bots) {
       for (const target of targets) {
         try {
-          for (let i = 0; i < Config.config.like.batchCount; i++) {
-            await sendLike(bot, target, Config.config.like.times)
-            await new Promise(res => setTimeout(res, Config.config.like.interval))
+          for (let i = 0; i < Config.example.like.batchCount; i++) {
+            await sendLike(bot, target, Config.example.like.times)
+            await new Promise(res => setTimeout(res, Config.example.like.interval))
           }
         } catch (err) { continue }  // 先静默后面再改
       }

@@ -4,18 +4,18 @@ export default [
     component: 'SOFT_GROUP_BEGIN'
   },
   {
-    field: 'config.fayan.enable',
+    field: 'example.fayan.enable',
     label: '发言统计开关',
     component: 'Switch'
   },
   {
-    field: 'config.fayan.sendMarkdown',
+    field: 'example.fayan.sendMarkdown',
     label: '使用Markdown发送',
     bottomHelpMessage: '是否使用Markdown发送，仅QQBot生效',
     component: 'Switch'
   },
   {
-    field: 'config.fayan.count',
+    field: 'example.fayan.count',
     label: '排行榜最多显示数',
     bottomHelpMessage: '排行榜最多显示的排名数，避免刷屏',
     component: 'InputNumber',

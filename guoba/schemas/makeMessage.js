@@ -4,23 +4,23 @@ export default [
     component: 'SOFT_GROUP_BEGIN'
   },
   {
-    field: 'config.makeMessage.enable',
+    field: 'example.makeMessage.enable',
     label: '伪造聊天开关',
     component: 'Switch'
   },
   {
-    field: 'config.makeMessage.onlyMaster',
+    field: 'example.makeMessage.onlyMaster',
     label: '仅主人使用',
     component: 'Switch'
   },
   {
-    field: 'config.makeMessage.whiteQQList',
+    field: 'example.makeMessage.whiteQQList',
     label: '白名单QQ',
     bottomHelpMessage: '防止白名单QQ被伪造',
     component: 'GSelectFriend'
   },
   {
-    field: 'config.makeMessage.repeatCount',
+    field: 'example.makeMessage.repeatCount',
     label: '默认复读次数',
     bottomHelpMessage: '伪造复读时未填写参数默认次数',
     component: 'InputNumber',

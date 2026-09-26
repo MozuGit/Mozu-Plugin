@@ -4,12 +4,12 @@ export default [
     component: 'SOFT_GROUP_BEGIN'
   },
   {
-    field: 'config.like.enable',
+    field: 'example.like.enable',
     label: '定时点赞开关',
     component: 'Switch'
   },
   {
-    field: 'config.like.cron',
+    field: 'example.like.cron',
     label: '定时点赞cron',
     component: 'EasyCron',
     componentProps: {
@@ -17,13 +17,13 @@ export default [
     }
   },
   {
-    field: 'config.like.targets',
+    field: 'example.like.targets',
     label: '点赞目标',
     bottomHelpMessage: '机器人定时点赞的目标QQ',
     component: 'GSelectGroup'
   },
   {
-    field: 'config.like.batchCount',
+    field: 'example.like.batchCount',
     label: '点赞批次',
     bottomHelpMessage: '发起点赞的次数',
     component: 'InputNumber',
@@ -36,7 +36,7 @@ export default [
     }
   },
   {
-    field: 'config.like.times',
+    field: 'example.like.times',
     label: '点赞次数',
     bottomHelpMessage: '单次点赞的次数',
     component: 'InputNumber',
@@ -49,7 +49,7 @@ export default [
     }
   },
   {
-    field: 'config.like.interval',
+    field: 'example.like.interval',
     label: '批次间隔',
     bottomHelpMessage: '批次间隔，避免请求频率过高（单位：ms）',
     component: 'InputNumber',

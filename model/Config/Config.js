@@ -18,7 +18,7 @@ class Cfg {
   constructor() {
     this.configCache = {}
     this.watcher = {}
-    this.dirCfgNames = ["config", "xiuxian", "panel"]
+    this.dirCfgNames = ["config", "xiuxian", "example", "panel"]
     this.initCfg()
   }
 

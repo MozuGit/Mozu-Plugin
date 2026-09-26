@@ -50,10 +50,11 @@ export function setConfigData(data, { Result }) {
   }
   batchModifyConfig([
     { dir: 'config', file: 'Redis', data: nested.config.Redis },
-    { dir: 'config', file: 'makeMessage', data: nested.config.makeMessage },
-    { dir: 'config', file: 'fayan', data: nested.config.fayan },
     { dir: 'config', file: 'openai', data: nested.config.openai },
     { dir: 'config', file: 'interface', data: nested.config.interface },
+    { dir: 'example', file: 'makeMessage', data: nested.example.makeMessage },
+    { dir: 'example', file: 'fayan', data: nested.example.fayan },
+    { dir: 'example', file: 'like', data: nested.example.fayan },
     { dir: 'panel', file: 'login', data: nested.panel.login },
   ])
   const xiuxianError = handleXiuxianConfig(nested.xiuxian)

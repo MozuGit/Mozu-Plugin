@@ -26,7 +26,7 @@ export class MozuFayan extends plugin {
   }
 
   async fayan(e) {
-    if (!Config.config.fayan.enable || !this.e.group) return false
+    if (!Config.example.fayan.enable || !this.e.group) return false
     const match = this.e.msg.match(/^#?发言榜(日榜|月榜|周榜)?\s*(\d*)/)
     const type = match?.[1] || "日榜"
     const num = match?.[2] || 0
@@ -43,12 +43,12 @@ export class MozuFayan extends plugin {
         break
     }
     const key = getGroupKey(date, this.e.self_id, this.e.group_id)
-    let list = await Redis.zrevrange(key, 0, Config.config.fayan.count - 1, 'WITHSCORES')
+    let list = await Redis.zrevrange(key, 0, Config.example.fayan.count - 1, 'WITHSCORES')
     const userIds = list.filter((_, i) => i % 2 === 0)
     if (userIds.length === 0) {
       let message
       let msg = []
-      if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.config.fayan.sendMarkdown) {
+      if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.example.fayan.sendMarkdown) {
         msg.push([
           '<@' + this.e.user_id.replace(this.e.self_id + ':', '') + '>',
           '***',
@@ -87,7 +87,7 @@ export class MozuFayan extends plugin {
     const names = await Redis.hmget(`Mozu:username`, ...userIds)
     let message
     let msg = []
-    if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.config.fayan.sendMarkdown) {
+    if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.example.fayan.sendMarkdown) {
       msg.push([
         '<@' + this.e.user_id.replace(this.e.self_id + ':', '') + '>',
         '***',
@@ -145,7 +145,7 @@ export class MozuFayan extends plugin {
   }
 
   async clearAll(e) {
-    if (!Config.config.fayan.enable || !this.e.group || !this.e.isMaster) return false
+    if (!Config.example.fayan.enable || !this.e.group || !this.e.isMaster) return false
     let date = await gettoday()
     let month = await getmonth()
     let week = await getweek()
@@ -154,7 +154,7 @@ export class MozuFayan extends plugin {
     pipeline.del(getGroupKey(month, this.e.self_id, this.e.group_id))
     pipeline.del(getGroupKey(week, this.e.self_id, this.e.group_id))
     await pipeline.exec()
-    if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.config.fayan.sendMarkdown) {
+    if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.example.fayan.sendMarkdown) {
       const message = segment.markdown([
         '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
         '***',
@@ -178,14 +178,14 @@ export class MozuFayan extends plugin {
   }
 
   async clearAt(e) {
-    if (!Config.config.fayan.enable || !this.e.group || !this.e.isMaster) return false
+    if (!Config.example.fayan.enable || !this.e.group || !this.e.isMaster) return false
     let date = await gettoday()
     let month = await getmonth()
     let week = await getweek()
     const pipeline = Redis.pipeline()
     const AtQQ = this.e?.at
     if (!AtQQ) {
-      if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.config.fayan.sendMarkdown) {
+      if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.example.fayan.sendMarkdown) {
         const message = segment.markdown([
           '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
           '***',
@@ -213,7 +213,7 @@ export class MozuFayan extends plugin {
     pipeline.zrem(getGroupKey(month, this.e.self_id, this.e.group_id), AtQQ)
     pipeline.zrem(getGroupKey(week, this.e.self_id, this.e.group_id), AtQQ)
     await pipeline.exec()
-    if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.config.fayan.sendMarkdown) {
+    if (['QQBot'].includes(e?.bot?.adapter?.name) && Config.example.fayan.sendMarkdown) {
       const message = segment.markdown([
         '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
         '***',
@@ -239,7 +239,7 @@ export class MozuFayan extends plugin {
 }
 
 Bot.on?.('message', async (e) => {
-  if (!Config.config.fayan.enable || !e?.group) return false
+  if (!Config.example.fayan.enable || !e?.group) return false
   let date = await gettoday()
   let month = await getmonth()
   let week = await getweek()
