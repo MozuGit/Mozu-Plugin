@@ -618,7 +618,10 @@ const restoreBackup = async (req, res) => {
     if (!fs.existsSync(filePath)) {
       return res.json({ success: false, message: '备份文件不存在' })
     }
-    await restoreKeys(filePath)
+    await restoreKeys(filePath, {
+      purge: true,
+      pattern: 'Mozu:xiuxian:*',
+    })
     res.json({ success: true })
   } catch (error) {
     res.json({ success: false, message: error.message })

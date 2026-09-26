@@ -43,7 +43,10 @@ export class MozuXiuxianBackup extends plugin {
       const fileName = raw.endsWith('.json') ? raw : raw + '.json'
       const filePath = path.join(Version.Plugin_Path, 'backup', 'xiuxian', fileName)
       if (fs.existsSync(filePath)) {
-        const result = await restoreKeys(filePath)
+        const result = await restoreKeys(filePath, {
+          purge: true,
+          pattern: 'Mozu:xiuxian:*',
+        })
         const message = [
           '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
           '***',
@@ -67,11 +70,11 @@ export class MozuXiuxianBackup extends plugin {
           ...(fileName !== '.json' ? ['**文件不存在**', '>请确认文件是否存在', '***'] : []),
           '**还原备份文件**',
           '>**' +
-            backupItems
-              .reverse()
-              .slice(0, parseInt(Config.xiuxian.setting.maxBackupFile, 10) || 10)
-              .join('**\n>**') +
-            '**',
+          backupItems
+            .reverse()
+            .slice(0, parseInt(Config.xiuxian.setting.maxBackupFile, 10) || 10)
+            .join('**\n>**') +
+          '**',
           '***',
         ].join('\n')
         this.e.reply([message, Button.backup])
