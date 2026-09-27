@@ -53,7 +53,7 @@ export function setConfigData(data, { Result }) {
     { dir: 'config', file: 'interface', data: nested.config.interface },
     { dir: 'example', file: 'makeMessage', data: nested.example.makeMessage },
     { dir: 'example', file: 'fayan', data: nested.example.fayan },
-    { dir: 'example', file: 'like', data: nested.example.fayan },
+    { dir: 'example', file: 'like', data: nested.example.like },
     { dir: 'panel', file: 'login', data: nested.panel.login },
   ])
   const xiuxianError = handleXiuxianConfig(nested.xiuxian)
