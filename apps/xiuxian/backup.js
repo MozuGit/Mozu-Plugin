@@ -70,11 +70,11 @@ export class MozuXiuxianBackup extends plugin {
           ...(fileName !== '.json' ? ['**文件不存在**', '>请确认文件是否存在', '***'] : []),
           '**还原备份文件**',
           '>**' +
-          backupItems
-            .reverse()
-            .slice(0, parseInt(Config.xiuxian.setting.maxBackupFile, 10) || 10)
-            .join('**\n>**') +
-          '**',
+            backupItems
+              .reverse()
+              .slice(0, parseInt(Config.xiuxian.setting.maxBackupFile, 10) || 10)
+              .join('**\n>**') +
+            '**',
           '***',
         ].join('\n')
         this.e.reply([message, Button.backup])

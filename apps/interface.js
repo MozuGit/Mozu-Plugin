@@ -29,14 +29,14 @@ export class MozuInterface extends plugin {
     //获取群基本信息
     let groupInfo = JSON.parse(await Redis.get(`Mozu:groupinfo:${group_id}`))
     if (!groupInfo) {
-      ; ({ data: groupInfo } = await bot.sdk.request.get(`/v2/groups/${group_id}/info`))
+      ;({ data: groupInfo } = await bot.sdk.request.get(`/v2/groups/${group_id}/info`))
       Redis.set(`Mozu:groupinfo:${group_id}`, JSON.stringify(groupInfo), 'EX', 3600)
     }
 
     //获取机器人群内状态
     let groupBotState = JSON.parse(await Redis.get(`Mozu:groupbotstate:${group_id}`))
     if (!groupBotState) {
-      ; ({ data: groupBotState } = await bot.sdk.request.get(`/v2/groups/${group_id}/bot_state`))
+      ;({ data: groupBotState } = await bot.sdk.request.get(`/v2/groups/${group_id}/bot_state`))
       Redis.set(`Mozu:groupbotstate:${group_id}`, JSON.stringify(groupBotState), 'EX', 3600)
     }
     if (groupBotState.member_role === 'admin') this.e.group.is_admin = true
@@ -54,7 +54,7 @@ export class MozuInterface extends plugin {
         const extra = Array.isArray(obj) ? obj : []
         const all = [
           { openid, time },
-          ...extra.map(item => ({
+          ...extra.map((item) => ({
             openid: item.openid,
             time: item.time === undefined ? time : item.time,
           })),
