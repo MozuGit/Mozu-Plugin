@@ -29,14 +29,14 @@ export class MozuInterface extends plugin {
     //获取群基本信息
     let groupInfo = JSON.parse(await Redis.get(`Mozu:groupinfo:${group_id}`))
     if (!groupInfo) {
-      ;({ data: groupInfo } = await bot.sdk.request.get(`/v2/groups/${group_id}/info`))
+      ; ({ data: groupInfo } = await bot.sdk.request.get(`/v2/groups/${group_id}/info`))
       Redis.set(`Mozu:groupinfo:${group_id}`, JSON.stringify(groupInfo), 'EX', 3600)
     }
 
     //获取机器人群内状态
     let groupBotState = JSON.parse(await Redis.get(`Mozu:groupbotstate:${group_id}`))
     if (!groupBotState) {
-      ;({ data: groupBotState } = await bot.sdk.request.get(`/v2/groups/${group_id}/bot_state`))
+      ; ({ data: groupBotState } = await bot.sdk.request.get(`/v2/groups/${group_id}/bot_state`))
       Redis.set(`Mozu:groupbotstate:${group_id}`, JSON.stringify(groupBotState), 'EX', 3600)
     }
     if (groupBotState.member_role === 'admin') this.e.group.is_admin = true
@@ -50,23 +50,33 @@ export class MozuInterface extends plugin {
 
     //设置群成员禁言
     if (!this.e.group.muteMember) {
-      this.e.group.muteMember = async (openid, time = 0) => {
-        const expireTime = new Date((Math.floor(Date.now() / 1000) + time + 1 + 8 * 3600) * 1000)
-          .toISOString()
-          .replace('Z', '+08:00')
-        const requestBody = {
-          members: [
-            {
-              op: time === 0 ? 'del' : 'add',
-              member_openid: openid.replace(self_id + ':', ''),
-              mute_expire_at: expireTime,
-            },
-          ],
+      this.e.group.muteMember = async (openid, time = 0, obj = []) => {
+        const extra = Array.isArray(obj) ? obj : []
+        const all = [
+          { openid, time },
+          ...extra.map(item => ({
+            openid: item.openid,
+            time: item.time === undefined ? time : item.time,
+          })),
+        ]
+        const buildMember = (item) => {
+          const t = item.time === undefined ? 0 : item.time
+          const expireTime = new Date((Math.floor(Date.now() / 1000) + t + 1 + 8 * 3600) * 1000)
+            .toISOString()
+            .replace('Z', '+08:00')
+          return {
+            op: t === 0 ? 'del' : 'add',
+            member_openid: item.openid.replace(self_id + ':', ''),
+            mute_expire_at: expireTime,
+          }
         }
-        try {
-          await bot.sdk.request.post(`/v2/groups/${group_id}/restrict_chat_setting`, requestBody)
-        } catch (err) {
-          return false
+        for (let i = 0; i < all.length; i += 20) {
+          const members = all.slice(i, i + 20).map(buildMember)
+          try {
+            await bot.sdk.request.post(`/v2/groups/${group_id}/restrict_chat_setting`, { members })
+          } catch (err) {
+            return false
+          }
         }
         return true
       }
