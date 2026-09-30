@@ -22,18 +22,10 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'static', 'index.html'))
 })
 
-const remoteIp = await getRemoteIp()
-const displayHost = Config.panel.login.host === 'auto' ? remoteIp || 'localhost' : Config.panel.login.host
-
-if (trustProxy === 'unset' && remoteIp) {
-  logger.warn(
-    logger.yellow(
-      '[魔族陌面版] 未配置 trustProxy。若面板前面有 nginx / CDN / ESA 等反代，' +
-        '登录限流会把所有访客算作同一个 IP；请把 config/panel/config/login.yaml 的 trustProxy 设为 1（一层反代）或 2（CDN+反代）。'
-    )
-  )
-}
-
+// 注意：不要在这里 await 任何网络/Redis 操作再 listen。
+// 之前 getRemoteIp() 会在 listen 之前被 await，一旦 Redis 不可达或外网接口挂住，
+// 模块求值就卡死、端口永远不开，前面挂 Cloudflare 时表现为 524。
+// 现在先把端口起来，外网 IP 只用于打印日志，解析失败不影响服务。
 const RGB = [
   [255, 107, 107],
   [255, 165, 107],
@@ -52,9 +44,10 @@ if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
   const server = app.listen(PORT, '0.0.0.0', () => {
     logger.info(buildLoggerRGB('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'))
     logger.info(buildLoggerRGB('┃ [魔族陌] 启动成功喵~'))
-    logger.info(buildLoggerRGB(`┃ 外网地址：http://${displayHost}:${PORT}`))
     logger.info(buildLoggerRGB(`┃ 本地地址：http://127.0.0.1:${PORT}`))
     logger.info(buildLoggerRGB('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'))
+    // 端口已经起来了，外网地址只是日志，异步补打，不阻塞、失败也不影响
+    printRemoteAddress(PORT)
   })
 
   server.on('error', (err) => {
@@ -73,9 +66,32 @@ if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
 }
 
 /**
- * 解析 trustProxy 配置，兼容多种写法，交给 Express 的 `trust proxy` 使用。
- * 支持：布尔、层数（数字或数字字符串）、网段/关键字数组、`loopback` 等关键字。
- * 返回 'unset' 表示"没配/配错"，此时按 false 处理（最安全：只用 socket 地址）。
+ * 打印外网访问地址
+ * @param {number} port
+ */
+async function printRemoteAddress(port) {
+  try {
+    if (Config.panel.login.host !== 'auto') {
+      logger.info(buildLoggerRGB(`┃ 外网地址：http://${Config.panel.login.host}:${port}`))
+      return
+    }
+    const remoteIp = await getRemoteIp()
+    logger.info(buildLoggerRGB(`┃ 外网地址：http://${remoteIp || 'localhost'}:${port}`))
+    if (trustProxy === 'unset' && remoteIp) {
+      logger.warn(
+        logger.yellow(
+          '[魔族陌面版] 未配置 trustProxy。若面板前面有 nginx / CDN / ESA 等反代，' +
+            '登录限流会把所有访客算作同一个 IP；请把 config/panel/config/login.yaml 的 trustProxy 设为 1（一层反代）或 2（CDN+反代）。'
+        )
+      )
+    }
+  } catch (err) {
+    logger.warn(`[魔族陌面版] 获取外网地址失败（不影响面版使用）：${err?.message || err}`)
+  }
+}
+
+/**
+ * 解析 trustProxy 配置
  * @param {unknown} value
  * @returns {boolean|number|string|string[]|'unset'}
  */
@@ -133,23 +149,28 @@ function isPrivateAddress(addr) {
 let trustProxyWarned = false
 
 /**
- * 未配置 trustProxy，但请求看起来来自本机/内网反代 —— 说明大概率存在反代，
- * 只是没告诉面板，此时所有访客会共用同一 IP 计数（不会被绕过，但会互相影响）。
  * @param {import('express').Request} req
+ * @param {import('express').Response} _res
+ * @param {import('express').NextFunction} next
  */
-function warnTrustProxyIfNeeded(req) {
-  if (trustProxy !== 'unset') return
-  if (!req.headers['x-forwarded-for'] && !req.headers['x-real-ip'] && !req.headers['cf-connecting-ip']) return
-  const socketAddr = req.socket?.remoteAddress || ''
-  if (!isPrivateAddress(socketAddr)) return
-  if (trustProxyWarned) return
-  trustProxyWarned = true
-  logger.warn(
-    logger.yellow(
-      '[魔族陌面版] 检测到请求经由反向代理（来源为内网地址且带转发头），但 trustProxy 未配置，' +
-        '登录限流会把所有访客算作同一个 IP。请按实际情况把 config/panel/config/login.yaml 的 trustProxy 设为 1 或 2。'
+function warnTrustProxyIfNeeded(req, _res, next) {
+  try {
+    if (trustProxy !== 'unset') return next()
+    if (!req.headers['x-forwarded-for'] && !req.headers['x-real-ip'] && !req.headers['cf-connecting-ip']) return next()
+    const socketAddr = req.socket?.remoteAddress || ''
+    if (!isPrivateAddress(socketAddr)) return next()
+    if (trustProxyWarned) return next()
+    trustProxyWarned = true
+    logger.warn(
+      logger.yellow(
+        '[魔族陌面版] 检测到请求经由反向代理（来源为内网地址且带转发头），但 trustProxy 未配置，' +
+          '登录限流会把所有访客算作同一个 IP。请按实际情况把 config/panel/config/login.yaml 的 trustProxy 设为 1 或 2。'
+      )
     )
-  )
+  } catch (err) {
+    logger.warn?.(`[魔族陌面版] trustProxy 提示检查失败：${err?.message || err}`)
+  }
+  next()
 }
 
 Redis.del('Mozu:panel:token').catch((err) => {
@@ -165,14 +186,38 @@ function buildLoggerRGB(message) {
   return result
 }
 
+/**
+ * 给 Promise 加超时，避免外部依赖挂住启动/响应流程
+ * @template T
+ * @param {Promise<T>} promise
+ * @param {number} ms
+ * @param {string} message
+ * @returns {Promise<T>}
+ */
+function withTimeout(promise, ms, message) {
+  let timer
+  return Promise.race([
+    Promise.resolve(promise).finally(() => clearTimeout(timer)),
+    new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error(message)), ms)
+    }),
+  ])
+}
+
 async function getRemoteIp() {
-  let cacheData = await Redis.get('Mozu:remote-ip')
+  let cacheData
+  try {
+    cacheData = await withTimeout(Redis.get('Mozu:remote-ip'), 3000, 'Redis 查询超时')
+  } catch (err) {
+    logger.warn(`[魔族陌面版] 读取缓存外网地址失败：${err?.message || err}`)
+    return false
+  }
   if (cacheData) return cacheData
   let apis = ['http://v4.ip.zxinc.org/info.php?type=json']
   for (let api of apis) {
     let response
     try {
-      response = await fetch(api)
+      response = await withTimeout(fetch(api), 5000, '获取外网 IP 超时')
     } catch {
       continue
     }
