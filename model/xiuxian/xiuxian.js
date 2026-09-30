@@ -601,7 +601,7 @@ export default new (class {
         },
       }
     }
-    ;[cult, retreatStart, pvp_cd] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id2}`, '修为', '闭关时间', '切磋冷却')
+    ;[cult, retreatStart, pvp_cd] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id2}`, '修为', '闭关时间', '被切磋冷却')
     cult = parseInt(cult, 10)
     retreatStart = parseInt(retreatStart, 10) || 0
     pvp_cd = parseInt(pvp_cd, 10) || 0
@@ -857,23 +857,23 @@ export default new (class {
     switch (type) {
       case '修为':
       case '灵石':
-        for (let i = 0; i < idNum; i++) {
+        for (let i = 1; i <= idNum; i++) {
           pipeline.hmget(`${PLAYER_INFO_KEY}:${i}`, type, '称号', '称号列表')
         }
         break
       case '战力':
-        for (let i = 0; i < idNum; i++) {
+        for (let i = 1; i <= idNum; i++) {
           pipeline.hmget(`${PLAYER_INFO_KEY}:${i}`, '修为', '境界', '称号', '称号列表', '功法列表', '灵根')
         }
         break
       case '闭关':
-        for (let i = 0; i < idNum; i++) {
+        for (let i = 1; i <= idNum; i++) {
           pipeline.hmget(`${PLAYER_INFO_KEY}:${i}`, '闭关时间', '称号', '称号列表')
         }
         break
       case '签到':
       case '切磋':
-        for (let i = 0; i < idNum; i++) {
+        for (let i = 1; i <= idNum; i++) {
           pipeline.hmget(`${PLAYER_INFO_KEY}:${i}`, type + '次数', '称号', '称号列表')
         }
         break
@@ -883,7 +883,7 @@ export default new (class {
     switch (type) {
       case '修为':
       case '灵石':
-        for (let i = 0; i < idNum; i++) {
+        for (let i = 1; i <= idNum; i++) {
           const value = parseInt(results[i][1][0], 10)
           const titleIndex = parseInt(results[i][1][1], 10) || 0
           const titles = JSON.parse(results[i][1][2] || '[]')
@@ -908,7 +908,7 @@ export default new (class {
         break
       case '战力':
         const artsMap = new Map(Config.xiuxian.drop.arts.map((art) => [art.id, art]))
-        for (let i = 0; i < idNum; i++) {
+        for (let i = 1; i <= idNum; i++) {
           const cult = parseInt(results[i][1][0], 10)
           const realm = parseInt(results[i][1][1], 10) || 0.75
           const arts = JSON.parse(results[i][1][4] || '[]')
@@ -942,7 +942,7 @@ export default new (class {
         break
       case '闭关':
         const time = Math.floor(Date.now() / 1000)
-        for (let i = 0; i < idNum; i++) {
+        for (let i = 1; i <= idNum; i++) {
           const retreat = parseInt(results[i][1][0], 10)
           const titleIndex = parseInt(results[i][1][1], 10) || 0
           const titles = JSON.parse(results[i][1][2] || '[]')
@@ -968,7 +968,7 @@ export default new (class {
         break
       case '签到':
       case '切磋':
-        for (let i = 0; i < idNum; i++) {
+        for (let i = 1; i <= idNum; i++) {
           const value = parseInt(results[i][1][0], 10)
           const titleIndex = parseInt(results[i][1][1], 10) || 0
           const titles = JSON.parse(results[i][1][2] || '[]')
@@ -1072,7 +1072,7 @@ export default new (class {
         },
       }
     } else {
-      cult += beastInfo.punishment.cult
+      cult = Math.max(0, cult - beastInfo.punishment.cult)
       Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
         修为: cult,
         上次猎杀妖兽时间: Math.floor(Date.now() / 1000),
@@ -1246,7 +1246,7 @@ export default new (class {
       const pillsData = (await this.getUserBag(id)).pills
       let sellPills = []
       const addls = pillsData.reduce((acc, item) => {
-        usePills.push({
+        sellPills.push({
           id: item.id,
           name: item.name,
           lsAll: item.sell_ls * item.count,
@@ -1764,7 +1764,7 @@ export default new (class {
     if (noAudit) {
       members = new Set(members)
       members.add(id)
-      memberPermission.push({ id: id, level: 1 })
+      memberPermission.push({ id: id, permission: 1 })
       await Redis.hmset(`${SECT_INFO_KEY}:${joinID}`, {
         宗门成员: JSON.stringify([...members]),
         宗门成员等级: JSON.stringify(memberPermission),

@@ -47,6 +47,10 @@ export function setConfigData(data, { Result }) {
   } else {
     nested.panel.login.password = Config.panel.login.password
   }
+  const xiuxianError = validateXiuxianConfig(nested.xiuxian)
+  if (xiuxianError) {
+    return Result.error(xiuxianError)
+  }
   batchModifyConfig([
     { dir: 'config', file: 'Redis', data: nested.config.Redis },
     { dir: 'config', file: 'openai', data: nested.config.openai },
@@ -56,10 +60,7 @@ export function setConfigData(data, { Result }) {
     { dir: 'example', file: 'like', data: nested.example.like },
     { dir: 'panel', file: 'login', data: nested.panel.login },
   ])
-  const xiuxianError = handleXiuxianConfig(nested.xiuxian)
-  if (xiuxianError) {
-    return Result.error(xiuxianError)
-  }
+  handleXiuxianConfig(nested.xiuxian)
   return Result.ok({}, '保存成功喵~')
 }
 
@@ -70,6 +71,23 @@ function batchModifyConfig(configs) {
     Object.keys(data).forEach((key) => {
       Config.modify(dir, file, key, data[key])
     })
+  }
+}
+
+function validateXiuxianConfig(xiuxianData) {
+  if (!xiuxianData) return
+  if (xiuxianData.drop) {
+    if (hasRepeatedId(xiuxianData.drop.pills, xiuxianData.drop.arts)) {
+      return '物品ID重复'
+    }
+  }
+  if (xiuxianData.sroot) {
+    if (hasRepeatedId(xiuxianData.sroot.sroot)) {
+      return '灵根ID重复'
+    }
+    if (Object.values(xiuxianData.sroot.root_drop).reduce((a, b) => a + b, 0) !== 100) {
+      return '灵根概率总和不等于100'
+    }
   }
 }
 
@@ -93,12 +111,10 @@ function handleXiuxianConfig(xiuxianData) {
       if (key === 'range') {
         const rangeData = xiuxianData.xiuxian.range
         if (rangeData && typeof rangeData === 'object') {
-          Object.keys(rangeData).forEach((rangeKey) => {
-            Config.modify('xiuxian', rangeKey, rangeData[rangeKey])
-          })
+          Config.modify('xiuxian', 'xiuxian', 'range', rangeData)
         }
       } else {
-        Config.modify('xiuxian', key, xiuxianData.xiuxian[key])
+        Config.modify('xiuxian', 'xiuxian', key, xiuxianData.xiuxian[key])
       }
     })
   }
@@ -106,9 +122,6 @@ function handleXiuxianConfig(xiuxianData) {
     Config.modify('xiuxian', 'Realm', 'Realms', xiuxianData.realm)
   }
   if (xiuxianData.drop) {
-    if (hasRepeatedId(xiuxianData.drop.pills, xiuxianData.drop.arts)) {
-      return '物品ID重复'
-    }
     const cleanRealms = xiuxianData.drop.secretRealms?.map((realm) => {
       const { pills, arts, ...cleanRealm } = realm
       return cleanRealm
@@ -130,12 +143,6 @@ function handleXiuxianConfig(xiuxianData) {
     }
   }
   if (xiuxianData.sroot) {
-    if (hasRepeatedId(xiuxianData.sroot.sroot)) {
-      return '灵根ID重复'
-    }
-    if (Object.values(xiuxianData.sroot.root_drop).reduce((a, b) => a + b, 0) !== 100) {
-      return '灵根概率总和不等于100'
-    }
     Object.keys(xiuxianData.sroot).forEach((key) => {
       Config.modify('xiuxian', 'sroot', key, xiuxianData.sroot[key])
     })

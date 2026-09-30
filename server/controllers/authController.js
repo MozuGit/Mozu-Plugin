@@ -48,7 +48,7 @@ const handleGetCode = async (req, res) => {
       message: '获取验证码频繁，请稍后再试',
     })
   }
-  const code = String(crypto.randomInt(0, 1000000)).padStart(8, '0')
+  const code = String(crypto.randomInt(0, 100000000)).padStart(8, '0')
   logger.info(logger.yellow(`[魔族陌面版][验证码][来自IP：${ip}] ${code}`))
   await Redis.set(`Mozu:panel:code:${ip}`, code, 'EX', 300)
   res.json({

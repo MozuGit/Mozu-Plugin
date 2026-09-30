@@ -1627,9 +1627,9 @@ const prefixHandlers = [
     },
   },
   {
-    prefix: /^#?(?:一键)?学习功法\s*\d*/,
+    prefix: /^#?(?:一键)?学习功法\s*(\d*)/,
     handler: async (id, user_id, Text, msg, at) => {
-      const match = msg.match(/^#?(?:一键)?学习功法\s*\d*/)
+      const match = msg.match(/^#?(?:一键)?学习功法\s*(\d*)/)
       const artId = parseInt(match[1], 10)
       const value = await xiuxian.learnArt(id, artId, msg.includes('一键'))
       const userInfo = await xiuxian.getUserInfo(id)
