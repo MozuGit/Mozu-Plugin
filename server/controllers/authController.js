@@ -1,8 +1,24 @@
 import TwoFactorAuth from '../../lib/TwoFactorAuth.js'
+import {
+  TOKEN_TTL,
+  MAX_PASSWORD_ATTEMPTS,
+  MAX_CODE_ATTEMPTS,
+  tokenKey,
+  getBearerToken,
+  isTokenValid,
+  revokeToken,
+} from '../../lib/panelAuth.js'
 
 import Redis from '#Redis'
 import Config from '#Config'
 import crypto from 'crypto'
+
+function safeEqual(a, b) {
+  const bufA = Buffer.from(String(a))
+  const bufB = Buffer.from(String(b))
+  if (bufA.length !== bufB.length) return false
+  return crypto.timingSafeEqual(bufA, bufB)
+}
 
 // 统一处理登录相关请求
 export const handleLogin = async (req, res) => {
@@ -62,7 +78,8 @@ const handleGetCodeTTL = async (req, res) => {
   const ttl = await Redis.ttl(`Mozu:panel:code:${ip}`)
   res.json({
     success: true,
-    ttl: ip === '127.0.0.1' ? 0 : ttl,
+    ttl,
+    totpRequired: isTotpEnabled(),
   })
 }
 
@@ -78,26 +95,38 @@ const handleResetPassword = async (req, res) => {
   }
 
   const ip = getIP(req)
-  if (parseInt(await Redis.get(`Mozu:panel:code:${ip}:count`)) >= 5) {
+
+  const attemptKey = `Mozu:panel:code:${ip}:count`
+  const attempts = await Redis.incr(attemptKey)
+  if (attempts === 1) await Redis.expire(attemptKey, 300)
+  if (attempts > MAX_CODE_ATTEMPTS) {
     await Redis.del(`Mozu:panel:code:${ip}`)
-    await Redis.del(`Mozu:panel:code:${ip}:count`)
+    await Redis.del(attemptKey)
     return res.json({
       success: false,
       message: '验证码连续错误，请重新获取验证码',
     })
   }
+
   const savedCode = await Redis.get(`Mozu:panel:code:${ip}`)
-  if (code !== savedCode) {
-    await Redis.incr(`Mozu:panel:code:${ip}:count`)
+  if (!savedCode || !safeEqual(String(code), String(savedCode))) {
     return res.json({
       success: false,
       message: '验证码错误',
     })
   }
 
+  if (isTotpEnabled() && !TwoFactorAuth.verifyToken(Config.panel.login.totp.secret, req.body.token)) {
+    return res.json({
+      success: false,
+      message: req.body.token ? 'TOTP 验证码错误' : '请输入 TOTP 动态验证码',
+      needTotp: true,
+    })
+  }
+
   Config.modify('panel', 'login', 'password', newPassword)
   await Redis.del(`Mozu:panel:code:${ip}`)
-  await Redis.del(`Mozu:panel:code:${ip}:count`)
+  await Redis.del(attemptKey)
   res.json({
     success: true,
   })
@@ -106,6 +135,8 @@ const handleResetPassword = async (req, res) => {
 // 普通登录
 const handleNormalLogin = async (req, res) => {
   const { password } = req.body
+  const ip = getIP(req)
+  const errorKey = `Mozu:panel:password:error:${ip}`
 
   if (!Config.panel.login.password) {
     return res.json({
@@ -114,20 +145,22 @@ const handleNormalLogin = async (req, res) => {
     })
   }
 
-  if (parseInt(await Redis.get('Mozu:panel:password:error')) >= 10) {
+  if (parseInt(await Redis.get(errorKey), 10) >= MAX_PASSWORD_ATTEMPTS) {
     return res.json({
       success: false,
       message: '密码连续错误，请60秒后重试',
     })
   }
 
-  if (
-    ((await hashSHA256(password)) === Config.panel.login.password || password === Config.panel.login.password) &&
-    (!isTotpEnabled() || TwoFactorAuth.verifyToken(Config.panel.login.totp.secret, req.body.token))
-  ) {
+  const passwordOk =
+    password !== undefined &&
+    ((await hashSHA256(password)) === Config.panel.login.password ||
+      safeEqual(String(password), String(Config.panel.login.password)))
+
+  if (passwordOk && (!isTotpEnabled() || TwoFactorAuth.verifyToken(Config.panel.login.totp.secret, req.body.token))) {
     const token = crypto.randomBytes(32).toString('hex')
-    await Redis.sadd('Mozu:panel:token', token)
-    await Redis.del('Mozu:panel:password:error')
+    await Redis.set(tokenKey(token), '1', 'EX', TOKEN_TTL)
+    await Redis.del(errorKey)
     res.json({
       success: true,
       message: '登录成功',
@@ -135,9 +168,9 @@ const handleNormalLogin = async (req, res) => {
         token: token,
       },
     })
-  } else if ((await hashSHA256(password)) !== Config.panel.login.password && password !== Config.panel.login.password) {
-    await Redis.set('Mozu:panel:password:error', 0, 'EX', 60, 'NX')
-    await Redis.incr('Mozu:panel:password:error')
+  } else if (!passwordOk) {
+    const attempts = await Redis.incr(errorKey)
+    if (attempts === 1) await Redis.expire(errorKey, 60)
     res.json({
       success: false,
       message: '密码错误',
@@ -152,15 +185,13 @@ const handleNormalLogin = async (req, res) => {
 
 // 退出登录
 const handleExitLogin = async (req, res) => {
-  const authHeader = req.headers.authorization.substring(7)
-  const presence = await Redis.sismember('Mozu:panel:token', authHeader)
-  if (presence) {
-    await Redis.srem('Mozu:panel:token', authHeader)
-    res.json({
-      success: true,
-      message: '退出登录成功',
-    })
-  }
+  const token = getBearerToken(req)
+  const revoked = await isTokenValid(token)
+  if (revoked) await revokeToken(token)
+  res.json({
+    success: true,
+    message: revoked ? '退出登录成功' : '已退出登录',
+  })
 }
 
 export const handle2FA = async (req, res) => {
@@ -306,20 +337,12 @@ function saveTotpConfig(enabled, secret) {
 }
 
 async function validateToken(req) {
-  const authHeader = req?.headers?.authorization
-  if (!authHeader) {
+  const token = getBearerToken(req)
+  if (!token) {
     return { valid: false, error: '未登录，请先登录' }
   }
-  if (!authHeader.startsWith('Bearer ')) {
-    return { valid: false, error: 'token 格式错误' }
-  }
-  const token = authHeader.substring(7)
-  if (!token || token.length === 0) {
-    return { valid: false, error: 'token 为空' }
-  }
   try {
-    const presence = await Redis.sismember('Mozu:panel:token', token)
-    if (!presence) {
+    if (!(await isTokenValid(token))) {
       return { valid: false, error: 'token 无效或已过期' }
     }
     return { valid: true, token }
@@ -337,14 +360,10 @@ async function hashSHA256(password) {
   return hashHex
 }
 
+/**
+ * 取客户端 IP 用于限流
+ * @param {import('express').Request} req
+ */
 function getIP(req) {
-  let ip =
-    req.headers['x-forwarded-for']?.split(',')[0].trim() ||
-    req.headers['x-real-ip'] ||
-    req.headers['cf-connecting-ip'] ||
-    req.headers['x-client-ip']
-  if (!ip || ip === 'unknown') {
-    ip = req.connection?.remoteAddress || req.socket?.remoteAddress || req.ip
-  }
-  return ip
+  return req.ip || req.socket?.remoteAddress || 'unknown'
 }

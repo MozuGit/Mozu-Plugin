@@ -1,9 +1,10 @@
 import Redis from '#Redis'
+import { getBearerToken, isTokenValid } from '../../lib/panelAuth.js'
 import { Version } from '../../model/Config/Version.js'
 
 export const getInfo = async (req, res) => {
   try {
-    const presence = await Redis.sismember('Mozu:panel:token', req.headers.authorization.substring(7))
+    const presence = await isTokenValid(getBearerToken(req))
     if (!presence) {
       return res.status(401).json({
         success: false,

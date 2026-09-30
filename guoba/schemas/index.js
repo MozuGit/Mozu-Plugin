@@ -28,13 +28,18 @@ export const schemas = [
 ]
 
 export function getConfigData() {
+  const panel = Config.getCfg().panel
   return {
     ...Config.getCfg(),
     panel: {
-      ...Config.getCfg().panel,
+      ...panel,
       login: {
-        ...Config.getCfg().panel.login,
+        ...panel.login,
         password: '',
+        totp: {
+          ...panel.login?.totp,
+          secret: '',
+        },
       },
     },
   }
@@ -46,6 +51,12 @@ export function setConfigData(data, { Result }) {
     nested.panel.login.password = crypto.createHash('sha256').update(nested.panel.login.password).digest('hex')
   } else {
     nested.panel.login.password = Config.panel.login.password
+  }
+  if (!nested.panel.login.totp?.secret) {
+    nested.panel.login.totp = {
+      ...nested.panel.login.totp,
+      secret: Config.panel.login.totp?.secret || '',
+    }
   }
   const xiuxianError = validateXiuxianConfig(nested.xiuxian)
   if (xiuxianError) {

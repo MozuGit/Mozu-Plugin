@@ -29,9 +29,28 @@ export default [
   {
     field: 'panel.login.password',
     label: '面版密码',
-    component: 'Input',
+    component: 'InputPassword',
     componentProps: {
       placeholder: '敏感信息不会展示在前端',
+    },
+  },
+  {
+    field: 'panel.login.trustProxy',
+    label: '反代/CDN 信任',
+    helpMessage: '修改后需要重启才能生效',
+    bottomHelpMessage:
+      '决定如何识别真实客户端 IP，影响登录限流。不确定就选"直连暴露"，填错只会让限流按反代 IP 统计，不会被绕过',
+    component: 'RadioGroup',
+    required: true,
+    componentProps: {
+      optionType: 'button',
+      buttonStyle: 'solid',
+      options: [
+        { label: '直连暴露', value: false },
+        { label: '一层反代', value: 1 },
+        { label: 'CDN+反代', value: 2 },
+        { label: '完全信任头', value: true },
+      ],
     },
   },
   {

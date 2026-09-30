@@ -11,7 +11,11 @@ const __dirname = path.dirname(__filename)
 
 const app = express()
 
+const trustProxy = parseTrustProxy(Config.panel.login.trustProxy)
+app.set('trust proxy', trustProxy === 'unset' ? false : trustProxy)
+
 app.use(express.json())
+app.use(warnTrustProxyIfNeeded)
 app.use('/api', routes)
 app.use(express.static(path.join(__dirname, 'static')))
 app.get('/', (req, res) => {
@@ -20,6 +24,15 @@ app.get('/', (req, res) => {
 
 const remoteIp = await getRemoteIp()
 const displayHost = Config.panel.login.host === 'auto' ? remoteIp || 'localhost' : Config.panel.login.host
+
+if (trustProxy === 'unset' && remoteIp) {
+  logger.warn(
+    logger.yellow(
+      '[魔族陌面版] 未配置 trustProxy。若面板前面有 nginx / CDN / ESA 等反代，' +
+        '登录限流会把所有访客算作同一个 IP；请把 config/panel/config/login.yaml 的 trustProxy 设为 1（一层反代）或 2（CDN+反代）。'
+    )
+  )
+}
 
 const RGB = [
   [255, 107, 107],
@@ -58,6 +71,90 @@ if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
     logger.error(`[魔族陌面版] 面版已禁用，机器人其它功能不受影响`)
   })
 }
+
+/**
+ * 解析 trustProxy 配置，兼容多种写法，交给 Express 的 `trust proxy` 使用。
+ * 支持：布尔、层数（数字或数字字符串）、网段/关键字数组、`loopback` 等关键字。
+ * 返回 'unset' 表示"没配/配错"，此时按 false 处理（最安全：只用 socket 地址）。
+ * @param {unknown} value
+ * @returns {boolean|number|string|string[]|'unset'}
+ */
+function parseTrustProxy(value) {
+  if (value === undefined || value === null || value === '') return 'unset'
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'number') return Number.isInteger(value) && value >= 0 ? value : 'unset'
+
+  if (typeof value === 'string') {
+    const text = value.split('#')[0].trim()
+    if (!text) return 'unset'
+    if (text === 'true') return true
+    if (text === 'false') return false
+    if (/^\d+$/.test(text)) return parseInt(text, 10)
+
+    const list = text
+      .replace(/^\[|\]$/g, '')
+      .split(',')
+      .map((item) => item.trim().replace(/^['"]|['"]$/g, ''))
+      .filter(Boolean)
+    return isValidProxyList(list) ? list : 'unset'
+  }
+
+  if (Array.isArray(value)) {
+    const list = value.map((item) => String(item).trim()).filter(Boolean)
+    return isValidProxyList(list) ? list : 'unset'
+  }
+
+  return 'unset'
+}
+
+function isValidProxyList(list) {
+  if (list.length === 0) return false
+  const keywords = ['loopback', 'linklocal', 'uniquelocal']
+  const ipv4 = /^\d{1,3}(\.\d{1,3}){3}(\/\d{1,2})?$/
+  const ipv6 = /^[0-9a-fA-F:]+(\/\d{1,3})?$/
+  return list.every((item) => keywords.includes(item) || ipv4.test(item) || ipv6.test(item))
+}
+
+/** @param {string} addr */
+function isPrivateAddress(addr) {
+  const ip = addr.replace(/^::ffff:/i, '')
+  if (ip === '::1' || ip === '127.0.0.1' || ip.startsWith('127.')) return true
+  if (ip.startsWith('10.') || ip.startsWith('192.168.')) return true
+  if (ip.startsWith('169.254.')) return true
+  const match = /^172\.(\d{1,3})\./.exec(ip)
+  if (match) {
+    const second = parseInt(match[1], 10)
+    if (second >= 16 && second <= 31) return true
+  }
+  if (/^f[cd][0-9a-f]{2}:/i.test(ip)) return true
+  return false
+}
+
+let trustProxyWarned = false
+
+/**
+ * 未配置 trustProxy，但请求看起来来自本机/内网反代 —— 说明大概率存在反代，
+ * 只是没告诉面板，此时所有访客会共用同一 IP 计数（不会被绕过，但会互相影响）。
+ * @param {import('express').Request} req
+ */
+function warnTrustProxyIfNeeded(req) {
+  if (trustProxy !== 'unset') return
+  if (!req.headers['x-forwarded-for'] && !req.headers['x-real-ip'] && !req.headers['cf-connecting-ip']) return
+  const socketAddr = req.socket?.remoteAddress || ''
+  if (!isPrivateAddress(socketAddr)) return
+  if (trustProxyWarned) return
+  trustProxyWarned = true
+  logger.warn(
+    logger.yellow(
+      '[魔族陌面版] 检测到请求经由反向代理（来源为内网地址且带转发头），但 trustProxy 未配置，' +
+        '登录限流会把所有访客算作同一个 IP。请按实际情况把 config/panel/config/login.yaml 的 trustProxy 设为 1 或 2。'
+    )
+  )
+}
+
+Redis.del('Mozu:panel:token').catch((err) => {
+  logger.warn(`[魔族陌面版] 清理旧登录令牌失败：${err?.message || err}`)
+})
 
 function buildLoggerRGB(message) {
   let index = 0

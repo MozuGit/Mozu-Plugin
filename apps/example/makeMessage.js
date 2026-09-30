@@ -115,8 +115,11 @@ export class MozuMakeMessage extends plugin {
     let text = match[2]
     let number = match[3] ? parseInt(match[3]) : Config.example.makeMessage.repeatCount || 10
     const QQListdata = await this.e.group.getMemberArray()
-    let userIds = QQListdata.map((member) => member.user_id)
-    let userNames = QQListdata.map((member) => member.nickname)
+    const whiteQQList = Config.example.makeMessage.whiteQQList || []
+    const availableMembers = QQListdata.filter((member) => !whiteQQList.includes(Number(member.user_id)))
+    if (availableMembers.length === 0) return false
+    let userIds = availableMembers.map((member) => member.user_id)
+    let userNames = availableMembers.map((member) => member.nickname)
     for (let i = 0; i < number; i++) {
       if (userIds.length === 0) break
       const randomIndex = Math.floor(Math.random() * userIds.length)

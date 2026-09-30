@@ -112,6 +112,19 @@
               </template>
             </a-input-password>
           </a-form-item>
+          <a-form-item v-if="resetTotpRequired" style="margin-bottom: 16px">
+            <a-input
+              v-model:value="resetForm.token"
+              placeholder="TOTP 动态验证码"
+              size="default"
+              maxlength="6"
+              autocomplete="one-time-code"
+            >
+              <template #prefix>
+                <SafetyCertificateOutlined />
+              </template>
+            </a-input>
+          </a-form-item>
           <a-form-item style="margin-bottom: 0">
             <a-button
               type="primary"
@@ -134,7 +147,7 @@
 import { reactive, ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { LockOutlined, SafetyOutlined, ArrowLeftOutlined } from '@ant-design/icons-vue'
+import { LockOutlined, SafetyOutlined, SafetyCertificateOutlined, ArrowLeftOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 
@@ -157,7 +170,11 @@ const totpRequired = ref(false)
 const resetForm = reactive({
   code: '',
   newPassword: '',
+  token: '',
 })
+
+// 启用 2FA 时，重置密码同样需要动态验证码（与登录一致）
+const resetTotpRequired = ref(false)
 
 function handleCodeInput(e) {
   let value = e.target.value
@@ -203,9 +220,12 @@ async function fetchTTL() {
       headers: { 'Content-Type': 'application/json' },
     })
     const data = await res.json()
-    if (data.success && data.ttl > 0) {
-      countdown.value = data.ttl
-      startCountdown()
+    if (data.success) {
+      resetTotpRequired.value = data.totpRequired === true
+      if (data.ttl > 0) {
+        countdown.value = data.ttl
+        startCountdown()
+      }
     }
   } catch (e) {}
 }
@@ -302,6 +322,10 @@ async function handleResetPassword() {
     message.error('密码不能少于6位')
     return
   }
+  if (resetTotpRequired.value && !resetForm.token) {
+    message.error('请输入 TOTP 动态验证码')
+    return
+  }
   resetting.value = true
   try {
     const hashedPassword = await hashSHA256(resetForm.newPassword)
@@ -311,6 +335,7 @@ async function handleResetPassword() {
       body: JSON.stringify({
         code: resetForm.code,
         newPassword: hashedPassword,
+        token: resetForm.token,
       }),
     })
     const data = await res.json()
@@ -318,6 +343,8 @@ async function handleResetPassword() {
       message.success('密码重置成功，请重新登录')
       closeResetPanel()
     } else {
+      // 后端要求 TOTP 时才显示输入框，兼容未启用 2FA 的情况
+      if (data.needTotp) resetTotpRequired.value = true
       message.error(data.message || '重置失败')
     }
   } catch (e) {

@@ -5,6 +5,7 @@ import { readdir, unlink } from 'node:fs/promises'
 
 import Redis from '#Redis'
 import Config from '#Config'
+import { getBearerToken, isTokenValid } from '../../lib/panelAuth.js'
 import { backupKeys, restoreKeys } from '../../scripts/backup.js'
 import { Version } from '../../model/Config/Version.js'
 
@@ -666,20 +667,12 @@ const deleteBackup = async (req, res) => {
 }
 
 async function validateToken(req) {
-  const authHeader = req?.headers?.authorization
-  if (!authHeader) {
+  const token = getBearerToken(req)
+  if (!token) {
     return { valid: false, error: '未登录，请先登录' }
   }
-  if (!authHeader.startsWith('Bearer ')) {
-    return { valid: false, error: 'token 格式错误' }
-  }
-  const token = authHeader.substring(7)
-  if (!token || token.length === 0) {
-    return { valid: false, error: 'token 为空' }
-  }
   try {
-    const presence = await Redis.sismember('Mozu:panel:token', token)
-    if (!presence) {
+    if (!(await isTokenValid(token))) {
       return { valid: false, error: 'token 无效或已过期' }
     }
     return { valid: true, token }
