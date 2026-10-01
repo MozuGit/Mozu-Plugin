@@ -48,20 +48,19 @@ export class MozuXiuxianHelp extends plugin {
 
 async function commands(commands) {
   let result = ''
-  let index = 0
+  let lineLength = 0
   for (const item of commands) {
     const cmd = await mqqapi.command(item)
-    if (
-      (index % 2 === 0 && index > 0) ||
-      item.length + commands[commands.length >= index ? index : index + 1].length >= 12
-    ) {
-      result += '\n'
+    if (result === '') {
+      result += cmd
+      lineLength = item.length
+    } else if (lineLength + 3 + item.length < 12) {
+      result += '  |  ' + cmd
+      lineLength += 3 + item.length
+    } else {
+      result += '\n' + cmd
+      lineLength = item.length
     }
-    result += cmd
-    index % 2 === 0 && item.length + commands[commands.length >= index ? index : index + 1].length < 12
-      ? (result += '  |  ')
-      : ''
-    index++
   }
   return result
 }

@@ -819,7 +819,7 @@ const rowSelection = computed(() => {
     return null
   }
   return {
-    selectedRowKeys: selectedRowKeys,
+    selectedRowKeys: selectedRowKeys.value,
     onChange: (keys) => {
       selectedRowKeys.value = keys
     },

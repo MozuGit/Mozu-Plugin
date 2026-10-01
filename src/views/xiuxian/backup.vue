@@ -123,7 +123,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { DeleteOutlined, SyncOutlined, CloudUploadOutlined, HistoryOutlined } from '@ant-design/icons-vue'
@@ -221,12 +221,12 @@ const columns = [
   },
 ]
 
-const rowSelection = {
-  selectedRowKeys: selectedRowKeys,
+const rowSelection = computed(() => ({
+  selectedRowKeys: selectedRowKeys.value,
   onChange: (keys) => {
     selectedRowKeys.value = keys
   },
-}
+}))
 
 const fetchBackupList = async (silent = false) => {
   if (!silent) {

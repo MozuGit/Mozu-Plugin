@@ -160,7 +160,7 @@ const saveConfig = async (req, res) => {
             })
           }
         } else {
-          Config.modify('xiuxian', key, xiuxianData.xiuxian[key])
+          Config.modify('xiuxian', 'xiuxian', key, xiuxianData.xiuxian[key])
         }
       })
     }
@@ -390,14 +390,15 @@ export const handlePlayer = async (req, res) => {
 
 const getPlayerList = async (req, res) => {
   try {
-    const { page } = req.query
-    const start = page * 10 + 1
+    const page = parseInt(req.query.page, 10)
+    const start = (Number.isInteger(page) && page > 0 ? page : 0) * 10 + 1
     const id = parseInt(await Redis.get('Mozu:xiuxian:openid:counter'), 10)
-    if (id < start) {
+    if (!Number.isInteger(id) || id < start) {
       return res.json({
         success: true,
         data: {
           players: [],
+          playerCount: Number.isInteger(id) ? id : 0,
         },
       })
     }
@@ -433,7 +434,7 @@ const modifyPlayer = async (req, res) => {
   try {
     const { id } = req.query
     if ((await Redis.exists(`Mozu:xiuxian:playerInfo:${id}`)) === 0) {
-      res.json({ success: false, message: '修仙玩家不存在' })
+      return res.json({ success: false, message: '修仙玩家不存在' })
     }
     const { cult, ls, realm, sex, titleIndex, titles, sroot } = req.body
     await Redis.hmset(`Mozu:xiuxian:playerInfo:${id}`, {

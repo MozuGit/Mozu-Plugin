@@ -706,18 +706,8 @@ export default new (class {
       }
     }
     const result = await Redis.zrange('Mozu:xiuxian:random:pvp', 0, -1, 'WITHSCORES')
-    const playerEntries = []
-    for (let i = 0; i < result.length; i += 2) {
-      if (parseInt(result[i], 10) !== id) {
-        playerEntries.push([parseInt(result[i], 10), parseInt(result[i + 1], 10)])
-      }
-    }
-    if (!playerEntries.length) {
-      return {
-        event: 'player_lack',
-      }
-    }
     const self_power = await this.getPower(id)
+    const playerEntries = []
     for (let i = 0; i < result.length; i += 2) {
       if (parseInt(result[i], 10) !== id) {
         playerEntries.push(parseInt(result[i], 10))
@@ -884,9 +874,9 @@ export default new (class {
       case '修为':
       case '灵石':
         for (let i = 1; i <= idNum; i++) {
-          const value = parseInt(results[i][1][0], 10)
-          const titleIndex = parseInt(results[i][1][1], 10) || 0
-          const titles = JSON.parse(results[i][1][2] || '[]')
+          const value = parseInt(results[i - 1][1][0], 10)
+          const titleIndex = parseInt(results[i - 1][1][1], 10) || 0
+          const titles = JSON.parse(results[i - 1][1][2] || '[]')
           const title =
             titleIndex !== -1
               ? titles[titleIndex - 1]?.title
@@ -909,18 +899,18 @@ export default new (class {
       case '战力':
         const artsMap = new Map(Config.xiuxian.drop.arts.map((art) => [art.id, art]))
         for (let i = 1; i <= idNum; i++) {
-          const cult = parseInt(results[i][1][0], 10)
-          const realm = parseInt(results[i][1][1], 10) || 0.75
-          const arts = JSON.parse(results[i][1][4] || '[]')
+          const cult = parseInt(results[i - 1][1][0], 10)
+          const realm = parseInt(results[i - 1][1][1], 10) || 0.75
+          const arts = JSON.parse(results[i - 1][1][4] || '[]')
           const addition =
             arts.reduce((addition, id) => {
               const art = artsMap.get(id)
               return addition + (art ? art.addition : 0)
-            }, 0) + (Config.xiuxian.sroot.sroot.find((s) => s.id == results[i][1][5])?.addition || 0)
+            }, 0) + (Config.xiuxian.sroot.sroot.find((s) => s.id == results[i - 1][1][5])?.addition || 0)
           const power = Math.floor(evaluate(Config.xiuxian.xiuxian.powerFormula, { cult: cult, realm: realm }))
           const value = Math.floor(power + power * (addition / 100))
-          const titleIndex = parseInt(results[i][1][2], 10) || 0
-          const titles = JSON.parse(results[i][1][3] || '[]')
+          const titleIndex = parseInt(results[i - 1][1][2], 10) || 0
+          const titles = JSON.parse(results[i - 1][1][3] || '[]')
           const title =
             titleIndex !== -1
               ? titles[titleIndex - 1]?.title
@@ -943,9 +933,9 @@ export default new (class {
       case '闭关':
         const time = Math.floor(Date.now() / 1000)
         for (let i = 1; i <= idNum; i++) {
-          const retreat = parseInt(results[i][1][0], 10)
-          const titleIndex = parseInt(results[i][1][1], 10) || 0
-          const titles = JSON.parse(results[i][1][2] || '[]')
+          const retreat = parseInt(results[i - 1][1][0], 10)
+          const titleIndex = parseInt(results[i - 1][1][1], 10) || 0
+          const titles = JSON.parse(results[i - 1][1][2] || '[]')
           const title =
             titleIndex !== -1
               ? titles[titleIndex - 1]?.title
@@ -969,9 +959,9 @@ export default new (class {
       case '签到':
       case '切磋':
         for (let i = 1; i <= idNum; i++) {
-          const value = parseInt(results[i][1][0], 10)
-          const titleIndex = parseInt(results[i][1][1], 10) || 0
-          const titles = JSON.parse(results[i][1][2] || '[]')
+          const value = parseInt(results[i - 1][1][0], 10)
+          const titleIndex = parseInt(results[i - 1][1][1], 10) || 0
+          const titles = JSON.parse(results[i - 1][1][2] || '[]')
           const title =
             titleIndex !== -1
               ? titles[titleIndex - 1]?.title
