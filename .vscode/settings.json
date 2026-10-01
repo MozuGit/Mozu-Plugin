@@ -1,4 +1,5 @@
 {
   "prettier.prettierPath": "./node_modules/prettier",
-  "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "files.eol": "\n"
 }
