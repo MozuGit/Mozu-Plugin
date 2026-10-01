@@ -81,6 +81,12 @@ async function backupKeys(pattern, outputFile) {
     return null
   }
 
+  try {
+    fs.mkdirSync(path.dirname(outputFile), { recursive: true })
+  } catch (err) {
+    return false
+  }
+
   const target = new JsonArrayFileWritable(outputFile)
 
   const getValueByType = async (key, type) => {

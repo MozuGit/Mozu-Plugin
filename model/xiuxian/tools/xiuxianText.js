@@ -158,7 +158,7 @@ const commandHandlers = {
         '**战力：' + userInfo.power + '**',
         '>**' + (await mqqapi.command('境界：' + userInfo.realm.realmName, '突破', true)) + '**',
         '**' + (await mqqapi.command('修为：' + userInfo.cult, '修炼', true)) + '**',
-        '**' + (await mqqapi.command('灵石：' + userInfo.ls, '修炼', true)) + '**',
+        '**' + (await mqqapi.command('灵石：' + userInfo.ls, '开采', true)) + '**',
         '***',
         '>灵根：' + (userInfo.sroot?.name || '无'),
         '灵根加成：' + (userInfo.sroot?.addition || 0) + ' %',
@@ -568,6 +568,9 @@ const commandHandlers = {
             '***',
           ].join('\n')
         )
+        break
+      case 'in_retreat':
+        Text.push(await retreatText())
         break
     }
     Text.push(Button.sroot)
@@ -999,7 +1002,7 @@ const prefixHandlers = [
             ].join('\n')
           )
           break
-        case 'lack_cult':
+        case 'cult_back':
           Text.push(
             [
               '<@' + user_id + '>',
@@ -1167,7 +1170,7 @@ const prefixHandlers = [
             ...(await buildUserInfo(userInfo)),
             '***',
             '**战力：' + userInfo.power + '**',
-            '>**' + (await mqqapi.command('境界：' + userInfo.realm.realmName)) + '**',
+            '>**' + (await mqqapi.command('境界：' + userInfo.realm.realmName, '突破', true)) + '**',
             '**' + (await mqqapi.command('修为：' + userInfo.cult, '修炼', true)) + '**',
             '**' + (await mqqapi.command('灵石：' + userInfo.ls, '开采', true)) + '**',
             '***',
@@ -1781,7 +1784,7 @@ const prefixHandlers = [
           srootText.push(
             [
               '>【' + srootLevel.get(sroot.level) + '】',
-              '>灵根：' + (sroot.level === 'mozumo' ? laTex.colorize(sroot.name, false, ['purple']) : sroot.name),
+              '>灵根：' + (sroot.level === 'mozumo' ? (await laTex.colorize(sroot.name, false, ['purple'])) : sroot.name),
               '加成：' + sroot.addition + ' %',
               await mqqapi.command('[点击替换]', '替换灵根' + index++, true),
               '***',
@@ -1913,11 +1916,13 @@ const prefixHandlers = [
       if (at && !Array.isArray(at) && !_id) {
         const atID = (await xiuxian.init(at)).data.id
         userInfo = await xiuxian.getUserInfo(atID)
+      } else if (!_id) {
+        query_id = -1
       } else {
         query_id = parseInt(_id, 10)
       }
-      const sectInfo = query_id ? await xiuxian.getSectInfo(query_id) : userInfo.sectInfo
-      if (sectInfo.id !== 0) {
+      const sectInfo = query_id ? await xiuxian.getSectInfo(query_id) : userInfo?.sectInfo
+      if (sectInfo && sectInfo.id !== 0) {
         Text.push(
           [
             '<@' + user_id + '>',
@@ -2170,10 +2175,7 @@ const prefixHandlers = [
               '<@' + user_id + '>',
               '***',
               '**宗门人数已满**',
-              '>请先' +
-                (await mqqapi.command('升级宗门', '升级宗门', true)) +
-                '或' +
-                (await mqqapi.command('移除玩家', '踢出宗门')),
+              '>请先' + (await mqqapi.command('升级宗门', '宗门升级', true)) + '提升人数上限',
               '***',
             ].join('\n')
           )

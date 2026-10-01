@@ -164,7 +164,7 @@ const saveConfig = async (req, res) => {
         }
       })
     }
-    if (xiuxianData.realm) {
+    if (xiuxianData.Realm) {
       Config.modify('xiuxian', 'Realm', 'Realms', xiuxianData.realm)
     }
     if (xiuxianData.drop) {
@@ -633,9 +633,7 @@ const restoreBackup = async (req, res) => {
 const Backup = async (req, res) => {
   try {
     const { filename } = req.query
-    const rawName = typeof filename === 'string' ? filename.trim() : ''
-    const base = rawName ? path.basename(rawName) : ''
-    const fileName = base && base !== '.' && base !== '..' ? base + '.json' : formatTime(Date.now()) + '.json'
+    const fileName = safeBackupName(filename, formatTime(Date.now()) + '.json')
     const filePath = path.join(Version.Plugin_Path, 'backup', 'xiuxian', fileName)
     await backupKeys('Mozu:xiuxian:*', filePath)
     res.json({ success: true, data: { filename: fileName.replace(/\.json$/, '') } })
@@ -693,7 +691,7 @@ function gettoday(num = 0) {
 }
 
 /**
- * 时间戳转 2026-01-01_08:00 格式
+ * 时间戳转 2026-01-01_08-00 格式
  * @param {number} timestamp 秒级/毫秒级时间戳自动兼容
  * @returns {string} 格式化时间
  */
@@ -707,5 +705,14 @@ function formatTime(timestamp) {
   const h = String(d.getHours()).padStart(2, '0')
   const m = String(d.getMinutes()).padStart(2, '0')
 
-  return `${year}-${month}-${day}_${h}:${m}`
+  return `${year}-${month}-${day}_${h}-${m}`
+}
+
+function safeBackupName(name, fallback) {
+  const base = path
+    .basename(String(name ?? '').trim())
+    .replace(/[:*?"<>|\\/\u0000-\u001f]/g, '-')
+    .replace(/[. ]+$/, '')
+  if (!base) return fallback
+  return base.endsWith('.json') ? base : base + '.json'
 }

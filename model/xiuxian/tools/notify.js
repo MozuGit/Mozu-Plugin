@@ -1,5 +1,4 @@
 import Config from '#Config'
-import Button from '../button.js'
 import { mqqapi } from '../../../lib/protocol.js'
 
 const prefix = Config.xiuxian.setting.forceSharp ? '/' : ''
@@ -7,15 +6,9 @@ const prefix = Config.xiuxian.setting.forceSharp ? '/' : ''
 export default new (class {
   async sectAuditName(sectId, sectName, isAI = false) {
     if (!Config?.masterQQ?.length) return
-    let BotList = []
-    if (Array.isArray(Bot.uin)) {
-      BotList.push(Bot.uin)
-    } else {
-      for (const id of Bot.uin) {
-        if (Bot[id]?.adapter?.name === 'QQBot') BotList.push(id)
-      }
-    }
-    const masterQQ = Config.masterQQ.splice(Config.masterQQ.indexOf('stdin'), Config.masterQQ.includes('stdin') ? 1 : 0)
+    const uins = Array.isArray(Bot.uin) ? Bot.uin : [Bot.uin]
+    const BotList = uins.filter((botid) => Bot[botid]?.adapter?.name === 'QQBot')
+    const masterQQ = Config.masterQQ.filter((master) => master !== 'stdin')
     let message
     if (isAI) {
       message = [
@@ -41,7 +34,7 @@ export default new (class {
       ].join('\n')
     }
     for (const botid of BotList) {
-      for (const master of Config.masterQQ) {
+      for (const master of masterQQ) {
         try {
           Bot[botid]?.pickFriend(master.replace(botid + ':', '')).sendMsg([
             message,
@@ -60,15 +53,9 @@ export default new (class {
 
   async sectAuditDesc(sectId, sectDesc, isAI = false) {
     if (!Config?.masterQQ?.length) return
-    let BotList = []
-    if (Array.isArray(Bot.uin)) {
-      BotList.push(Bot.uin)
-    } else {
-      for (const id of Bot.uin) {
-        if (Bot[id]?.adapter?.name === 'QQBot') BotList.push(id)
-      }
-    }
-    const masterQQ = Config.masterQQ.splice(Config.masterQQ.indexOf('stdin'), Config.masterQQ.includes('stdin') ? 1 : 0)
+    const uins = Array.isArray(Bot.uin) ? Bot.uin : [Bot.uin]
+    const BotList = uins.filter((botid) => Bot[botid]?.adapter?.name === 'QQBot')
+    const masterQQ = Config.masterQQ.filter((master) => master !== 'stdin')
     let message
     if (isAI) {
       message = [
@@ -94,7 +81,7 @@ export default new (class {
       ].join('\n')
     }
     for (const botid of BotList) {
-      for (const master of Config.masterQQ) {
+      for (const master of masterQQ) {
         try {
           Bot[botid]?.pickFriend(master.replace(botid + ':', '')).sendMsg([
             message,

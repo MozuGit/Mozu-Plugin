@@ -40,7 +40,7 @@ export class MozuXiuxianBackup extends plugin {
     const match = this.e.msg.match(/#?(?:魔族陌)?修仙备份(?:还原)?(.*)$/)
     const raw = match?.[1]?.trim()
     if (this.e.msg.includes('还原')) {
-      const fileName = raw.endsWith('.json') ? raw : raw + '.json'
+      const fileName = raw ? safeBackupName(raw) : '.json'
       const filePath = path.join(Version.Plugin_Path, 'backup', 'xiuxian', fileName)
       if (fs.existsSync(filePath)) {
         const result = await restoreKeys(filePath, {
@@ -81,7 +81,7 @@ export class MozuXiuxianBackup extends plugin {
       }
     } else {
       const fileTime = formatTime(Date.now())
-      const fileName = raw ? (raw.endsWith('.json') ? raw : raw + '.json') : fileTime + '.json'
+      const fileName = raw ? safeBackupName(raw) : fileTime + '.json'
       const filePath = path.join(Version.Plugin_Path, 'backup', 'xiuxian', fileName)
       const result = await backupKeys('Mozu:xiuxian:*', filePath)
       const message = [
@@ -125,7 +125,7 @@ export class MozuXiuxianBackup extends plugin {
 }
 
 /**
- * 时间戳转 2026-01-01_08:00 格式
+ * 时间戳转 2026-01-01_08-00 格式
  * @param {number} timestamp 秒级/毫秒级时间戳自动兼容
  * @returns {string} 格式化时间
  */
@@ -139,5 +139,13 @@ function formatTime(timestamp) {
   const h = String(d.getHours()).padStart(2, '0')
   const m = String(d.getMinutes()).padStart(2, '0')
 
-  return `${year}-${month}-${day}_${h}:${m}`
+  return `${year}-${month}-${day}_${h}-${m}`
+}
+
+function safeBackupName(name) {
+  const base = path
+    .basename(String(name ?? '').trim())
+    .replace(/[:*?"<>|\\/\u0000-\u001f]/g, '-')
+    .replace(/[. ]+$/, '')
+  return base.endsWith('.json') ? base : base + '.json'
 }

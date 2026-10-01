@@ -20,7 +20,7 @@ export default [
     field: 'example.like.targets',
     label: '点赞目标',
     bottomHelpMessage: '机器人定时点赞的目标QQ',
-    component: 'GSelectGroup',
+    component: 'GSelectFriend',
   },
   {
     field: 'example.like.batchCount',

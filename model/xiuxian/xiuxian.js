@@ -833,7 +833,7 @@ export default new (class {
         winner: isSelfWin,
         self_power,
         random_id: selectedPlayer.id,
-        random_power: randomPlayer[1],
+        random_power: selectedPlayer.score,
         cultAddSelf,
         cultAddRandom,
         finalWinRate,
@@ -1206,7 +1206,7 @@ export default new (class {
             return {
               event: 'lack_pill_count',
               data: {
-                pill: pillInfo,
+                pill: { ...pillInfo, count: pill.count },
               },
             }
           }
@@ -1281,7 +1281,7 @@ export default new (class {
             return {
               event: 'lack_pill_count',
               data: {
-                pill: pillInfo,
+                pill: { ...pillInfo, count: pill.count },
               },
             }
           }
@@ -1314,7 +1314,7 @@ export default new (class {
       let learnArts = []
       let learnArtsIns = []
       let deduct_cult = 0
-      for (const art of artsData) {
+      for (const art of [...artsData]) {
         if (arts.has(art.id)) {
           haslearnArts.push(art.id)
         } else {
@@ -1462,7 +1462,7 @@ export default new (class {
             return {
               event: 'lack_art_count',
               data: {
-                art: artInfo,
+                art: { ...artInfo, count: art.count },
               },
             }
           }
@@ -2510,7 +2510,7 @@ export default new (class {
     let [titles, title] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '称号列表', '称号')
     titles = JSON.parse(titles || '[]')
     titleIndex = parseInt(titleIndex, 10)
-    if (titleIndex < 1 || titleIndex > titles.length) {
+    if (!Number.isInteger(titleIndex) || titleIndex < 1 || titleIndex > titles.length) {
       return {
         event: 'invalid_title',
       }
