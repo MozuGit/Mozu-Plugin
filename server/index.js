@@ -32,6 +32,7 @@ const RGB = [
   [255, 107, 200],
 ]
 
+const remoteIp = await getRemoteIp()
 const PORT = Number(Config.panel.login.port) || 11451
 
 if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
@@ -40,7 +41,7 @@ if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
   const server = app.listen(PORT, '0.0.0.0', () => {
     logger.info(buildLoggerRGB('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'))
     logger.info(buildLoggerRGB('┃ [魔族陌] 启动成功喵~'))
-    logger.info(buildLoggerRGB(`┃ 外网地址：http://${Config.panel.login.host}:${PORT}`))
+    logger.info(buildLoggerRGB(`┃ 外网地址：http://${remoteIp}:${PORT}`))
     logger.info(buildLoggerRGB(`┃ 本地地址：http://127.0.0.1:${PORT}`))
     logger.info(buildLoggerRGB('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'))
   })
@@ -58,6 +59,31 @@ if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
     logger.error(`[魔族陌面版] ${tips[err.code] || err.message}`)
     logger.error(`[魔族陌面版] 面版已禁用，机器人其它功能不受影响`)
   })
+}
+
+/**
+ * 打印外网访问地址
+ * @param {number} port
+ */
+async function printRemoteAddress(port) {
+  try {
+    if (Config.panel.login.host !== 'auto') {
+      
+      return
+    }
+    const remoteIp = await getRemoteIp()
+    logger.info(buildLoggerRGB(`┃ 外网地址：http://${remoteIp || 'localhost'}:${port}`))
+    if (trustProxy === 'unset' && remoteIp) {
+      logger.warn(
+        logger.yellow(
+          '[魔族陌面版] 未配置 trustProxy。若面板前面有 nginx / CDN / ESA 等反代，' +
+            '登录限流会把所有访客算作同一个 IP；请把 config/panel/config/login.yaml 的 trustProxy 设为 1（一层反代）或 2（CDN+反代）。'
+        )
+      )
+    }
+  } catch (err) {
+    logger.warn(`[魔族陌面版] 获取外网地址失败：${err?.message || err}`)
+  }
 }
 
 /**
@@ -172,4 +198,32 @@ function withTimeout(promise, ms, message) {
       timer = setTimeout(() => reject(new Error(message)), ms)
     }),
   ])
+}
+
+async function getRemoteIp() {
+  let cacheData
+  try {
+    cacheData = await withTimeout(Redis.get('Mozu:remote-ip'), 3000, 'Redis 查询超时')
+  } catch (err) {
+    logger.warn(`[魔族陌面版] 读取缓存外网地址失败：${err?.message || err}`)
+    return false
+  }
+  if (cacheData) return cacheData
+  let apis = ['http://v4.ip.zxinc.org/info.php?type=json']
+  for (let api of apis) {
+    let response
+    try {
+      response = await withTimeout(fetch(api), 5000, '获取外网 IP 超时')
+    } catch {
+      continue
+    }
+    if (response.status === 200) {
+      let { code, data } = await response.json()
+      if (code === 0) {
+        Redis.set('Mozu:remote-ip', data.myip, 'EX', 3600 * 24)
+        return data.myip
+      }
+    }
+  }
+  return false
 }
