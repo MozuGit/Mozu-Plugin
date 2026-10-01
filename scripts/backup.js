@@ -1,3 +1,5 @@
+import path from 'node:path'
+
 import Redis from '#Redis'
 import fs from 'node:fs'
 import { Writable } from 'node:stream'
@@ -84,6 +86,7 @@ async function backupKeys(pattern, outputFile) {
   try {
     fs.mkdirSync(path.dirname(outputFile), { recursive: true })
   } catch (err) {
+    logger.error(`[Mozu-Plugin][备份] 创建备份目录失败：${path.dirname(outputFile)} —— ${err?.message || err}`)
     return false
   }
 

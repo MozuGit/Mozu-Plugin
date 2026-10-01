@@ -1784,7 +1784,7 @@ const prefixHandlers = [
           srootText.push(
             [
               '>【' + srootLevel.get(sroot.level) + '】',
-              '>灵根：' + (sroot.level === 'mozumo' ? (await laTex.colorize(sroot.name, false, ['purple'])) : sroot.name),
+              '>灵根：' + (sroot.level === 'mozumo' ? await laTex.colorize(sroot.name, false, ['purple']) : sroot.name),
               '加成：' + sroot.addition + ' %',
               await mqqapi.command('[点击替换]', '替换灵根' + index++, true),
               '***',

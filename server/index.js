@@ -68,7 +68,6 @@ if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
 async function printRemoteAddress(port) {
   try {
     if (Config.panel.login.host !== 'auto') {
-      
       return
     }
     const remoteIp = await getRemoteIp()
