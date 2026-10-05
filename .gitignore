@@ -11,3 +11,7 @@ pnpm-workspace.yaml
 
 # 备份文件
 /backup/xiuxian/*
+
+# 群管功能（还没做完先不上传）
+/apps/groupAdmin/*
+/model/groupAdmin/*
