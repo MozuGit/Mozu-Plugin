@@ -81,7 +81,7 @@ pnpm install
 - QQBot适配器更新有点慢
 - 所以我看看能不能自己加点API接口（只加了一点点）
 - 需要去锅巴面版自行开启接口功能（默认关闭）
-- 参考文档：[QQ机器人官方文档](https://bot.q.qq.com/wiki/develop/api-v2/autogen/api/v2_groups_group_openid_info.get.html)
+- 参考文档：[QQ机器人官方文档](https://bot.q.qq.com/wiki/develop/api-v2/autogen/)
 
 ## 联系方式
 

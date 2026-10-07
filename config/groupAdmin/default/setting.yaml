@@ -1,0 +1,5 @@
+# 启用群管
+enable: false
+
+# 群管优先级
+priority: 100
