@@ -4,7 +4,7 @@ export default new (class {
   async groupInfo(bot, group_id) {
     let result = null
     try {
-      result = await bot.sdk.request.get(`/v2/groups/${group_id}/info`)
+      result = await bot.sdk.request.get(`/v2/groups/${group_id.replace(bot.uin + ':', '')}/info`)
     } catch (err) {
       logger.error('[魔族陌][Interface] ' + err)
     }
@@ -14,7 +14,7 @@ export default new (class {
   async getGroupBotState(bot, group_id) {
     let result = null
     try {
-      result = await bot.sdk.request.get(`/v2/groups/${group_id}/bot_state`)
+      result = await bot.sdk.request.get(`/v2/groups/${group_id.replace(bot.uin + ':', '')}/bot_state`)
     } catch (err) {
       logger.error('[魔族陌][Interface] ' + err)
     }
@@ -23,7 +23,7 @@ export default new (class {
 
   async getGroupJoinList(bot, group_id) {
     try {
-      const { result } = await bot.sdk.request.get(`/v2/groups/${group_id}/join_request_list`)
+      const { result } = await bot.sdk.request.get(`/v2/groups/${group_id.replace(bot.uin + ':', '')}/join_request_list`)
       return result
     } catch (err) {
       return { list: [], next_cursor: '' }
@@ -53,7 +53,9 @@ export default new (class {
     for (let i = 0; i < all.length; i += 20) {
       const members = all.slice(i, i + 20).map(buildMember)
       try {
-        await bot.sdk.request.post(`/v2/groups/${group_id}/restrict_chat_setting`, { members })
+        await bot.sdk.request.post(`/v2/groups/${group_id.replace(bot.uin + ':', '')}/restrict_chat_setting`, {
+          members,
+        })
       } catch (err) {
         return false
       }

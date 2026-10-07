@@ -1,0 +1,5 @@
+# 天选之人开关
+enable: true
+
+# 启用发起人增加被选中的概率
+self_add_rate: true

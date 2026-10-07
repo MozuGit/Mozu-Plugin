@@ -12,9 +12,10 @@ import panel from './panel.js'
 import xiuxian from './xiuxian.js'
 import makeMessage from './makeMessage.js'
 import fayan from './fayan.js'
+import like from './like.js'
+import whois from './whois.js'
 import openai from './openai.js'
 import _interface from './interface.js'
-import like from './like.js'
 
 export const schemas = [
   ...RedisConfig,
@@ -23,6 +24,7 @@ export const schemas = [
   ...makeMessage,
   ...fayan,
   ...like,
+  ...whois,
   ...openai,
   ..._interface,
 ]
@@ -69,6 +71,7 @@ export function setConfigData(data, { Result }) {
     { dir: 'example', file: 'makeMessage', data: nested.example.makeMessage },
     { dir: 'example', file: 'fayan', data: nested.example.fayan },
     { dir: 'example', file: 'like', data: nested.example.like },
+    { dir: 'example', file: 'whois', data: nested.example.whois },
     { dir: 'panel', file: 'login', data: nested.panel.login },
   ])
   handleXiuxianConfig(nested.xiuxian)
