@@ -23,7 +23,9 @@ export default new (class {
 
   async getGroupJoinList(bot, group_id) {
     try {
-      const { result } = await bot.sdk.request.get(`/v2/groups/${group_id.replace(bot.uin + ':', '')}/join_request_list`)
+      const { result } = await bot.sdk.request.get(
+        `/v2/groups/${group_id.replace(bot.uin + ':', '')}/join_request_list`
+      )
       return result
     } catch (err) {
       return { list: [], next_cursor: '' }

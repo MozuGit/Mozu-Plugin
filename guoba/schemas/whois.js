@@ -12,6 +12,6 @@ export default [
     field: 'example.whois.self_add_rate',
     label: '发起人概率',
     helpMessage: '发起人增加被选中的概率',
-    component: 'Switch'
-  }
+    component: 'Switch',
+  },
 ]
