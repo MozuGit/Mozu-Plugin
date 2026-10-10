@@ -977,7 +977,7 @@ const prefixHandlers = [
     },
   },
   {
-    prefix: /^#?切磋\s*\d+/,
+    prefix: /^#?切磋\s*\d*/,
     handler: async (id, user_id, Text, msg, at, isMaster) => {
       let id2 = 0
       const _id = (msg.match(/\d+/g) || []).join('')
@@ -1083,7 +1083,7 @@ const prefixHandlers = [
     },
   },
   {
-    prefix: /^#?(随机)?切磋$/,
+    prefix: /^#?随机切磋$/,
     handler: async (id, user_id, Text, msg, at, isMaster) => {
       const value = await xiuxian.pvpRandom(id, isMaster)
       switch (value.event) {
