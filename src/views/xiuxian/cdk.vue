@@ -1200,20 +1200,12 @@ onUnmounted(() => {
 .toolbar {
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--lg-hairline);
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-}
-
-.update-hint {
-  color: #1677ff;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
 
 .cdk-table {
@@ -1460,60 +1452,28 @@ onUnmounted(() => {
 :deep(.ant-table-tbody > tr > td:last-child) {
   position: sticky;
   right: 0;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.78);
+  -webkit-backdrop-filter: blur(var(--lg-blur-soft));
+  backdrop-filter: blur(var(--lg-blur-soft));
   z-index: 2;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.06);
+  box-shadow: -2px 0 12px rgba(39, 52, 105, 0.08);
 }
 
 :deep(.ant-table-thead > tr > th:last-child) {
   z-index: 3;
+  background: rgba(255, 255, 255, 0.86);
 }
 
 :deep(.ant-table-tbody > tr:hover > td:last-child) {
-  background: #fafafa;
+  background: rgba(var(--lg-aurora-cyan), 0.24);
 }
 
 :deep(.ant-table-row-selected > td:last-child) {
-  background: #e6f7ff;
+  background: rgba(var(--lg-aurora-violet), 0.26);
 }
 
 :deep(.ant-table-row-selected:hover > td:last-child) {
-  background: #dcebf8;
-}
-
-.fade-in-card {
-  animation: slideInFromLeft 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  opacity: 0;
-  transform: translateX(-30px);
-}
-
-@keyframes slideInFromLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-:deep(.ant-card) {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition:
-    box-shadow 0.3s ease,
-    transform 0.3s ease;
-}
-
-:deep(.ant-card:hover) {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
-
-:deep(.ant-table-wrapper) {
-  overflow-x: auto;
+  background: rgba(var(--lg-aurora-violet), 0.34);
 }
 
 :deep(.ant-tag) {

@@ -381,17 +381,21 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   padding: 6px 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--lg-brand-gradient);
   color: white;
   border-radius: 20px;
   font-size: 14px;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 2px 12px rgba(102, 126, 234, 0.34);
   transition: all 0.3s ease;
 }
 
 .sect-count-badge:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 6px 20px rgba(102, 126, 234, 0.5);
 }
 
 .count-number {
@@ -409,14 +413,6 @@ onUnmounted(() => {
   justify-content: flex-end;
 }
 
-.update-hint {
-  color: #1677ff;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
 .update-hint-placeholder {
   height: 20px;
 }
@@ -431,37 +427,6 @@ onUnmounted(() => {
 
 :deep(.ant-table) {
   min-width: 900px;
-}
-
-.fade-in-card {
-  animation: slideInFromLeft 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  opacity: 0;
-  transform: translateX(-30px);
-}
-
-@keyframes slideInFromLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-:deep(.ant-card) {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition:
-    box-shadow 0.3s ease,
-    transform 0.3s ease;
-}
-
-:deep(.ant-card:hover) {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
 }
 
 :deep(.ant-modal-body) {

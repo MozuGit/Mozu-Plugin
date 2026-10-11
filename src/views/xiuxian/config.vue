@@ -1389,13 +1389,13 @@ onMounted(async () => {
   align-items: center;
   margin-bottom: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--lg-hairline);
 }
 
 .card-title {
   font-size: 18px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--lg-text);
 }
 
 .header-actions {
@@ -1404,7 +1404,7 @@ onMounted(async () => {
 }
 
 .save-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--lg-brand-gradient);
   border: none;
 }
 
@@ -1440,16 +1440,16 @@ onMounted(async () => {
 .config-item {
   margin-bottom: 8px;
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: var(--lg-radius-sm);
   transition: background 0.2s ease;
 }
 
 .config-item:hover {
-  background: #fafafa;
+  background: rgba(255, 255, 255, 0.42);
 }
 
 .config-help {
-  color: #999;
+  color: var(--lg-text-muted);
   font-size: 12px;
   margin-top: 4px;
   margin-left: 4px;
@@ -1463,10 +1463,11 @@ onMounted(async () => {
   display: inline-block;
   min-width: 180px;
   min-height: 60px;
-  border: 1px solid #d9d9d9;
-  border-radius: 8px;
+  border: 1px solid var(--lg-border-soft);
+  border-radius: var(--lg-radius-sm);
   padding: 12px 36px 12px 16px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
@@ -1477,8 +1478,11 @@ onMounted(async () => {
 }
 
 .subform-card:hover {
-  border-color: #667eea;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+  border-color: var(--lg-brand);
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 4px 16px rgba(102, 126, 234, 0.24);
   transform: translateY(-2px);
 }
 
@@ -1496,13 +1500,13 @@ onMounted(async () => {
 .count-number {
   font-size: 24px;
   font-weight: 600;
-  color: #667eea;
+  color: var(--lg-brand);
   line-height: 1;
 }
 
 .count-text {
   font-size: 14px;
-  color: #999;
+  color: var(--lg-text-muted);
   margin-left: 4px;
 }
 
@@ -1515,26 +1519,26 @@ onMounted(async () => {
 }
 
 .preview-label {
-  color: #666;
+  color: var(--lg-text-secondary);
   margin-right: 8px;
   flex-shrink: 0;
 }
 
 .preview-value {
-  color: #333;
+  color: var(--lg-text);
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 200px;
 }
 
 .preview-more {
-  color: #999;
+  color: var(--lg-text-muted);
   font-size: 12px;
   margin-top: 4px;
 }
 
 .card-empty {
-  color: #bbb;
+  color: var(--lg-text-muted);
   font-size: 14px;
   text-align: center;
   padding: 12px 0;
@@ -1545,7 +1549,7 @@ onMounted(async () => {
   top: 8px;
   right: 12px;
   font-size: 12px;
-  color: #bbb;
+  color: var(--lg-text-muted);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -1553,7 +1557,7 @@ onMounted(async () => {
 }
 
 .subform-card:hover .card-hint {
-  color: #667eea;
+  color: var(--lg-brand);
 }
 
 .sub-form {
@@ -1590,17 +1594,20 @@ onMounted(async () => {
 }
 
 .array-item-card {
-  background: #fafafa;
-  border: 1px solid #e8e8e8;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid var(--lg-border-soft);
+  border-radius: var(--lg-radius-sm);
   margin-bottom: 12px;
   padding: 16px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
   transition: all 0.3s ease;
 }
 
 .array-item-card:hover {
-  border-color: #667eea;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+  border-color: var(--lg-brand);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 2px 12px rgba(102, 126, 234, 0.2);
 }
 
 .array-item-header {
@@ -1609,12 +1616,12 @@ onMounted(async () => {
   align-items: center;
   margin-bottom: 12px;
   padding-bottom: 8px;
-  border-bottom: 1px dashed #e8e8e8;
+  border-bottom: 1px dashed var(--lg-hairline);
 }
 
 .array-item-title {
   font-weight: 600;
-  color: #333;
+  color: var(--lg-text);
   font-size: 14px;
 }
 
@@ -1628,18 +1635,19 @@ onMounted(async () => {
   padding: 4px 0;
 }
 
+/* 模态框底部操作条：原来是实心白，会盖住模态框的玻璃 */
 .array-footer {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   padding: 16px 4px 4px;
-  border-top: 1px solid #f0f0f0;
-  background: #fff;
+  border-top: 1px solid var(--lg-hairline);
+  background: transparent;
   flex-shrink: 0;
 }
 
 .array-add-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--lg-brand-gradient);
   border: none;
 }
 
@@ -1647,53 +1655,22 @@ onMounted(async () => {
   opacity: 0.9;
 }
 
-:deep(.ant-card) {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition:
-    box-shadow 0.3s ease,
-    transform 0.3s ease;
-}
-
-:deep(.ant-card:hover) {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
-
 :deep(.ant-form-item-label > label) {
   font-weight: 500;
 }
 
 :deep(.ant-form-item-extra) {
-  color: #1890ff;
+  color: #3b6fd4;
   font-size: 12px;
 }
 
 :deep(.ant-form-item-help) {
-  color: #999;
+  color: var(--lg-text-muted);
   font-size: 12px;
 }
 
 :deep(.ant-divider) {
   margin: 16px 0;
-}
-
-.fade-in-card {
-  animation: slideInFromLeft 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  opacity: 0;
-  transform: translateX(-30px);
-}
-
-@keyframes slideInFromLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
 }
 
 @media (max-width: 768px) {

@@ -27,7 +27,10 @@
     <!-- 右侧登录/重置面板容器 -->
     <div class="right-panel-wrapper">
       <!-- 登录卡片 -->
-      <div class="login-box" :class="{ 'fade-out': showResetPanel }">
+      <div
+        class="login-box lg-glass lg-glass--strong lg-glass__sheen lg-refract"
+        :class="{ 'fade-out': showResetPanel }"
+      >
         <h1>魔族陌登录</h1>
         <a-form ref="formRef" :model="form" @finish="handleLogin">
           <a-form-item style="margin-bottom: 0">
@@ -64,7 +67,10 @@
       </div>
 
       <!-- 重置密码卡片 -->
-      <div class="login-box reset-panel" :class="{ 'slide-in-right': showResetPanel }">
+      <div
+        class="login-box reset-panel lg-glass lg-glass--strong lg-glass__sheen lg-refract"
+        :class="{ 'slide-in-right': showResetPanel }"
+      >
         <!-- 使用相对定位容器，让标题绝对居中 -->
         <div style="position: relative; display: flex; align-items: center; margin-bottom: 20px; height: 32px">
           <a-button type="text" @click="closeResetPanel" style="padding: 0; position: absolute; left: 0; z-index: 1">
@@ -373,11 +379,11 @@ async function hashSHA256(password) {
   min-height: 100vh;
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, #eaea66 0%, #a936d0 100%);
+  background: transparent;
   padding: 0 10%;
   gap: 60px;
   position: relative;
-  overflow: hidden;
+  z-index: 1;
 }
 
 .github-link {
@@ -395,7 +401,13 @@ async function hashSHA256(password) {
 }
 
 .github-link svg {
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+  fill: rgba(16, 22, 40, 0.55);
+  filter: drop-shadow(0 2px 8px rgba(39, 52, 105, 0.2));
+  transition: fill 0.3s ease;
+}
+
+.github-link:hover svg {
+  fill: rgba(16, 22, 40, 0.85);
 }
 
 .left-content {
@@ -489,15 +501,12 @@ async function hashSHA256(password) {
 .login-box {
   width: 100%;
   padding: 40px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border-radius: var(--lg-radius-lg);
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
 }
 
 .login-box:not(.reset-panel) {
-  position: relative;
   z-index: 1;
 }
 
@@ -529,12 +538,16 @@ async function hashSHA256(password) {
 .login-box h1 {
   text-align: center;
   margin-bottom: 30px;
-  color: #333;
+  color: var(--lg-text);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .reset-panel h2 {
-  color: #333;
+  color: var(--lg-text);
   font-weight: 600;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .gold-black-btn {

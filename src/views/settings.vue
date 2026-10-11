@@ -403,21 +403,6 @@ onBeforeUnmount(() => {
 
 .settings-card {
   width: 100%;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition:
-    box-shadow 0.3s ease,
-    transform 0.3s ease;
-  border: 1px solid #f0f0f0;
-}
-
-.settings-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
-
-.fade-in-card {
-  animation: slideInFromLeft 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .setting-item {
@@ -489,10 +474,12 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--lg-border-soft);
+  border-radius: var(--lg-radius);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 4px 16px rgba(39, 52, 105, 0.1);
 }
 
 .qr-image {
@@ -544,9 +531,9 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: #fafafa;
-  border: 1px dashed #d9d9d9;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.48);
+  border: 1px dashed rgba(var(--lg-aurora-violet), 0.42);
+  border-radius: var(--lg-radius-sm);
   overflow: hidden;
 }
 
@@ -555,7 +542,7 @@ onBeforeUnmount(() => {
   font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
   font-size: 13px;
   letter-spacing: 1px;
-  color: rgba(0, 0, 0, 0.85);
+  color: var(--lg-text);
   word-break: break-all;
   user-select: all;
 }
@@ -626,33 +613,10 @@ onBeforeUnmount(() => {
   }
 }
 
-@keyframes slideInFromLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-:deep(.ant-card) {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition:
-    box-shadow 0.3s ease,
-    transform 0.3s ease;
-}
-
-:deep(.ant-card:hover) {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
+/* slideInFromLeft 由全局 liquid-glass.css 提供 */
 
 :deep(.ant-card-head) {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--lg-hairline);
 }
 
 @media (max-width: 768px) {

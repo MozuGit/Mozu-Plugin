@@ -324,21 +324,6 @@ onMounted(() => {
 
 .about-card {
   width: 100%;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition:
-    box-shadow 0.3s ease,
-    transform 0.3s ease;
-  border: 1px solid #f0f0f0;
-}
-
-.about-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
-
-.fade-in-card {
-  animation: slideInFromLeft 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .info-list {
@@ -353,7 +338,7 @@ onMounted(() => {
   flex-wrap: wrap;
   gap: 8px 12px;
   padding-bottom: 16px;
-  border-bottom: 1px dashed #e9eef3;
+  border-bottom: 1px dashed var(--lg-hairline);
   animation: slideInItem 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   opacity: 0;
   transform: translateX(-20px);
@@ -397,7 +382,7 @@ onMounted(() => {
   gap: 12px;
 }
 
-/* 通用徽章样式 */
+/* 通用徽章样式 —— 半透明玻璃底 + 品牌色描边，品牌色本身保留 */
 .version-badge,
 .author-badge,
 .link-badge {
@@ -409,6 +394,7 @@ onMounted(() => {
   transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   text-decoration: none;
   cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .version-badge:hover,
@@ -419,98 +405,114 @@ onMounted(() => {
 
 /* 版本徽章 - 正常 */
 .version-normal {
-  background: linear-gradient(135deg, #f0f7ff 0%, #e6f4ff 100%);
-  border: 1px solid #b3d8ff;
+  background: rgba(230, 244, 255, 0.58);
+  border: 1px solid rgba(105, 177, 255, 0.65);
 }
 
 .version-normal:hover {
-  background: linear-gradient(135deg, #e6f4ff 0%, #d6ebff 100%);
+  background: rgba(214, 235, 255, 0.76);
   border-color: #69b1ff;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 4px 14px rgba(24, 144, 255, 0.24);
 }
 
 /* 版本徽章 - 可更新 */
 .version-update {
-  background: linear-gradient(135deg, #fff7e6 0%, #fff1d6 100%);
-  border: 1px solid #ffd591;
+  background: rgba(255, 241, 214, 0.6);
+  border: 1px solid rgba(255, 192, 105, 0.68);
 }
 
 .version-update:hover {
-  background: linear-gradient(135deg, #fff1d6 0%, #ffe7ba 100%);
+  background: rgba(255, 231, 186, 0.78);
   border-color: #ffc069;
-  box-shadow: 0 4px 12px rgba(250, 140, 22, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 4px 14px rgba(250, 140, 22, 0.24);
 }
 
 /* 版本徽章 - 测试版 */
 .version-beta {
-  background: linear-gradient(135deg, #f6ffed 0%, #eeffdd 100%);
-  border: 1px solid #b7eb8f;
+  background: rgba(238, 255, 221, 0.6);
+  border: 1px solid rgba(149, 222, 100, 0.68);
 }
 
 .version-beta:hover {
-  background: linear-gradient(135deg, #eeffdd 0%, #e0ffcc 100%);
+  background: rgba(224, 255, 204, 0.78);
   border-color: #95de64;
-  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 4px 14px rgba(82, 196, 26, 0.24);
 }
 
 /* 作者徽章 */
 .author-badge {
-  background: linear-gradient(135deg, #f9f0ff 0%, #efdbff 100%);
-  border: 1px solid #d3adf7;
+  background: rgba(239, 219, 255, 0.58);
+  border: 1px solid rgba(179, 127, 235, 0.65);
 }
 
 .author-badge:hover {
-  background: linear-gradient(135deg, #efdbff 0%, #e5c8ff 100%);
+  background: rgba(229, 200, 255, 0.78);
   border-color: #b37feb;
-  box-shadow: 0 4px 12px rgba(114, 46, 209, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 4px 14px rgba(114, 46, 209, 0.24);
 }
 
 /* GitHub 徽章 */
 .github-badge {
-  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
-  border: 1px solid #d9d9d9;
+  background: rgba(232, 232, 232, 0.55);
+  border: 1px solid rgba(191, 191, 191, 0.68);
 }
 
 .github-badge:hover {
-  background: linear-gradient(135deg, #e8e8e8 0%, #d9d9d9 100%);
+  background: rgba(217, 217, 217, 0.78);
   border-color: #bfbfbf;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 4px 14px rgba(0, 0, 0, 0.16);
 }
 
 /* Gitee 徽章 */
 .gitee-badge {
-  background: linear-gradient(135deg, #fff0f0 0%, #ffe6e6 100%);
-  border: 1px solid #ffb3b3;
+  background: rgba(255, 230, 230, 0.58);
+  border: 1px solid rgba(255, 153, 153, 0.68);
 }
 
 .gitee-badge:hover {
-  background: linear-gradient(135deg, #ffe6e6 0%, #ffcccc 100%);
+  background: rgba(255, 204, 204, 0.78);
   border-color: #ff9999;
-  box-shadow: 0 4px 12px rgba(199, 29, 35, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 4px 14px rgba(199, 29, 35, 0.24);
 }
 
 /* GitCode 徽章 */
 .gitcode-badge {
-  background: linear-gradient(135deg, #e6f7ff 0%, #d6eeff 100%);
-  border: 1px solid #91d5ff;
+  background: rgba(214, 238, 255, 0.58);
+  border: 1px solid rgba(105, 192, 255, 0.68);
 }
 
 .gitcode-badge:hover {
-  background: linear-gradient(135deg, #d6eeff 0%, #c5e6ff 100%);
+  background: rgba(197, 230, 255, 0.78);
   border-color: #69c0ff;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 4px 14px rgba(24, 144, 255, 0.24);
 }
 
 /* QQ 徽章 */
 .qq-badge {
-  background: linear-gradient(135deg, #e8f4ff 0%, #d6ecff 100%);
-  border: 1px solid #91c8ff;
+  background: rgba(214, 236, 255, 0.58);
+  border: 1px solid rgba(105, 177, 255, 0.68);
 }
 
 .qq-badge:hover {
-  background: linear-gradient(135deg, #d6ecff 0%, #c5e3ff 100%);
+  background: rgba(197, 227, 255, 0.78);
   border-color: #69b1ff;
-  box-shadow: 0 4px 12px rgba(0, 120, 255, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 4px 14px rgba(0, 120, 255, 0.24);
 }
 
 .qq-badge .badge-icon {
@@ -527,14 +529,16 @@ onMounted(() => {
 
 /* QQ群 徽章 */
 .qqgroup-badge {
-  background: linear-gradient(135deg, #fff0e6 0%, #ffe6d6 100%);
-  border: 1px solid #ffb391;
+  background: rgba(255, 230, 214, 0.58);
+  border: 1px solid rgba(255, 140, 90, 0.68);
 }
 
 .qqgroup-badge:hover {
-  background: linear-gradient(135deg, #ffe6d6 0%, #ffdcc5 100%);
+  background: rgba(255, 220, 197, 0.78);
   border-color: #ff8c5a;
-  box-shadow: 0 4px 12px rgba(255, 120, 0, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 4px 14px rgba(255, 120, 0, 0.24);
 }
 
 .qqgroup-badge .badge-icon {
@@ -551,14 +555,16 @@ onMounted(() => {
 
 /* 爱发电 徽章 */
 .ifdian-badge {
-  background: linear-gradient(135deg, #fce4ec 0%, #f8d7e0 100%);
-  border: 1px solid #f48fb1;
+  background: rgba(248, 215, 224, 0.58);
+  border: 1px solid rgba(240, 98, 146, 0.68);
 }
 
 .ifdian-badge:hover {
-  background: linear-gradient(135deg, #f8d7e0 0%, #f5c8d4 100%);
+  background: rgba(245, 200, 212, 0.78);
   border-color: #f06292;
-  box-shadow: 0 4px 12px rgba(233, 30, 99, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 4px 14px rgba(233, 30, 99, 0.24);
 }
 
 .ifdian-badge .badge-icon {
@@ -736,45 +742,14 @@ onMounted(() => {
   }
 }
 
-@keyframes slideInFromLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInItem {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
+/* slideInFromLeft / slideInItem 由全局 liquid-glass.css 提供 */
 
 :deep(.ant-card) {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition:
-    box-shadow 0.3s ease,
-    transform 0.3s ease;
-}
-
-:deep(.ant-card:hover) {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+  border-radius: var(--lg-radius);
 }
 
 :deep(.ant-card-head) {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--lg-hairline);
 }
 
 @media (max-width: 768px) {

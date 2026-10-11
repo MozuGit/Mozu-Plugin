@@ -37,7 +37,7 @@
         <a-col :xs="24" :sm="12">
           <a-statistic title="今日活跃人数" :value="displayTodayActive" class="statistic-item active-statistic">
             <template #suffix>
-              <span style="font-size: 16px; color: #faad14">人</span>
+              <span style="font-size: 16px; color: #0891b2">人</span>
             </template>
           </a-statistic>
         </a-col>
@@ -66,11 +66,11 @@
       :body-style="{ padding: '24px', maxHeight: '70vh', overflowY: 'auto' }"
     >
       <div class="modal-content">
-        <div class="modal-stats">
+        <div class="modal-stats lg-glass lg-glass--weak">
           <a-statistic
             title="总活跃人数"
             :value="sortedPlayerList.length"
-            :value-style="{ color: '#faad14', fontSize: '24px' }"
+            :value-style="{ color: '#c2820b', fontSize: '24px' }"
           />
         </div>
         <div class="table-wrapper">
@@ -356,7 +356,7 @@ const updateChart = (data) => {
       formatter: (params) => {
         const param = params[0]
         return `<div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">${param.name}</div>
-                <div style="font-size: 13px; color: #faad14;">活跃人数：<strong>${param.value}</strong> 人</div>
+                <div style="font-size: 13px; color: #0e7490;">活跃人数：<strong>${param.value}</strong> 人</div>
                 <div style="font-size: 12px; color: #999; margin-top: 4px;">点击查看详细列表</div>`
       },
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -429,7 +429,7 @@ const updateChart = (data) => {
         symbolSize: 12,
         lineStyle: {
           width: 3,
-          color: '#faad14',
+          color: '#0891b2',
         },
         areaStyle: {
           color: {
@@ -441,17 +441,17 @@ const updateChart = (data) => {
             colorStops: [
               {
                 offset: 0,
-                color: 'rgba(250, 173, 20, 0.3)',
+                color: 'rgba(8, 145, 178, 0.32)',
               },
               {
                 offset: 1,
-                color: 'rgba(250, 173, 20, 0.02)',
+                color: 'rgba(8, 145, 178, 0.02)',
               },
             ],
           },
         },
         itemStyle: {
-          color: '#faad14',
+          color: '#0891b2',
           borderColor: '#fff',
           borderWidth: 2,
         },
@@ -465,7 +465,7 @@ const updateChart = (data) => {
           show: true,
           position: 'top',
           distance: 8,
-          color: '#faad14',
+          color: '#0e7490',
           fontSize: 12,
           fontWeight: 600,
           formatter: (params) => {
@@ -614,30 +614,14 @@ onBeforeUnmount(() => {
   -webkit-tap-highlight-color: transparent;
 }
 
-.fade-in-card {
-  animation: slideInItem 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  opacity: 0;
-  transform: translateX(-30px);
-}
-
 .trend-card {
   animation-delay: 0.2s;
 }
 
-@keyframes slideInItem {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.statistic-item {
-  animation: slideInSubItem 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+.statistic-item,
+.active-statistic,
+.avg-statistic {
+  animation: slideInItem 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   opacity: 0;
   transform: translateX(-20px);
 }
@@ -651,56 +635,26 @@ onBeforeUnmount(() => {
 }
 
 .active-statistic {
-  animation: slideInSubItem 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  opacity: 0;
-  transform: translateX(-20px);
   animation-delay: 0.3s;
 }
 
 .avg-statistic {
-  animation: slideInSubItem 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  opacity: 0;
-  transform: translateX(-20px);
   animation-delay: 0.5s;
-}
-
-@keyframes slideInSubItem {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
 }
 
 :deep(.ant-statistic-title) {
   font-size: 16px;
-  color: rgba(0, 0, 0, 0.85);
+  color: var(--lg-text-secondary);
 }
 
 :deep(.ant-statistic-content) {
   font-size: 28px;
   font-weight: 600;
-}
-
-:deep(.ant-card) {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition:
-    box-shadow 0.3s ease,
-    transform 0.3s ease;
-}
-
-:deep(.ant-card:hover) {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+  color: var(--lg-text);
 }
 
 .trend-card :deep(.ant-card-head-title) {
-  color: #1890ff;
+  color: #3b6fd4;
   font-size: 17px;
 }
 
@@ -722,7 +676,7 @@ onBeforeUnmount(() => {
 }
 
 .player-modal :deep(.ant-modal-header) {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--lg-hairline);
   padding: 16px 24px;
   flex-shrink: 0;
 }
@@ -730,7 +684,7 @@ onBeforeUnmount(() => {
 .player-modal :deep(.ant-modal-title) {
   font-size: 18px;
   font-weight: 600;
-  color: #1890ff;
+  color: #3b6fd4;
 }
 
 .player-modal :deep(.ant-modal-body) {
@@ -751,8 +705,7 @@ onBeforeUnmount(() => {
 .modal-stats {
   margin-bottom: 16px;
   padding: 16px;
-  background: #fafafa;
-  border-radius: 8px;
+  border-radius: var(--lg-radius-sm);
   text-align: center;
   flex-shrink: 0;
 }
@@ -765,25 +718,23 @@ onBeforeUnmount(() => {
 }
 
 .player-table :deep(.ant-table) {
-  border-radius: 8px;
+  border-radius: var(--lg-radius-sm);
   overflow: hidden;
 }
 
 .player-table :deep(.ant-table-container) {
-  border-radius: 8px;
+  border-radius: var(--lg-radius-sm);
 }
 
 .player-table :deep(.ant-table-thead > tr > th) {
-  background: #fafafa;
   font-weight: 600;
-  color: rgba(0, 0, 0, 0.85);
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
 .player-table :deep(.ant-table-tbody > tr:hover > td) {
-  background: #f0f7ff;
+  background: rgba(var(--lg-aurora-cyan), 0.12) !important;
 }
 
 .player-table :deep(.ant-table-body) {
@@ -792,32 +743,13 @@ onBeforeUnmount(() => {
   -webkit-overflow-scrolling: touch;
 }
 
-.player-table :deep(.ant-table-body::-webkit-scrollbar) {
-  width: 6px;
-  height: 6px;
-}
-
-.player-table :deep(.ant-table-body::-webkit-scrollbar-track) {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.player-table :deep(.ant-table-body::-webkit-scrollbar-thumb) {
-  background: #d3adf7;
-  border-radius: 3px;
-}
-
-.player-table :deep(.ant-table-body::-webkit-scrollbar-thumb:hover) {
-  background: #b37feb;
-}
-
 .player-table :deep(.ant-tag-purple) {
-  background: #f9f0ff;
-  border-color: #d3adf7;
-  color: #722ed1;
+  background: rgba(var(--lg-aurora-violet), 0.14);
+  border-color: rgba(var(--lg-aurora-violet), 0.42);
+  color: #6b46c1;
   font-size: 13px;
   padding: 4px 12px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-weight: 500;
 }
 
@@ -832,8 +764,8 @@ onBeforeUnmount(() => {
 }
 
 .openid-tag:hover {
-  background: #f0f0ff !important;
-  border-color: #722ed1 !important;
+  background: rgba(var(--lg-aurora-violet), 0.2) !important;
+  border-color: rgba(var(--lg-aurora-violet), 0.62) !important;
 }
 
 .openid-text {
@@ -856,7 +788,7 @@ onBeforeUnmount(() => {
 }
 
 .refresh-btn {
-  color: #666;
+  color: var(--lg-text-muted);
   transition: all 0.3s ease;
   border-radius: 50%;
   width: 36px;
@@ -868,8 +800,8 @@ onBeforeUnmount(() => {
 }
 
 .refresh-btn:hover {
-  color: #1890ff;
-  background: rgba(24, 144, 255, 0.1);
+  color: #3b6fd4;
+  background: rgba(var(--lg-aurora-cyan), 0.16);
   transform: rotate(180deg);
 }
 

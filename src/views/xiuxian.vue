@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-container">
-    <div class="quick-nav">
+    <div class="quick-nav lg-glass lg-glass__specular">
       <a-space :size="12" class="nav-scroll-container">
         <a-button
           :type="currentPage === 'home' ? 'primary' : 'default'"
@@ -134,11 +134,9 @@ const navigateTo = (page) => {
 .quick-nav {
   margin-bottom: 24px;
   padding: 12px 16px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  animation: slideInFromLeft 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  border-radius: var(--lg-radius);
   overflow: hidden;
+  animation: slideInFromLeft 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .nav-scroll-container {
@@ -162,7 +160,7 @@ const navigateTo = (page) => {
 
 .quick-nav .ant-btn {
   height: 40px;
-  border-radius: 8px;
+  border-radius: var(--lg-radius-sm);
   font-size: 14px;
   transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   position: relative;
@@ -173,41 +171,31 @@ const navigateTo = (page) => {
 }
 
 .quick-nav .ant-btn:not(.ant-btn-primary) {
-  background: #f5f7fa;
-  border-color: #e8eaed;
-  color: #5f6368;
+  background: rgba(255, 255, 255, 0.42);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: var(--lg-text-secondary);
 }
 
 .quick-nav .ant-btn:not(.ant-btn-primary):hover {
-  background: #e8f0fe;
-  border-color: #b8d4fe;
+  background: rgba(var(--lg-aurora-cyan), 0.18);
+  border-color: rgba(var(--lg-aurora-cyan), 0.55);
   color: #1a73e8;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.2);
+  box-shadow: 0 2px 12px rgba(var(--lg-aurora-cyan), 0.28);
 }
 
 .quick-nav .ant-btn.active {
-  background: #e8f0fe;
-  border-color: #1a73e8;
-  color: #1a73e8;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.15);
+  background: linear-gradient(135deg, rgba(var(--lg-aurora-violet), 0.22), rgba(var(--lg-aurora-cyan), 0.18));
+  border-color: rgba(var(--lg-aurora-violet), 0.55);
+  color: var(--lg-brand);
+  font-weight: 600;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 2px 12px rgba(var(--lg-aurora-violet), 0.26);
 }
 
 .content-area {
   width: 100%;
-}
-
-@keyframes slideInFromLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
 }
 
 @media (max-width: 768px) {

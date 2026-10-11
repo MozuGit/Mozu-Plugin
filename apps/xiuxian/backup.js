@@ -51,7 +51,7 @@ export class MozuXiuxianBackup extends plugin {
           '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
           '***',
           '**修仙备份还原成功**',
-          '>还原' + result + '个键',
+          '>还原' + (typeof result === 'number' ? result + '个键' : '失败，请查看后台日志'),
           '来自文件' + path.join(Version.Plugin_Name, 'backup', 'xiuxian', fileName),
           '***',
         ].join('\n')
@@ -88,7 +88,7 @@ export class MozuXiuxianBackup extends plugin {
         '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
         '***',
         '**修仙备份成功**',
-        '>备份' + result + '个键到：',
+        '>备份' + (typeof result === 'number' ? result + '个键到：' : '失败，请查看后台日志：'),
         path.join(Version.Plugin_Name, 'backup', 'xiuxian', fileName),
         '***',
       ].join('\n')
@@ -119,7 +119,11 @@ export class MozuXiuxianBackup extends plugin {
       }
     }
     logger.info('[魔族陌修仙] 定时备份成功')
-    logger.info('[魔族陌修仙] 备份' + result + '个键到' + path.join(Version.Plugin_Name, 'backup', 'xiuxian', fileName))
+    logger.info(
+      '[魔族陌修仙] 备份' +
+        (typeof result === 'number' ? result + '个键到' : '失败，请检查上方目录错误日志') +
+        (typeof result === 'number' ? path.join(Version.Plugin_Name, 'backup', 'xiuxian', fileName) : '')
+    )
     return false
   }
 }

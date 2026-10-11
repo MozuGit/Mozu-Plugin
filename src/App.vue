@@ -1,6 +1,19 @@
 <template>
+  <svg class="glass-filters" aria-hidden="true" focusable="false">
+    <filter id="lg-refract" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.008 0.014" numOctaves="2" seed="7" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </svg>
+
+  <div class="lg-aurora" aria-hidden="true">
+    <span class="lg-aurora__blob lg-aurora__blob--1" />
+    <span class="lg-aurora__blob lg-aurora__blob--2" />
+    <span class="lg-aurora__blob lg-aurora__blob--3" />
+  </div>
+
   <router-view v-if="route.name === 'login'" />
-  <a-layout v-else style="min-height: 100vh; background: linear-gradient(135deg, #fff600 0%, #6a0eab 100%)">
+  <a-layout v-else class="app-layout">
     <div v-if="isMobile && !collapsed" class="mobile-overlay" @click="collapsed = true" />
 
     <a-layout-sider
@@ -10,8 +23,7 @@
       theme="light"
       :width="200"
       :breakpoint="'lg'"
-      :class="{ 'mobile-sider': isMobile, 'sider-collapsed': collapsed && isMobile }"
-      style="background: #fff"
+      :class="{ 'mobile-sider': isMobile, 'sider-collapsed': collapsed && isMobile, 'app-sider': true }"
     >
       <div class="sider-content">
         <div class="logo">
@@ -26,7 +38,7 @@
           mode="inline"
           :inline-collapsed="collapsed"
           @click="handleMenuClick"
-          style="border-right: 0; flex: 1"
+          class="app-menu"
         >
           <a-menu-item key="xiuxian">
             <AppstoreOutlined />
@@ -51,8 +63,8 @@
       </div>
     </a-layout-sider>
 
-    <a-layout style="background: transparent">
-      <a-layout-content style="margin: 16px; position: relative">
+    <a-layout class="app-main">
+      <a-layout-content class="app-content">
         <a-button
           v-if="isMobile && collapsed"
           class="mobile-menu-btn"
@@ -70,16 +82,16 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount, h } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
-  HomeOutlined,
   AppstoreOutlined,
   SettingOutlined,
   MenuOutlined,
   InfoCircleOutlined,
   LogoutOutlined,
 } from '@ant-design/icons-vue'
+import { useGlassPointer } from './composables/useGlassPointer'
 
 const router = useRouter()
 const route = useRoute()
@@ -90,13 +102,21 @@ const checkMobile = () => {
   collapsed.value = isMobile.value
 }
 
+let glassPointer = null
+
 onMounted(() => {
   checkMobile()
   window.addEventListener('resize', checkMobile)
+
+  glassPointer = useGlassPointer()
+
+  document.body.classList.add('lg-body')
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', checkMobile)
+  glassPointer?.destroy()
+  document.body.classList.remove('lg-body')
 })
 
 const collapsed = ref(isMobile.value)
@@ -179,6 +199,40 @@ async function logout() {
 </script>
 
 <style scoped>
+.glass-filters {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.app-layout {
+  min-height: 100vh;
+  background: transparent;
+}
+
+.app-main,
+.app-content {
+  background: transparent;
+}
+
+.app-content {
+  margin: 16px;
+  position: relative;
+}
+
+.app-sider {
+  background: var(--lg-surface-strong) !important;
+  background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.14) 100%) !important;
+  -webkit-backdrop-filter: blur(var(--lg-blur-strong)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur-strong)) saturate(var(--lg-saturate));
+  border-right: 1px solid var(--lg-border-soft);
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.5),
+    4px 0 28px rgba(39, 52, 105, 0.1);
+}
+
 .sider-content {
   display: flex;
   flex-direction: column;
@@ -198,20 +252,56 @@ async function logout() {
 .logo img {
   height: 32px;
   flex-shrink: 0;
+  filter: drop-shadow(0 2px 6px rgba(39, 52, 105, 0.18));
 }
 
 .logo-text {
   margin-left: 20px;
-  color: #333;
+  color: var(--lg-text);
   font-weight: bold;
   white-space: nowrap;
   flex-shrink: 0;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.app-menu {
+  border-right: 0 !important;
+  flex: 1;
+  background: transparent !important;
+}
+
+.app-menu :deep(.ant-menu-item) {
+  color: var(--lg-text-secondary);
+  border-radius: var(--lg-radius-sm);
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.app-menu :deep(.ant-menu-item:hover) {
+  background: rgba(255, 255, 255, 0.5) !important;
+  color: var(--lg-brand) !important;
+}
+
+.app-menu :deep(.ant-menu-item-selected) {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--lg-aurora-violet), 0.22),
+    rgba(var(--lg-aurora-cyan), 0.18)
+  ) !important;
+  color: var(--lg-brand) !important;
+  font-weight: 600;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 2px 10px rgba(39, 52, 105, 0.1);
+}
+
+.app-menu :deep(.ant-menu-item-selected::after) {
+  display: none;
 }
 
 .logout-wrapper {
   padding: 12px;
   margin-top: auto;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--lg-hairline);
 }
 
 .logout-btn {
@@ -241,18 +331,21 @@ async function logout() {
   bottom: 16px;
   left: 16px;
   z-index: 998;
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: 1px solid #d9d9d9 !important;
-  color: #666 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
+  background: var(--lg-surface-strong) !important;
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  border: 1px solid var(--lg-border-soft) !important;
+  color: var(--lg-text-secondary) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 8px 28px rgba(39, 52, 105, 0.18);
 }
 
 .mobile-menu-btn:hover,
 .mobile-menu-btn:focus {
-  background: rgba(255, 255, 255, 1) !important;
-  border-color: #bfbfbf !important;
-  color: #333 !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(var(--lg-aurora-violet), 0.5) !important;
+  color: var(--lg-brand) !important;
 }
 
 .fade-enter-active,
@@ -285,7 +378,9 @@ async function logout() {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(24, 32, 60, 0.38);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   z-index: 999;
   animation: fadeIn 0.3s ease;
 }
@@ -305,16 +400,8 @@ async function logout() {
     margin-left: 0;
   }
 
-  :deep(.ant-layout-content) {
-    margin: 12px !important;
-  }
-
-  :deep(.ant-layout-header) {
-    padding: 0 12px !important;
-  }
-
-  :deep(.ant-layout-header h2) {
-    font-size: 16px;
+  .app-content {
+    margin: 12px;
   }
 }
 </style>
