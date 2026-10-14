@@ -49,7 +49,7 @@ export default new (class {
       return {
         op: t === 0 ? 'del' : 'add',
         member_openid: item.openid.replace(bot.uin + ':', ''),
-        mute_expire_at: expireTime,
+        mute_expire_at: t === 0 ? '' : expireTime,
       }
     }
     for (let i = 0; i < all.length; i += 20) {
