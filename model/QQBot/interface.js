@@ -1,5 +1,3 @@
-import Config from '#Config'
-
 export default new (class {
   async groupInfo(bot, group_id) {
     let result = null

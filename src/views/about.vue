@@ -64,7 +64,7 @@
                 <circle cx="12" cy="7" r="4" />
               </svg>
               <span class="badge-text">{{ authorName }}</span>
-              <span class="badge-tag author-tag">作者</span>
+              <span class="badge-tag author-tag">魔族陌</span>
             </a>
             <span v-else class="text-muted">魔族陌</span>
           </span>
