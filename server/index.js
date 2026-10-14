@@ -18,6 +18,9 @@ app.use(express.json())
 app.use(warnTrustProxyIfNeeded)
 app.use('/api', routes)
 app.use(express.static(path.join(__dirname, 'static')))
+// public/ 里的大体积资源（字体 loli.ttf、Mo.png、favicon.ico）仓库只保留一份，
+// 构建时不复制（vite.config.js 的 copyPublicDir=false），这里按原路径对外提供
+app.use(express.static(path.join(__dirname, '..', 'public')))
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'static', 'index.html'))
 })

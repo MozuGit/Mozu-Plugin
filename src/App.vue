@@ -1,84 +1,86 @@
 <template>
-  <svg class="glass-filters" aria-hidden="true" focusable="false">
-    <filter id="lg-refract" x="-20%" y="-20%" width="140%" height="140%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.008 0.014" numOctaves="2" seed="7" result="noise" />
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G" />
-    </filter>
-  </svg>
+  <a-config-provider :theme="themeConfig">
+    <svg class="glass-filters" aria-hidden="true" focusable="false">
+      <filter id="lg-refract" x="-20%" y="-20%" width="140%" height="140%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.008 0.014" numOctaves="2" seed="7" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
 
-  <div class="lg-aurora" aria-hidden="true">
-    <span class="lg-aurora__blob lg-aurora__blob--1" />
-    <span class="lg-aurora__blob lg-aurora__blob--2" />
-    <span class="lg-aurora__blob lg-aurora__blob--3" />
-  </div>
+    <div class="lg-aurora" aria-hidden="true">
+      <span class="lg-aurora__blob lg-aurora__blob--1" />
+      <span class="lg-aurora__blob lg-aurora__blob--2" />
+      <span class="lg-aurora__blob lg-aurora__blob--3" />
+    </div>
 
-  <router-view v-if="route.name === 'login'" />
-  <a-layout v-else class="app-layout">
-    <div v-if="isMobile && !collapsed" class="mobile-overlay" @click="collapsed = true" />
+    <router-view v-if="route.name === 'login'" />
+    <a-layout v-else class="app-layout">
+      <div v-if="isMobile && !collapsed" class="mobile-overlay" @click="collapsed = true" />
 
-    <a-layout-sider
-      v-model:collapsed="collapsed"
-      :collapsible="!isMobile"
-      :trigger="null"
-      theme="light"
-      :width="200"
-      :breakpoint="'lg'"
-      :class="{ 'mobile-sider': isMobile, 'sider-collapsed': collapsed && isMobile, 'app-sider': true }"
-    >
-      <div class="sider-content">
-        <div class="logo">
-          <img src="../Mo.png" style="height: 32px" />
-          <transition name="fade">
-            <span v-if="!collapsed" class="logo-text">魔族陌管理</span>
-          </transition>
+      <a-layout-sider
+        v-model:collapsed="collapsed"
+        :collapsible="!isMobile"
+        :trigger="null"
+        theme="light"
+        :width="200"
+        :breakpoint="'lg'"
+        :class="{ 'mobile-sider': isMobile, 'sider-collapsed': collapsed && isMobile, 'app-sider': true }"
+      >
+        <div class="sider-content">
+          <div class="logo">
+            <img src="/Mo.png" style="height: 32px" />
+            <transition name="fade">
+              <span v-if="!collapsed" class="logo-text">魔族陌管理</span>
+            </transition>
+          </div>
+
+          <a-menu
+            v-model:selectedKeys="selectedKeys"
+            mode="inline"
+            :inline-collapsed="collapsed"
+            @click="handleMenuClick"
+            class="app-menu"
+          >
+            <a-menu-item key="xiuxian">
+              <AppstoreOutlined />
+              <span>魔族陌修仙</span>
+            </a-menu-item>
+            <a-menu-item key="settings">
+              <SettingOutlined />
+              <span>设置</span>
+            </a-menu-item>
+            <a-menu-item key="about">
+              <InfoCircleOutlined />
+              <span>关于</span>
+            </a-menu-item>
+          </a-menu>
+
+          <div class="logout-wrapper">
+            <a-button block @click="logout" class="logout-btn">
+              <LogoutOutlined />
+              <span v-if="!collapsed">退出登录</span>
+            </a-button>
+          </div>
         </div>
+      </a-layout-sider>
 
-        <a-menu
-          v-model:selectedKeys="selectedKeys"
-          mode="inline"
-          :inline-collapsed="collapsed"
-          @click="handleMenuClick"
-          class="app-menu"
-        >
-          <a-menu-item key="xiuxian">
-            <AppstoreOutlined />
-            <span>魔族陌修仙</span>
-          </a-menu-item>
-          <a-menu-item key="settings">
-            <SettingOutlined />
-            <span>设置</span>
-          </a-menu-item>
-          <a-menu-item key="about">
-            <InfoCircleOutlined />
-            <span>关于</span>
-          </a-menu-item>
-        </a-menu>
-
-        <div class="logout-wrapper">
-          <a-button block @click="logout" class="logout-btn">
-            <LogoutOutlined />
-            <span v-if="!collapsed">退出登录</span>
+      <a-layout class="app-main">
+        <a-layout-content class="app-content">
+          <a-button
+            v-if="isMobile && collapsed"
+            class="mobile-menu-btn"
+            shape="circle"
+            size="large"
+            @click="collapsed = false"
+          >
+            <MenuOutlined />
           </a-button>
-        </div>
-      </div>
-    </a-layout-sider>
 
-    <a-layout class="app-main">
-      <a-layout-content class="app-content">
-        <a-button
-          v-if="isMobile && collapsed"
-          class="mobile-menu-btn"
-          shape="circle"
-          size="large"
-          @click="collapsed = false"
-        >
-          <MenuOutlined />
-        </a-button>
-
-        <router-view />
-      </a-layout-content>
+          <router-view />
+        </a-layout-content>
+      </a-layout>
     </a-layout>
-  </a-layout>
+  </a-config-provider>
 </template>
 
 <script setup>
@@ -95,6 +97,14 @@ import { useGlassPointer } from './composables/useGlassPointer'
 
 const router = useRouter()
 const route = useRoute()
+
+// 全局字体
+const themeConfig = {
+  token: {
+    fontFamily:
+      "'Loli', 'Heiti SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', sans-serif",
+  },
+}
 
 const isMobile = ref(false)
 const checkMobile = () => {

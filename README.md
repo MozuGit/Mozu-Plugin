@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./Mo.png" width="256" height="256" /><br>
+<img src="./public/Mo.png" width="256" height="256" /><br>
 
 # Mozu-Plugin
 

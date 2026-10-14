@@ -133,7 +133,7 @@ const navigateTo = (page) => {
 
 .quick-nav {
   margin-bottom: 24px;
-  padding: 12px 16px;
+  padding: 6px 12px;
   border-radius: var(--lg-radius);
   overflow: hidden;
   animation: slideInFromLeft 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
@@ -147,7 +147,7 @@ const navigateTo = (page) => {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding-bottom: 4px;
+  padding: 8px 4px;
 }
 
 .nav-scroll-container::-webkit-scrollbar {
@@ -200,7 +200,7 @@ const navigateTo = (page) => {
 
 @media (max-width: 768px) {
   .quick-nav {
-    padding: 10px 12px;
+    padding: 4px 8px;
     margin-bottom: 16px;
   }
 

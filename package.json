@@ -5,7 +5,7 @@
   "homepage": "https://mozumiao.com",
   "main": "index.js",
   "type": "module",
-  "icon": "./Mo.png",
+  "icon": "./public/Mo.png",
   "author": "@MozuGit",
   "license": "GPL-3.0-only",
   "repository": {

@@ -1,6 +1,26 @@
+/* --- 全局字体：loli.ttf --- */
+@font-face {
+  font-family: 'Loli';
+  src: url('/fonts/loli.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 html,
 body {
   background-color: #eef1fb;
+  font-family: var(--lg-font);
+}
+
+/* ant-design-vue 组件自带字体栈，会盖过继承值，这里显式覆盖为全局字体 */
+html body button,
+html body input,
+html body textarea,
+html body select,
+html body [class^='ant-'],
+html body [class*=' ant-'] {
+  font-family: var(--lg-font);
 }
 
 :root {
@@ -44,6 +64,11 @@ body {
   /* 指针镜面高光坐标 */
   --lg-spec-x: 50%;
   --lg-spec-y: 0%;
+
+  /* 全局字体 */
+  --lg-font:
+    'Loli', 'Heiti SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC',
+    'Source Han Sans SC', sans-serif;
 }
 
 .lg-aurora {

@@ -14,7 +14,7 @@
       <div class="slogan-wrapper">
         <!-- 图片 -->
         <div class="logo-image">
-          <img src="../Mo.png" alt="Mozu" />
+          <img src="/Mo.png" alt="Mozu" />
         </div>
         <!-- 字幕 -->
         <div class="slogan">

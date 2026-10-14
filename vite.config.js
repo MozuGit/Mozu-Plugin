@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [vue()],
   build: {
     outDir: 'server/static',
+    copyPublicDir: false,
     rollupOptions: {
       output: {
         entryFileNames: 'assets/index.js',
