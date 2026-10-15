@@ -30,6 +30,17 @@ export default new (class {
     }
   }
 
+  async getGroupMuteList(bot, group_id) {
+    try {
+      const {
+        data: { members: result },
+      } = await bot.sdk.request.get(`/v2/groups/${group_id.replace(bot.uin + ':', '')}/restrict_chat_setting`)
+      return result
+    } catch (err) {
+      return []
+    }
+  }
+
   async muteMember(bot, group_id, openid, time = 0, obj = []) {
     const extra = Array.isArray(obj) ? obj : []
     const all = [

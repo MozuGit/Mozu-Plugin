@@ -48,17 +48,24 @@ export class MozuInterface extends plugin {
       }
     }
 
-    //设置群成员禁言
-    if (!this.e.group.muteMember) {
-      this.e.group.muteMember = async (openid, time = 0, obj = []) => {
-        return await QQBot.muteMember(bot, group_id, openid, (time = 0), (obj = []))
-      }
-    }
-
     //获取入群申请列表
     if (!this.e.group.getJoinList) {
       this.e.group.getJoinList = async () => {
         return await QQBot.getGroupJoinList(bot, group_id)
+      }
+    }
+
+    //获取群禁言成员列表
+    if (!this.e.group.getGroupMuteList) {
+      this.e.group.getGroupMuteList = async () => {
+        return await QQBot.getGroupMuteList(bot, group_id)
+      }
+    }
+
+    //设置群成员禁言
+    if (!this.e.group.muteMember) {
+      this.e.group.muteMember = async (openid, time = 0, obj = []) => {
+        return await QQBot.muteMember(bot, group_id, openid, (time = 0), (obj = []))
       }
     }
     return false
