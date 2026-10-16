@@ -1,5 +1,8 @@
 import Config from '#Config'
 
+import GroupAdmin from '../../model/groupAdmin/groupAdmin.js'
+import QQBotApi from '../../model/QQBot/interface.js'
+
 const Numreg = '[零一壹二两三四五六七八九十百千万亿\\d]+'
 const TimeUnitReg = Object.keys({
   毫秒: 0.001,
@@ -55,11 +58,35 @@ export class MozuGroupAdmin extends plugin {
           reg: `^#禁言\\s?((\\d+)\\s)?(${Numreg})?(${TimeUnitReg})?$^#禁言\s?(([A-Z0-9]+)\s)?(${Numreg})?(${TimeUnitReg})?$`,
           fnc: 'muteMember',
         },
+        {
+          reg: `^#解除全部禁言$`,
+          fnc: 'relieveAllMute',
+        },
       ],
     })
   }
 
   async muteMember(e) {
-    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.xiuxian.setting.enable) return false
+    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable) return false
+    if (!this.e.group) return false
+    return false //待更新
+  }
+
+  async relieveAllMute(e) {
+    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable) return false
+    if (!this.e.group) return false
+    const Ga = new GroupAdmin(e)
+    const muteList = (await Ga.getMuteList()).map((item) => item.member_openid)
+    if (muteList.length) {
+      const ok = await new QQBotApi(e).muteMember(
+        muteList[0],
+        0,
+        muteList.slice(1).map((item) => ({ openid: item, time: 0 }))
+      )
+      if (ok) {
+        this.e.reply('解除全部禁言成功')
+      }
+    }
+    return true
   }
 }

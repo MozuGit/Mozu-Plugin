@@ -1,47 +1,53 @@
-export default new (class {
-  async groupInfo(bot, group_id) {
+export default class QQBotApi {
+  constructor(e) {
+    this.bot = e.bot
+    this.group_id = e.group_id.replace(this.bot.uin + ':', '')
+  }
+
+  //获取群信息
+  async getGroupInfo() {
     let result = null
     try {
-      result = await bot.sdk.request.get(`/v2/groups/${group_id.replace(bot.uin + ':', '')}/info`)
+      result = await this.bot.sdk.request.get(`/v2/groups/${this.group_id}/info`)
     } catch (err) {
       logger.error('[魔族陌][Interface] ' + err)
     }
     return result
   }
 
-  async getGroupBotState(bot, group_id) {
+  //获取群内机器人状态
+  async getGroupBotState() {
     let result = null
     try {
-      result = await bot.sdk.request.get(`/v2/groups/${group_id.replace(bot.uin + ':', '')}/bot_state`)
+      result = await this.bot.sdk.request.get(`/v2/groups/${this.group_id}/bot_state`)
     } catch (err) {
       logger.error('[魔族陌][Interface] ' + err)
     }
     return result
   }
 
-  async getGroupJoinList(bot, group_id) {
+  //获取群成员申请加入列表
+  async getGroupJoinList() {
     try {
-      const { result } = await bot.sdk.request.get(
-        `/v2/groups/${group_id.replace(bot.uin + ':', '')}/join_request_list`
-      )
+      const { result } = await this.bot.sdk.request.get(`/v2/groups/${this.group_id}/join_request_list`)
       return result
     } catch (err) {
       return { list: [], next_cursor: '' }
     }
   }
 
-  async getGroupMuteList(bot, group_id) {
+  //获取群禁言信息
+  async getGroupMuteInfo() {
     try {
-      const {
-        data: { members: result },
-      } = await bot.sdk.request.get(`/v2/groups/${group_id.replace(bot.uin + ':', '')}/restrict_chat_setting`)
+      const { data: result } = await this.bot.sdk.request.get(`/v2/groups/${this.group_id}/restrict_chat_setting`)
       return result
     } catch (err) {
       return []
     }
   }
 
-  async muteMember(bot, group_id, openid, time = 0, obj = []) {
+  //禁言群成员
+  async muteMember(openid, time = 0, obj = []) {
     const extra = Array.isArray(obj) ? obj : []
     const all = [
       { openid, time },
@@ -57,14 +63,14 @@ export default new (class {
         .replace('Z', '+08:00')
       return {
         op: t === 0 ? 'del' : 'add',
-        member_openid: item.openid.replace(bot.uin + ':', ''),
+        member_openid: item.openid.replace(this.bot.uin + ':', ''),
         mute_expire_at: t === 0 ? '' : expireTime,
       }
     }
     for (let i = 0; i < all.length; i += 20) {
       const members = all.slice(i, i + 20).map(buildMember)
       try {
-        await bot.sdk.request.post(`/v2/groups/${group_id.replace(bot.uin + ':', '')}/restrict_chat_setting`, {
+        await this.bot.sdk.request.post(`/v2/groups/${this.group_id}/restrict_chat_setting`, {
           members,
         })
       } catch (err) {
@@ -73,4 +79,4 @@ export default new (class {
     }
     return true
   }
-})()
+}

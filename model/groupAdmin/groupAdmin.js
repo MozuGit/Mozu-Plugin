@@ -1,20 +1,16 @@
-import Redis from '#Redis'
-import Config from '#Config'
-
-import QQBot from '../QQBot/interface.js'
+import QQBotApi from '../QQBot/interface.js'
 
 export default class GroupAdmin {
   constructor(e) {
-    this.e = e
-    this.Bot = e.bot ?? Bot
+    this.api = new QQBotApi(e)
   }
 
   /**
    * 获取群成员禁言列表
    * @param {String} group_id 群open_id
-   * @param {Boolean} info 输出禁言成员详细信息
    */
-  async getMuteList(group_id, info = false) {
-    //待更新
+  async getMuteList() {
+    const { members: result } = await this.api.getGroupMuteInfo()
+    return result
   }
 }

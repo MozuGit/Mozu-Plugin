@@ -1,6 +1,6 @@
 import Redis from '#Redis'
 import Config from '#Config'
-import QQBot from '../../model/QQBot/interface.js'
+import QQBotApi from '../../model/QQBot/interface.js'
 
 export class MozuWhois extends plugin {
   constructor() {
@@ -20,7 +20,8 @@ export class MozuWhois extends plugin {
 
   async whois(e, i = 0) {
     if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.example.whois.enable) return false
-    const is_admin = (await QQBot.getGroupBotState(this.e.bot, this.e.group_id))?.data?.member_role
+    const api = new QQBotApi(e)
+    const is_admin = (await api.getGroupBotState(this.e.bot, this.e.group_id))?.data?.member_role
     if (!this.e.isGroup || !is_admin) return false
     const group_id = this.e.group_id
     const nowMute = await Redis.get(`Mozu:whois:mute:${group_id}`)
@@ -34,8 +35,8 @@ export class MozuWhois extends plugin {
       name = this.e.raw.author.username || this.e.sender.nickname
     }
     const time = Math.floor(Math.random() * (60 - 5 + 1)) + 5
-    if (nowMute) await QQBot.muteMember(this.e.bot, group_id, nowMute, 0)
-    await QQBot.muteMember(this.e.bot, group_id, who, time)
+    if (nowMute) await api.muteMember(nowMute, 0)
+    await api.muteMember(who, time)
     await Redis.del(`Mozu:whois:mute:${group_id}`)
     await Redis.set(`Mozu:whois:mute:${group_id}`, who, 'EX', time)
     await this.e.reply(

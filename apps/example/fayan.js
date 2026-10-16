@@ -265,5 +265,5 @@ async function getweek(num = 0) {
 }
 
 function getGroupKey(date, self_id, group_id) {
-  return `Mozu:msg:${date}:group:${self_id}:${group_id.replace(self_id + ':', '')}`
+  return `Mozu:msg:${date}:group:${self_id}:${String(group_id).replace(self_id + ':', '')}`
 }
