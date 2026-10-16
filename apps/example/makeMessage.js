@@ -27,11 +27,11 @@ export class MozuMakeMessage extends plugin {
       (Config.example.makeMessage.onlyMaster && !this.e.isMaster)
     )
       return false
-    let msgList = [],
+    if (!e.group) return e.reply('私聊暂不支持此操作', true)
+    const msgList = [],
       imgUrls = [],
       AtQQ = []
     let num = 0
-    if (!e.group) return e.reply('私聊暂不支持此操作', true)
     let text = e.msg.replace(/#?伪(造|装)(聊天)?/g, '')
     if (text == '') return e.reply('你要造什么，造空气吗', true)
     for (let msg of e.message) {
@@ -81,11 +81,11 @@ export class MozuMakeMessage extends plugin {
       }
       msgContent.push(msg[1].replace(/=img=/g, ''))
       imgs = msg[1].match(/=img=/g)
-      if (imgs?.length > 0) {
+      if (imgs?.length) {
         for (let j = 0; j < imgs.length; j++) {
-          if (imgUrls.length === 0) break
+          if (!imgUrls.length) break
           msgContent.push(segment.image(imgUrls[imgUrls.length - 1]))
-          if (imgUrls.length !== 1) imgUrls.pop()
+          if (imgUrls.length) imgUrls.pop()
         }
       }
       if (Config.example.makeMessage.whiteQQList.includes(Number(msg[0])) && !e.isMaster) continue
@@ -109,26 +109,45 @@ export class MozuMakeMessage extends plugin {
       (Config.example.makeMessage.onlyMaster && !this.e.isMaster)
     )
       return false
-    let msgList = []
     if (!e.group) return e.reply('私聊暂不支持此操作', true)
+    const msgList = [],
+      imgUrls = [],
+      AtQQ = [],
+      msgContent = []
+    for (let msg of e.message) {
+      if (msg.type == 'image') {
+        imgUrls.push(msg.url)
+      }
+      if (msg.type == 'at') {
+        AtQQ.push(msg.qq)
+      }
+    }
+    imgUrls.reverse()
     let match = e.msg.match(/^#?伪(造|装)复读\s*(.+?)(?:\s+(\d+))?$/)
     let text = match[2]
     let number = match[3] ? parseInt(match[3]) : Config.example.makeMessage.repeatCount || 10
-    const QQListdata = await this.e.group.getMemberArray()
+    const imgCount = (text.match(/=img=/g) || []).length
+    msgContent.push(text.replace(/=img=/g, ''))
+    for (let i = 0; i < imgCount; i++) {
+      if (!imgUrls.length) break
+      msgContent.push(segment.image(imgUrls[imgUrls.length - 1]))
+      if (imgUrls.length) imgUrls.pop()
+    }
+    const QQListdata = AtQQ.length ? AtQQ : await this.e.group.getMemberArray()
     const whiteQQList = Config.example.makeMessage.whiteQQList || []
     const availableMembers = QQListdata.filter((member) => !whiteQQList.includes(Number(member.user_id)))
     if (availableMembers.length === 0) return false
     let userIds = availableMembers.map((member) => member.user_id)
     let userNames = availableMembers.map((member) => member.nickname)
     for (let i = 0; i < number; i++) {
-      if (userIds.length === 0) break
-      const randomIndex = Math.floor(Math.random() * userIds.length)
-      const userId = userIds[randomIndex]
-      const userName = userNames[randomIndex]
-      userIds.splice(randomIndex, 1)
-      userNames.splice(randomIndex, 1)
+      if (!userIds.length) break
+      const index = AtQQ.length ? i : Math.floor(Math.random() * userIds.length)
+      const userId = userIds[index]
+      const userName = userNames[index]
+      userIds.splice(index, 1)
+      userNames.splice(index, 1)
       msgList.push({
-        message: text,
+        message: msgContent,
         user_id: userId,
         nickname: userName,
         time: e.time,
