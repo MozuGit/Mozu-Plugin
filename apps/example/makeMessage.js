@@ -133,19 +133,30 @@ export class MozuMakeMessage extends plugin {
       msgContent.push(segment.image(imgUrls[imgUrls.length - 1]))
       if (imgUrls.length) imgUrls.pop()
     }
-    const QQListdata = AtQQ.length ? AtQQ : await this.e.group.getMemberArray()
+    const QQListdata = AtQQ.length
+      ? await Promise.all(
+          AtQQ.map(async (member) => ({
+            user_id: member,
+            nickname: (await Bot.pickUser(member).getInfo()).nickname,
+          }))
+        )
+      : await this.e.group.getMemberArray()
     const whiteQQList = Config.example.makeMessage.whiteQQList || []
-    const availableMembers = QQListdata.filter((member) => !whiteQQList.includes(Number(member.user_id)))
+    let availableMembers = QQListdata.filter((member) => !whiteQQList.includes(Number(member.user_id)))
     if (availableMembers.length === 0) return false
+    if (!AtQQ.length) {
+      const pickedIdx = new Set()
+      while (pickedIdx.size < Math.min(number, availableMembers.length)) {
+        pickedIdx.add(Math.floor(Math.random() * availableMembers.length))
+      }
+      availableMembers = [...pickedIdx].map((i) => availableMembers[i])
+    }
     let userIds = availableMembers.map((member) => member.user_id)
     let userNames = availableMembers.map((member) => member.nickname)
-    for (let i = 0; i < number; i++) {
+    for (let i = 0; i < availableMembers.length; i++) {
       if (!userIds.length) break
-      const index = AtQQ.length ? i : Math.floor(Math.random() * userIds.length)
-      const userId = userIds[index]
-      const userName = userNames[index]
-      userIds.splice(index, 1)
-      userNames.splice(index, 1)
+      const userId = userIds[i]
+      const userName = userNames[i]
       msgList.push({
         message: msgContent,
         user_id: userId,
