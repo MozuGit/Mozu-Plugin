@@ -1,10 +1,10 @@
 import Config from '#Config'
 
 import GroupAdmin from '../../model/groupAdmin/groupAdmin.js'
-import QQBotApi from '../../model/QQBot/interface.js'
+import translateChinaNum from '../../tools/translateChinaNum.js'
 
 const Numreg = '[零一壹二两三四五六七八九十百千万亿\\d]+'
-const TimeUnitReg = Object.keys({
+const Time_unit = {
   毫秒: 0.001,
   秒: 1,
   S: 1,
@@ -30,32 +30,19 @@ const TimeUnitReg = Object.keys({
   年: 31536000,
   Y: 31536000,
   YEAR: 31536000,
-}).join('|')
-
-/**
- * 从标准 at 消息段提取适配器用户 ID
- * @param {object} e 消息事件
- * @returns {Array<string|number>} 用户 ID 列表
- */
-function getAtUserIds(e) {
-  const selfIds = new Set([e.self_id, e.bot?.uin].filter(Boolean).map(String))
-  return e.message
-    .filter((item) => item.type === 'at' && item.is_you !== true && item.is_you !== 'true')
-    .map((item) => item.qq)
-    .filter((id) => id !== undefined && id !== null && String(id).trim() !== '')
-    .filter((id) => String(id) !== 'all' && !selfIds.has(String(id)))
 }
+const TimeUnitReg = Object.keys(Time_unit).join('|')
 
 export class MozuGroupAdmin extends plugin {
   constructor() {
     super({
-      name: '魔族陌:群管',
+      name: '魔族陌:官机群管',
       dsc: '给QQBot适配器添加群管功能',
       event: 'message',
       priority: Config.groupAdmin.setting.priority || 100,
       rule: [
         {
-          reg: `^#禁言\\s?((\\d+)\\s)?(${Numreg})?(${TimeUnitReg})?$^#禁言\s?(([A-Z0-9]+)\s)?(${Numreg})?(${TimeUnitReg})?$`,
+          reg: `^#禁言\s?(([A-Z0-9]+)\s)?(${Numreg})?(${TimeUnitReg})?$`,
           fnc: 'muteMember',
         },
         {
@@ -69,22 +56,51 @@ export class MozuGroupAdmin extends plugin {
   async muteMember(e) {
     if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable) return false
     if (!this.e.group) return false
-    return false //待更新
+    const Ga = new GroupAdmin(e)
+    const ids = [...(e.raw?.content || '').matchAll(/<@!?([^>\s]+)>/g)].map((m) => m[1])
+    const ats = e.mentions?.length
+      ? e.mentions.filter((member) => member.member_role === 'member')
+      : ids.map((member_openid) => ({ member_openid }))
+    const unit = e.msg.match(new RegExp(TimeUnitReg))?.[0]
+    let _unit = Time_unit[unit.toUpperCase()] ?? (/^\d+$/.test(unit) ? unit : 60)
+    const time = translateChinaNum(e.msg.match(new RegExp(Numreg))?.[0])
+    const muteList = ats.map((at) => ({ openid: at.member_openid, time: time * _unit, username: at.username }))
+    if (!muteList.length) return this.e.reply('未找到可禁言对象')
+    const ok = Ga.muteMembers(muteList)
+    if (ok) {
+      this.e.reply(
+        [
+          '**禁言成功**',
+          '>禁言时长：' + e.msg.match(new RegExp(Numreg))?.[0] + unit,
+          '***',
+          '**禁言列表**',
+          '>' + muteList.map((item) => item.username).join('\n'),
+          '***',
+        ].join('\n')
+      )
+    }
+    return true
   }
 
   async relieveAllMute(e) {
     if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable) return false
     if (!this.e.group) return false
     const Ga = new GroupAdmin(e)
-    const muteList = (await Ga.getMuteList()).map((item) => item.member_openid)
+    const muteList = (await Ga.getMuteList())
+      .map((item) => ({ openid: item.member_openid, username: item.username }))
+      .map((item) => ({ openid: item.openid, time: 0, username: item.username }))
     if (muteList.length) {
-      const ok = await new QQBotApi(e).muteMember(
-        muteList[0],
-        0,
-        muteList.slice(1).map((item) => ({ openid: item, time: 0 }))
-      )
+      const ok = Ga.muteMembers(muteList)
       if (ok) {
-        this.e.reply('解除全部禁言成功')
+        this.e.reply(
+          [
+            '**解除全部禁言成功**',
+            '***',
+            '**解除禁言列表**',
+            '>' + muteList.map((item) => item.username).join('\n'),
+            '***',
+          ].join('\n')
+        )
       }
     }
     return true
