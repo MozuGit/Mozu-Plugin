@@ -31,7 +31,7 @@ const PLAYER_INFO_KEY = 'Mozu:xiuxian:playerInfo' //玩家信息KEY
 const PLAYER_BAG_KEY = 'Mozu:xiuxian:playerBag' //玩家背包KEY
 const SECT_INFO_KEY = 'Mozu:xiuxian:sectInfo' //宗门信息KEY
 
-export default new (class {
+export default {
   async init(openid) {
     const [id, created] = await Redis.xiuxianInit(
       'Mozu:xiuxian:openid:forward',
@@ -60,12 +60,12 @@ export default new (class {
       event: created ? 'user_init' : 'user_login',
       data: { id: parseInt(id, 10) },
     }
-  }
+  },
 
   async hasPlayer(openid) {
     const exists = await Redis.hget('Mozu:xiuxian:openid:forward', openid)
     return !!exists
-  }
+  },
 
   async getUserInfo(id) {
     const key = `${PLAYER_INFO_KEY}:${id}`
@@ -163,7 +163,7 @@ export default new (class {
       retreat,
       power,
     }
-  }
+  },
 
   async getUserBag(id) {
     const { pills, arts } = Config.xiuxian.drop
@@ -211,7 +211,7 @@ export default new (class {
       pills: pillsData,
       arts: artsData,
     }
-  }
+  },
 
   async getSectInfo(sectId) {
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
@@ -241,7 +241,7 @@ export default new (class {
           : Config.xiuxian.sect.sect_level[Config.xiuxian.sect.sect_level.length - 1].memberMax,
       nextExp,
     }
-  }
+  },
 
   async getPower(id) {
     const key = `${PLAYER_INFO_KEY}:${id}`
@@ -263,11 +263,11 @@ export default new (class {
       Redis.zrem('Mozu:xiuxian:random:pvp', id)
     }
     return power
-  }
+  },
 
   async recordDayActive(openid) {
     Redis.sadd(`Mozu:xiuxian:active:${gettoday()}`, openid)
-  }
+  },
 
   async getPlayerCount() {
     const count = await Redis.get('Mozu:xiuxian:openid:counter')
@@ -279,7 +279,7 @@ export default new (class {
         countDay: countDay,
       },
     }
-  }
+  },
 
   async xiulian(id, isMaster) {
     let [cult, last, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '上次修炼时间', '闭关时间')
@@ -316,7 +316,7 @@ export default new (class {
         addcult,
       },
     }
-  }
+  },
 
   async kaicai(id, isMaster) {
     let [ls, last, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '上次开采时间', '闭关时间')
@@ -353,7 +353,7 @@ export default new (class {
         addls,
       },
     }
-  }
+  },
 
   async sign(id) {
     let [cult, ls, signCount, lastDay] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, [
@@ -385,7 +385,7 @@ export default new (class {
         addls,
       },
     }
-  }
+  },
 
   async realmUp(id, upAll = false) {
     const retreatStart = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '闭关时间'), 10) || 0
@@ -507,7 +507,7 @@ export default new (class {
         }
       }
     }
-  }
+  },
 
   async startRetreat(id) {
     const retreatStart = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '闭关时间')) || 0
@@ -526,7 +526,7 @@ export default new (class {
         event: 'in_retreat',
       }
     }
-  }
+  },
 
   async stopRetreat(id) {
     let [cult, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '闭关时间')
@@ -554,7 +554,7 @@ export default new (class {
         },
       }
     }
-  }
+  },
 
   async pvp(id, id2, isMaster) {
     if (id === id2) {
@@ -674,7 +674,7 @@ export default new (class {
         finalWinRate,
       },
     }
-  }
+  },
 
   async pvpRandom(id, isMaster) {
     let [cult, retreatStart, pvp_cd] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '闭关时间', '切磋冷却')
@@ -839,7 +839,7 @@ export default new (class {
         finalWinRate,
       },
     }
-  }
+  },
 
   async getRank(type, id) {
     const pipeline = Redis.pipeline()
@@ -1008,7 +1008,7 @@ export default new (class {
         value: targetPlayer.value,
       },
     }
-  }
+  },
 
   async huntBeast(id, beastInfo, isMaster) {
     let [cult, ls, last, retreatStart] = await Redis.hmget(
@@ -1075,7 +1075,7 @@ export default new (class {
         },
       }
     }
-  }
+  },
 
   async exploreSecretRealm(id, secretRealmInfo, count = 1) {
     const limitRealm = Config.xiuxian.drop.secretRealm_limit[secretRealmInfo.level] || 0
@@ -1146,7 +1146,7 @@ export default new (class {
         arts: arts,
       },
     }
-  }
+  },
 
   async usePill(id, pillId, count = 1, pillAll = false) {
     let [cult, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '闭关时间')
@@ -1221,7 +1221,7 @@ export default new (class {
         }
       }
     }
-  }
+  },
 
   async sellPill(id, pillId, count = 1, pillAll = false) {
     let [ls, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '闭关时间')
@@ -1296,7 +1296,7 @@ export default new (class {
         }
       }
     }
-  }
+  },
 
   async learnArt(id, artId, artAll = false) {
     let [cult, arts, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '功法列表', '闭关时间')
@@ -1402,7 +1402,7 @@ export default new (class {
         }
       }
     }
-  }
+  },
 
   async sellArt(id, artId, count = 1, artAll = false) {
     let [ls, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '闭关时间')
@@ -1477,7 +1477,7 @@ export default new (class {
         }
       }
     }
-  }
+  },
 
   async obtainSroot(id) {
     let [ls, sroot, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '灵根', '闭关时间')
@@ -1513,7 +1513,7 @@ export default new (class {
         event: 'is_sroot',
       }
     }
-  }
+  },
 
   async washSroot(id, count = 1) {
     let [ls, sroot, washsroot, retreatStart] = await Redis.hmget(
@@ -1598,7 +1598,7 @@ export default new (class {
         event: 'not_sroot',
       }
     }
-  }
+  },
 
   async replaceSroot(id, srootIndex) {
     let [sroot, washsroot, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵根', '洗灵根', '闭关时间')
@@ -1646,7 +1646,7 @@ export default new (class {
         event: 'not_sroot',
       }
     }
-  }
+  },
 
   async createSect(id) {
     let [ls, sectId, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '宗门ID', '闭关时间')
@@ -1695,7 +1695,7 @@ export default new (class {
         },
       }
     }
-  }
+  },
 
   async sectMember(id) {
     let sectId = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID'), 10) || 0
@@ -1712,7 +1712,7 @@ export default new (class {
         members: memberPermission,
       },
     }
-  }
+  },
 
   async joinSect(id, joinID) {
     let sectId = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID'), 10) || 0
@@ -1774,7 +1774,7 @@ export default new (class {
         event: 'join_sect_audit',
       }
     }
-  }
+  },
 
   async sectUp(id) {
     const sectId = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID'), 10)
@@ -1821,7 +1821,7 @@ export default new (class {
         event: 'sect_level_max',
       }
     }
-  }
+  },
 
   async signSect(id) {
     let [cult, ls, lastDay, sectId] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, [
@@ -1862,7 +1862,7 @@ export default new (class {
         sectExp,
       },
     }
-  }
+  },
 
   async listSect(id) {
     const sectCount = parseInt(await Redis.get('Mozu:xiuxian:sectid:counter'), 10) || 0
@@ -1901,7 +1901,7 @@ export default new (class {
         sectInfos,
       },
     }
-  }
+  },
 
   async auditSect(id) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
@@ -1938,7 +1938,7 @@ export default new (class {
         membersList: membersList || [],
       },
     }
-  }
+  },
 
   async auditSectMember(id, auditId, approved, auditAll = false) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
@@ -2068,7 +2068,7 @@ export default new (class {
         }
       }
     }
-  }
+  },
 
   async exitSect(id) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
@@ -2097,7 +2097,7 @@ export default new (class {
         event: 'sect_owner',
       }
     }
-  }
+  },
 
   async transferSect(id, transfer_id, confirmed = false) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
@@ -2137,7 +2137,7 @@ export default new (class {
         event: 'no_permission',
       }
     }
-  }
+  },
 
   async sectEnshrined(id, lsNum) {
     let [ls, sectId] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '宗门ID')
@@ -2184,7 +2184,7 @@ export default new (class {
         event: 'invalid_lsNum',
       }
     }
-  }
+  },
 
   async sectStore(id, page = 0) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
@@ -2205,7 +2205,7 @@ export default new (class {
         products: products,
       },
     }
-  }
+  },
 
   async sectSetAudit(id, noAudit) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
@@ -2225,7 +2225,7 @@ export default new (class {
         event: 'no_permission',
       }
     }
-  }
+  },
 
   async sectSetName(id, sectName) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
@@ -2297,7 +2297,7 @@ export default new (class {
         event: 'no_permission',
       }
     }
-  }
+  },
 
   async sectSetDesc(id, sectDesc) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
@@ -2369,7 +2369,7 @@ export default new (class {
         event: 'no_permission',
       }
     }
-  }
+  },
 
   async sectNameAudit(isMaster, approved = 0, auditAll = false, sectId = false) {
     if (isMaster) {
@@ -2415,7 +2415,7 @@ export default new (class {
         event: 'no_permission',
       }
     }
-  }
+  },
 
   async sectDescAudit(isMaster, approved = 0, auditAll = false, sectId = false) {
     if (isMaster) {
@@ -2461,7 +2461,7 @@ export default new (class {
         event: 'no_permission',
       }
     }
-  }
+  },
 
   async sectReset(sectId, isMaster, type) {
     if (isMaster) {
@@ -2483,7 +2483,7 @@ export default new (class {
         event: 'no_permission',
       }
     }
-  }
+  },
 
   async setSex(id, sexType) {
     const sex = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '性别')
@@ -2504,7 +2504,7 @@ export default new (class {
         sex: sexType,
       },
     }
-  }
+  },
 
   async setTitle(id, titleIndex) {
     let [titles, title] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '称号列表', '称号')
@@ -2523,7 +2523,7 @@ export default new (class {
         title: title,
       },
     }
-  }
+  },
 
   async genCdkey(user_id, msg, isMaster) {
     if (!isMaster) {
@@ -2563,7 +2563,7 @@ export default new (class {
         cdks,
       },
     }
-  }
+  },
 
   async delCdkey(user_id, msg, isMaster) {
     if (!isMaster) {
@@ -2614,7 +2614,7 @@ export default new (class {
         },
       }
     }
-  }
+  },
 
   async useCdkey(id, user_id, cdk) {
     if ((await Redis.exists(`Mozu:xiuxian:cdk:${cdk}`)) === 0) {
@@ -2720,7 +2720,7 @@ export default new (class {
         }
       }
     }
-  }
+  },
 
   async switchId(id, switch_id, isMaster) {
     if (!isMaster) {
@@ -2752,8 +2752,8 @@ export default new (class {
         event: 'not_switch_id',
       }
     }
-  }
-})()
+  },
+}
 
 function gettoday() {
   const currentDate = new Date()

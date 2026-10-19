@@ -1,6 +1,7 @@
 import Config from '#Config'
 
 import GroupAdmin from '../../model/groupAdmin/groupAdmin.js'
+import common from '../../model/groupAdmin/common.js'
 import translateChinaNum from '../../tools/translateChinaNum.js'
 
 const Numreg = '[零一壹二两三四五六七八九十百千万亿\\d]+'
@@ -56,14 +57,15 @@ export class MozuGroupAdmin extends plugin {
   async muteMember(e) {
     if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable) return false
     if (!this.e.group) return false
+    if (!common.checkPermission(e, 'admin', 'admin')) return true
     const Ga = new GroupAdmin(e)
     const ids = [...(e.raw?.content || '').matchAll(/<@!?([^>\s]+)>/g)].map((m) => m[1])
     const ats = e.mentions?.length
       ? e.mentions.filter((member) => member.member_role === 'member')
       : ids.map((member_openid) => ({ member_openid }))
     const unit = e.msg.match(new RegExp(TimeUnitReg))?.[0]
-    let _unit = Time_unit[unit.toUpperCase()] ?? (/^\d+$/.test(unit) ? unit : 60)
-    const time = translateChinaNum(e.msg.match(new RegExp(Numreg))?.[0])
+    let _unit = Time_unit[unit?.toUpperCase()] ?? (/^\d+$/.test(unit) ? unit : 60)
+    const time = translateChinaNum(e.msg.match(new RegExp(Numreg))?.[0]) ?? 1
     const muteList = ats.map((at) => ({ openid: at.member_openid, time: time * _unit, username: at.username }))
     if (!muteList.length) return this.e.reply('未找到可禁言对象')
     const ok = Ga.muteMembers(muteList)
@@ -71,7 +73,7 @@ export class MozuGroupAdmin extends plugin {
       this.e.reply(
         [
           '**禁言成功**',
-          '>禁言时长：' + e.msg.match(new RegExp(Numreg))?.[0] + unit,
+          '>禁言时长：' + (e.msg.match(new RegExp(Numreg))?.[0] ?? 1) + (unit ?? '分钟'),
           '***',
           '**禁言列表**',
           '>' + muteList.map((item) => item.username).join('\n'),
@@ -85,6 +87,7 @@ export class MozuGroupAdmin extends plugin {
   async relieveAllMute(e) {
     if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable) return false
     if (!this.e.group) return false
+    if (!common.checkPermission(e, 'admin', 'admin')) return true
     const Ga = new GroupAdmin(e)
     const muteList = (await Ga.getMuteList())
       .map((item) => ({ openid: item.member_openid, username: item.username }))

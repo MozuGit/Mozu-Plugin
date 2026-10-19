@@ -3,7 +3,7 @@ import OpenAI from 'openai'
 
 import Config from '#Config'
 
-export default new (class {
+export default {
   /**
    * AI审核文本
    * @param {string} messgae
@@ -23,5 +23,5 @@ export default new (class {
     } catch (err) {
       logger.error(logger.cyan('[魔族陌修仙][OpenAI]') + logger.red(util.inspect(err)))
     }
-  }
-})()
+  },
+}
