@@ -1,10 +1,10 @@
 export default {
   /**
    * 获取用户权限
-   * @param {*} e 接收到的事件对象
-   * @param {"master"|"member"|"admin"|"owner"} permission 用户所需的权限
-   * @param {"member"|"admin"} role Bot所需的权限
-   * @param {boolean} 是否发送消息
+   * @param {*} e - 接收到的事件对象
+   * @param {"master"|"member"|"admin"|"owner"} permission - 用户所需的权限
+   * @param {"member"|"admin"} role - Bot所需的权限
+   * @param {boolean} - 是否发送消息
    * @returns {boolean} 是否具有权限
    */
   checkPermission(e, permission = 'member', role = 'member', isReply = true) {

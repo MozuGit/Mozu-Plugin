@@ -6,7 +6,7 @@ import Config from '#Config'
 export default {
   /**
    * AI审核文本
-   * @param {string} messgae
+   * @param {string} messgae - 需要审核的文本
    * @returns 返回true表示内容正常
    */
   async aiAuditText(messgae) {

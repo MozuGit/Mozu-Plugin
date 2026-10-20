@@ -4,7 +4,10 @@ export default class QQBotApi {
     this.group_id = e.group_id.replace(this.bot.uin + ':', '')
   }
 
-  //获取群信息
+  /**
+   * 获取群信息
+   * @returns {Object} 群信息
+   */
   async getGroupInfo() {
     let result = null
     try {
@@ -15,7 +18,10 @@ export default class QQBotApi {
     return result
   }
 
-  //获取群内机器人状态
+  /**
+   * 获取群内机器人状态
+   * @returns {Object} 群内机器人状态
+   */
   async getGroupBotState() {
     let result = null
     try {
@@ -26,7 +32,10 @@ export default class QQBotApi {
     return result
   }
 
-  //获取群成员申请加入列表
+  /**
+   * 获取群成员申请加入列表
+   * @returns {Object} 群成员申请加入列表
+   */
   async getGroupJoinList() {
     try {
       const { result } = await this.bot.sdk.request.get(`/v2/groups/${this.group_id}/join_request_list`)
@@ -36,7 +45,10 @@ export default class QQBotApi {
     }
   }
 
-  //获取群禁言信息
+  /**
+   * 获取群禁言信息
+   * @returns {Object[]} 群禁言信息
+   */
   async getGroupMuteInfo() {
     try {
       const { data: result } = await this.bot.sdk.request.get(`/v2/groups/${this.group_id}/restrict_chat_setting`)
@@ -46,7 +58,15 @@ export default class QQBotApi {
     }
   }
 
-  //禁言群成员
+  /**
+   * 禁言群成员
+   * @param {string} openid - 需操作的openid
+   * @param {number} time - 禁言时间（单位：秒，0表示解除禁言）
+   * @param {Object[]} [obj] - 可选，额外的操作openid和禁言列表
+   * @param {string} obj[].openid - 需操作的openid
+   * @param {number} obj[].time - 禁言时间（单位：秒，0表示解除禁言）
+   * @returns {boolean} 返回操作成功或者失败
+   */
   async muteMember(openid, time = 0, obj = []) {
     const extra = Array.isArray(obj) ? obj : []
     const all = [

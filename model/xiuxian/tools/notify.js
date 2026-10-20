@@ -3,7 +3,7 @@ import { mqqapi } from '../../../lib/protocol.js'
 
 const prefix = Config.xiuxian.setting.forceSharp ? '/' : ''
 
-export default new (class {
+export default {
   async sectAuditName(sectId, sectName, isAI = false) {
     if (!Config?.masterQQ?.length) return
     const uins = Array.isArray(Bot.uin) ? Bot.uin : [Bot.uin]
@@ -49,7 +49,7 @@ export default new (class {
         }
       }
     }
-  }
+  },
 
   async sectAuditDesc(sectId, sectDesc, isAI = false) {
     if (!Config?.masterQQ?.length) return
@@ -96,5 +96,5 @@ export default new (class {
         }
       }
     }
-  }
-})()
+  },
+}
