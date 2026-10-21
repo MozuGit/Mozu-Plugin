@@ -6,7 +6,7 @@ export default class QQBotApi {
 
   /**
    * 获取群信息
-   * @returns {Object} 群信息
+   * @returns {Promise<Object>} 群信息
    */
   async getGroupInfo() {
     let result = null
@@ -20,7 +20,7 @@ export default class QQBotApi {
 
   /**
    * 获取群内机器人状态
-   * @returns {Object} 群内机器人状态
+   * @returns {Promise<Object>} 群内机器人状态
    */
   async getGroupBotState() {
     let result = null
@@ -34,7 +34,7 @@ export default class QQBotApi {
 
   /**
    * 获取群成员申请加入列表
-   * @returns {Object} 群成员申请加入列表
+   * @returns {Promise<Object>} 群成员申请加入列表
    */
   async getGroupJoinList() {
     try {
@@ -47,7 +47,7 @@ export default class QQBotApi {
 
   /**
    * 获取群禁言信息
-   * @returns {Object[]} 群禁言信息
+   * @returns {Promise<Object[]>} 群禁言信息
    */
   async getGroupMuteInfo() {
     try {
@@ -59,13 +59,13 @@ export default class QQBotApi {
   }
 
   /**
-   * 禁言群成员
+   * 设置群成员禁言
    * @param {string} openid - 需操作的openid
    * @param {number} time - 禁言时间（单位：秒，0表示解除禁言）
    * @param {Object[]} [obj] - 可选，额外的操作openid和禁言列表
    * @param {string} obj[].openid - 需操作的openid
    * @param {number} obj[].time - 禁言时间（单位：秒，0表示解除禁言）
-   * @returns {boolean} 返回操作成功或者失败
+   * @returns {Promise<boolean>} 返回操作成功或者失败
    */
   async muteMember(openid, time = 0, obj = []) {
     const extra = Array.isArray(obj) ? obj : []
@@ -92,6 +92,32 @@ export default class QQBotApi {
       try {
         await this.bot.sdk.request.post(`/v2/groups/${this.group_id}/restrict_chat_setting`, {
           members,
+        })
+      } catch (err) {
+        return false
+      }
+    }
+    return true
+  }
+
+  /**
+   * 群成员批量移除
+   * @param {string} openid - 需操作的openid
+   * @param {boolean} addBlack - 是否同时加入群黑名单，默认：false
+   * @param {string[]} openids - 额外的操作openid
+   * @returns {Promise<boolean>} 返回操作成功或者失败
+   */
+  async kickMember(openid, addBlack = false, openids = []) {
+    const normalize = (v) => {
+      return v == null ? [] : Array.isArray(v) ? v : [v]
+    }
+    const members = [...normalize(openid), ...normalize(openids)].map((item) => item.replace(this.bot.uin + ':', ''))
+    for (let i = 0; i < members.length; i += 20) {
+      const member_openids = members.slice(i, i + 20)
+      try {
+        await this.bot.sdk.request.post(`/v2/groups/${this.group_id}/batch_remove_members`, {
+          member_openids,
+          addBlack,
         })
       } catch (err) {
         return false

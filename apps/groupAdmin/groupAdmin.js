@@ -52,6 +52,10 @@ export class MozuGroupAdmin extends plugin {
           fnc: 'noMuteMember',
         },
         {
+          reg: '^#踢黑?$',
+          fnc: 'kickMember',
+        },
+        {
           reg: `^#解除全部禁言$`,
           fnc: 'relieveAllMute',
         },
@@ -73,11 +77,11 @@ export class MozuGroupAdmin extends plugin {
     const time = translateChinaNum(e.msg.match(new RegExp(Numreg))?.[0]) ?? 1
     const muteList = ats.map((at) => ({ openid: at.member_openid, time: time * _unit, username: at.username }))
     if (!muteList.length) return this.e.reply('未找到可禁言对象')
-    const ok = Ga.muteMembers(muteList)
+    const ok = await Ga.muteMembers(muteList)
     if (ok) {
       const muteText = []
       for (const mute of muteList) {
-        muteText.push(['> 群员：**' + (await mqqapi.command(mute.username, mute.openid)) + '**'].join('\n'))
+        muteText.push(['>群员：**' + (await mqqapi.command(mute.username, mute.openid)) + '**'].join('\n'))
       }
       this.e.reply(
         segment.markdown(
@@ -104,7 +108,7 @@ export class MozuGroupAdmin extends plugin {
     const ats = e.mentions?.length
       ? e.mentions.filter((member) => member.member_role === 'member')
       : ids.map((member_openid) => ({ member_openid }))
-    if (!ats.length) return this.e.reply('未找到解除禁言对象')
+    if (!ats.length) return this.e.reply('未找到可解除禁言对象')
     const muteMap = new Map(
       (await Ga.getMuteList()).map((item) => [
         item.member_openid,
@@ -120,18 +124,41 @@ export class MozuGroupAdmin extends plugin {
         muteTime: info?.muteTime,
       }
     })
-    const ok = Ga.muteMembers(muteList)
+    const ok = await Ga.muteMembers(muteList)
     if (ok) {
       const muteText = []
       for (const mute of muteList) {
         muteText.push(
           [
-            '> 群员：**' + (await mqqapi.command(mute.username, mute.openid)) + '**',
+            '>群员：**' + (await mqqapi.command(mute.username, mute.openid)) + '**',
             '禁言时间剩余：' + (mute.muteTime ? await mqqapi.command(timeDiff(mute.muteTime), mute.muteTime) : '未知'),
           ].join('\n')
         )
       }
       this.e.reply(segment.markdown(['**解除禁言成功**', '***', '**解除禁言列表**', ...muteText, '***'].join('\n')))
+    }
+    return true
+  }
+
+  async kickMember(e) {
+    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable) return false
+    if (!this.e.group) return false
+    if (!common.checkPermission(e, 'admin', 'admin')) return true
+    const Ga = new GroupAdmin(e)
+    const ids = [...(e.raw?.content || '').matchAll(/<@!?([^>\s]+)>/g)].map((m) => m[1])
+    const ats = e.mentions?.length
+      ? e.mentions.filter((member) => member.member_role === 'member')
+      : ids.map((member_openid) => ({ member_openid }))
+    if (!ats.length) return this.e.reply('未找到群成员对象')
+    const ok = await Ga.kickMembers(ats, e.msg.includes('黑'))
+    if (ok) {
+      const kickText = []
+      for (const at of ats) {
+        muteText.push(
+          ['>已踢出：**' + (await mqqapi.command(at?.username ?? at.member_openid, at.member_openid)) + '**'].join('\n')
+        )
+      }
+      this.e.reply(segment.markdown(['**踢出成功**', '***', '**踢出列表**', ...kickText, '***'].join('\n')))
     }
     return true
   }
@@ -148,12 +175,12 @@ export class MozuGroupAdmin extends plugin {
       muteTime: item.mute_expire_at,
     }))
     if (muteList.length) {
-      const ok = Ga.muteMembers(muteList)
+      const ok = await Ga.muteMembers(muteList)
       const muteText = []
       for (const mute of muteList) {
         muteText.push(
           [
-            '> 群员：**' + (await mqqapi.command(mute.username, mute.openid)) + '**',
+            '>群员：**' + (await mqqapi.command(mute.username, mute.openid)) + '**',
             '禁言时间剩余：' + (await mqqapi.command(timeDiff(mute.muteTime), mute.muteTime)),
           ].join('\n')
         )

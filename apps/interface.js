@@ -35,7 +35,7 @@ export class MozuInterface extends plugin {
     }
 
     //获取机器人群内状态
-    let groupBotState = JSON.parse(await Redis.get(`Mozu:groupbotstate:${group_id}`))
+    let groupBotState = JSON.parse(await Redis.get(`Mozu:groupbotstate:${group_id}`) || null)
     if (!groupBotState) {
       ;({ data: groupBotState } = await api.getGroupBotState())
       Redis.set(`Mozu:groupbotstate:${group_id}`, JSON.stringify(groupBotState), 'EX', 3600)
@@ -66,7 +66,14 @@ export class MozuInterface extends plugin {
     //设置群成员禁言
     if (!this.e.group.muteMember) {
       this.e.group.muteMember = async (openid, time = 0, obj = []) => {
-        return await api.muteMember(openid, (time = 0), (obj = []))
+        return await api.muteMember(openid, time, obj)
+      }
+    }
+
+    //群成员移除
+    if (!this.e.group.kickMember) {
+      this.e.group.kickMember = async (openid, addBlack = false, openids = []) => {
+        return await api.kickMember(openid, addBlack, openids)
       }
     }
     return false
