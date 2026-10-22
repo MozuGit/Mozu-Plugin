@@ -25,6 +25,7 @@
 
 - 可用 **锅巴面板** 进行配置
 - 由于作者精力有限，代码未经过深度测试，有问题请提交到[Issues](https://github.com/MozuGit/Mozu-Plugin/issues)
+- 插件文档：https://mozumiao.com
 
 ## 安装教程
 

@@ -154,7 +154,7 @@ export class MozuGroupAdmin extends plugin {
     if (ok) {
       const kickText = []
       for (const at of ats) {
-        muteText.push(
+        kickText.push(
           ['>已踢出：**' + (await mqqapi.command(at?.username ?? at.member_openid, at.member_openid)) + '**'].join('\n')
         )
       }

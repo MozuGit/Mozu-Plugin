@@ -29,11 +29,14 @@ export default class GroupAdmin {
 
   /**
    * 群成员批量移除
-   * @param {string[]} members - 移除群成员数组
+   * @param {string[]|Array<{member_openid?: string, openid?: string, id?:string}>} members - 移除群成员数组
    * @param {boolean} addBlack - 是否同时加入群黑名单，默认：false
    * @returns {Promise<boolean>} 表示移除是否成功
    */
   async kickMembers(members, addBlack = false) {
+    if (isObjectArray(members)) {
+      members = members.map(m => m.member_openid || m.openid || m.id)
+    }
     return await this.api.kickMember(members[0], addBlack, members.slice(1))
   }
 }
