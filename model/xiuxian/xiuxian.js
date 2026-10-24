@@ -32,6 +32,11 @@ const PLAYER_BAG_KEY = 'Mozu:xiuxian:playerBag' //玩家背包KEY
 const SECT_INFO_KEY = 'Mozu:xiuxian:sectInfo' //宗门信息KEY
 
 export default {
+  /**
+   * 初始化玩家
+   * @param {string} openid - 玩家原始ID
+   * @returns 修仙ID
+   */
   async init(openid) {
     const [id, created] = await Redis.xiuxianInit(
       'Mozu:xiuxian:openid:forward',
@@ -62,11 +67,21 @@ export default {
     }
   },
 
+  /**
+   * 判断玩家是否存在
+   * @param {string} openid
+   * @returns 玩家是否存在
+   */
   async hasPlayer(openid) {
     const exists = await Redis.hget('Mozu:xiuxian:openid:forward', openid)
     return !!exists
   },
 
+  /**
+   * 获取玩家信息
+   * @param {number} id - 修仙ID
+   * @returns 玩家详细信息
+   */
   async getUserInfo(id) {
     const key = `${PLAYER_INFO_KEY}:${id}`
     if ((await Redis.exists(`${PLAYER_INFO_KEY}:${id}`)) === 0) {
@@ -120,7 +135,7 @@ export default {
     const realmName =
       Config.xiuxian.Realm.Realms.length >= realm
         ? Config.xiuxian.Realm.Realms[realm - 1]?.name || '无'
-        : Config.xiuxian.Realm.Realms[Config.xiuxian.Realm.Realms.length].name || '未命名'
+        : Config.xiuxian.Realm.Realms[Config.xiuxian.Realm.Realms.length - 1].name || '未命名'
     const realmName2 = Config.xiuxian.Realm.Realms[realm]?.name
     const realmNeedExp = Config.xiuxian.Realm.Realms[realm]?.value
       ? Math.max(0, (Config.xiuxian.Realm.Realms[realm]?.value || 0) - cult)
@@ -165,6 +180,11 @@ export default {
     }
   },
 
+  /**
+   * 获取玩家背包信息
+   * @param {number} id 修仙ID
+   * @returns 玩家背包信息
+   */
   async getUserBag(id) {
     const { pills, arts } = Config.xiuxian.drop
     let [pillsData, artsData] = await Redis.hmget(`${PLAYER_BAG_KEY}:${id}`, '丹药', '功法')
@@ -213,6 +233,11 @@ export default {
     }
   },
 
+  /**
+   * 获取宗门信息
+   * @param {number} sectId - 修仙宗门ID
+   * @returns 宗门信息
+   */
   async getSectInfo(sectId) {
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return false
@@ -243,6 +268,11 @@ export default {
     }
   },
 
+  /**
+   * 计算玩家战力
+   * @param {number} id - 修仙ID
+   * @returns 玩家战力
+   */
   async getPower(id) {
     const key = `${PLAYER_INFO_KEY}:${id}`
     let [cult, realm, sroot, arts] = await Redis.hmget(key, '修为', '境界', '灵根', '功法列表')
@@ -269,6 +299,10 @@ export default {
     Redis.sadd(`Mozu:xiuxian:active:${gettoday()}`, openid)
   },
 
+  /**
+   * 获取修仙玩家数和当天玩家数
+   * @returns 修仙玩家数
+   */
   async getPlayerCount() {
     const count = await Redis.get('Mozu:xiuxian:openid:counter')
     const countDay = await Redis.scard(`Mozu:xiuxian:active:${gettoday()}`)
@@ -281,6 +315,12 @@ export default {
     }
   },
 
+  /**
+   * 修炼
+   * @param {number} id - 修仙ID
+   * @param {boolean} isMaster - 是否为主人
+   * @returns 修炼结果
+   */
   async xiulian(id, isMaster) {
     let [cult, last, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '上次修炼时间', '闭关时间')
     cult = parseInt(cult, 10)
@@ -318,6 +358,12 @@ export default {
     }
   },
 
+  /**
+   * 开采
+   * @param {number} id - 修仙ID
+   * @param {*} isMaster - 是否为主人
+   * @returns 开采结果
+   */
   async kaicai(id, isMaster) {
     let [ls, last, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '上次开采时间', '闭关时间')
     ls = parseInt(ls, 10)
@@ -355,13 +401,19 @@ export default {
     }
   },
 
+  /**
+   * 修仙签到
+   * @param {number} id - 修仙ID
+   * @returns 修仙签到结果
+   */
   async sign(id) {
-    let [cult, ls, signCount, lastDay] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, [
+    let [cult, ls, signCount, lastDay] = await Redis.hmget(
+      `${PLAYER_INFO_KEY}:${id}`,
       '修为',
       '灵石',
       '签到次数',
-      '上次签到时间',
-    ])
+      '上次签到时间'
+    )
     let { cult: addcult, ls: addls } = Config.xiuxian.xiuxian.sign
     const today = gettoday()
     if (lastDay && lastDay === today) {
@@ -387,6 +439,12 @@ export default {
     }
   },
 
+  /**
+   * 境界突破
+   * @param {number} id - 修仙ID
+   * @param {boolean} upAll - 是否一键突破
+   * @returns 突破结果
+   */
   async realmUp(id, upAll = false) {
     const retreatStart = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '闭关时间'), 10) || 0
     if (retreatStart !== 0) {
@@ -509,6 +567,11 @@ export default {
     }
   },
 
+  /**
+   * 开始闭关
+   * @param {number} id - 修仙ID
+   * @returns 开始闭关结果
+   */
   async startRetreat(id) {
     const retreatStart = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '闭关时间')) || 0
     if (retreatStart === 0) {
@@ -528,6 +591,11 @@ export default {
     }
   },
 
+  /**
+   * 结束闭关
+   * @param {number} id - 修仙ID
+   * @returns 结束闭关结果
+   */
   async stopRetreat(id) {
     let [cult, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '闭关时间')
     cult = parseInt(cult, 10)
@@ -556,6 +624,13 @@ export default {
     }
   },
 
+  /**
+   * 切磋
+   * @param {number} id - 发起方修仙ID
+   * @param {number} id2 - 被动方修仙ID
+   * @param {boolean} isMaster - 是否为主人
+   * @returns 切磋结果
+   */
   async pvp(id, id2, isMaster) {
     if (id === id2) {
       return {
@@ -676,6 +751,12 @@ export default {
     }
   },
 
+  /**
+   * 随机切磋
+   * @param {number} id - 修仙ID
+   * @param {*} isMaster - 是否为主人
+   * @returns 随机切磋结果
+   */
   async pvpRandom(id, isMaster) {
     let [cult, retreatStart, pvp_cd] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '闭关时间', '切磋冷却')
     cult = parseInt(cult, 10)
@@ -841,6 +922,12 @@ export default {
     }
   },
 
+  /**
+   * 获取修仙排行榜
+   * @param {string} type - 修仙排行榜类型
+   * @param {number} id - 修仙ID
+   * @returns 修仙排行榜名单
+   */
   async getRank(type, id) {
     const pipeline = Redis.pipeline()
     const idNum = parseInt(await Redis.get('Mozu:xiuxian:openid:counter'))
@@ -1010,6 +1097,13 @@ export default {
     }
   },
 
+  /**
+   * 猎杀妖兽
+   * @param {number} id - 修仙ID
+   * @param {Object} beastInfo - 妖兽信息
+   * @param {boolean} isMaster - 是否为主人
+   * @returns 猎杀妖兽结果
+   */
   async huntBeast(id, beastInfo, isMaster) {
     let [cult, ls, last, retreatStart] = await Redis.hmget(
       `${PLAYER_INFO_KEY}:${id}`,
@@ -1077,6 +1171,13 @@ export default {
     }
   },
 
+  /**
+   * 探索秘境
+   * @param {number} id - 修仙ID
+   * @param {Object} secretRealmInfo 秘境信息
+   * @param {number} count - 探索次数
+   * @returns 探索秘境结果
+   */
   async exploreSecretRealm(id, secretRealmInfo, count = 1) {
     const limitRealm = Config.xiuxian.drop.secretRealm_limit[secretRealmInfo.level] || 0
     let [ls, realm, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '境界', '闭关时间')
@@ -1148,6 +1249,14 @@ export default {
     }
   },
 
+  /**
+   * 使用丹药
+   * @param {number} id - 修仙ID
+   * @param {number} pillId - 丹药ID
+   * @param {number} count - 使用数量
+   * @param {boolean} pillAll - 使用全部
+   * @returns 使用丹药结果
+   */
   async usePill(id, pillId, count = 1, pillAll = false) {
     let [cult, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '闭关时间')
     cult = parseInt(cult, 10)
@@ -1223,6 +1332,14 @@ export default {
     }
   },
 
+  /**
+   * 出售丹药
+   * @param {number} id - 修仙ID
+   * @param {number} pillId - 丹药ID
+   * @param {number} count - 出售数量
+   * @param {boolean} pillAll - 出售全部
+   * @returns 出售丹药结果
+   */
   async sellPill(id, pillId, count = 1, pillAll = false) {
     let [ls, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '闭关时间')
     ls = parseInt(ls, 10)
@@ -1298,6 +1415,13 @@ export default {
     }
   },
 
+  /**
+   * 学习功法
+   * @param {number} id - 修仙ID
+   * @param {number} artId - 功法ID
+   * @param {boolean} artAll - 一键学习功法
+   * @returns 学习功法结果
+   */
   async learnArt(id, artId, artAll = false) {
     let [cult, arts, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '功法列表', '闭关时间')
     cult = parseInt(cult, 10)
@@ -1331,7 +1455,6 @@ export default {
               })
               break
             } else {
-              const learnArtIns = learnArtsIns.find((a) => a.id === art.id)
               learnArtsIns.push({
                 id: art.id,
                 count: 1,
@@ -1404,6 +1527,14 @@ export default {
     }
   },
 
+  /**
+   * 出售功法
+   * @param {number} id - 修仙ID
+   * @param {number} artId - 功法ID
+   * @param {number} count - 出售数量
+   * @param {boolean} artAll - 出售全部
+   * @returns 出售功法结果
+   */
   async sellArt(id, artId, count = 1, artAll = false) {
     let [ls, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '闭关时间')
     ls = parseInt(ls, 10)
@@ -1479,6 +1610,11 @@ export default {
     }
   },
 
+  /**
+   * 获取灵根
+   * @param {number} id - 修仙ID
+   * @returns 获取灵根结果
+   */
   async obtainSroot(id) {
     let [ls, sroot, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '灵根', '闭关时间')
     ls = parseInt(ls, 10)
@@ -1515,6 +1651,12 @@ export default {
     }
   },
 
+  /**
+   * 洗灵根
+   * @param {number} id - 修仙ID
+   * @param {number} count - 洗灵根次数
+   * @returns 洗灵根结果
+   */
   async washSroot(id, count = 1) {
     let [ls, sroot, washsroot, retreatStart] = await Redis.hmget(
       `${PLAYER_INFO_KEY}:${id}`,
@@ -1600,6 +1742,12 @@ export default {
     }
   },
 
+  /**
+   * 替换灵根
+   * @param {number} id - 修仙ID
+   * @param {number} srootIndex - 选择灵根索引
+   * @returns 替换灵根结果
+   */
   async replaceSroot(id, srootIndex) {
     let [sroot, washsroot, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵根', '洗灵根', '闭关时间')
     sroot = parseInt(sroot, 10) || 0
@@ -1648,6 +1796,11 @@ export default {
     }
   },
 
+  /**
+   * 创建宗门
+   * @param {number} id - 修仙ID
+   * @returns 创建宗门结果
+   */
   async createSect(id) {
     let [ls, sectId, retreatStart] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '宗门ID', '闭关时间')
     ls = parseInt(ls, 10)
@@ -1697,6 +1850,11 @@ export default {
     }
   },
 
+  /**
+   * 获取当前玩家下的宗门成员
+   * @param {number} id - 修仙ID
+   * @returns 宗门成员信息
+   */
   async sectMember(id) {
     let sectId = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID'), 10) || 0
     if (sectId === 0) {
@@ -1714,6 +1872,12 @@ export default {
     }
   },
 
+  /**
+   * 加入宗门
+   * @param {*} id - 修仙ID
+   * @param {*} joinID - 宗门ID
+   * @returns 加入宗门结果
+   */
   async joinSect(id, joinID) {
     let sectId = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID'), 10) || 0
     if (sectId !== 0) {
@@ -1776,6 +1940,11 @@ export default {
     }
   },
 
+  /**
+   * 宗门升级
+   * @param {number} id - 修仙ID
+   * @returns 宗门升级结果
+   */
   async sectUp(id) {
     const sectId = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID'), 10)
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
@@ -1823,13 +1992,19 @@ export default {
     }
   },
 
+  /**
+   * 宗门签到
+   * @param {number} id - 修仙ID
+   * @returns 宗门签到结果
+   */
   async signSect(id) {
-    let [cult, ls, lastDay, sectId] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, [
+    let [cult, ls, lastDay, sectId] = await Redis.hmget(
+      `${PLAYER_INFO_KEY}:${id}`,
       '修为',
       '灵石',
       '宗门上次签到时间',
-      '宗门ID',
-    ])
+      '宗门ID'
+    )
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return {
         event: 'no_sect',
@@ -1864,7 +2039,11 @@ export default {
     }
   },
 
-  async listSect(id) {
+  /**
+   * 获取宗门列表
+   * @returns 宗门列表信息（随机10个）
+   */
+  async listSect() {
     const sectCount = parseInt(await Redis.get('Mozu:xiuxian:sectid:counter'), 10) || 0
     let sectList = []
     const sectNum = sectCount > 10 ? 10 : sectCount
@@ -1903,6 +2082,11 @@ export default {
     }
   },
 
+  /**
+   * 宗门审核
+   * @param {number} id - 修仙ID
+   * @returns 宗门审核结果
+   */
   async auditSect(id) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
@@ -1940,6 +2124,14 @@ export default {
     }
   },
 
+  /**
+   * 宗门审核成员
+   * @param {number} id - 修仙ID
+   * @param {number} auditId - 审核ID
+   * @param {boolean} approved - 通过/拒绝
+   * @param {boolean} auditAll - 是否操作全部
+   * @returns 宗门审核成员状态
+   */
   async auditSectMember(id, auditId, approved, auditAll = false) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
@@ -2070,6 +2262,11 @@ export default {
     }
   },
 
+  /**
+   * 退出宗门
+   * @param {number} id - 修仙ID
+   * @returns 退出宗门结果
+   */
   async exitSect(id) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
@@ -2099,6 +2296,13 @@ export default {
     }
   },
 
+  /**
+   * 转让宗门
+   * @param {number} id - 修仙ID
+   * @param {number} transfer_id - 转让ID
+   * @param {boolean} confirmed - 是否确认
+   * @returns 转让宗门结果
+   */
   async transferSect(id, transfer_id, confirmed = false) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
@@ -2139,6 +2343,12 @@ export default {
     }
   },
 
+  /**
+   * 供奉宗门
+   * @param {number} id - 修仙ID
+   * @param {number} lsNum - 供奉灵石数量
+   * @returns 供奉宗门结果
+   */
   async sectEnshrined(id, lsNum) {
     let [ls, sectId] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '灵石', '宗门ID')
     ls = parseInt(ls, 10)
@@ -2186,6 +2396,12 @@ export default {
     }
   },
 
+  /**
+   * 宗门商店（未完善）
+   * @param {number} id - 修仙ID
+   * @param {number} page - 商品页数
+   * @returns 待更新
+   */
   async sectStore(id, page = 0) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
@@ -2207,6 +2423,12 @@ export default {
     }
   },
 
+  /**
+   * 设置宗门无需/需要审核
+   * @param {number} id - 修仙ID
+   * @param {boolean} noAudit - 无需审核
+   * @returns 设置结果
+   */
   async sectSetAudit(id, noAudit) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
@@ -2227,6 +2449,12 @@ export default {
     }
   },
 
+  /**
+   * 设置宗门名称
+   * @param {number} id - 修仙ID
+   * @param {string} sectName - 需设置宗门名称的文本
+   * @returns 设置宗门名称结果
+   */
   async sectSetName(id, sectName) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
@@ -2270,12 +2498,12 @@ export default {
                     }
                   }
                 }
+              //未匹配到违禁词，直接穿透
               case 3:
                 Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', sectName)
                 return {
                   event: 'sect_set_name_success',
                 }
-                break
             }
           } else {
             return {
@@ -2299,6 +2527,12 @@ export default {
     }
   },
 
+  /**
+   * 设置宗门简介
+   * @param {number} id - 修仙ID
+   * @param {string} sectDesc - 需设置宗门简介的文本
+   * @returns 设置宗门简介结果
+   */
   async sectSetDesc(id, sectDesc) {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
@@ -2342,12 +2576,12 @@ export default {
                     }
                   }
                 }
+              //未匹配到违禁词，直接穿透
               case 3:
                 Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门简介', sectDesc)
                 return {
                   event: 'sect_set_desc_success',
                 }
-                break
             }
           } else {
             return {
@@ -2371,6 +2605,14 @@ export default {
     }
   },
 
+  /**
+   * 宗门名称审核
+   * @param {boolean} isMaster - 是否为主人
+   * @param {boolean} approved - 通过/拒绝
+   * @param {boolean} auditAll - 全部审核
+   * @param {number} sectId - 宗门ID
+   * @returns 宗门名称审核结果
+   */
   async sectNameAudit(isMaster, approved = 0, auditAll = false, sectId = false) {
     if (isMaster) {
       const sectAuditName = (await Redis.hgetall('Mozu:xiuxian:audit:sect:name')) || {}
@@ -2417,6 +2659,14 @@ export default {
     }
   },
 
+  /**
+   * 宗门简介审核
+   * @param {boolean} isMaster - 是否为主人
+   * @param {boolean} approved - 通过/拒绝
+   * @param {boolean} auditAll - 全部审核
+   * @param {number} sectId - 宗门ID
+   * @returns 宗门简介审核结果
+   */
   async sectDescAudit(isMaster, approved = 0, auditAll = false, sectId = false) {
     if (isMaster) {
       const sectAuditDesc = (await Redis.hgetall('Mozu:xiuxian:audit:sect:desc')) || {}
@@ -2463,6 +2713,13 @@ export default {
     }
   },
 
+  /**
+   * 宗门名称简介重置
+   * @param {number} sectId - 宗门ID
+   * @param {boolean} isMaster - 是否为主人
+   * @param {'名称'|'简介'} type - 重置类型
+   * @returns 宗门重置结果
+   */
   async sectReset(sectId, isMaster, type) {
     if (isMaster) {
       if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
@@ -2485,6 +2742,12 @@ export default {
     }
   },
 
+  /**
+   * 设置性别
+   * @param {number} id - 修仙ID
+   * @param {'男'|'女'} sexType - 性别类型
+   * @returns 设置性别结果
+   */
   async setSex(id, sexType) {
     const sex = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '性别')
     if (sex !== '未设置') {
@@ -2506,6 +2769,12 @@ export default {
     }
   },
 
+  /**
+   * 设置称号
+   * @param {number} id - 修仙ID
+   * @param {number} titleIndex - 称号索引
+   * @returns 设置称号结果
+   */
   async setTitle(id, titleIndex) {
     let [titles, title] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '称号列表', '称号')
     titles = JSON.parse(titles || '[]')
@@ -2525,7 +2794,13 @@ export default {
     }
   },
 
-  async genCdkey(user_id, msg, isMaster) {
+  /**
+   * 生成兑换码
+   * @param {string} msg - 原始消息
+   * @param {boolean} isMaster - 是否为主人
+   * @returns 生成兑换码结果
+   */
+  async genCdkey(msg, isMaster) {
     if (!isMaster) {
       return {
         event: 'no_permissions',
@@ -2565,7 +2840,13 @@ export default {
     }
   },
 
-  async delCdkey(user_id, msg, isMaster) {
+  /**
+   * 删除兑换码
+   * @param {string} msg - 原始消息
+   * @param {boolean} isMaster - 是否为主人
+   * @returns 删除兑换码结果
+   */
+  async delCdkey(msg, isMaster) {
     if (!isMaster) {
       return {
         event: 'no_permissions',
@@ -2616,6 +2897,13 @@ export default {
     }
   },
 
+  /**
+   * 使用兑换码
+   * @param {number} id - 修仙ID
+   * @param {string} user_id - 玩家原始ID
+   * @param {string} cdk - 兑换码
+   * @returns 使用兑换码结果
+   */
   async useCdkey(id, user_id, cdk) {
     if ((await Redis.exists(`Mozu:xiuxian:cdk:${cdk}`)) === 0) {
       return {
@@ -2722,6 +3010,15 @@ export default {
     }
   },
 
+  /**
+   * 切换ID
+   * 慎用！！！！
+   * 注意：使用前需双方退出宗门
+   * @param {number} id - 切换ID
+   * @param {number} switch_id - 切换ID
+   * @param {boolean} isMaster - 是否为主人
+   * @returns 切换结果
+   */
   async switchId(id, switch_id, isMaster) {
     if (!isMaster) {
       return {
