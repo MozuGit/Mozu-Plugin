@@ -40,6 +40,11 @@ export const handleLogin = async (req, res) => {
       return await handleResetPassword(req, res)
     }
 
+    // 修改访问密码（需要登录）
+    if (action === 'change_password') {
+      return await handleChangePassword(req, res)
+    }
+
     //退出登录
     if (action === 'exit') {
       return await handleExitLogin(req, res)
@@ -130,6 +135,124 @@ const handleResetPassword = async (req, res) => {
   res.json({
     success: true,
   })
+}
+
+// 修改访问密码（登录后）
+const handleChangePassword = async (req, res) => {
+  if (req.method !== 'POST') {
+    return res.status(405).json({
+      success: false,
+      message: '请求方法不支持',
+    })
+  }
+
+  const auth = await validateToken(req)
+  if (!auth.valid) {
+    return res.status(401).json({
+      success: false,
+      message: auth.error,
+    })
+  }
+
+  const { currentPassword, newPassword, token } = req.body || {}
+
+  if (typeof newPassword !== 'string' || newPassword.length < 6) {
+    return res.json({
+      success: false,
+      message: '新密码至少需要 6 位',
+    })
+  }
+  if (newPassword.length > 128) {
+    return res.json({
+      success: false,
+      message: '新密码不能超过 128 位',
+    })
+  }
+
+  const ip = getIP(req)
+  const attemptKey = `Mozu:panel:password-change:error:${ip}`
+  const attempts = parseInt(await Redis.get(attemptKey), 10) || 0
+  if (attempts >= 5) {
+    return res.json({
+      success: false,
+      message: '密码修改尝试次数过多，请稍后再试',
+    })
+  }
+
+  const configuredPassword = Config.panel.login.password
+  if (configuredPassword) {
+    const currentOk =
+      typeof currentPassword === 'string' &&
+      currentPassword.length > 0 &&
+      (await verifyPassword(currentPassword, configuredPassword))
+    if (!currentOk) {
+      await increasePasswordAttempts(attemptKey)
+      return res.json({
+        success: false,
+        message: '当前密码错误',
+      })
+    }
+  }
+
+  if (isTotpEnabled() && !TwoFactorAuth.verifyToken(Config.panel.login.totp.secret, token)) {
+    await increasePasswordAttempts(attemptKey)
+    return res.json({
+      success: false,
+      message: token ? 'TOTP 验证码错误' : '请输入 TOTP 动态验证码',
+    })
+  }
+
+  if (configuredPassword && (await verifyPassword(newPassword, configuredPassword))) {
+    return res.json({
+      success: false,
+      message: '新密码不能与当前密码相同',
+    })
+  }
+
+  const saved = Config.modify('panel', 'login', 'password', await hashSHA256(newPassword))
+  if (!saved) {
+    return res.json({
+      success: false,
+      message: '密码写入失败，请检查 config/panel 目录权限',
+    })
+  }
+
+  await Redis.del(attemptKey)
+
+  const newToken = crypto.randomBytes(32).toString('hex')
+  const newTokenKey = tokenKey(newToken)
+  await Redis.set(newTokenKey, '1', 'EX', TOKEN_TTL)
+
+  try {
+    const keys = await Redis.keys(tokenKey('*'))
+    const staleKeys = keys.filter((key) => key !== newTokenKey)
+    if (staleKeys.length > 0) {
+      await Redis.del(...staleKeys)
+    }
+  } catch (error) {
+    logger.warn(`[魔族陌面版] 清理旧登录令牌失败：${error?.message || error}`)
+  }
+
+  logger.info('[魔族陌面版] 管理员密码已修改，旧登录会话已注销')
+
+  res.json({
+    success: true,
+    message: '密码修改成功，其他设备已退出登录',
+    data: {
+      token: newToken,
+    },
+  })
+}
+
+async function verifyPassword(password, configuredPassword) {
+  if (password === undefined || password === null || password === '') return false
+  const input = String(password)
+  return (await hashSHA256(input)) === configuredPassword || safeEqual(input, String(configuredPassword))
+}
+
+async function increasePasswordAttempts(key) {
+  const attempts = await Redis.incr(key)
+  if (attempts === 1) await Redis.expire(key, 300)
 }
 
 // 普通登录

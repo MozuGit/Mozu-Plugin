@@ -84,7 +84,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   AppstoreOutlined,
@@ -94,17 +94,23 @@ import {
   LogoutOutlined,
 } from '@ant-design/icons-vue'
 import { useGlassPointer } from './composables/useGlassPointer'
+import { useAppearance } from './composables/useAppearance'
 
 const router = useRouter()
 const route = useRoute()
 
-// 全局字体
-const themeConfig = {
+const { accentColor, fontStack, radiusToken } = useAppearance()
+
+// 全局字体与强调色跟随外观设置
+const themeConfig = computed(() => ({
   token: {
-    fontFamily:
-      "'Loli', 'Heiti SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', sans-serif",
+    fontFamily: fontStack.value,
+    colorPrimary: accentColor.value,
+    colorInfo: accentColor.value,
+    colorLink: accentColor.value,
+    borderRadius: radiusToken.value,
   },
-}
+}))
 
 const isMobile = ref(false)
 const checkMobile = () => {
@@ -140,21 +146,23 @@ const validRouteNames = [
   'xiuxianPlayer',
   'xiuxianSect',
   'xiuxianBackup',
-  'settings',
+  'settingsAppearance',
+  'settingsSecurity',
   'about',
 ]
 
 const pageTitles = {
   index: '主页',
   xiuxian: '魔族陌修仙',
-  settings: '设置',
+  settingsAppearance: '外观设置',
+  settingsSecurity: '安全设置',
   about: '关于',
 }
 
 watch(
   () => route.name,
   (name) => {
-    if (name !== 'login') {
+    if (name && name !== 'login') {
       let subPageTitle = ''
       if (!validRouteNames.includes(name)) {
         router.push('/xiuxian')
@@ -171,6 +179,9 @@ watch(
       ) {
         menuKey = 'xiuxian'
         subPageTitle = '魔族陌修仙'
+      }
+      if (name === 'settingsAppearance' || name === 'settingsSecurity') {
+        menuKey = 'settings'
       }
       selectedKeys.value = [menuKey]
       document.title = (pageTitles[name] || subPageTitle) + ' - MozuAdmin'

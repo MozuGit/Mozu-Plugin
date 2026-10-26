@@ -58,8 +58,23 @@ const routes = [
   },
   {
     path: '/settings',
-    name: 'settings',
     component: () => import('../views/settings.vue'),
+    children: [
+      {
+        path: '',
+        redirect: '/settings/appearance',
+      },
+      {
+        path: 'appearance',
+        name: 'settingsAppearance',
+        component: () => import('../views/settings/appearance.vue'),
+      },
+      {
+        path: 'security',
+        name: 'settingsSecurity',
+        component: () => import('../views/settings/security.vue'),
+      },
+    ],
   },
   {
     path: '/about',

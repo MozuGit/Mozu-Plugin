@@ -1,0 +1,66 @@
+/* 外观偏好：背景模式与动效强度 */
+html[data-background='gradient'] .lg-aurora {
+  background-color: #f1f5ff;
+  background-image:
+    radial-gradient(90% 70% at 15% 8%, rgba(var(--lg-aurora-cyan), 0.28) 0%, transparent 62%),
+    radial-gradient(80% 70% at 88% 12%, rgba(var(--lg-aurora-violet), 0.26) 0%, transparent 64%),
+    radial-gradient(90% 80% at 70% 100%, rgba(var(--lg-aurora-pink), 0.2) 0%, transparent 68%),
+    linear-gradient(160deg, #f8faff 0%, #eef2fb 52%, #f5f7ff 100%);
+}
+
+html[data-background='gradient'] .lg-aurora__blob,
+html[data-background='gradient'] .lg-aurora::before,
+html[data-background='solid'] .lg-aurora__blob,
+html[data-background='solid'] .lg-aurora::before,
+html[data-background='solid'] .lg-aurora::after {
+  display: none;
+}
+
+html[data-background='solid'] .lg-aurora {
+  background-color: #eef1fb;
+  background-image: none;
+}
+
+html[data-motion='reduced'] .lg-aurora__blob {
+  animation-duration: 72s;
+  opacity: 0.55;
+}
+
+html[data-motion='reduced'] .lg-glass__sheen::after,
+html[data-motion='reduced'] .ant-card::after,
+html[data-motion='reduced'] .ant-modal-content::after {
+  animation: none !important;
+}
+
+html[data-motion='reduced'] .ant-card:hover,
+html[data-motion='reduced'] .lg-hoverable:hover,
+html[data-motion='reduced'] .lg-glass__specular:hover::before {
+  transform: none;
+}
+
+html[data-motion='reduced'] .fade-in-card,
+html[data-motion='reduced'] .lg-stagger {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0ms !important;
+  opacity: 1;
+  transform: none;
+}
+
+html[data-motion='off'] *,
+html[data-motion='off'] *::before,
+html[data-motion='off'] *::after {
+  animation: none !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-motion='off'] .fade-in-card,
+html[data-motion='off'] .lg-stagger {
+  opacity: 1;
+  transform: none;
+}
+
+html[data-motion='off'] .ant-card:hover,
+html[data-motion='off'] .lg-hoverable:hover {
+  transform: none;
+}
