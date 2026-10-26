@@ -35,7 +35,7 @@ export class MozuInterface extends plugin {
     }
 
     //获取机器人群内状态
-    let groupBotState = JSON.parse(await Redis.get(`Mozu:groupbotstate:${group_id}`) || null)
+    let groupBotState = JSON.parse((await Redis.get(`Mozu:groupbotstate:${group_id}`)) || null)
     if (!groupBotState) {
       ;({ data: groupBotState } = await api.getGroupBotState())
       Redis.set(`Mozu:groupbotstate:${group_id}`, JSON.stringify(groupBotState), 'EX', 3600)

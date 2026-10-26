@@ -12,17 +12,24 @@
         </a-button>
       </template>
       <a-row :gutter="[16, 16]">
-        <a-col :xs="24" :sm="12">
+        <a-col :xs="24" :sm="8">
           <a-statistic title="修仙人数" :value="displayPlayerCount" class="statistic-item">
             <template #suffix>
               <span style="font-size: 16px; color: #52c41a">人</span>
             </template>
           </a-statistic>
         </a-col>
-        <a-col :xs="24" :sm="12">
+        <a-col :xs="24" :sm="8">
           <a-statistic title="宗门数量" :value="displaySectCount" class="statistic-item">
             <template #suffix>
               <span style="font-size: 16px; color: #1890ff">个</span>
+            </template>
+          </a-statistic>
+        </a-col>
+        <a-col :xs="24" :sm="8">
+          <a-statistic title="昨日新增（新注册）" :value="displayYesterdayNewPlayers" class="statistic-item">
+            <template #suffix>
+              <span style="font-size: 16px; color: #fa8c16">人</span>
             </template>
           </a-statistic>
         </a-col>
@@ -33,6 +40,14 @@
       <template #title>
         <span>修仙活跃分析</span>
       </template>
+      <template #extra>
+        <a-segmented
+          v-model:value="activeRange"
+          :options="rangeOptions"
+          :disabled="rangeLoading"
+          class="range-segmented"
+        />
+      </template>
       <a-row :gutter="[16, 16]" style="margin-bottom: 20px">
         <a-col :xs="24" :sm="12">
           <a-statistic title="今日活跃人数" :value="displayTodayActive" class="statistic-item active-statistic">
@@ -42,7 +57,7 @@
           </a-statistic>
         </a-col>
         <a-col :xs="24" :sm="12">
-          <a-statistic title="近10天平均人数" :value="displayAvgActive" class="statistic-item avg-statistic">
+          <a-statistic :title="avgTitle" :value="displayAvgActive" class="statistic-item avg-statistic">
             <template #suffix>
               <span style="font-size: 16px; color: #722ed1">人</span>
             </template>
@@ -55,7 +70,7 @@
 
     <a-modal
       v-model:open="modalVisible"
-      :title="`${selectedDate} 活跃玩家列表`"
+      :title="modalTitle"
       width="800px"
       :footer="null"
       class="player-modal"
@@ -105,7 +120,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, onBeforeUnmount, computed } from 'vue'
+import { ref, onMounted, nextTick, onBeforeUnmount, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { CopyOutlined, ReloadOutlined } from '@ant-design/icons-vue'
@@ -113,22 +128,45 @@ import * as echarts from 'echarts'
 
 const playerCount = ref(0)
 const sectCount = ref(0)
+const yesterdayNewPlayers = ref(0)
 const todayActiveCount = ref(0)
 const avgActiveCount = ref(0)
 const activeTrend = ref([])
+const activeRange = ref(10)
+const rangeLoading = ref(false)
 const displayPlayerCount = ref(0)
 const displaySectCount = ref(0)
+const displayYesterdayNewPlayers = ref(0)
 const displayTodayActive = ref(0)
 const displayAvgActive = ref(0)
 const loading = ref(false)
 const refreshing = ref(false)
 const chartRef = ref(null)
 let chartInstance = null
+let requestSeq = 0
+let resizeTimer = null
+
+const rangeOptions = [
+  { label: '近7天', value: 7 },
+  { label: '近10天', value: 10 },
+  { label: '近14天', value: 14 },
+  { label: '近30天', value: 30 },
+  { label: '近一年', value: 365 },
+]
+
+const avgTitle = computed(() => {
+  return activeRange.value === 365 ? '近一年月均人数' : `近${activeRange.value}天平均人数`
+})
 
 const modalVisible = ref(false)
 const playerLoading = ref(false)
 const playerList = ref([])
 const selectedDate = ref('')
+const selectedPointType = ref('day')
+
+const modalTitle = computed(() => {
+  return `${selectedDate.value} ${selectedPointType.value === 'month' ? '月活跃玩家列表' : '活跃玩家列表'}`
+})
 
 const router = useRouter()
 
@@ -217,11 +255,13 @@ const getFullDate = (offset) => {
   return `${year}-${month}-${day}`
 }
 
-const fetchActivePlayers = async (dateStr) => {
+const fetchActivePlayers = async (point) => {
   playerLoading.value = true
   const token = localStorage.getItem('token')
+  const query =
+    point.type === 'month' ? `month=${encodeURIComponent(point.date)}` : `date=${encodeURIComponent(point.date)}`
   try {
-    const res = await fetch(`/api/xiuxian/get_active_players?date=${dateStr}`, {
+    const res = await fetch(`/api/xiuxian/get_active_players?${query}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -263,12 +303,12 @@ const initChart = () => {
 }
 
 const showPlayerList = (index) => {
-  if (index >= 0 && index < activeTrend.value.length) {
-    const fullDate = getFullDate(9 - index)
-    selectedDate.value = fullDate
-    modalVisible.value = true
-    fetchActivePlayers(fullDate)
-  }
+  const point = activeTrend.value[index]
+  if (!point) return
+  selectedDate.value = point.date
+  selectedPointType.value = point.type
+  modalVisible.value = true
+  fetchActivePlayers(point)
 }
 
 const handleContainerClick = (event) => {
@@ -319,9 +359,11 @@ const updateChart = (data) => {
 
   if (!chartInstance) return
 
-  const dates = data.map((item) => item.date)
+  const isMonthly = activeRange.value === 365
+  const isCompact = window.innerWidth <= 768
+  const dates = data.map((item) => item.label || item.date)
   const values = data.map((item) => item.active)
-  const maxValue = Math.max(...values)
+  const maxValue = Math.max(0, ...values)
   let yMax
   if (maxValue <= 10) {
     yMax = Math.ceil(maxValue * 1.5)
@@ -331,6 +373,9 @@ const updateChart = (data) => {
     yMax = Math.ceil(maxValue / 50) * 50 + 50
   } else {
     yMax = Math.ceil(maxValue / 100) * 100 + 100
+  }
+  if (yMax < 5) {
+    yMax = 5
   }
   const yMin = 0
   let interval
@@ -355,8 +400,12 @@ const updateChart = (data) => {
       confine: true,
       formatter: (params) => {
         const param = params[0]
-        return `<div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">${param.name}</div>
-                <div style="font-size: 13px; color: #0e7490;">活跃人数：<strong>${param.value}</strong> 人</div>
+        const point = activeTrend.value[param.dataIndex]
+        const isMonthPoint = point?.type === 'month'
+        const title = isMonthPoint ? point.date : param.name
+        const label = isMonthPoint ? '月活跃人数' : '活跃人数'
+        return `<div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">${title}</div>
+                <div style="font-size: 13px; color: #0e7490;">${label}：<strong>${param.value}</strong> 人</div>
                 <div style="font-size: 12px; color: #999; margin-top: 4px;">点击查看详细列表</div>`
       },
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -384,8 +433,14 @@ const updateChart = (data) => {
       },
       axisLabel: {
         color: '#666',
-        fontSize: 12,
+        fontSize: isMonthly ? 11 : 12,
         fontWeight: 500,
+        interval: 'auto',
+        formatter: (value) => {
+          if (!isMonthly) return value
+          const month = value.slice(5)
+          return /^\d{2}$/.test(month) ? `${Number(month)}月` : value
+        },
       },
       axisTick: {
         alignWithLabel: true,
@@ -413,7 +468,7 @@ const updateChart = (data) => {
           return Math.round(value)
         },
       },
-      name: '活跃人数',
+      name: isMonthly ? '月活跃人数' : '活跃人数',
       nameTextStyle: {
         color: '#999',
         fontSize: 12,
@@ -421,12 +476,12 @@ const updateChart = (data) => {
     },
     series: [
       {
-        name: '活跃人数',
+        name: isMonthly ? '月活跃人数' : '活跃人数',
         type: 'line',
         data: values,
         smooth: true,
         symbol: 'circle',
-        symbolSize: 12,
+        symbolSize: data.length > 20 ? 8 : 12,
         lineStyle: {
           width: 3,
           color: '#0891b2',
@@ -462,7 +517,7 @@ const updateChart = (data) => {
           },
         },
         label: {
-          show: true,
+          show: data.length <= 14 && !(isMonthly && isCompact),
           position: 'top',
           distance: 8,
           color: '#0e7490',
@@ -482,16 +537,56 @@ const updateChart = (data) => {
   chartInstance.resize()
 }
 
-const fetchData = async (isSilent = false) => {
+const normalizeTrend = (payload) => {
+  if (Array.isArray(payload.trend) && payload.trend.length > 0) {
+    return payload.trend.map((item) => {
+      const type = item.type === 'month' ? 'month' : 'day'
+      const date = String(item.date || '')
+      return {
+        date,
+        label: item.label || (type === 'month' ? date : date.slice(5)),
+        active: Math.round(Number(item.active) || 0),
+        type,
+      }
+    })
+  }
+
+  if (Array.isArray(payload.todayActive) && payload.todayActive.length > 0) {
+    return payload.todayActive.map((value, index) => ({
+      date: getFullDate(9 - index),
+      label: formatDate(9 - index),
+      active: Math.round(value || 0),
+      type: 'day',
+    }))
+  }
+
+  const baseValue = Math.round(payload.todayActive || 0)
+  const trend = []
+  for (let i = 9; i >= 0; i--) {
+    const variation = Math.random() * 0.4 - 0.2
+    const value = Math.max(0, Math.round(baseValue * (1 + variation * (1 - i / 10))))
+    trend.push({
+      date: getFullDate(i),
+      label: formatDate(i),
+      active: i === 0 ? baseValue : value,
+      type: 'day',
+    })
+  }
+  return trend
+}
+
+const fetchData = async (isSilent = false, range = activeRange.value, animateOverview = true) => {
   if (!isSilent) {
     loading.value = true
   } else {
     refreshing.value = true
   }
+  rangeLoading.value = true
 
+  const seq = ++requestSeq
   const token = localStorage.getItem('token')
   try {
-    const res = await fetch('/api/xiuxian/getInfo', {
+    const res = await fetch(`/api/xiuxian/getInfo?range=${range}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -501,46 +596,43 @@ const fetchData = async (isSilent = false) => {
       localStorage.removeItem('token')
       router.push('/login')
       document.title = '魔族陌 - 登录'
-      return
+      return false
     }
     const data = await res.json()
-    if (data.success) {
-      const newPlayerCount = Math.round(data.data.playerCount || 0)
-      const newSectCount = Math.round(data.data.sectCount || 0)
-      let newTodayActive = 0
-      let trendArray = []
-      if (data.data.todayActive && Array.isArray(data.data.todayActive)) {
-        trendArray = data.data.todayActive.map((value, index) => ({
-          date: formatDate(9 - index),
-          active: Math.round(value || 0),
-        }))
-        newTodayActive = trendArray.length > 0 ? trendArray[trendArray.length - 1].active : 0
-      } else {
-        const baseValue = Math.round(data.data.todayActive || 0)
-        newTodayActive = baseValue
+    if (!data.success) {
+      message.error(data.message || '获取数据失败')
+      return false
+    }
+    if (seq !== requestSeq) return false
 
-        trendArray = []
-        for (let i = 9; i >= 0; i--) {
-          const variation = Math.random() * 0.4 - 0.2
-          const value = Math.max(0, Math.round(baseValue * (1 + variation * (1 - i / 10))))
-          trendArray.push({
-            date: formatDate(i),
-            active: i === 0 ? baseValue : value,
-          })
-        }
-      }
-
-      const newAvgActive =
-        trendArray.length > 0
+    const payload = data.data || {}
+    const newPlayerCount = Math.round(payload.playerCount || 0)
+    const newSectCount = Math.round(payload.sectCount || 0)
+    const newYesterdayNewPlayers = Math.round(payload.yesterdayNewPlayers || 0)
+    const trendArray = normalizeTrend(payload)
+    const legacyActive = Array.isArray(payload.todayActive) ? payload.todayActive : []
+    const todayPoint = trendArray.find((item) => item.date === getFullDate(0))
+    const newTodayActive =
+      legacyActive.length > 0
+        ? Math.round(legacyActive[legacyActive.length - 1] || 0)
+        : todayPoint
+          ? todayPoint.active
+          : 0
+    const newAvgActive =
+      typeof payload.average === 'number'
+        ? Math.round(payload.average)
+        : trendArray.length > 0
           ? Math.round(trendArray.reduce((sum, item) => sum + item.active, 0) / trendArray.length)
           : 0
 
-      playerCount.value = newPlayerCount
-      sectCount.value = newSectCount
-      todayActiveCount.value = newTodayActive
-      avgActiveCount.value = newAvgActive
-      activeTrend.value = trendArray
+    playerCount.value = newPlayerCount
+    sectCount.value = newSectCount
+    yesterdayNewPlayers.value = newYesterdayNewPlayers
+    todayActiveCount.value = newTodayActive
+    avgActiveCount.value = newAvgActive
+    activeTrend.value = trendArray
 
+    if (animateOverview) {
       const animationDuration = isSilent ? 800 : 1500
 
       animateNumber(newPlayerCount, displayPlayerCount, animationDuration)
@@ -562,36 +654,73 @@ const fetchData = async (isSilent = false) => {
         },
         isSilent ? 300 : 600
       )
-
-      await nextTick()
-      initChart()
-      updateChart(trendArray)
-
-      if (isSilent) {
-        message.success('数据已更新')
-      }
+      setTimeout(
+        () => {
+          animateNumber(newYesterdayNewPlayers, displayYesterdayNewPlayers, animationDuration)
+        },
+        isSilent ? 400 : 800
+      )
+    } else {
+      displayPlayerCount.value = newPlayerCount
+      displaySectCount.value = newSectCount
+      displayYesterdayNewPlayers.value = newYesterdayNewPlayers
+      displayTodayActive.value = newTodayActive
+      animateNumber(newAvgActive, displayAvgActive, isSilent ? 500 : 700)
     }
+
+    await nextTick()
+    initChart()
+    updateChart(trendArray)
+
+    if (isSilent) {
+      message.success('数据已更新')
+    }
+    return true
   } catch (error) {
     if (isSilent) {
       message.error('刷新失败，请重试')
     } else {
       message.error('获取数据失败:', error)
     }
+    return false
   } finally {
     loading.value = false
     refreshing.value = false
+    if (seq === requestSeq) {
+      rangeLoading.value = false
+    }
   }
 }
+
+let revertingRange = false
+watch(activeRange, async (range, previous) => {
+  if (revertingRange) {
+    revertingRange = false
+    return
+  }
+  if (!rangeOptions.some((item) => item.value === range)) return
+
+  const ok = await fetchData(false, range, false)
+  if (!ok && activeRange.value === range) {
+    revertingRange = true
+    activeRange.value = previous
+  }
+})
 
 const refreshBasicData = async () => {
   if (refreshing.value) return
-  await fetchData(true)
+  await fetchData(true, activeRange.value, true)
 }
 
 const handleResize = () => {
-  if (chartInstance) {
+  clearTimeout(resizeTimer)
+  resizeTimer = setTimeout(() => {
+    if (!chartInstance) return
     chartInstance.resize()
-  }
+    if (activeTrend.value.length > 0) {
+      updateChart(activeTrend.value)
+    }
+  }, 150)
 }
 
 onMounted(() => {
@@ -601,6 +730,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
+  clearTimeout(resizeTimer)
   if (chartInstance) {
     chartInstance.dispose()
     chartInstance = null
@@ -634,6 +764,10 @@ onBeforeUnmount(() => {
   animation-delay: 0.35s;
 }
 
+.statistic-item:nth-child(3) {
+  animation-delay: 0.55s;
+}
+
 .active-statistic {
   animation-delay: 0.3s;
 }
@@ -656,6 +790,26 @@ onBeforeUnmount(() => {
 .trend-card :deep(.ant-card-head-title) {
   color: #3b6fd4;
   font-size: 17px;
+}
+
+.trend-card :deep(.ant-card-head-wrapper) {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+.range-segmented {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.range-segmented :deep(.ant-segmented-item) {
+  color: var(--lg-text-secondary);
+  font-size: 13px;
+}
+
+.range-segmented :deep(.ant-segmented-item-selected) {
+  background: linear-gradient(135deg, rgba(var(--lg-aurora-violet), 0.22), rgba(var(--lg-aurora-cyan), 0.18));
+  color: #1a73e8;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .chart-container {
@@ -833,6 +987,25 @@ onBeforeUnmount(() => {
 
   .chart-container {
     height: 200px;
+  }
+
+  .trend-card :deep(.ant-card-head-wrapper) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .trend-card :deep(.ant-card-extra) {
+    margin-inline-start: 0;
+    max-width: 100%;
+  }
+
+  .range-segmented :deep(.ant-segmented-item) {
+    font-size: 12px;
+  }
+
+  .range-segmented :deep(.ant-segmented-item-label) {
+    padding: 0 7px;
   }
 
   .player-modal :deep(.ant-modal) {

@@ -8,6 +8,14 @@ import Config from '#Config'
 import { getBearerToken, isTokenValid } from '../../lib/panelAuth.js'
 import { backupKeys, restoreKeys } from '../../scripts/backup.js'
 import { Version } from '../../model/Config/Version.js'
+import {
+  buildDailyTrend,
+  buildMonthlyTrend,
+  countNewPlayers,
+  getMonthDayKeys,
+  getTrendAverage,
+  parseActiveRange,
+} from '../utils/xiuxianActive.js'
 
 import xiuxianElements from '../../guoba/schemas/xiuxian.js'
 
@@ -27,14 +35,46 @@ export const getInfo = async (req, res) => {
       pipeline.scard(`Mozu:xiuxian:active:${gettoday(i)}`)
     }
     const results = await pipeline.exec()
-    const todayActive = results.map(([err, result]) => (err ? 0 : result))
+    const todayActive = results.map(([err, result]) => (err ? 0 : result)).reverse()
+    const data = {
+      playerCount: playerCount,
+      todayActive: todayActive,
+      sectCount: sectCount,
+    }
+
+    // 旧版调用不传 range，返回结构保持原样；新版面板按区间追加 trend。
+    const range = parseActiveRange(req.query.range)
+    if (range !== null) {
+      let trend
+      if (range === 10) {
+        trend = todayActive.map((active, index) => {
+          const date = gettoday(9 - index)
+          return {
+            date,
+            label: date.slice(5),
+            active: Math.round(active || 0),
+            type: 'day',
+          }
+        })
+      } else if (range === 365) {
+        trend = await buildMonthlyTrend(Redis)
+      } else {
+        trend = await buildDailyTrend(Redis, range)
+      }
+      data.range = range
+      data.trend = trend
+      data.average = getTrendAverage(trend)
+      try {
+        data.yesterdayNewPlayers = await countNewPlayers(Redis, playerCount)
+      } catch {
+        // 新增统计失败不应影响活跃趋势和原有数据展示
+        data.yesterdayNewPlayers = 0
+      }
+    }
+
     res.json({
       success: true,
-      data: {
-        playerCount: playerCount,
-        todayActive: todayActive.reverse(),
-        sectCount: sectCount,
-      },
+      data: data,
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -50,7 +90,14 @@ export const getActivePlayers = async (req, res) => {
         message: auth.error,
       })
     }
-    const openids = await Redis.smembers(`Mozu:xiuxian:active:${req.query.date ? req.query.date : gettoday()}`)
+    const month = typeof req.query.month === 'string' ? req.query.month.trim() : ''
+    let openids
+    if (/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
+      const [year, monthIndex] = month.split('-').map(Number)
+      openids = await Redis.sunion(...getMonthDayKeys(year, monthIndex - 1))
+    } else {
+      openids = await Redis.smembers(`Mozu:xiuxian:active:${req.query.date ? req.query.date : gettoday()}`)
+    }
     const pipeline = Redis.pipeline()
     for (const openid of openids) {
       pipeline.hget('Mozu:xiuxian:openid:forward', openid)
