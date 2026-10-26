@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import Config from '#Config'
 
 import { mqqapi } from '../../lib/protocol.js'
@@ -35,6 +37,9 @@ const Time_unit = {
 }
 const TimeUnitReg = Object.keys(Time_unit).join('|')
 
+/** 我要自闭正则 */
+const Autisticreg = new RegExp(`^#?我要(自闭|禅定)(${Numreg})?个?(${TimeUnitReg})?$`, 'i')
+
 export class MozuGroupAdmin extends plugin {
   constructor() {
     super({
@@ -56,16 +61,19 @@ export class MozuGroupAdmin extends plugin {
           fnc: 'kickMember',
         },
         {
-          reg: `^#解除全部禁言$`,
+          reg: '^#解除全部禁言$',
           fnc: 'relieveAllMute',
+        },
+        {
+          reg: Autisticreg,
+          fnc: 'Autistic',
         },
       ],
     })
   }
 
   async muteMember(e) {
-    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable) return false
-    if (!this.e.group) return false
+    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable || !this.e.group) return false
     if (!common.checkPermission(e, 'admin', 'admin')) return true
     const Ga = new GroupAdmin(e)
     const ids = [...(e.raw?.content || '').matchAll(/<@!?([^>\s]+)>/g)].map((m) => m[1])
@@ -100,8 +108,7 @@ export class MozuGroupAdmin extends plugin {
   }
 
   async noMuteMember(e) {
-    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable) return false
-    if (!this.e.group) return false
+    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable || !this.e.group) return false
     if (!common.checkPermission(e, 'admin', 'admin')) return true
     const Ga = new GroupAdmin(e)
     const ids = [...(e.raw?.content || '').matchAll(/<@!?([^>\s]+)>/g)].map((m) => m[1])
@@ -141,7 +148,7 @@ export class MozuGroupAdmin extends plugin {
   }
 
   async kickMember(e) {
-    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable) return false
+    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable || !this.e.group) return false
     if (!this.e.group) return false
     if (!common.checkPermission(e, 'admin', 'admin')) return true
     const Ga = new GroupAdmin(e)
@@ -164,8 +171,7 @@ export class MozuGroupAdmin extends plugin {
   }
 
   async relieveAllMute(e) {
-    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable) return false
-    if (!this.e.group) return false
+    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable || !this.e.group) return false
     if (!common.checkPermission(e, 'admin', 'admin')) return true
     const Ga = new GroupAdmin(e)
     const muteList = (await Ga.getMuteList()).map((item) => ({
@@ -191,6 +197,19 @@ export class MozuGroupAdmin extends plugin {
         )
       }
     }
+    return true
+  }
+
+  async Autistic(e) {
+    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable || !this.e.group) return false
+    if (!common.checkPermission(e, 'member', 'admin', false)) return true
+    if (e.isMaster || e.raw.author.member_role !== 'member') return this.e.reply('别自闭啦~~', true)
+    const Ga = new GroupAdmin(e)
+    const regRet = Autisticreg.exec(e.msg)
+    const TabooTime = translateChinaNum(regRet[2] || 5)
+    const Company = Time_unit[_.toUpper(regRet[3]) || '分']
+    const ok = await Ga.muteMembers([{ openid: this.e.user_id, time: TabooTime * Company }])
+    if (ok) await this.e.reply('那我就不手下留情了~', true)
     return true
   }
 }

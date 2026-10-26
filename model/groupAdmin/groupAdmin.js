@@ -35,7 +35,7 @@ export default class GroupAdmin {
    */
   async kickMembers(members, addBlack = false) {
     if (isObjectArray(members)) {
-      members = members.map(m => m.member_openid || m.openid || m.id)
+      members = members.map((m) => m.member_openid || m.openid || m.id).filter(Boolean)
     }
     return await this.api.kickMember(members[0], addBlack, members.slice(1))
   }
