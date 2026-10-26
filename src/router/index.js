@@ -93,7 +93,7 @@ router.beforeEach((to, from, next) => {
   if (to.path !== '/login' && !token) {
     next('/login')
   } else if (to.path === '/login' && token) {
-    next(from.path || '/')
+    next('/xiuxian')
   } else {
     next()
   }
