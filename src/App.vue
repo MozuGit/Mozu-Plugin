@@ -54,13 +54,6 @@
               <span>关于</span>
             </a-menu-item>
           </a-menu>
-
-          <div class="logout-wrapper">
-            <a-button block @click="logout" class="logout-btn">
-              <LogoutOutlined />
-              <span v-if="!collapsed">退出登录</span>
-            </a-button>
-          </div>
         </div>
       </a-layout-sider>
 
@@ -86,13 +79,7 @@
 <script setup>
 import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import {
-  AppstoreOutlined,
-  SettingOutlined,
-  MenuOutlined,
-  InfoCircleOutlined,
-  LogoutOutlined,
-} from '@ant-design/icons-vue'
+import { AppstoreOutlined, SettingOutlined, MenuOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
 import { useGlassPointer } from './composables/useGlassPointer'
 import { useAppearance } from './composables/useAppearance'
 
@@ -200,23 +187,6 @@ function handleMenuClick({ key }) {
     collapsed.value = true
   }
 }
-
-async function logout() {
-  const token = localStorage.getItem('token')
-  try {
-    await fetch('/api/login?action=exit', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-  } catch (error) {
-    console.error('退出登录失败:', error)
-  } finally {
-    localStorage.removeItem('token')
-    router.push('/login')
-    document.title = '魔族陌 - MozuAdmin'
-  }
-}
 </script>
 
 <style scoped>
@@ -317,34 +287,6 @@ async function logout() {
 
 .app-menu :deep(.ant-menu-item-selected::after) {
   display: none;
-}
-
-.logout-wrapper {
-  padding: 12px;
-  margin-top: auto;
-  border-top: 1px solid var(--lg-hairline);
-}
-
-.logout-btn {
-  background-color: #ff4d4f !important;
-  border-color: #ff4d4f !important;
-  color: #fff !important;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s;
-}
-
-.logout-btn:hover,
-.logout-btn:focus {
-  background-color: #ff7875 !important;
-  border-color: #ff7875 !important;
-  color: #fff !important;
-}
-
-.logout-btn span {
-  margin-left: 8px;
 }
 
 .mobile-menu-btn {

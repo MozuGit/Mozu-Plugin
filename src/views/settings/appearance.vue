@@ -138,7 +138,7 @@
         <div class="settings-row">
           <div class="row-copy">
             <div class="row-title">界面字体</div>
-            <div class="row-desc">默认使用插件内置的 Loli 字体，也可以切换为系统字体</div>
+            <div class="row-desc">默认跟随系统字体，也可以切换为插件内置的 Loli 字体</div>
           </div>
           <div class="row-control">
             <div class="pill-group">

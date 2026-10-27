@@ -3,6 +3,7 @@ import { computed, reactive, watch } from 'vue'
 // 面板外观偏好：主题极光、强调色、背景与界面质感
 
 const STORAGE_KEY = 'mozu:panel:appearance:v1'
+const STATE_VERSION = 2
 
 export const THEME_PRESETS = [
   {
@@ -135,8 +136,8 @@ export const MOTION_STYLES = [
 ]
 
 export const FONT_STYLES = [
-  { id: 'loli', name: '默认' },
   { id: 'system', name: '系统' },
+  { id: 'loli', name: 'Loli' },
 ]
 
 const FONT_STACKS = {
@@ -152,7 +153,7 @@ const DEFAULT_STATE = {
   glass: 'clear',
   corner: 'default',
   motion: 'full',
-  font: 'loli',
+  font: 'system',
 }
 
 const VALIDATORS = {
@@ -177,9 +178,10 @@ function readStoredState() {
         fallback[key] = parsed[key]
       }
     }
-  } catch {
-    // 浏览器禁用存储或数据损坏时直接使用默认值
-  }
+    if (!parsed.version) {
+      fallback.font = 'system'
+    }
+  } catch {}
   return fallback
 }
 
@@ -189,7 +191,7 @@ const currentPreset = computed(() => THEME_PRESETS.find((item) => item.id === st
 const currentAccent = computed(() => ACCENT_COLORS.find((item) => item.id === state.accent) || ACCENT_COLORS[0])
 const currentGlass = computed(() => GLASS_STYLES.find((item) => item.id === state.glass) || GLASS_STYLES[0])
 const currentCorner = computed(() => CORNER_STYLES.find((item) => item.id === state.corner) || CORNER_STYLES[1])
-const fontStack = computed(() => FONT_STACKS[state.font] || FONT_STACKS.loli)
+const fontStack = computed(() => FONT_STACKS[state.font] || FONT_STACKS.system)
 
 function applyAppearance() {
   if (typeof document === 'undefined') return
@@ -224,10 +226,8 @@ function applyAppearance() {
 
 function persistAppearance() {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  } catch {
-    // 忽略无痕模式等场景下的写入失败
-  }
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state, version: STATE_VERSION }))
+  } catch {}
 }
 
 export function resetAppearance() {
