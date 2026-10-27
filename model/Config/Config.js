@@ -48,7 +48,15 @@ class Cfg {
 
   /** 读取默认或用户配置 */
   getDefOrConfig(dirCfgName, name) {
-    return { ...this.getDefSet(dirCfgName, name), ...this.getConfig(dirCfgName, name) }
+    const defConfig = this.getDefSet(dirCfgName, name)
+    const userConfig = this.getConfig(dirCfgName, name)
+    const config = { ...defConfig, ...userConfig }
+    for (const key of Object.keys(defConfig)) {
+      if (config[key] === null || config[key] === undefined) {
+        config[key] = defConfig[key]
+      }
+    }
+    return config
   }
 
   /** 默认配置 */

@@ -212,7 +212,14 @@ const saveConfig = async (req, res) => {
       })
     }
     if (xiuxianData.Realm) {
-      Config.modify('xiuxian', 'Realm', 'Realms', xiuxianData.realm)
+      const realms = xiuxianData.Realm.Realms ?? xiuxianData.realm
+      if (!Array.isArray(realms) || realms.length === 0) {
+        return res.json({
+          success: false,
+          message: '境界配置不能为空',
+        })
+      }
+      Config.modify('xiuxian', 'Realm', 'Realms', realms)
     }
     if (xiuxianData.drop) {
       if (hasRepeatedId(xiuxianData.drop.pills, xiuxianData.drop.arts)) {
