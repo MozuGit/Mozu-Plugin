@@ -4,6 +4,7 @@ import Config from '#Config'
 import { Button, xiuxian } from '../index.js'
 import { mqqapi, laTex } from '../../../lib/protocol.js'
 import { Version } from '../../Config/Version.js'
+import { toPlainText } from './textStyle.js'
 
 async function xiuxianText(msg, user_id, at, isMaster) {
   msg = msg.trim()
@@ -44,6 +45,10 @@ async function xiuxianText(msg, user_id, at, isMaster) {
       ].join('\n')
     )
     Text.push(Button.author)
+  }
+  const textStyle = Config.xiuxian.setting?.TextStyle
+  if (textStyle === 0 || textStyle === '0') {
+    return Text.map((item) => (typeof item === 'string' ? toPlainText(item) : item))
   }
   return Text
 }

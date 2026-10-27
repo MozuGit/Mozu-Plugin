@@ -171,7 +171,7 @@ export default [
   {
     field: 'xiuxian.setting.TextStyle',
     label: '输出文本样式',
-    bottomHelpMessage: '发送消息的文本',
+    bottomHelpMessage: '发送消息的格式文本',
     component: 'RadioGroup',
     required: true,
     componentProps: {
