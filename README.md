@@ -105,10 +105,16 @@ pnpm install
 
 ## 联系方式
 
-- **QQ：** [魔族陌](https://qm.qq.com/q/5fKlztbHHG)
-- **QQ群：** [陌陌的猫窝](https://qm.qq.com/q/G0BdsqHQ4M)
-- **GitHub：** [MozuGit](https://github.com/MozuGit)
-- **爱发电：** [赞助开发者](https://www.ifdian.net/a/Mozumo)
+| 联系方式 | 链接 |
+| --- | --- |
+| **QQ** | [魔族陌](https://qm.qq.com/q/5fKlztbHHG) |
+| **QQ群** | [陌陌的猫窝](https://qm.qq.com/q/G0BdsqHQ4M) |
+| **Github** | [MozuGit](https://github.com/MozuGit) |
+
+## 赞助
+
+- **Star：** [给项目点点Star喵~](https://github.com/MozuGit/Mozu-Plugin/stargazers)
+- **爱发电：** [赞助开发者喵~](https://www.ifdian.net/a/Mozumo)
 
 ## 鸣谢
 
