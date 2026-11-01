@@ -10,21 +10,17 @@ import { Version } from '../../model/Config/Version.js'
 import RedisConfig from './Redis.js'
 import panel from './panel.js'
 import xiuxian from './xiuxian.js'
-import makeMessage from './makeMessage.js'
-import fayan from './fayan.js'
-import like from './like.js'
-import whois from './whois.js'
 import openai from './openai.js'
 import _interface from './interface.js'
+import example from './example.js'
+import groupAdmin from './groupAdmin.js'
 
 export const schemas = [
   ...RedisConfig,
   ...panel,
   ...xiuxian,
-  ...makeMessage,
-  ...fayan,
-  ...like,
-  ...whois,
+  ...groupAdmin,
+  ...example,
   ...openai,
   ..._interface,
 ]
@@ -68,6 +64,7 @@ export function setConfigData(data, { Result }) {
     { dir: 'config', file: 'Redis', data: nested.config.Redis },
     { dir: 'config', file: 'openai', data: nested.config.openai },
     { dir: 'config', file: 'interface', data: nested.config.interface },
+    { dir: 'groupAdmin', file: 'setting', data: nested.groupAdmin.setting },
     { dir: 'example', file: 'makeMessage', data: nested.example.makeMessage },
     { dir: 'example', file: 'fayan', data: nested.example.fayan },
     { dir: 'example', file: 'like', data: nested.example.like },
