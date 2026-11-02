@@ -15,15 +15,7 @@ import _interface from './interface.js'
 import example from './example.js'
 import groupAdmin from './groupAdmin.js'
 
-export const schemas = [
-  ...RedisConfig,
-  ...panel,
-  ...xiuxian,
-  ...groupAdmin,
-  ...example,
-  ...openai,
-  ..._interface,
-]
+export const schemas = [...RedisConfig, ...panel, ...xiuxian, ...groupAdmin, ...example, ...openai, ..._interface]
 
 export function getConfigData() {
   const panel = Config.getCfg().panel

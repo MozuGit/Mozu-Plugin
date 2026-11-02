@@ -1,16 +1,16 @@
 {
   "name": "Mozu-Plugin",
   "version": "1.3.0",
+  "license": "GPL-3.0-or-later",
   "description": "适用于TRSS-Yunzai的插件，主要功能有修仙、伪造聊天、发言统计等",
   "homepage": "https://mozumiao.com",
   "main": "index.js",
   "type": "module",
   "icon": "./public/Mo.png",
   "author": "@MozuGit",
-  "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MozuGit/Mozu-Plugin.git"
+    "url": "github:MozuGit/Mozu-Plugin"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",

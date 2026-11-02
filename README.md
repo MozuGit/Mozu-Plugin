@@ -63,17 +63,17 @@ pnpm install
 
 ## 功能介绍
 
-| 功能                                      | 一句话说明                                                     | 要求           |
-| ----------------------------------------- | -------------------------------------------------------------- | -------------- |
-| [魔族陌修仙](apps/xiuxian/)               | 修炼、突破、宗门、妖兽、秘境、灵根、称号、排行、兑换码         | QQBot          |
-| [魔族陌面版](server/)                     | 修仙数据管理台：总览、玩家、宗门、CDK、配置、备份               | Web            |
-| [发言统计](apps/example/fayan.js)         | 日 / 周 / 月发言榜与记录清除                                   | 任意           |
-| [伪造聊天](apps/example/makeMessage.js)   | 伪造转发聊天记录与群复读                                       | 非 QQBot       |
-| [官机群管](apps/groupAdmin/groupAdmin.js) | 禁言、解禁、踢人、解除全部禁言、我要自闭                       | QQBot          |
-| [天选之人](apps/example/whois.js)         | 随机禁言一位群友 5–60 秒                                       | QQBot          |
-| [定时点赞](apps/example/like.js)          | 按 cron 定时给指定 QQ 点赞                                     | 支持点赞 API   |
-| [QQBot 接口](apps/interface.js)           | 补齐群信息、禁言、踢人等接口                                   | QQBot          |
-| [插件更新](apps/update.js)                | 群内更新插件（主人）、查看更新日志                             | —              |
+| 功能                                      | 一句话说明                                             | 要求         |
+| ----------------------------------------- | ------------------------------------------------------ | ------------ |
+| [魔族陌修仙](apps/xiuxian/)               | 修炼、突破、宗门、妖兽、秘境、灵根、称号、排行、兑换码 | QQBot        |
+| [魔族陌面版](server/)                     | 修仙数据管理台：总览、玩家、宗门、CDK、配置、备份      | Web          |
+| [发言统计](apps/example/fayan.js)         | 日 / 周 / 月发言榜与记录清除                           | 任意         |
+| [伪造聊天](apps/example/makeMessage.js)   | 伪造转发聊天记录与群复读                               | 非 QQBot     |
+| [官机群管](apps/groupAdmin/groupAdmin.js) | 禁言、解禁、踢人、解除全部禁言、我要自闭               | QQBot        |
+| [天选之人](apps/example/whois.js)         | 随机禁言一位群友 5–60 秒                               | QQBot        |
+| [定时点赞](apps/example/like.js)          | 按 cron 定时给指定 QQ 点赞                             | 支持点赞 API |
+| [QQBot 接口](apps/interface.js)           | 补齐群信息、禁言、踢人等接口                           | QQBot        |
+| [插件更新](apps/update.js)                | 群内更新插件（主人）、查看更新日志                     | —            |
 
 官机群管、定时点赞、QQBot 接口默认关闭，其余功能默认开启。
 
@@ -105,11 +105,11 @@ pnpm install
 
 ## 联系方式
 
-| 联系方式 | 链接 |
-| --- | --- |
-| **QQ** | [魔族陌](https://qm.qq.com/q/5fKlztbHHG) |
-| **QQ群** | [陌陌的猫窝](https://qm.qq.com/q/G0BdsqHQ4M) |
-| **Github** | [MozuGit](https://github.com/MozuGit) |
+| 联系方式   | 链接                                         |
+| ---------- | -------------------------------------------- |
+| **QQ**     | [魔族陌](https://qm.qq.com/q/5fKlztbHHG)     |
+| **QQ群**   | [陌陌的猫窝](https://qm.qq.com/q/G0BdsqHQ4M) |
+| **Github** | [MozuGit](https://github.com/MozuGit)        |
 
 ## 赞助
 
