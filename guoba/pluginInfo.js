@@ -10,5 +10,5 @@ export default {
   isV2: false,
   description: Version.Plugin_pkg.description,
   showInMenu: 'true',
-  iconPath: `${Version.Plugin_Path}/public/Mo.png`,
+  iconPath: `${Version.Plugin_Path}/web/public/Mo.png`,
 }

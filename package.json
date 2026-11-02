@@ -6,7 +6,7 @@
   "homepage": "https://mozumiao.com",
   "main": "index.js",
   "type": "module",
-  "icon": "./public/Mo.png",
+  "icon": "./web/public/Mo.png",
   "author": "@MozuGit",
   "repository": {
     "type": "git",
