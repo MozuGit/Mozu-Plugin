@@ -70,7 +70,7 @@ pnpm install
 | [发言统计](apps/example/fayan.js)         | 日 / 周 / 月发言榜与记录清除                           | 任意         |
 | [伪造聊天](apps/example/makeMessage.js)   | 伪造转发聊天记录与群复读                               | 非 QQBot     |
 | [官机群管](apps/groupAdmin/groupAdmin.js) | 禁言、解禁、踢人、解除全部禁言、我要自闭               | QQBot        |
-| [天选之人](apps/example/whois.js)         | 随机禁言一位群友 5–60 秒                               | QQBot        |
+| [天选之人](apps/example/chosenOne.js)     | 随机禁言一位群友 5–60 秒                               | QQBot        |
 | [定时点赞](apps/example/like.js)          | 按 cron 定时给指定 QQ 点赞                             | 支持点赞 API |
 | [QQBot 接口](apps/interface.js)           | 补齐群信息、禁言、踢人等接口                           | QQBot        |
 | [插件更新](apps/update.js)                | 群内更新插件（主人）、查看更新日志                     | —            |

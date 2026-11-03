@@ -2,7 +2,7 @@ import Redis from '#Redis'
 import Config from '#Config'
 import QQBotApi from '../../model/QQBot/interface.js'
 
-export class MozuWhois extends plugin {
+export class MozuChosenOne extends plugin {
   constructor() {
     super({
       name: '天选之人',
@@ -12,33 +12,33 @@ export class MozuWhois extends plugin {
       rule: [
         {
           reg: '^#?天选之人$',
-          fnc: 'whois',
+          fnc: 'chosenOne',
         },
       ],
     })
   }
 
-  async whois(e, i = 0) {
-    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.example.whois.enable) return false
+  async chosenOne(e) {
+    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.example.chosenOne.enable) return false
     const api = new QQBotApi(e)
     const is_admin = (await api.getGroupBotState(this.e.bot, this.e.group_id))?.data?.member_role === 'admin'
     if (!this.e.isGroup || !is_admin) return false
     const group_id = this.e.group_id
-    const nowMute = await Redis.get(`Mozu:whois:mute:${group_id}`)
+    const nowMute = await Redis.get(`Mozu:chosenOne:mute:${group_id}`)
     let mmap = await this.e.group.getMemberMap()
     let arrMember = Array.from(mmap.values())
     let random = arrMember[Math.round(Math.random() * (arrMember.length - 1))]
     let name = random?.nickname ?? random?.user_id ?? '未知'
     let who = random.user_id
-    if (Config.example.whois.self_add_rate && Math.round(Math.random() * 100) > 70 && !this.e.isMaster) {
+    if (Config.example.chosenOne.self_add_rate && Math.round(Math.random() * 100) > 70 && !this.e.isMaster) {
       who = this.e.user_id
       name = this.e.raw.author.username || this.e.sender.nickname
     }
     const time = Math.floor(Math.random() * (60 - 5 + 1)) + 5
     if (nowMute) await api.muteMember(nowMute, 0)
     await api.muteMember(who, time)
-    await Redis.del(`Mozu:whois:mute:${group_id}`)
-    await Redis.set(`Mozu:whois:mute:${group_id}`, who, 'EX', time)
+    await Redis.del(`Mozu:chosenOne:mute:${group_id}`)
+    await Redis.set(`Mozu:chosenOne:mute:${group_id}`, who, 'EX', time)
     await this.e.reply(
       `<@${this.e.user_id.replace(this.e.self_id + ':', '')}>\n***\n**天选之人**\n>幸运儿：**${name}**\n禁言时间：${time} 秒\n我也要玩喵~ **[](mqqapi://aio/inlinecmd?command=天选之人&ender=false)[天选之人](mqqapi://aio/inlinecmd?command=天选之人&ender=false1)**`
     )

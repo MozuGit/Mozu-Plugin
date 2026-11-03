@@ -60,7 +60,7 @@ export function setConfigData(data, { Result }) {
     { dir: 'example', file: 'makeMessage', data: nested.example.makeMessage },
     { dir: 'example', file: 'fayan', data: nested.example.fayan },
     { dir: 'example', file: 'like', data: nested.example.like },
-    { dir: 'example', file: 'whois', data: nested.example.whois },
+    { dir: 'example', file: 'chosenOne', data: nested.example.chosenOne },
     { dir: 'panel', file: 'login', data: nested.panel.login },
   ])
   handleXiuxianConfig(nested.xiuxian)
