@@ -21,7 +21,7 @@ export class MozuWhois extends plugin {
   async whois(e, i = 0) {
     if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.example.whois.enable) return false
     const api = new QQBotApi(e)
-    const is_admin = (await api.getGroupBotState(this.e.bot, this.e.group_id))?.data?.member_role
+    const is_admin = (await api.getGroupBotState(this.e.bot, this.e.group_id))?.data?.member_role === 'admin'
     if (!this.e.isGroup || !is_admin) return false
     const group_id = this.e.group_id
     const nowMute = await Redis.get(`Mozu:whois:mute:${group_id}`)
