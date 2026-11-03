@@ -49,7 +49,6 @@ export class MozuMakeMessage extends plugin {
     }
     for (let i = 0; i < data.length; i++) {
       let msgContent = [],
-        imgs = [],
         ifmsg = false,
         msg = data[i].split(/,\s*/),
         date
@@ -79,13 +78,13 @@ export class MozuMakeMessage extends plugin {
           msg[1] = text
         }
       }
-      msgContent.push(msg[1].replace(/=img=/g, ''))
-      imgs = msg[1].match(/=img=/g)
-      if (imgs?.length) {
-        for (let j = 0; j < imgs.length; j++) {
-          if (!imgUrls.length) break
+      const parts = msg[1].split(/=img=/g)
+      for (let j = 0; j < parts.length; j++) {
+        if (parts[j]) msgContent.push(parts[j])
+        if (j < parts.length - 1) {
+          if (!imgUrls.length) continue
           msgContent.push(segment.image(imgUrls[imgUrls.length - 1]))
-          if (imgUrls.length) imgUrls.pop()
+          imgUrls.pop()
         }
       }
       if (Config.example.makeMessage.whiteQQList.includes(Number(msg[0])) && !e.isMaster) continue
@@ -126,12 +125,14 @@ export class MozuMakeMessage extends plugin {
     let match = e.msg.match(/^#?伪(造|装)复读\s*(.+?)(?:\s+(\d+))?$/)
     let text = match[2]
     let number = match[3] ? parseInt(match[3]) : Config.example.makeMessage.repeatCount || 10
-    const imgCount = (text.match(/=img=/g) || []).length
-    msgContent.push(text.replace(/=img=/g, ''))
-    for (let i = 0; i < imgCount; i++) {
-      if (!imgUrls.length) break
-      msgContent.push(segment.image(imgUrls[imgUrls.length - 1]))
-      if (imgUrls.length) imgUrls.pop()
+    const parts = text.split(/=img=/g)
+    for (let j = 0; j < parts.length; j++) {
+      if (parts[j]) msgContent.push(parts[j])
+      if (j < parts.length - 1) {
+        if (!imgUrls.length) continue
+        msgContent.push(segment.image(imgUrls[imgUrls.length - 1]))
+        imgUrls.pop()
+      }
     }
     const QQListdata = AtQQ.length
       ? await Promise.all(
@@ -158,7 +159,7 @@ export class MozuMakeMessage extends plugin {
       const userId = userIds[i]
       const userName = userNames[i]
       msgList.push({
-        message: msgContent,
+        message: [...msgContent],
         user_id: userId,
         nickname: userName,
         time: e.time,
