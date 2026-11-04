@@ -303,7 +303,7 @@ import {
   QrcodeOutlined,
   SafetyCertificateOutlined,
   SafetyOutlined,
-  StopOutlined,
+  StopOutlined
 } from '@ant-design/icons-vue'
 
 const router = useRouter()
@@ -333,13 +333,13 @@ const passwordForm = reactive({
   currentPassword: '',
   newPassword: '',
   confirmPassword: '',
-  token: '',
+  token: ''
 })
 
 const apiRequest = async (url, options = {}) => {
   const authToken = localStorage.getItem('token')
   const headers = {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json'
   }
   if (authToken) {
     headers['Authorization'] = `Bearer ${authToken}`
@@ -349,8 +349,8 @@ const apiRequest = async (url, options = {}) => {
     ...options,
     headers: {
       ...headers,
-      ...options.headers,
-    },
+      ...options.headers
+    }
   }
 
   try {
@@ -398,8 +398,8 @@ const fetchQrcode = (otpauthUrl) => {
         width: 200,
         color: {
           dark: '#0f172a',
-          light: '#ffffff',
-        },
+          light: '#ffffff'
+        }
       },
       (error, url) => {
         if (error) return reject(error)
@@ -505,7 +505,7 @@ const handleEnable = async () => {
   try {
     const response = await apiRequest('/api/login/tfa?action=enable', {
       method: 'POST',
-      body: JSON.stringify({ token: enableForm.token.trim() }),
+      body: JSON.stringify({ token: enableForm.token.trim() })
     })
 
     if (response.success) {
@@ -535,7 +535,7 @@ const handleDisable = async () => {
   try {
     const response = await apiRequest('/api/login/tfa?action=delete', {
       method: 'POST',
-      body: JSON.stringify({ token: disableToken.value.trim() }),
+      body: JSON.stringify({ token: disableToken.value.trim() })
     })
 
     if (response.success) {
@@ -587,8 +587,8 @@ const handleChangePassword = async () => {
       body: JSON.stringify({
         currentPassword: passwordForm.currentPassword,
         newPassword: passwordForm.newPassword,
-        token: passwordForm.token.trim(),
-      }),
+        token: passwordForm.token.trim()
+      })
     })
 
     if (response.success) {
@@ -613,8 +613,8 @@ const handleLogout = async () => {
   try {
     await fetch('/api/login?action=exit', {
       headers: {
-        Authorization: `Bearer ${token}`,
-      },
+        Authorization: `Bearer ${token}`
+      }
     })
   } catch {
     // 网络异常时也清除本地令牌

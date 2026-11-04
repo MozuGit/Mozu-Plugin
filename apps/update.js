@@ -17,13 +17,13 @@ export class update extends plugin {
       rule: [
         {
           reg: `^#*(魔族陌|${Version.Plugin_Name})(插件)?(强制)?更新$|^#*(强制)?更新(推送|${Version.Plugin_Name})(插件)?$`,
-          fnc: 'update',
+          fnc: 'update'
         },
         {
           reg: `^#?(魔族陌|${Version.Plugin_Name})(插件)?更新日志$`,
-          fnc: 'update_log',
-        },
-      ],
+          fnc: 'update_log'
+        }
+      ]
     })
   }
 

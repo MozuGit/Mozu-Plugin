@@ -10,13 +10,13 @@ export class MozuMakeMessage extends plugin {
       rule: [
         {
           reg: '^#?伪(造|装)聊天',
-          fnc: 'forged',
+          fnc: 'forged'
         },
         {
           reg: /^#?伪(造|装)复读\s*(.+?)(?:\s+(\d+))?$/,
-          fnc: 'repeat',
-        },
-      ],
+          fnc: 'repeat'
+        }
+      ]
     })
   }
 
@@ -92,7 +92,7 @@ export class MozuMakeMessage extends plugin {
         message: msgContent,
         user_id: Number(msg[0]),
         nickname: await (await Bot.pickUser(Number(msg[0])).getInfo()).nickname,
-        time: ifmsg ? Number(date) / 1000 : e.time,
+        time: ifmsg ? Number(date) / 1000 : e.time
       })
       ifmsg = false
     }
@@ -138,7 +138,7 @@ export class MozuMakeMessage extends plugin {
       ? await Promise.all(
           AtQQ.map(async (member) => ({
             user_id: member,
-            nickname: (await Bot.pickUser(member).getInfo()).nickname,
+            nickname: (await Bot.pickUser(member).getInfo()).nickname
           }))
         )
       : await this.e.group.getMemberArray()
@@ -162,7 +162,7 @@ export class MozuMakeMessage extends plugin {
         message: [...msgContent],
         user_id: userId,
         nickname: userName,
-        time: e.time,
+        time: e.time
       })
     }
     let forwardMsg = await e.group.makeForwardMsg(msgList)

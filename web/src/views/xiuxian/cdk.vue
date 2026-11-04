@@ -524,7 +524,7 @@ const checkMobile = () => {
 const tableLocale = {
   triggerAsc: '',
   triggerDesc: '',
-  cancelSort: '取消排序',
+  cancelSort: '取消排序'
 }
 
 const usageTableColumns = [
@@ -532,24 +532,24 @@ const usageTableColumns = [
     title: '序号',
     key: 'index',
     width: 60,
-    align: 'center',
+    align: 'center'
   },
   {
     title: '使用人ID',
     key: 'userId',
-    ellipsis: true,
+    ellipsis: true
   },
   {
     title: '使用时间',
     key: 'usedTime',
-    width: 180,
+    width: 180
   },
   {
     title: '操作',
     key: 'action',
     width: 80,
-    align: 'center',
-  },
+    align: 'center'
+  }
 ]
 
 const deleteModalVisible = ref(false)
@@ -565,13 +565,13 @@ const addUsageModalVisible = ref(false)
 const editUsageList = ref([])
 const newUsageForm = reactive({
   userId: '',
-  useTime: null,
+  useTime: null
 })
 
 const singleUseForm = reactive({
   isUsed: false,
   useId: '',
-  useTime: null,
+  useTime: null
 })
 
 const batchDeleteTableColumns = [
@@ -579,38 +579,38 @@ const batchDeleteTableColumns = [
     title: '兑换码',
     dataIndex: 'name',
     key: 'name',
-    width: 120,
+    width: 120
   },
   {
     title: '类型',
     key: 'genera',
     width: 70,
-    align: 'center',
+    align: 'center'
   },
   {
     title: '使用状态',
     key: 'usedStatus',
     width: 80,
-    align: 'center',
+    align: 'center'
   },
   {
     title: '强制',
     key: 'forceSetting',
     width: 60,
-    align: 'center',
+    align: 'center'
   },
   {
     title: '修为',
     key: 'cultList',
     width: 120,
-    ellipsis: true,
+    ellipsis: true
   },
   {
     title: '灵石',
     key: 'lsList',
     width: 120,
-    ellipsis: true,
-  },
+    ellipsis: true
+  }
 ]
 
 const batchDeleteList = computed(() => {
@@ -620,7 +620,7 @@ const batchDeleteList = computed(() => {
 const apiRequest = async (url, options = {}) => {
   const token = localStorage.getItem('token')
   const headers = {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json'
   }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
@@ -629,8 +629,8 @@ const apiRequest = async (url, options = {}) => {
     ...options,
     headers: {
       ...headers,
-      ...options.headers,
-    },
+      ...options.headers
+    }
   }
   const res = await fetch(url, config)
   if (res.status === 401) {
@@ -709,7 +709,7 @@ const parseCdkValue = (cdk) => {
     useId: Array.isArray(useId) ? '' : String(useId),
     useIdList: useIdList,
     useTime: Array.isArray(useTime) ? '' : String(useTime),
-    useTimeList: useTimeList,
+    useTimeList: useTimeList
   }
 }
 
@@ -752,7 +752,7 @@ const tableColumns = [
     width: 120,
     ellipsis: true,
     sorter: (a, b) => a.name.localeCompare(b.name),
-    sortDirections: ['ascend', 'descend'],
+    sortDirections: ['ascend', 'descend']
   },
   {
     title: '类型',
@@ -760,7 +760,7 @@ const tableColumns = [
     width: 80,
     align: 'center',
     sorter: (a, b) => (a.genera === b.genera ? 0 : a.genera ? -1 : 1),
-    sortDirections: ['ascend', 'descend'],
+    sortDirections: ['ascend', 'descend']
   },
   {
     title: '强制设置',
@@ -768,18 +768,18 @@ const tableColumns = [
     width: 90,
     align: 'center',
     sorter: (a, b) => (a.forceSetting === b.forceSetting ? 0 : a.forceSetting ? -1 : 1),
-    sortDirections: ['ascend', 'descend'],
+    sortDirections: ['ascend', 'descend']
   },
   {
     title: '使用状态',
     key: 'usedStatus',
     width: 100,
-    align: 'center',
+    align: 'center'
   },
   {
     title: '使用信息',
     key: 'usedInfo',
-    width: 180,
+    width: 180
   },
   {
     title: '修为',
@@ -791,7 +791,7 @@ const tableColumns = [
       const bStr = Array.isArray(b.cultList) ? b.cultList.join(',') : ''
       return aStr.localeCompare(bStr)
     },
-    sortDirections: ['ascend', 'descend'],
+    sortDirections: ['ascend', 'descend']
   },
   {
     title: '灵石',
@@ -803,15 +803,15 @@ const tableColumns = [
       const bStr = Array.isArray(b.lsList) ? b.lsList.join(',') : ''
       return aStr.localeCompare(bStr)
     },
-    sortDirections: ['ascend', 'descend'],
+    sortDirections: ['ascend', 'descend']
   },
   {
     title: '操作',
     key: 'action',
     width: 150,
     align: 'center',
-    fixed: 'right',
-  },
+    fixed: 'right'
+  }
 ]
 
 const rowSelection = computed(() => {
@@ -822,7 +822,7 @@ const rowSelection = computed(() => {
     selectedRowKeys: selectedRowKeys.value,
     onChange: (keys) => {
       selectedRowKeys.value = keys
-    },
+    }
   }
 })
 
@@ -874,7 +874,7 @@ const confirmAddUsage = () => {
 
   editUsageList.value.push({
     userId: newUsageForm.userId.trim(),
-    useTime: String(newUsageForm.useTime.unix()),
+    useTime: String(newUsageForm.useTime.unix())
   })
 
   addUsageModalVisible.value = false
@@ -944,8 +944,8 @@ const confirmDelete = async () => {
     await apiRequest('/api/xiuxian/cdk?action=delete', {
       method: 'POST',
       body: JSON.stringify({
-        list: [deleteTarget.value.name],
-      }),
+        list: [deleteTarget.value.name]
+      })
     })
 
     message.success('删除成功')
@@ -980,8 +980,8 @@ const confirmBatchDelete = async () => {
     await apiRequest('/api/xiuxian/cdk?action=delete', {
       method: 'POST',
       body: JSON.stringify({
-        list: selectedRowKeys.value,
-      }),
+        list: selectedRowKeys.value
+      })
     })
     message.success(`成功删除 ${selectedRowKeys.value.length} 个兑换码`)
     cdkList.value = cdkList.value.filter((item) => !selectedRowKeys.value.includes(item.name))
@@ -1015,11 +1015,11 @@ const formState = reactive({
   genera: false,
   forceSetting: false,
   cultList: [],
-  lsList: [],
+  lsList: []
 })
 
 const formRules = {
-  name: [{ required: true, message: '请输入兑换码', trigger: 'blur' }],
+  name: [{ required: true, message: '请输入兑换码', trigger: 'blur' }]
 }
 
 const setFormData = (data) => {
@@ -1034,7 +1034,7 @@ const setFormData = (data) => {
   if (data.genera) {
     editUsageList.value = data.useIdList.map((userId, index) => ({
       userId: userId,
-      useTime: data.useTimeList[index] || '',
+      useTime: data.useTimeList[index] || ''
     }))
     singleUseForm.isUsed = false
     singleUseForm.useId = ''
@@ -1061,7 +1061,7 @@ const showAddModal = () => {
     useId: '',
     useIdList: [],
     useTime: '',
-    useTimeList: [],
+    useTimeList: []
   })
   modalVisible.value = true
 }
@@ -1109,7 +1109,7 @@ const handleSubmit = async () => {
       genera: formState.genera,
       forceSetting: formState.forceSetting,
       cultList: formState.cultList,
-      lsList: formState.lsList,
+      lsList: formState.lsList
     }
 
     if (isEdit.value || formState.genera) {
@@ -1130,7 +1130,7 @@ const handleSubmit = async () => {
 
     await apiRequest(url, {
       method: 'POST',
-      body: JSON.stringify(postData),
+      body: JSON.stringify(postData)
     })
 
     message.success(isEdit.value ? '修改成功' : '添加成功')

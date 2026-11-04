@@ -95,8 +95,8 @@ const themeConfig = computed(() => ({
     colorPrimary: accentColor.value,
     colorInfo: accentColor.value,
     colorLink: accentColor.value,
-    borderRadius: radiusToken.value,
-  },
+    borderRadius: radiusToken.value
+  }
 }))
 
 const isMobile = ref(false)
@@ -135,7 +135,7 @@ const validRouteNames = [
   'xiuxianBackup',
   'settingsAppearance',
   'settingsSecurity',
-  'about',
+  'about'
 ]
 
 const pageTitles = {
@@ -143,7 +143,7 @@ const pageTitles = {
   xiuxian: '魔族陌修仙',
   settingsAppearance: '外观设置',
   settingsSecurity: '安全设置',
-  about: '关于',
+  about: '关于'
 }
 
 watch(

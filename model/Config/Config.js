@@ -192,11 +192,11 @@ export default new Proxy(new Cfg(), {
             if (typeof fileName !== 'string') return undefined
             if (fileName === 'then') return undefined
             return target.getDefOrConfig(dirCfgName, fileName)
-          },
+          }
         }
       )
     }
 
     return undefined
-  },
+  }
 })

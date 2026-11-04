@@ -15,8 +15,8 @@ export const THEME_PRESETS = [
       blue: '99, 102, 241',
       violet: '139, 92, 246',
       pink: '236, 72, 153',
-      mint: '45, 212, 191',
-    },
+      mint: '45, 212, 191'
+    }
   },
   {
     id: 'mint',
@@ -27,8 +27,8 @@ export const THEME_PRESETS = [
       blue: '56, 189, 248',
       violet: '20, 184, 166',
       pink: '125, 211, 252',
-      mint: '134, 239, 172',
-    },
+      mint: '134, 239, 172'
+    }
   },
   {
     id: 'sunset',
@@ -39,8 +39,8 @@ export const THEME_PRESETS = [
       blue: '244, 114, 182',
       violet: '217, 70, 239',
       pink: '251, 113, 133',
-      mint: '253, 186, 116',
-    },
+      mint: '253, 186, 116'
+    }
   },
   {
     id: 'ocean',
@@ -51,8 +51,8 @@ export const THEME_PRESETS = [
       blue: '59, 130, 246',
       violet: '129, 140, 248',
       pink: '103, 232, 249',
-      mint: '45, 212, 191',
-    },
+      mint: '45, 212, 191'
+    }
   },
   {
     id: 'sakura',
@@ -63,9 +63,9 @@ export const THEME_PRESETS = [
       blue: '232, 121, 249',
       violet: '192, 132, 252',
       pink: '251, 207, 232',
-      mint: '253, 164, 175',
-    },
-  },
+      mint: '253, 164, 175'
+    }
+  }
 ]
 
 export const ACCENT_COLORS = [
@@ -75,13 +75,13 @@ export const ACCENT_COLORS = [
   { id: 'green', name: '翡翠', color: '#10b981', deep: '#059669' },
   { id: 'orange', name: '琥珀', color: '#f59e0b', deep: '#d97706' },
   { id: 'pink', name: '樱花', color: '#ec4899', deep: '#be185d' },
-  { id: 'red', name: '绯红', color: '#ef4444', deep: '#b91c1c' },
+  { id: 'red', name: '绯红', color: '#ef4444', deep: '#b91c1c' }
 ]
 
 export const BACKGROUND_STYLES = [
   { id: 'aurora', name: '极光', description: '流动光晕' },
   { id: 'gradient', name: '渐变', description: '柔和渐变' },
-  { id: 'solid', name: '纯色', description: '干净底色' },
+  { id: 'solid', name: '纯色', description: '干净底色' }
 ]
 
 export const GLASS_STYLES = [
@@ -94,8 +94,8 @@ export const GLASS_STYLES = [
       '--lg-surface-weak': 'rgba(255, 255, 255, 0.18)',
       '--lg-blur': '18px',
       '--lg-blur-strong': '30px',
-      '--lg-saturate': '175%',
-    },
+      '--lg-saturate': '175%'
+    }
   },
   {
     id: 'mist',
@@ -106,8 +106,8 @@ export const GLASS_STYLES = [
       '--lg-surface-weak': 'rgba(255, 255, 255, 0.28)',
       '--lg-blur': '26px',
       '--lg-blur-strong': '40px',
-      '--lg-saturate': '185%',
-    },
+      '--lg-saturate': '185%'
+    }
   },
   {
     id: 'solid',
@@ -118,32 +118,32 @@ export const GLASS_STYLES = [
       '--lg-surface-weak': 'rgba(255, 255, 255, 0.62)',
       '--lg-blur': '10px',
       '--lg-blur-strong': '16px',
-      '--lg-saturate': '120%',
-    },
-  },
+      '--lg-saturate': '120%'
+    }
+  }
 ]
 
 export const CORNER_STYLES = [
   { id: 'compact', name: '紧凑', base: '8px', small: '6px', large: '14px', token: 6 },
   { id: 'default', name: '默认', base: '12px', small: '8px', large: '20px', token: 8 },
-  { id: 'soft', name: '圆润', base: '16px', small: '10px', large: '26px', token: 10 },
+  { id: 'soft', name: '圆润', base: '16px', small: '10px', large: '26px', token: 10 }
 ]
 
 export const MOTION_STYLES = [
   { id: 'full', name: '完整' },
   { id: 'reduced', name: '减弱' },
-  { id: 'off', name: '关闭' },
+  { id: 'off', name: '关闭' }
 ]
 
 export const FONT_STYLES = [
   { id: 'system', name: '系统' },
-  { id: 'loli', name: 'Loli' },
+  { id: 'loli', name: 'Loli' }
 ]
 
 const FONT_STACKS = {
   loli: "'Loli', 'Heiti SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', sans-serif",
   system:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', sans-serif",
+    "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', sans-serif"
 }
 
 const DEFAULT_STATE = {
@@ -153,7 +153,7 @@ const DEFAULT_STATE = {
   glass: 'clear',
   corner: 'default',
   motion: 'full',
-  font: 'system',
+  font: 'system'
 }
 
 const VALIDATORS = {
@@ -163,7 +163,7 @@ const VALIDATORS = {
   glass: (value) => GLASS_STYLES.some((item) => item.id === value),
   corner: (value) => CORNER_STYLES.some((item) => item.id === value),
   motion: (value) => MOTION_STYLES.some((item) => item.id === value),
-  font: (value) => FONT_STYLES.some((item) => item.id === value),
+  font: (value) => FONT_STYLES.some((item) => item.id === value)
 }
 
 function readStoredState() {
@@ -244,7 +244,7 @@ export function useAppearance() {
     fontStack,
     accentColor: computed(() => currentAccent.value.color),
     radiusToken: computed(() => currentCorner.value.token),
-    resetAppearance,
+    resetAppearance
   }
 }
 

@@ -30,7 +30,7 @@ const RGB = [
   [107, 255, 150],
   [107, 200, 255],
   [180, 107, 255],
-  [255, 107, 200],
+  [255, 107, 200]
 ]
 
 const remoteIp = await getRemoteIp()
@@ -54,7 +54,7 @@ if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
         `Windows 用 netstat -ano | findstr :${PORT} 找 PID 后 taskkill /PID <pid> /F；` +
         `Linux 用 lsof -i:${PORT}。也可以改 config/panel/config/login.yaml 的 port 再重启。`,
       EACCES: `没有权限监听 ${PORT}（Linux 下 1024 以下端口需要 root，或端口被系统保留）。`,
-      EADDRNOTAVAIL: `监听地址 0.0.0.0 不可用，检查网卡 / 容器网络配置。`,
+      EADDRNOTAVAIL: `监听地址 0.0.0.0 不可用，检查网卡 / 容器网络配置。`
     }
     logger.error(logger.red(`[魔族陌面版] 面版启动失败：${err.code}`))
     logger.error(`[魔族陌面版] ${tips[err.code] || err.message}`)
@@ -196,7 +196,7 @@ function withTimeout(promise, ms, message) {
     Promise.resolve(promise).finally(() => clearTimeout(timer)),
     new Promise((_, reject) => {
       timer = setTimeout(() => reject(new Error(message)), ms)
-    }),
+    })
   ])
 }
 

@@ -13,14 +13,14 @@ export class MozuXiuxianTitle extends plugin {
         {
           cron: Config.xiuxian.title.rankTitle.cron || '0 0 0 ? * 1',
           name: '修仙排行榜定时发放称号',
-          fnc: () => this.cronTitle(),
+          fnc: () => this.cronTitle()
         },
         {
           cron: Config.xiuxian.title.cleanTitle.cron || '0 0 0 * * *',
           name: '定时清理过期称号',
-          fnc: () => this.cleanTitle(),
-        },
-      ],
+          fnc: () => this.cleanTitle()
+        }
+      ]
     })
   }
 
@@ -69,7 +69,7 @@ export class MozuXiuxianTitle extends plugin {
             validTime:
               Config.xiuxian.title.rankTitle.validDays !== 0
                 ? nowTime + Config.xiuxian.title.rankTitle.validDays * 86400
-                : 0,
+                : 0
           })
         } else {
           titleIndex.validTime =
@@ -111,7 +111,7 @@ export class MozuXiuxianTitle extends plugin {
       }
       updatePipeline.hmset(`Mozu:xiuxian:playerInfo:${id}`, {
         称号: titleIndex,
-        称号列表: JSON.stringify(titleLists),
+        称号列表: JSON.stringify(titleLists)
       })
       if (titleLists.length === 0) {
         updatePipeline.srem('Mozu:xiuxian:title:owners', id)

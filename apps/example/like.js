@@ -11,9 +11,9 @@ export class MozuLike extends plugin {
         {
           cron: Config.example.like.cron || '0 0 8 * * ?',
           name: '魔族陌:定时点赞',
-          fnc: () => this.like(),
-        },
-      ],
+          fnc: () => this.like()
+        }
+      ]
     })
   }
 

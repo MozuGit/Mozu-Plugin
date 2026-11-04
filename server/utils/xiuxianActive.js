@@ -74,7 +74,7 @@ export async function buildDailyTrend(redis, range, now = new Date()) {
       date: day,
       label: day.slice(5),
       active: error ? 0 : Number(count) || 0,
-      type: 'day',
+      type: 'day'
     }
   })
 }
@@ -103,7 +103,7 @@ export async function buildMonthlyTrend(redis, now = new Date()) {
       date: key,
       label: key,
       active: error || !Array.isArray(members) ? 0 : members.length,
-      type: 'month',
+      type: 'month'
     }
   })
 }
@@ -129,7 +129,7 @@ export function getYesterdayRange(now = new Date()) {
   const end = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   return {
     start: Math.floor(start.getTime() / 1000),
-    end: Math.floor(end.getTime() / 1000),
+    end: Math.floor(end.getTime() / 1000)
   }
 }
 

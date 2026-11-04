@@ -8,7 +8,7 @@ if (Config.config.interface.enable)
   global.Mozu = {
     mqqapi: mqqapi,
     laTex: laTex,
-    qagent,
+    qagent
   }
 
 export class MozuInterface extends plugin {
@@ -16,7 +16,7 @@ export class MozuInterface extends plugin {
     super({
       name: 'MozuInterface',
       dsc: '测试接口',
-      priority: -Infinity,
+      priority: -Infinity
     })
   }
 
@@ -45,7 +45,7 @@ export class MozuInterface extends plugin {
     if (!this.e.group.info) {
       this.e.group.info = {
         ...groupInfo,
-        group_bot_state: groupBotState,
+        group_bot_state: groupBotState
       }
     }
 

@@ -14,7 +14,7 @@ import {
   countNewPlayers,
   getMonthDayKeys,
   getTrendAverage,
-  parseActiveRange,
+  parseActiveRange
 } from '../utils/xiuxianActive.js'
 
 import xiuxianElements from '../../guoba/schemas/xiuxian.js'
@@ -25,7 +25,7 @@ export const getInfo = async (req, res) => {
     if (!auth.valid) {
       return res.status(401).json({
         success: false,
-        message: auth.error,
+        message: auth.error
       })
     }
     const playerCount = parseInt(await Redis.get('Mozu:xiuxian:openid:counter'), 10)
@@ -39,7 +39,7 @@ export const getInfo = async (req, res) => {
     const data = {
       playerCount: playerCount,
       todayActive: todayActive,
-      sectCount: sectCount,
+      sectCount: sectCount
     }
 
     // 旧版调用不传 range，返回结构保持原样；新版面板按区间追加 trend。
@@ -53,7 +53,7 @@ export const getInfo = async (req, res) => {
             date,
             label: date.slice(5),
             active: Math.round(active || 0),
-            type: 'day',
+            type: 'day'
           }
         })
       } else if (range === 365) {
@@ -74,7 +74,7 @@ export const getInfo = async (req, res) => {
 
     res.json({
       success: true,
-      data: data,
+      data: data
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -87,7 +87,7 @@ export const getActivePlayers = async (req, res) => {
     if (!auth.valid) {
       return res.status(401).json({
         success: false,
-        message: auth.error,
+        message: auth.error
       })
     }
     const month = typeof req.query.month === 'string' ? req.query.month.trim() : ''
@@ -109,8 +109,8 @@ export const getActivePlayers = async (req, res) => {
     res.json({
       success: true,
       data: {
-        players: data,
-      },
+        players: data
+      }
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -122,7 +122,7 @@ export const handleConfig = async (req, res) => {
   if (!auth.valid) {
     return res.status(401).json({
       success: false,
-      message: auth.error,
+      message: auth.error
     })
   }
   const { action } = req.query
@@ -149,7 +149,7 @@ export const handleConfig = async (req, res) => {
   } catch (error) {
     res.json({
       success: false,
-      message: error.message,
+      message: error.message
     })
   }
 }
@@ -159,8 +159,8 @@ const getConfig = async (req, res) => {
     res.json({
       success: true,
       data: {
-        config: Config.getCfg().xiuxian,
-      },
+        config: Config.getCfg().xiuxian
+      }
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -172,8 +172,8 @@ const getConfigElements = async (req, res) => {
     res.json({
       success: true,
       data: {
-        elements: xiuxianElements,
-      },
+        elements: xiuxianElements
+      }
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -188,7 +188,7 @@ const saveConfig = async (req, res) => {
       { file: 'setting', data: xiuxianData.setting },
       { file: 'sect', data: xiuxianData.sect },
       { file: 'title', data: xiuxianData.title },
-      { file: 'beast', data: xiuxianData.beast },
+      { file: 'beast', data: xiuxianData.beast }
     ]
     for (const { file, data } of configMappings) {
       if (data && typeof data === 'object') {
@@ -216,7 +216,7 @@ const saveConfig = async (req, res) => {
       if (!Array.isArray(realms) || realms.length === 0) {
         return res.json({
           success: false,
-          message: '境界配置不能为空',
+          message: '境界配置不能为空'
         })
       }
       Config.modify('xiuxian', 'Realm', 'Realms', realms)
@@ -225,7 +225,7 @@ const saveConfig = async (req, res) => {
       if (hasRepeatedId(xiuxianData.drop.pills, xiuxianData.drop.arts)) {
         return res.json({
           success: false,
-          message: '物品ID重复',
+          message: '物品ID重复'
         })
       }
       const cleanRealms = xiuxianData.drop.secretRealms?.map((realm) => {
@@ -252,13 +252,13 @@ const saveConfig = async (req, res) => {
       if (hasRepeatedId(xiuxianData.sroot.sroot)) {
         return res.json({
           success: false,
-          message: '灵根ID重复',
+          message: '灵根ID重复'
         })
       }
       if (Object.values(xiuxianData.sroot.root_drop).reduce((a, b) => a + b, 0) !== 100) {
         return res.json({
           success: false,
-          message: '灵根概率总和不等于100',
+          message: '灵根概率总和不等于100'
         })
       }
       Object.keys(xiuxianData.sroot).forEach((key) => {
@@ -267,7 +267,7 @@ const saveConfig = async (req, res) => {
     }
     res.json({
       success: true,
-      message: '保存成功喵~',
+      message: '保存成功喵~'
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -294,13 +294,13 @@ const getGroups = async (req, res) => {
       .filter((item) => item.group_id !== 'stdin')
       .map((item) => ({
         groupId: item.group_id,
-        name: item.group_name || item.nickname || item.group_id,
+        name: item.group_name || item.nickname || item.group_id
       }))
     res.json({
       success: true,
       data: {
-        groups: result,
-      },
+        groups: result
+      }
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -327,7 +327,7 @@ export const handleCdk = async (req, res) => {
   if (!auth.valid) {
     return res.status(401).json({
       success: false,
-      message: auth.error,
+      message: auth.error
     })
   }
   const { action } = req.query
@@ -346,7 +346,7 @@ export const handleCdk = async (req, res) => {
   } catch (error) {
     res.json({
       success: false,
-      message: error.message,
+      message: error.message
     })
   }
 }
@@ -361,13 +361,13 @@ const getCdkList = async (req, res) => {
     const results = await pipeline.exec()
     const cdkInfos = results.map(([err, result], index) => ({
       name: cdks[index].replace('Mozu:xiuxian:cdk:', ''),
-      ...result,
+      ...result
     }))
     res.json({
       success: true,
       data: {
-        cdks: cdkInfos,
-      },
+        cdks: cdkInfos
+      }
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -381,11 +381,11 @@ const addCdk = async (req, res) => {
       value: JSON.stringify({ genera, forceSetting, cultList, lsList }),
       使用状态: useStatus,
       使用ID: useId,
-      使用时间: useTime,
+      使用时间: useTime
     })
     await Redis.sadd('Mozu:xiuxian:cdks', name)
     res.json({
-      success: true,
+      success: true
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -402,7 +402,7 @@ const deleteCdks = async (req, res) => {
     }
     await pipeline.exec()
     res.json({
-      success: true,
+      success: true
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -414,7 +414,7 @@ export const handlePlayer = async (req, res) => {
   if (!auth.valid) {
     return res.status(401).json({
       success: false,
-      message: auth.error,
+      message: auth.error
     })
   }
   const { action } = req.query
@@ -437,7 +437,7 @@ export const handlePlayer = async (req, res) => {
   } catch (error) {
     res.json({
       success: false,
-      message: error.message,
+      message: error.message
     })
   }
 }
@@ -452,8 +452,8 @@ const getPlayerList = async (req, res) => {
         success: true,
         data: {
           players: [],
-          playerCount: Number.isInteger(id) ? id : 0,
-        },
+          playerCount: Number.isInteger(id) ? id : 0
+        }
       })
     }
     const end = Math.min(start + 10, id + 1)
@@ -470,14 +470,14 @@ const getPlayerList = async (req, res) => {
       sex: result.性别,
       titleIndex: result.称号,
       titles: JSON.parse(result.称号列表 || '[]'),
-      sroot: result.灵根,
+      sroot: result.灵根
     }))
     res.json({
       success: true,
       data: {
         players: playerInfos,
-        playerCount: id,
-      },
+        playerCount: id
+      }
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -498,7 +498,7 @@ const modifyPlayer = async (req, res) => {
       性别: sex,
       称号: titleIndex,
       称号列表: JSON.stringify(titles),
-      灵根: sroot,
+      灵根: sroot
     })
     res.json({ success: true })
   } catch (error) {
@@ -511,7 +511,7 @@ const getRealm = async (req, res) => {
     const data = Config.xiuxian.Realm.Realms.map((realm) => realm.name)
     res.json({
       success: true,
-      data: ['无', ...data],
+      data: ['无', ...data]
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -524,12 +524,12 @@ const getSroot = async (req, res) => {
     Config.xiuxian.sroot.sroot.forEach((realm) => {
       data.push({
         id: realm.id,
-        name: realm.name,
+        name: realm.name
       })
     })
     res.json({
       success: true,
-      data: data,
+      data: data
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -541,7 +541,7 @@ export const handleSect = async (req, res) => {
   if (!auth.valid) {
     return res.status(401).json({
       success: false,
-      message: auth.error,
+      message: auth.error
     })
   }
   const { action } = req.query
@@ -556,7 +556,7 @@ export const handleSect = async (req, res) => {
   } catch (error) {
     res.json({
       success: false,
-      message: error.message,
+      message: error.message
     })
   }
 }
@@ -570,8 +570,8 @@ const getSectList = async (req, res) => {
       return res.json({
         success: true,
         data: {
-          sects: [],
-        },
+          sects: []
+        }
       })
     }
     const end = Math.min(start + 10, sectCount + 1)
@@ -586,15 +586,15 @@ const getSectList = async (req, res) => {
       level: result.宗门等级,
       desc: result.宗门简介,
       exp: result.宗门经验,
-      noAudit: result.无需审核状态,
+      noAudit: result.无需审核状态
     }))
     res.json({
       success: true,
       data: {
         sects: sectInfos,
         sectCount: sectCount,
-        max_level: Config.xiuxian.sect.sect_level.length,
-      },
+        max_level: Config.xiuxian.sect.sect_level.length
+      }
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -610,7 +610,7 @@ const modifySect = async (req, res) => {
       宗门等级: level,
       宗门简介: desc,
       宗门经验: exp,
-      无需审核状态: noAudit,
+      无需审核状态: noAudit
     })
     res.json({ success: true })
   } catch (error) {
@@ -623,7 +623,7 @@ export const handleBackup = async (req, res) => {
   if (!auth.valid) {
     return res.status(401).json({
       success: false,
-      message: auth.error,
+      message: auth.error
     })
   }
   const { action } = req.query
@@ -646,7 +646,7 @@ export const handleBackup = async (req, res) => {
   } catch (error) {
     res.json({
       success: false,
-      message: error.message,
+      message: error.message
     })
   }
 }
@@ -658,8 +658,8 @@ const getBackupList = async (req, res) => {
     res.json({
       success: true,
       data: {
-        backups: files,
-      },
+        backups: files
+      }
     })
   } catch (error) {
     res.json({ success: false, message: error.message })
@@ -676,7 +676,7 @@ const restoreBackup = async (req, res) => {
     }
     await restoreKeys(filePath, {
       purge: true,
-      pattern: 'Mozu:xiuxian:*',
+      pattern: 'Mozu:xiuxian:*'
     })
     res.json({ success: true })
   } catch (error) {

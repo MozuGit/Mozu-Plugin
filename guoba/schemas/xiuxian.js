@@ -3,7 +3,7 @@ import Config from '#Config'
 export default [
   {
     component: 'SOFT_GROUP_BEGIN',
-    label: '修仙设置',
+    label: '修仙设置'
   },
   {
     component: 'Divider',
@@ -13,11 +13,11 @@ export default [
       style: {
         fontWeight: 'bold',
         color: 'rgb(76, 113, 201)',
-        fontSize: '16px',
+        fontSize: '16px'
       },
       orientation: 'left',
-      plain: true,
-    },
+      plain: true
+    }
   },
   {
     field: 'actions',
@@ -33,11 +33,11 @@ export default [
           icon: 'ant-design:delete-filled',
           confirm: {
             title: '确认重置',
-            content: '确认重置所有修仙配置吗？此操作不可撤销！',
-          },
-        },
-      ],
-    },
+            content: '确认重置所有修仙配置吗？此操作不可撤销！'
+          }
+        }
+      ]
+    }
   },
   {
     component: 'Divider',
@@ -47,16 +47,16 @@ export default [
       style: {
         fontWeight: 'bold',
         color: 'rgb(76, 113, 201)',
-        fontSize: '16px',
+        fontSize: '16px'
       },
       orientation: 'left',
-      plain: true,
-    },
+      plain: true
+    }
   },
   {
     field: 'xiuxian.setting.enable',
     label: '修仙全局开关',
-    component: 'Switch',
+    component: 'Switch'
   },
   {
     field: 'xiuxian.setting.priority',
@@ -68,9 +68,9 @@ export default [
       placeholder: '5000',
       step: 1000,
       style: {
-        width: '150px',
-      },
-    },
+        width: '150px'
+      }
+    }
   },
   {
     field: 'xiuxian.setting.cronBackup',
@@ -79,8 +79,8 @@ export default [
     bottomHelpMessage: '修仙定时备份',
     component: 'EasyCron',
     componentProps: {
-      placeholder: '*表示任意，?表示不指定（月日和星期互斥）',
-    },
+      placeholder: '*表示任意，?表示不指定（月日和星期互斥）'
+    }
   },
   {
     field: 'xiuxian.setting.maxBackupFile',
@@ -92,9 +92,9 @@ export default [
       min: 0,
       step: 1,
       style: {
-        width: '150px',
-      },
-    },
+        width: '150px'
+      }
+    }
   },
   {
     field: 'xiuxian.setting.contact',
@@ -102,11 +102,11 @@ export default [
     component: 'GSubForm',
     componentProps: {
       modalProps: {
-        title: '联系主人',
+        title: '联系主人'
       },
       style: {
         maxHeight: '200px',
-        overflowY: 'auto',
+        overflowY: 'auto'
       },
       schemas: [
         {
@@ -115,8 +115,8 @@ export default [
           bottomHelpMessage: 'QQUid不是QQ号',
           component: 'Input',
           componentProps: {
-            placeholder: '请输入QQUid',
-          },
+            placeholder: '请输入QQUid'
+          }
         },
         {
           field: 'peerName',
@@ -124,24 +124,24 @@ export default [
           bottomHelpMessage: '显示文本',
           component: 'Input',
           componentProps: {
-            placeholder: '请输入文本',
-          },
-        },
-      ],
-    },
+            placeholder: '请输入文本'
+          }
+        }
+      ]
+    }
   },
   {
     field: 'xiuxian.setting.master_no_cd',
     label: '主人不受冷却限制',
     bottomHelpMessage: '主人不受任何冷却限制',
-    component: 'Switch',
+    component: 'Switch'
   },
   {
     field: 'xiuxian.setting.forceSharp',
     label: '强制用#触发',
     helpMessage: '修改后需要重启才能生效',
     bottomHelpMessage: '前缀必须有#或/才能触发指令',
-    component: 'Switch',
+    component: 'Switch'
   },
   {
     field: 'xiuxian.setting.group',
@@ -152,21 +152,21 @@ export default [
       options: [
         { label: '不启用', value: 0 },
         { label: '黑名单', value: 1 },
-        { label: '白名单', value: 2 },
-      ],
-    },
+        { label: '白名单', value: 2 }
+      ]
+    }
   },
   {
     field: 'xiuxian.setting.blackGroup',
     label: '黑名单群',
     bottomHelpMessage: '黑名单群不触发任何指令',
-    component: 'GSelectGroup',
+    component: 'GSelectGroup'
   },
   {
     field: 'xiuxian.setting.whiteGroup',
     label: '白名单群',
     bottomHelpMessage: '仅白名单群能触发指令',
-    component: 'GSelectGroup',
+    component: 'GSelectGroup'
   },
   {
     field: 'xiuxian.setting.TextStyle',
@@ -177,9 +177,9 @@ export default [
     componentProps: {
       options: [
         { label: '普通文本', value: 0 },
-        { label: 'Markdown', value: 1 },
-      ],
-    },
+        { label: 'Markdown', value: 1 }
+      ]
+    }
   },
   {
     component: 'Divider',
@@ -189,11 +189,11 @@ export default [
       style: {
         fontWeight: 'bold',
         color: 'rgb(76, 113, 201)',
-        fontSize: '16px',
+        fontSize: '16px'
       },
       orientation: 'left',
-      plain: true,
-    },
+      plain: true
+    }
   },
   {
     field: 'xiuxian.xiuxian.xiulian',
@@ -203,8 +203,8 @@ export default [
     componentProps: {
       placeholder: '请输入修炼冷却时间（单位：秒）',
       min: 0,
-      step: 10,
-    },
+      step: 10
+    }
   },
   {
     field: 'xiuxian.xiuxian.kaicai',
@@ -214,8 +214,8 @@ export default [
     componentProps: {
       placeholder: '请输入开采冷却时间（单位：秒）',
       min: 0,
-      step: 10,
-    },
+      step: 10
+    }
   },
   {
     field: 'xiuxian.xiuxian.powerFormula',
@@ -223,8 +223,8 @@ export default [
     bottomHelpMessage: '变量：修为cult 境界realm',
     component: 'Input',
     componentProps: {
-      placeholder: '请输入战力计算公式',
-    },
+      placeholder: '请输入战力计算公式'
+    }
   },
   {
     field: 'xiuxian.xiuxian.maxcult',
@@ -236,9 +236,9 @@ export default [
       min: 0,
       step: 100,
       style: {
-        width: '180px',
-      },
-    },
+        width: '180px'
+      }
+    }
   },
   {
     field: 'xiuxian.xiuxian.mincult',
@@ -250,9 +250,9 @@ export default [
       min: 0,
       step: 100,
       style: {
-        width: '180px',
-      },
-    },
+        width: '180px'
+      }
+    }
   },
   {
     field: 'xiuxian.xiuxian.maxls',
@@ -264,9 +264,9 @@ export default [
       min: 0,
       step: 100,
       style: {
-        width: '180px',
-      },
-    },
+        width: '180px'
+      }
+    }
   },
   {
     field: 'xiuxian.xiuxian.minls',
@@ -278,9 +278,9 @@ export default [
       min: 0,
       step: 100,
       style: {
-        width: '180px',
-      },
-    },
+        width: '180px'
+      }
+    }
   },
   {
     field: 'xiuxian.xiuxian.retreat',
@@ -288,11 +288,11 @@ export default [
     component: 'GSubForm',
     componentProps: {
       modalProps: {
-        title: '闭关配置',
+        title: '闭关配置'
       },
       style: {
         maxHeight: '100px',
-        overflowY: 'auto',
+        overflowY: 'auto'
       },
       schemas: [
         {
@@ -305,9 +305,9 @@ export default [
             min: 0,
             step: 100,
             style: {
-              width: '180px',
-            },
-          },
+              width: '180px'
+            }
+          }
         },
         {
           field: 'max',
@@ -319,12 +319,12 @@ export default [
             min: 0,
             step: 1,
             style: {
-              width: '100px',
-            },
-          },
-        },
-      ],
-    },
+              width: '100px'
+            }
+          }
+        }
+      ]
+    }
   },
   {
     field: 'xiuxian.xiuxian.sign',
@@ -332,11 +332,11 @@ export default [
     component: 'GSubForm',
     componentProps: {
       modalProps: {
-        title: '修仙签到配置',
+        title: '修仙签到配置'
       },
       style: {
         maxHeight: '100px',
-        overflowY: 'auto',
+        overflowY: 'auto'
       },
       schemas: [
         {
@@ -349,9 +349,9 @@ export default [
             min: 0,
             step: 100,
             style: {
-              width: '180px',
-            },
-          },
+              width: '180px'
+            }
+          }
         },
         {
           field: 'ls',
@@ -363,12 +363,12 @@ export default [
             min: 0,
             step: 100,
             style: {
-              width: '180px',
-            },
-          },
-        },
-      ],
-    },
+              width: '180px'
+            }
+          }
+        }
+      ]
+    }
   },
   {
     field: 'xiuxian.xiuxian.pvp',
@@ -376,11 +376,11 @@ export default [
     component: 'GSubForm',
     componentProps: {
       modalProps: {
-        title: '修仙切磋配置',
+        title: '修仙切磋配置'
       },
       style: {
         maxHeight: '100px',
-        overflowY: 'auto',
+        overflowY: 'auto'
       },
       schemas: [
         {
@@ -393,9 +393,9 @@ export default [
             min: 0,
             step: 10,
             style: {
-              width: '180px',
-            },
-          },
+              width: '180px'
+            }
+          }
         },
         {
           field: 'def_cd',
@@ -407,12 +407,12 @@ export default [
             min: 0,
             step: 10,
             style: {
-              width: '180px',
-            },
-          },
-        },
-      ],
-    },
+              width: '180px'
+            }
+          }
+        }
+      ]
+    }
   },
   {
     component: 'Divider',
@@ -422,11 +422,11 @@ export default [
       style: {
         fontWeight: 'bold',
         color: 'rgb(76, 113, 201)',
-        fontSize: '16px',
+        fontSize: '16px'
       },
       orientation: 'left',
-      plain: true,
-    },
+      plain: true
+    }
   },
   {
     field: 'xiuxian.Realm.Realms',
@@ -441,9 +441,9 @@ export default [
           component: 'Input',
           bottomHelpMessage: '修仙境界名称',
           componentProps: {
-            placeholder: '请输入境界名称',
+            placeholder: '请输入境界名称'
           },
-          required: true,
+          required: true
         },
         {
           field: 'value',
@@ -455,10 +455,10 @@ export default [
             min: 0,
             step: 100,
             style: {
-              width: '180px',
-            },
+              width: '180px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'success',
@@ -468,9 +468,9 @@ export default [
           componentProps: {
             placeholder: '请输入突破境界的概率',
             min: 0,
-            max: 100,
+            max: 100
           },
-          required: true,
+          required: true
         },
         {
           field: 'failed',
@@ -482,13 +482,13 @@ export default [
             min: 0,
             step: 100,
             style: {
-              width: '180px',
-            },
+              width: '180px'
+            }
           },
-          required: true,
-        },
-      ],
-    },
+          required: true
+        }
+      ]
+    }
   },
   {
     component: 'Divider',
@@ -498,11 +498,11 @@ export default [
       style: {
         fontWeight: 'bold',
         color: 'rgb(76, 113, 201)',
-        fontSize: '16px',
+        fontSize: '16px'
       },
       orientation: 'left',
-      plain: true,
-    },
+      plain: true
+    }
   },
   {
     field: 'xiuxian.beast.huntBeastCD',
@@ -514,10 +514,10 @@ export default [
       min: 0,
       step: 10,
       style: {
-        width: '180px',
-      },
+        width: '180px'
+      }
     },
-    required: true,
+    required: true
   },
   {
     field: 'xiuxian.beast.beasts',
@@ -532,9 +532,9 @@ export default [
           component: 'Input',
           bottomHelpMessage: '修仙妖兽名称',
           componentProps: {
-            placeholder: '请输入妖兽名称',
+            placeholder: '请输入妖兽名称'
           },
-          required: true,
+          required: true
         },
         {
           field: 'power',
@@ -546,10 +546,10 @@ export default [
             min: 0,
             step: 100,
             style: {
-              width: '180px',
-            },
+              width: '180px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'reward',
@@ -558,11 +558,11 @@ export default [
           component: 'GSubForm',
           componentProps: {
             modalProps: {
-              title: '猎杀妖兽成功的奖励',
+              title: '猎杀妖兽成功的奖励'
             },
             style: {
               maxHeight: '200px',
-              overflowY: 'auto',
+              overflowY: 'auto'
             },
             schemas: [
               {
@@ -574,10 +574,10 @@ export default [
                   min: 0,
                   step: 100,
                   style: {
-                    width: '180px',
-                  },
+                    width: '180px'
+                  }
                 },
-                required: true,
+                required: true
               },
               {
                 field: 'ls',
@@ -588,13 +588,13 @@ export default [
                   min: 0,
                   step: 100,
                   style: {
-                    width: '180px',
-                  },
+                    width: '180px'
+                  }
                 },
-                required: true,
-              },
-            ],
-          },
+                required: true
+              }
+            ]
+          }
         },
         {
           field: 'punishment',
@@ -603,11 +603,11 @@ export default [
           component: 'GSubForm',
           componentProps: {
             modalProps: {
-              title: '猎杀妖兽失败的惩罚',
+              title: '猎杀妖兽失败的惩罚'
             },
             style: {
               maxHeight: '200px',
-              overflowY: 'auto',
+              overflowY: 'auto'
             },
             schemas: [
               {
@@ -619,17 +619,17 @@ export default [
                   min: 0,
                   step: 100,
                   style: {
-                    width: '180px',
-                  },
+                    width: '180px'
+                  }
                 },
-                required: true,
-              },
-            ],
-          },
-        },
-      ],
+                required: true
+              }
+            ]
+          }
+        }
+      ]
     },
-    required: true,
+    required: true
   },
   {
     component: 'Divider',
@@ -639,17 +639,17 @@ export default [
       style: {
         fontWeight: 'bold',
         color: 'rgb(76, 113, 201)',
-        fontSize: '16px',
+        fontSize: '16px'
       },
       orientation: 'left',
-      plain: true,
-    },
+      plain: true
+    }
   },
   {
     field: 'xiuxian.sect.sect_up_reset',
     label: '宗门升级经验重置',
     component: 'Switch',
-    bottomHelpMessage: '宗门升级后经验设置为0',
+    bottomHelpMessage: '宗门升级后经验设置为0'
   },
   {
     field: 'xiuxian.sect.create_sect_ls',
@@ -661,10 +661,10 @@ export default [
       min: 0,
       step: 1000,
       style: {
-        width: '180px',
-      },
+        width: '180px'
+      }
     },
-    required: true,
+    required: true
   },
   {
     field: 'xiuxian.sect.sect_validation',
@@ -678,11 +678,11 @@ export default [
           component: 'GSubForm',
           componentProps: {
             modalProps: {
-              title: '宗门审核设置',
+              title: '宗门审核设置'
             },
             style: {
               maxHeight: '200px',
-              overflowY: 'auto',
+              overflowY: 'auto'
             },
             schemas: [
               {
@@ -694,9 +694,9 @@ export default [
                     { label: '手动审核', value: 0 },
                     { label: 'AI审核', value: 1 },
                     { label: '关键词审核', value: 2 },
-                    { label: '无需审核', value: 3 },
-                  ],
-                },
+                    { label: '无需审核', value: 3 }
+                  ]
+                }
               },
               {
                 field: 'keywords',
@@ -704,11 +704,11 @@ export default [
                 component: 'GTags',
                 bottomHelpMessage: '仅审核模式是关键词审核时有效',
                 componentProps: {
-                  multiple: true,
-                },
-              },
-            ],
-          },
+                  multiple: true
+                }
+              }
+            ]
+          }
         },
         {
           field: 'name',
@@ -716,11 +716,11 @@ export default [
           component: 'GSubForm',
           componentProps: {
             modalProps: {
-              title: '宗门名称设置',
+              title: '宗门名称设置'
             },
             style: {
               maxHeight: '200px',
-              overflowY: 'auto',
+              overflowY: 'auto'
             },
             schemas: [
               {
@@ -732,10 +732,10 @@ export default [
                   placeholder: '请输入长度',
                   min: -1,
                   style: {
-                    width: '180px',
-                  },
+                    width: '180px'
+                  }
                 },
-                required: true,
+                required: true
               },
               {
                 field: 'max',
@@ -746,19 +746,19 @@ export default [
                   placeholder: '请输入长度',
                   min: 0,
                   style: {
-                    width: '180px',
-                  },
+                    width: '180px'
+                  }
                 },
-                required: true,
+                required: true
               },
               {
                 field: 'newline',
                 label: '允许换行',
                 bottomHelpMessage: '是否允许宗门名称换行',
-                component: 'Switch',
-              },
-            ],
-          },
+                component: 'Switch'
+              }
+            ]
+          }
         },
         {
           field: 'desc',
@@ -766,11 +766,11 @@ export default [
           component: 'GSubForm',
           componentProps: {
             modalProps: {
-              title: '宗门简介设置',
+              title: '宗门简介设置'
             },
             style: {
               maxHeight: '200px',
-              overflowY: 'auto',
+              overflowY: 'auto'
             },
             schemas: [
               {
@@ -782,10 +782,10 @@ export default [
                   placeholder: '请输入长度',
                   min: -1,
                   style: {
-                    width: '180px',
-                  },
+                    width: '180px'
+                  }
                 },
-                required: true,
+                required: true
               },
               {
                 field: 'max',
@@ -796,23 +796,23 @@ export default [
                   placeholder: '请输入长度',
                   min: 0,
                   style: {
-                    width: '180px',
-                  },
+                    width: '180px'
+                  }
                 },
-                required: true,
+                required: true
               },
               {
                 field: 'newline',
                 label: '允许换行',
                 bottomHelpMessage: '是否允许宗门简介换行',
-                component: 'Switch',
-              },
-            ],
-          },
-        },
-      ],
+                component: 'Switch'
+              }
+            ]
+          }
+        }
+      ]
     },
-    required: true,
+    required: true
   },
   {
     field: 'xiuxian.sect.sect_level',
@@ -832,10 +832,10 @@ export default [
             min: 0,
             step: 100,
             style: {
-              width: '180px',
-            },
+              width: '180px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'memberMax',
@@ -846,10 +846,10 @@ export default [
             min: 0,
             step: 1,
             style: {
-              width: '180px',
-            },
+              width: '180px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'sign',
@@ -857,11 +857,11 @@ export default [
           component: 'GSubForm',
           componentProps: {
             modalProps: {
-              title: '宗门签到奖励',
+              title: '宗门签到奖励'
             },
             style: {
               maxHeight: '200px',
-              overflowY: 'auto',
+              overflowY: 'auto'
             },
             schemas: [
               {
@@ -874,10 +874,10 @@ export default [
                   min: 0,
                   step: 1000,
                   style: {
-                    width: '180px',
-                  },
+                    width: '180px'
+                  }
                 },
-                required: true,
+                required: true
               },
               {
                 field: 'ls',
@@ -889,10 +889,10 @@ export default [
                   min: 0,
                   step: 1000,
                   style: {
-                    width: '180px',
-                  },
+                    width: '180px'
+                  }
                 },
-                required: true,
+                required: true
               },
               {
                 field: 'sectExp',
@@ -904,17 +904,17 @@ export default [
                   min: 0,
                   step: 1000,
                   style: {
-                    width: '180px',
-                  },
+                    width: '180px'
+                  }
                 },
-                required: true,
-              },
-            ],
-          },
-        },
-      ],
+                required: true
+              }
+            ]
+          }
+        }
+      ]
     },
-    required: true,
+    required: true
   },
   {
     component: 'Divider',
@@ -924,11 +924,11 @@ export default [
       style: {
         fontWeight: 'bold',
         color: 'rgb(76, 113, 201)',
-        fontSize: '16px',
+        fontSize: '16px'
       },
       orientation: 'left',
-      plain: true,
-    },
+      plain: true
+    }
   },
   {
     field: 'xiuxian.title.rankTitle',
@@ -936,10 +936,10 @@ export default [
     component: 'GSubForm',
     componentProps: {
       modalProps: {
-        title: '排行榜称号配置',
+        title: '排行榜称号配置'
       },
       style: {
-        overflowY: 'auto',
+        overflowY: 'auto'
       },
       schemas: [
         {
@@ -952,10 +952,10 @@ export default [
             min: 0,
             step: 1,
             style: {
-              width: '120px',
-            },
+              width: '120px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'cron',
@@ -963,9 +963,9 @@ export default [
           bottomHelpMessage: '排行榜称号发放cron',
           component: 'EasyCron',
           componentProps: {
-            placeholder: '*表示任意，?表示不指定（月日和星期互斥）',
+            placeholder: '*表示任意，?表示不指定（月日和星期互斥）'
           },
-          required: true,
+          required: true
         },
         {
           field: 'cult',
@@ -973,9 +973,9 @@ export default [
           component: 'GTags',
           bottomHelpMessage: '修为榜榜单称号配置',
           componentProps: {
-            multiple: true,
+            multiple: true
           },
-          required: true,
+          required: true
         },
         {
           field: 'ls',
@@ -983,9 +983,9 @@ export default [
           component: 'GTags',
           bottomHelpMessage: '灵石榜榜单称号配置',
           componentProps: {
-            multiple: true,
+            multiple: true
           },
-          required: true,
+          required: true
         },
         {
           field: 'power',
@@ -993,9 +993,9 @@ export default [
           component: 'GTags',
           bottomHelpMessage: '战力榜榜单称号配置',
           componentProps: {
-            multiple: true,
+            multiple: true
           },
-          required: true,
+          required: true
         },
         {
           field: 'retreat',
@@ -1003,12 +1003,12 @@ export default [
           component: 'GTags',
           bottomHelpMessage: '闭关榜榜单称号配置',
           componentProps: {
-            multiple: true,
+            multiple: true
           },
-          required: true,
-        },
-      ],
-    },
+          required: true
+        }
+      ]
+    }
   },
   {
     field: 'xiuxian.title.cleanTitle',
@@ -1016,10 +1016,10 @@ export default [
     component: 'GSubForm',
     componentProps: {
       modalProps: {
-        title: '清理过期称号配置',
+        title: '清理过期称号配置'
       },
       style: {
-        overflowY: 'auto',
+        overflowY: 'auto'
       },
       schemas: [
         {
@@ -1028,12 +1028,12 @@ export default [
           bottomHelpMessage: '定时清理过期称号cron',
           component: 'EasyCron',
           componentProps: {
-            placeholder: '*表示任意，?表示不指定（月日和星期互斥）',
+            placeholder: '*表示任意，?表示不指定（月日和星期互斥）'
           },
-          required: true,
-        },
-      ],
-    },
+          required: true
+        }
+      ]
+    }
   },
   {
     component: 'Divider',
@@ -1043,11 +1043,11 @@ export default [
       style: {
         fontWeight: 'bold',
         color: 'rgb(76, 113, 201)',
-        fontSize: '16px',
+        fontSize: '16px'
       },
       orientation: 'left',
-      plain: true,
-    },
+      plain: true
+    }
   },
   {
     field: 'xiuxian.drop.secretRealm_limit',
@@ -1055,11 +1055,11 @@ export default [
     component: 'GSubForm',
     componentProps: {
       modalProps: {
-        title: '等级限制配置',
+        title: '等级限制配置'
       },
       style: {
         maxHeight: '200px',
-        overflowY: 'auto',
+        overflowY: 'auto'
       },
       schemas: [
         {
@@ -1068,9 +1068,9 @@ export default [
           bottomHelpMessage: '进入初级秘境的最低境界',
           component: 'Select',
           componentProps: {
-            options: getRealmList(),
+            options: getRealmList()
           },
-          required: true,
+          required: true
         },
         {
           field: 'medium',
@@ -1078,9 +1078,9 @@ export default [
           bottomHelpMessage: '进入进阶秘境的最低境界',
           component: 'Select',
           componentProps: {
-            options: getRealmList(),
+            options: getRealmList()
           },
-          required: true,
+          required: true
         },
         {
           field: 'hard',
@@ -1088,12 +1088,12 @@ export default [
           bottomHelpMessage: '进入高级秘境的最低境界',
           component: 'Select',
           componentProps: {
-            options: getRealmList(),
+            options: getRealmList()
           },
-          required: true,
-        },
-      ],
-    },
+          required: true
+        }
+      ]
+    }
   },
   {
     field: 'xiuxian.drop.secretRealms',
@@ -1108,9 +1108,9 @@ export default [
           bottomHelpMessage: '建议四个字',
           component: 'Input',
           componentProps: {
-            placeholder: '请输入秘境名称',
+            placeholder: '请输入秘境名称'
           },
-          required: true,
+          required: true
         },
         {
           field: 'level',
@@ -1121,10 +1121,10 @@ export default [
             options: [
               { label: '初级', value: 'easy' },
               { label: '进阶', value: 'medium' },
-              { label: '高级', value: 'hard' },
-            ],
+              { label: '高级', value: 'hard' }
+            ]
           },
-          required: true,
+          required: true
         },
         {
           field: 'cost_ls',
@@ -1136,10 +1136,10 @@ export default [
             step: 1000,
             placeholder: '请输入灵石',
             style: {
-              width: '120px',
-            },
+              width: '120px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'drop_rate',
@@ -1151,14 +1151,14 @@ export default [
             max: 100,
             placeholder: '请输入',
             style: {
-              width: '120px',
-            },
+              width: '120px'
+            }
           },
-          required: true,
-        },
-      ],
+          required: true
+        }
+      ]
     },
-    required: true,
+    required: true
   },
   {
     field: 'xiuxian.drop.pills',
@@ -1173,18 +1173,18 @@ export default [
           helpMessage: '物品ID必须唯一',
           component: 'InputNumber',
           componentProps: {
-            placeholder: '请输入物品ID',
+            placeholder: '请输入物品ID'
           },
-          required: true,
+          required: true
         },
         {
           field: 'name',
           label: '丹药名称',
           component: 'Input',
           componentProps: {
-            placeholder: '请输入丹药名称',
+            placeholder: '请输入丹药名称'
           },
-          required: true,
+          required: true
         },
         {
           field: 'cult',
@@ -1196,10 +1196,10 @@ export default [
             step: 1000,
             placeholder: '请输入修为',
             style: {
-              width: '120px',
-            },
+              width: '120px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'sell_ls',
@@ -1211,10 +1211,10 @@ export default [
             step: 1000,
             placeholder: '请输入灵石',
             style: {
-              width: '120px',
-            },
+              width: '120px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'fromSecretRealmID',
@@ -1222,13 +1222,13 @@ export default [
           bottomHelpMessage: '丹药来源的秘境产出',
           component: 'Select',
           componentProps: {
-            options: getSecretRealmList(),
+            options: getSecretRealmList()
           },
-          required: true,
-        },
-      ],
+          required: true
+        }
+      ]
     },
-    required: true,
+    required: true
   },
   {
     field: 'xiuxian.drop.arts',
@@ -1243,18 +1243,18 @@ export default [
           helpMessage: '物品ID必须唯一',
           component: 'InputNumber',
           componentProps: {
-            placeholder: '请输入物品ID',
+            placeholder: '请输入物品ID'
           },
-          required: true,
+          required: true
         },
         {
           field: 'name',
           label: '功法名称',
           component: 'Input',
           componentProps: {
-            placeholder: '请输入功法名称',
+            placeholder: '请输入功法名称'
           },
-          required: true,
+          required: true
         },
         {
           field: 'rate',
@@ -1267,10 +1267,10 @@ export default [
             step: 1000,
             placeholder: '请输入概率',
             style: {
-              width: '120px',
-            },
+              width: '120px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'deduct_cult',
@@ -1282,10 +1282,10 @@ export default [
             step: 1000,
             placeholder: '请输入修为',
             style: {
-              width: '120px',
-            },
+              width: '120px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'addition',
@@ -1296,10 +1296,10 @@ export default [
             min: 0,
             placeholder: '（%）',
             style: {
-              width: '120px',
-            },
+              width: '120px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'sell_ls',
@@ -1311,10 +1311,10 @@ export default [
             step: 1000,
             placeholder: '请输入灵石',
             style: {
-              width: '120px',
-            },
+              width: '120px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'fromSecretRealmID',
@@ -1322,13 +1322,13 @@ export default [
           bottomHelpMessage: '丹药来源的秘境产出',
           component: 'Select',
           componentProps: {
-            options: getSecretRealmList(),
+            options: getSecretRealmList()
           },
-          required: true,
-        },
-      ],
+          required: true
+        }
+      ]
     },
-    required: true,
+    required: true
   },
   {
     component: 'Divider',
@@ -1338,11 +1338,11 @@ export default [
       style: {
         fontWeight: 'bold',
         color: 'rgb(76, 113, 201)',
-        fontSize: '16px',
+        fontSize: '16px'
       },
       orientation: 'left',
-      plain: true,
-    },
+      plain: true
+    }
   },
   {
     field: 'xiuxian.sroot.obtain_sroot_ls',
@@ -1354,9 +1354,9 @@ export default [
       min: 0,
       step: 1000,
       style: {
-        width: '150px',
-      },
-    },
+        width: '150px'
+      }
+    }
   },
   {
     field: 'xiuxian.sroot.wash_sroot_ls',
@@ -1368,9 +1368,9 @@ export default [
       min: 0,
       step: 1000,
       style: {
-        width: '150px',
-      },
-    },
+        width: '150px'
+      }
+    }
   },
   {
     field: 'xiuxian.sroot.root_drop',
@@ -1378,11 +1378,11 @@ export default [
     component: 'GSubForm',
     componentProps: {
       modalProps: {
-        title: '灵根掉落概率配置',
+        title: '灵根掉落概率配置'
       },
       style: {
         maxHeight: '200px',
-        overflowY: 'auto',
+        overflowY: 'auto'
       },
       schemas: [
         {
@@ -1395,10 +1395,10 @@ export default [
             step: 100,
             placeholder: '请输入概率 单位：%',
             style: {
-              width: '120px',
-            },
+              width: '120px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'advanced',
@@ -1410,10 +1410,10 @@ export default [
             step: 100,
             placeholder: '请输入概率 单位：%',
             style: {
-              width: '120px',
-            },
+              width: '120px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'supreme',
@@ -1425,10 +1425,10 @@ export default [
             step: 100,
             placeholder: '请输入概率 单位：%',
             style: {
-              width: '120px',
-            },
+              width: '120px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'mozumo',
@@ -1440,13 +1440,13 @@ export default [
             step: 100,
             placeholder: '请输入概率 单位：%',
             style: {
-              width: '120px',
-            },
+              width: '120px'
+            }
           },
-          required: true,
-        },
-      ],
-    },
+          required: true
+        }
+      ]
+    }
   },
   {
     field: 'xiuxian.sroot.sroot',
@@ -1465,19 +1465,19 @@ export default [
             min: 1,
             step: 1,
             style: {
-              width: '180px',
-            },
+              width: '180px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'name',
           label: '灵根名称',
           component: 'Input',
           componentProps: {
-            placeholder: '请输入灵根名称',
+            placeholder: '请输入灵根名称'
           },
-          required: true,
+          required: true
         },
         {
           field: 'addition',
@@ -1489,10 +1489,10 @@ export default [
             min: 0,
             step: 1,
             style: {
-              width: '180px',
-            },
+              width: '180px'
+            }
           },
-          required: true,
+          required: true
         },
         {
           field: 'level',
@@ -1503,22 +1503,22 @@ export default [
               { label: '五行灵根', value: 'five_elements' },
               { label: '高级灵根', value: 'advanced' },
               { label: '极品灵根', value: 'supreme' },
-              { label: '至臻灵根', value: 'mozumo' },
-            ],
+              { label: '至臻灵根', value: 'mozumo' }
+            ]
           },
-          required: true,
-        },
-      ],
+          required: true
+        }
+      ]
     },
-    required: true,
-  },
+    required: true
+  }
 ]
 
 function getRealmList() {
   const realms = Config.xiuxian.Realm.Realms
   return realms.map((realm, index) => ({
     label: realm.name,
-    value: index + 1,
+    value: index + 1
   }))
 }
 
@@ -1526,6 +1526,6 @@ function getSecretRealmList() {
   const secretRealms = Config.xiuxian.drop.secretRealms
   return secretRealms.map((secretRealm, index) => ({
     label: secretRealm.name,
-    value: index + 1,
+    value: index + 1
   }))
 }

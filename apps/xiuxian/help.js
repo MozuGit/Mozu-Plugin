@@ -11,9 +11,9 @@ export class MozuXiuxianHelp extends plugin {
       rule: [
         {
           reg: '#?(魔族陌)?修仙帮助$',
-          fnc: 'xiuxianHelp',
-        },
-      ],
+          fnc: 'xiuxianHelp'
+        }
+      ]
     })
   }
 
@@ -40,7 +40,7 @@ export class MozuXiuxianHelp extends plugin {
       '***',
       '**🌈兑换指令**',
       '>' + (await commands(help.cdk)),
-      '***',
+      '***'
     ].join('\n')
     this.e.reply([message, Button.author])
   }

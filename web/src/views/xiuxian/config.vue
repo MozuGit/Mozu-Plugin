@@ -643,7 +643,7 @@ const isNewArrayItem = ref(false)
 const apiRequest = async (url, options = {}) => {
   const token = localStorage.getItem('token')
   const headers = {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json'
   }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
@@ -652,8 +652,8 @@ const apiRequest = async (url, options = {}) => {
     ...options,
     headers: {
       ...headers,
-      ...options.headers,
-    },
+      ...options.headers
+    }
   }
 
   try {
@@ -772,14 +772,14 @@ const getFormItemRules = (schema) => {
     rules.push({
       type: 'number',
       min: schema.componentProps.min,
-      message: `${schema.label}最小值为${schema.componentProps.min}`,
+      message: `${schema.label}最小值为${schema.componentProps.min}`
     })
   }
   if (schema.componentProps?.max !== undefined) {
     rules.push({
       type: 'number',
       max: schema.componentProps.max,
-      message: `${schema.label}最大值为${schema.componentProps.max}`,
+      message: `${schema.label}最大值为${schema.componentProps.max}`
     })
   }
 
@@ -835,7 +835,7 @@ const getNestedSchemas = (element) => {
         component: el.component,
         componentProps: el.componentProps,
         required: el.required,
-        bottomHelpMessage: el.bottomHelpMessage,
+        bottomHelpMessage: el.bottomHelpMessage
       }))
   }
 
@@ -1281,7 +1281,7 @@ const handleResetConfirm = async () => {
 
   try {
     const response = await apiRequest('/api/xiuxian/config?action=reset', {
-      method: 'POST',
+      method: 'POST'
     })
 
     if (response.success) {
@@ -1330,7 +1330,7 @@ const handleSave = async () => {
 
     const response = await apiRequest('/api/xiuxian/config?action=save_config', {
       method: 'POST',
-      body: JSON.stringify(saveData),
+      body: JSON.stringify(saveData)
     })
 
     if (response.success) {
@@ -1353,7 +1353,7 @@ const fetchGroups = async () => {
     if (response.success && response.data?.groups) {
       groupOptions.value = response.data.groups.map((g) => ({
         label: g.name || g.groupId,
-        value: g.groupId,
+        value: g.groupId
       }))
     }
   } catch (error) {}

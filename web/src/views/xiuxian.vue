@@ -80,7 +80,7 @@ import {
   SettingOutlined,
   GiftOutlined,
   TeamOutlined,
-  CompassOutlined,
+  CompassOutlined
 } from '@ant-design/icons-vue'
 
 const router = useRouter()

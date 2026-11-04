@@ -12,9 +12,9 @@ export class MozuXiuxian extends plugin {
       rule: [
         {
           reg: RegExp.xiuxian,
-          fnc: 'xiuxian',
-        },
-      ],
+          fnc: 'xiuxian'
+        }
+      ]
     })
   }
 

@@ -49,14 +49,14 @@ const tabs = [
     key: 'appearance',
     label: '外观',
     route: 'settingsAppearance',
-    icon: BgColorsOutlined,
+    icon: BgColorsOutlined
   },
   {
     key: 'security',
     label: '安全',
     route: 'settingsSecurity',
-    icon: SafetyCertificateOutlined,
-  },
+    icon: SafetyCertificateOutlined
+  }
 ]
 
 const activeKey = computed(() => (route.name === 'settingsSecurity' ? 'security' : 'appearance'))

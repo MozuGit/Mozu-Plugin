@@ -98,7 +98,7 @@ async function backupKeys(pattern, outputFile) {
       hash: () => Redis.hgetall(key),
       list: () => Redis.lrange(key, 0, -1),
       set: () => Redis.smembers(key),
-      zset: () => Redis.zrange(key, 0, -1, 'WITHSCORES'),
+      zset: () => Redis.zrange(key, 0, -1, 'WITHSCORES')
     }
     return valueGetters[type] ? await valueGetters[type]() : null
   }
@@ -229,7 +229,7 @@ async function restoreKeys(backupFile, options = {}) {
               }
               pipeline.zadd(...args)
             }
-          },
+          }
         }
 
         restoreStrategies[type]?.()

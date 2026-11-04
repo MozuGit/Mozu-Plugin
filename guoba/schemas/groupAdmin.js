@@ -1,13 +1,13 @@
 export default [
   {
     label: '官机群管',
-    component: 'SOFT_GROUP_BEGIN',
+    component: 'SOFT_GROUP_BEGIN'
   },
   {
     field: 'groupAdmin.setting.enable',
     label: '启用群管',
     bottomHelpMessage: '启用官机（QQBot）群管',
-    component: 'Switch',
+    component: 'Switch'
   },
   {
     field: 'groupAdmin.setting.priority',
@@ -17,8 +17,8 @@ export default [
     componentProps: {
       placeholder: '数字越低，优先级越高',
       style: {
-        width: '120px',
-      },
-    },
-  },
+        width: '120px'
+      }
+    }
+  }
 ]

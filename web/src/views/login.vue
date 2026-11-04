@@ -166,7 +166,7 @@ let timer = null
 
 const form = reactive({
   password: '',
-  token: '',
+  token: ''
 })
 
 const formRef = ref()
@@ -176,7 +176,7 @@ const totpRequired = ref(false)
 const resetForm = reactive({
   code: '',
   newPassword: '',
-  token: '',
+  token: ''
 })
 
 // 启用 2FA 时，重置密码同样需要动态验证码（与登录一致）
@@ -223,7 +223,7 @@ async function fetchTTL() {
   try {
     const res = await fetch('/api/login?action=get_code_ttl', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' }
     })
     const data = await res.json()
     if (data.success) {
@@ -252,7 +252,7 @@ async function handleLogin() {
     }
     const hashedPassword = await hashSHA256(form.password)
     const payload = {
-      password: hashedPassword,
+      password: hashedPassword
     }
     if (totpRequired.value) {
       if (!/^\d{6}$/.test(form.token)) {
@@ -264,7 +264,7 @@ async function handleLogin() {
     const res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(payload)
     })
     const data = await res.json()
 
@@ -297,7 +297,7 @@ async function handleGetCode() {
   try {
     const res = await fetch('/api/login?action=get_code', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' }
     })
     const data = await res.json()
     if (data.success) {
@@ -341,8 +341,8 @@ async function handleResetPassword() {
       body: JSON.stringify({
         code: resetForm.code,
         newPassword: hashedPassword,
-        token: resetForm.token,
-      }),
+        token: resetForm.token
+      })
     })
     const data = await res.json()
     if (data.success) {

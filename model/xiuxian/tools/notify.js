@@ -18,7 +18,7 @@ export default {
         '宗门ID：' + sectId,
         '申请名称：' + sectName,
         '若内容违规可执行 ' + (await mqqapi.command('重置宗门名称', '重置宗门名称' + sectId, true)),
-        '***',
+        '***'
       ].join('\n')
     } else {
       message = [
@@ -30,7 +30,7 @@ export default {
         (await mqqapi.command('[审核通过]', '宗门名称审核通过' + sectId, true)) +
           '      ' +
           (await mqqapi.command('[驳回审核]', '宗门名称审核拒绝' + sectId, true)),
-        '***',
+        '***'
       ].join('\n')
     }
     for (const botid of BotList) {
@@ -41,8 +41,8 @@ export default {
             segment.button([
               { text: '通过', input: prefix + '宗门名称审核通过' + sectId },
               { text: '重置', input: prefix + '重置宗门名称' + sectId },
-              { text: '驳回', input: prefix + '宗门名称审核拒绝' + sectId },
-            ]),
+              { text: '驳回', input: prefix + '宗门名称审核拒绝' + sectId }
+            ])
           ])
         } catch {
           continue
@@ -65,7 +65,7 @@ export default {
         '宗门ID：' + sectId,
         '申请简介：' + sectDesc,
         '若内容违规可执行 ' + (await mqqapi.command('重置宗门简介', '重置宗门简介' + sectId, true)),
-        '***',
+        '***'
       ].join('\n')
     } else {
       message = [
@@ -77,7 +77,7 @@ export default {
         (await mqqapi.command('[审核通过]', '宗门简介审核通过' + sectId, true)) +
           '      ' +
           (await mqqapi.command('[驳回审核]', '宗门简介审核拒绝' + sectId, true)),
-        '***',
+        '***'
       ].join('\n')
     }
     for (const botid of BotList) {
@@ -88,13 +88,13 @@ export default {
             segment.button([
               { text: '通过', input: prefix + '宗门简介审核通过' + sectId },
               { text: '重置', input: prefix + '重置宗门简介' + sectId },
-              { text: '驳回', input: prefix + '宗门简介审核拒绝' + sectId },
-            ]),
+              { text: '驳回', input: prefix + '宗门简介审核拒绝' + sectId }
+            ])
           ])
         } catch {
           continue
         }
       }
     }
-  },
+  }
 }

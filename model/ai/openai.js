@@ -13,15 +13,15 @@ export default {
     try {
       const client = new OpenAI({
         apiKey: Config.config.openai.apiKey,
-        baseURL: Config.config.openai.baseURL,
+        baseURL: Config.config.openai.baseURL
       })
       const complettion = await client.chat.completions.create({
         model: Config.config.openai.model,
-        messages: [{ role: 'user', content: '返回是/否\n请只判断以下内容是否违规\n内容：' + messgae }],
+        messages: [{ role: 'user', content: '返回是/否\n请只判断以下内容是否违规\n内容：' + messgae }]
       })
       return complettion.choices[0].message.content
     } catch (err) {
       logger.error(logger.cyan('[魔族陌修仙][OpenAI]') + logger.red(util.inspect(err)))
     }
-  },
+  }
 }

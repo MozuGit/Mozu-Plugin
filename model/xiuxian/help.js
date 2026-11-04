@@ -34,7 +34,7 @@ const help = {
       '取消替换灵根',
       '查询修仙者',
       '修仙者人数',
-      '修仙个人信息',
+      '修仙个人信息'
     ]
     const result = commands.map((item) => `${prefix}${item}`)
     return result
@@ -54,7 +54,7 @@ const help = {
       '同意宗门成员',
       '拒绝宗门成员',
       '全部同意宗门成员',
-      '全部拒绝宗门成员',
+      '全部拒绝宗门成员'
     ]
     const result = commands.map((item) => `${prefix}${item}`)
     return result
@@ -68,7 +68,7 @@ const help = {
     let commands = ['使用兑换码', '生成兑换码', '删除兑换码']
     const result = commands.map((item) => `${prefix}${item}`)
     return result
-  },
+  }
 }
 
 export default help

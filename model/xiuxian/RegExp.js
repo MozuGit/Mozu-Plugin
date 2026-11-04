@@ -19,7 +19,7 @@ const patterns = [
   /重置宗门(名称|简介)\s*\d*/,
   /生成(?:通用)?兑换码(.*)/,
   /删除(?:全部)?兑换码([\s\S]*)/,
-  /使用兑换码(.*)/,
+  /使用兑换码(.*)/
 ]
 
 const RegExp = {
@@ -27,7 +27,7 @@ const RegExp = {
     const sources = patterns.map((regex) => regex.source)
     const rule = `${prefix}(?:<@.*?>)*(${sources.join('|')})(?:<@.*?>)*$`
     return rule
-  },
+  }
 }
 
 export default RegExp

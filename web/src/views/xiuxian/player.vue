@@ -305,7 +305,7 @@ import {
   DeleteOutlined,
   SyncOutlined,
   SearchOutlined,
-  ReloadOutlined,
+  ReloadOutlined
 } from '@ant-design/icons-vue'
 
 const router = useRouter()
@@ -314,7 +314,7 @@ const tableLocale = {
   triggerAsc: '',
   triggerDesc: '',
   cancelSort: '取消排序',
-  emptyText: '暂无玩家数据',
+  emptyText: '暂无玩家数据'
 }
 
 const debounce = (fn, delay = 300) => {
@@ -330,7 +330,7 @@ const debounce = (fn, delay = 300) => {
 const apiRequest = async (url, options = {}) => {
   const token = localStorage.getItem('token')
   const headers = {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json'
   }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
@@ -339,8 +339,8 @@ const apiRequest = async (url, options = {}) => {
     ...options,
     headers: {
       ...headers,
-      ...options.headers,
-    },
+      ...options.headers
+    }
   }
   const res = await fetch(url, config)
   if (res.status === 401) {
@@ -385,7 +385,7 @@ const searchParams = reactive({
   lsOperator: 'contains',
   realm: undefined,
   sroot: undefined,
-  sex: undefined,
+  sex: undefined
 })
 
 const hasSearchCondition = computed(() => {
@@ -469,7 +469,7 @@ const displayPagination = computed(() => {
       pageSize: pageSize,
       total: displayPlayerList.value.length,
       showSizeChanger: false,
-      showTotal: (total) => `本页 ${Math.min(displayPlayerList.value.length, pageSize)} 条，共 ${total} 名玩家`,
+      showTotal: (total) => `本页 ${Math.min(displayPlayerList.value.length, pageSize)} 条，共 ${total} 名玩家`
     }
   } else {
     return {
@@ -477,7 +477,7 @@ const displayPagination = computed(() => {
       pageSize: pageSize,
       total: totalPlayerCount.value,
       showSizeChanger: false,
-      showTotal: (total) => `本页 ${playerList.value.length} 条，共 ${total} 名玩家`,
+      showTotal: (total) => `本页 ${playerList.value.length} 条，共 ${total} 名玩家`
     }
   }
 })
@@ -487,56 +487,56 @@ const columns = [
     title: '修仙ID',
     dataIndex: 'id',
     key: 'id',
-    width: 95,
+    width: 95
   },
   {
     title: '修为',
     dataIndex: 'cult',
     key: 'cult',
     width: 120,
-    ellipsis: true,
+    ellipsis: true
   },
   {
     title: '灵石',
     dataIndex: 'ls',
     key: 'ls',
     width: 120,
-    ellipsis: true,
+    ellipsis: true
   },
   {
     title: '境界',
     dataIndex: 'realm',
     key: 'realm',
     width: 130,
-    ellipsis: true,
+    ellipsis: true
   },
   {
     title: '灵根',
     dataIndex: 'sroot',
     key: 'sroot',
     width: 130,
-    ellipsis: true,
+    ellipsis: true
   },
   {
     title: '性别',
     dataIndex: 'sex',
     key: 'sex',
     width: 80,
-    align: 'center',
+    align: 'center'
   },
   {
     title: '当前称号',
     key: 'currentTitle',
     width: 120,
-    ellipsis: true,
+    ellipsis: true
   },
   {
     title: '操作',
     key: 'action',
     width: 100,
     align: 'center',
-    fixed: 'right',
-  },
+    fixed: 'right'
+  }
 ]
 
 const fetchRealmMap = async () => {
@@ -546,7 +546,7 @@ const fetchRealmMap = async () => {
       realmMap.value = data
       const options = Object.entries(data).map(([key, value]) => ({
         value: key,
-        label: value,
+        label: value
       }))
       realmOptions.value = options.sort((a, b) => parseInt(a.value) - parseInt(b.value))
     }
@@ -565,7 +565,7 @@ const fetchSrootMap = async () => {
       })
       srootOptions.value = data.map((item) => ({
         value: String(item.id),
-        label: item.name,
+        label: item.name
       }))
     }
   } catch (error) {
@@ -642,7 +642,7 @@ const searchByIdWithPaging = async (idFilter) => {
         const mapped = pageData.players.map((player) => ({
           ...player,
           titleIndex: player.titleIndex !== undefined ? Number(player.titleIndex) : -1,
-          titles: player.titles || [],
+          titles: player.titles || []
         }))
         newAllList.push(...mapped)
       }
@@ -706,7 +706,7 @@ const loadAllData = async () => {
       const mappedPlayers = firstPageData.players.map((player) => ({
         ...player,
         titleIndex: player.titleIndex !== undefined ? Number(player.titleIndex) : -1,
-        titles: player.titles || [],
+        titles: player.titles || []
       }))
 
       allPlayerList.value = mappedPlayers
@@ -724,7 +724,7 @@ const loadAllData = async () => {
         const mappedPlayers = pageData.players.map((player) => ({
           ...player,
           titleIndex: player.titleIndex !== undefined ? Number(player.titleIndex) : -1,
-          titles: player.titles || [],
+          titles: player.titles || []
         }))
 
         mergePlayers(mappedPlayers)
@@ -770,7 +770,7 @@ const fetchPlayerList = async (page = 1, silent = false) => {
         const mappedPlayers = data.players.map((player) => ({
           ...player,
           titleIndex: player.titleIndex !== undefined ? Number(player.titleIndex) : -1,
-          titles: player.titles || [],
+          titles: player.titles || []
         }))
 
         playerList.value = mappedPlayers
@@ -878,21 +878,21 @@ const formState = reactive({
   sroot: '',
   sex: '未设置',
   titleIndex: -1,
-  titles: [],
+  titles: []
 })
 
 const formRules = {
   cult: [
     { required: true, message: '请输入修为值', trigger: 'blur' },
-    { pattern: /^\d+$/, message: '请输入有效数字', trigger: 'blur' },
+    { pattern: /^\d+$/, message: '请输入有效数字', trigger: 'blur' }
   ],
   ls: [
     { required: true, message: '请输入灵石数量', trigger: 'blur' },
-    { pattern: /^\d+$/, message: '请输入有效数字', trigger: 'blur' },
+    { pattern: /^\d+$/, message: '请输入有效数字', trigger: 'blur' }
   ],
   realm: [{ required: true, message: '请选择境界', trigger: 'change' }],
   sroot: [{ required: true, message: '请选择灵根', trigger: 'change' }],
-  sex: [{ required: true, message: '请选择性别', trigger: 'change' }],
+  sex: [{ required: true, message: '请选择性别', trigger: 'change' }]
 }
 
 const disabledDate = (current) => {
@@ -949,7 +949,7 @@ const showEditModal = (record) => {
     getDate: title.getTime > 0 ? dayjs.unix(title.getTime) : null,
     validTime: title.validTime || 0,
     isPermanent: title.validTime === 0,
-    validDate: title.validTime > 0 ? dayjs.unix(title.validTime) : null,
+    validDate: title.validTime > 0 ? dayjs.unix(title.validTime) : null
   }))
   modalVisible.value = true
 }
@@ -962,7 +962,7 @@ const addTitle = () => {
     getDate: now,
     validTime: 0,
     isPermanent: true,
-    validDate: null,
+    validDate: null
   })
 }
 
@@ -983,7 +983,7 @@ const buildUpdatedPlayer = (response) => {
     return {
       ...serverPlayer,
       titleIndex: serverPlayer.titleIndex !== undefined ? Number(serverPlayer.titleIndex) : -1,
-      titles: serverPlayer.titles || [],
+      titles: serverPlayer.titles || []
     }
   }
 
@@ -998,8 +998,8 @@ const buildUpdatedPlayer = (response) => {
     titles: formState.titles.map((t) => ({
       title: t.title,
       getTime: Number(t.getTime),
-      validTime: Number(t.validTime),
-    })),
+      validTime: Number(t.validTime)
+    }))
   }
 }
 
@@ -1041,12 +1041,12 @@ const handleSubmit = async () => {
       titles: formState.titles.map((t) => ({
         title: t.title,
         getTime: Number(t.getTime),
-        validTime: Number(t.validTime),
-      })),
+        validTime: Number(t.validTime)
+      }))
     }
     const response = await apiRequest(`/api/xiuxian/player?action=modify&id=${formState.id}`, {
       method: 'POST',
-      body: JSON.stringify(postData),
+      body: JSON.stringify(postData)
     })
 
     const updatedPlayer = buildUpdatedPlayer(response)

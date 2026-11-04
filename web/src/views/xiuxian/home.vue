@@ -151,7 +151,7 @@ const rangeOptions = [
   { label: '近10天', value: 10 },
   { label: '近14天', value: 14 },
   { label: '近30天', value: 30 },
-  { label: '近一年', value: 365 },
+  { label: '近一年', value: 365 }
 ]
 
 const avgTitle = computed(() => {
@@ -184,15 +184,15 @@ const playerColumns = [
     dataIndex: 'playerId',
     key: 'playerId',
     width: '30%',
-    align: 'center',
+    align: 'center'
   },
   {
     title: 'openid',
     dataIndex: 'openid',
     key: 'openid',
     width: '70%',
-    align: 'center',
-  },
+    align: 'center'
+  }
 ]
 
 const copyOpenid = (text) => {
@@ -263,8 +263,8 @@ const fetchActivePlayers = async (point) => {
   try {
     const res = await fetch(`/api/xiuxian/get_active_players?${query}`, {
       headers: {
-        Authorization: `Bearer ${token}`,
-      },
+        Authorization: `Bearer ${token}`
+      }
     })
     if (res.status === 401) {
       message.error('token过期或无效')
@@ -276,7 +276,7 @@ const fetchActivePlayers = async (point) => {
     if (data.success) {
       playerList.value = data.data.players.map((item) => ({
         openid: item[0],
-        playerId: item[1],
+        playerId: item[1]
       }))
     } else {
       message.error(data.message || '获取活跃玩家失败')
@@ -413,23 +413,23 @@ const updateChart = (data) => {
       borderWidth: 1,
       padding: [12, 16],
       textStyle: {
-        color: '#333',
-      },
+        color: '#333'
+      }
     },
     grid: {
       left: '3%',
       right: '4%',
       bottom: '8%',
       top: '15%',
-      containLabel: true,
+      containLabel: true
     },
     xAxis: {
       type: 'category',
       data: dates,
       axisLine: {
         lineStyle: {
-          color: '#e8e8e8',
-        },
+          color: '#e8e8e8'
+        }
       },
       axisLabel: {
         color: '#666',
@@ -440,12 +440,12 @@ const updateChart = (data) => {
           if (!isMonthly) return value
           const month = value.slice(5)
           return /^\d{2}$/.test(month) ? `${Number(month)}月` : value
-        },
+        }
       },
       axisTick: {
-        alignWithLabel: true,
+        alignWithLabel: true
       },
-      boundaryGap: false,
+      boundaryGap: false
     },
     yAxis: {
       type: 'value',
@@ -455,8 +455,8 @@ const updateChart = (data) => {
       splitLine: {
         lineStyle: {
           color: '#f0f0f0',
-          type: 'dashed',
-        },
+          type: 'dashed'
+        }
       },
       axisLabel: {
         color: '#666',
@@ -466,13 +466,13 @@ const updateChart = (data) => {
             return (value / 1000).toFixed(1) + 'k'
           }
           return Math.round(value)
-        },
+        }
       },
       name: isMonthly ? '月活跃人数' : '活跃人数',
       nameTextStyle: {
         color: '#999',
-        fontSize: 12,
-      },
+        fontSize: 12
+      }
     },
     series: [
       {
@@ -484,7 +484,7 @@ const updateChart = (data) => {
         symbolSize: data.length > 20 ? 8 : 12,
         lineStyle: {
           width: 3,
-          color: '#0891b2',
+          color: '#0891b2'
         },
         areaStyle: {
           color: {
@@ -496,25 +496,25 @@ const updateChart = (data) => {
             colorStops: [
               {
                 offset: 0,
-                color: 'rgba(8, 145, 178, 0.32)',
+                color: 'rgba(8, 145, 178, 0.32)'
               },
               {
                 offset: 1,
-                color: 'rgba(8, 145, 178, 0.02)',
-              },
-            ],
-          },
+                color: 'rgba(8, 145, 178, 0.02)'
+              }
+            ]
+          }
         },
         itemStyle: {
           color: '#0891b2',
           borderColor: '#fff',
-          borderWidth: 2,
+          borderWidth: 2
         },
         emphasis: {
           focus: 'series',
           lineStyle: {
-            width: 4,
-          },
+            width: 4
+          }
         },
         label: {
           show: data.length <= 14 && !(isMonthly && isCompact),
@@ -525,12 +525,12 @@ const updateChart = (data) => {
           fontWeight: 600,
           formatter: (params) => {
             return params.value
-          },
+          }
         },
         z: 10,
-        hoverAnimation: true,
-      },
-    ],
+        hoverAnimation: true
+      }
+    ]
   }
 
   chartInstance.setOption(option, true)
@@ -546,7 +546,7 @@ const normalizeTrend = (payload) => {
         date,
         label: item.label || (type === 'month' ? date : date.slice(5)),
         active: Math.round(Number(item.active) || 0),
-        type,
+        type
       }
     })
   }
@@ -556,7 +556,7 @@ const normalizeTrend = (payload) => {
       date: getFullDate(9 - index),
       label: formatDate(9 - index),
       active: Math.round(value || 0),
-      type: 'day',
+      type: 'day'
     }))
   }
 
@@ -569,7 +569,7 @@ const normalizeTrend = (payload) => {
       date: getFullDate(i),
       label: formatDate(i),
       active: i === 0 ? baseValue : value,
-      type: 'day',
+      type: 'day'
     })
   }
   return trend
@@ -588,8 +588,8 @@ const fetchData = async (isSilent = false, range = activeRange.value, animateOve
   try {
     const res = await fetch(`/api/xiuxian/getInfo?range=${range}`, {
       headers: {
-        Authorization: `Bearer ${token}`,
-      },
+        Authorization: `Bearer ${token}`
+      }
     })
     if (res.status === 401) {
       message.error('token过期或无效')

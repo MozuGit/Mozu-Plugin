@@ -137,13 +137,13 @@ const CACHE_DURATION = 5 * 60 * 1000
 const tableLocale = {
   triggerAsc: '',
   triggerDesc: '',
-  cancelSort: '取消排序',
+  cancelSort: '取消排序'
 }
 
 const apiRequest = async (url, options = {}) => {
   const token = localStorage.getItem('token')
   const headers = {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json'
   }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
@@ -152,8 +152,8 @@ const apiRequest = async (url, options = {}) => {
     ...options,
     headers: {
       ...headers,
-      ...options.headers,
-    },
+      ...options.headers
+    }
   }
   const res = await fetch(url, config)
   if (res.status === 401) {
@@ -211,21 +211,21 @@ const columns = [
     key: 'filename',
     ellipsis: true,
     sorter: (a, b) => a.filename.localeCompare(b.filename),
-    sortDirections: ['ascend', 'descend'],
+    sortDirections: ['ascend', 'descend']
   },
   {
     title: '操作',
     key: 'action',
     width: 180,
-    align: 'center',
-  },
+    align: 'center'
+  }
 ]
 
 const rowSelection = computed(() => ({
   selectedRowKeys: selectedRowKeys.value,
   onChange: (keys) => {
     selectedRowKeys.value = keys
-  },
+  }
 }))
 
 const fetchBackupList = async (silent = false) => {
@@ -239,7 +239,7 @@ const fetchBackupList = async (silent = false) => {
     let parsedList = []
     if (data.backups && Array.isArray(data.backups)) {
       parsedList = data.backups.map((filename) => ({
-        filename: filename.replace(/\.json$/, ''),
+        filename: filename.replace(/\.json$/, '')
       }))
     }
     backupList.value = parsedList
@@ -313,8 +313,8 @@ const executeSingleDelete = async () => {
     await apiRequest('/api/xiuxian/backup?action=delete', {
       method: 'POST',
       body: JSON.stringify({
-        files: [currentDeleteFile.value.filename],
-      }),
+        files: [currentDeleteFile.value.filename]
+      })
     })
 
     message.success('删除成功')
@@ -346,8 +346,8 @@ const executeBatchDelete = async () => {
     await apiRequest('/api/xiuxian/backup?action=delete', {
       method: 'POST',
       body: JSON.stringify({
-        files: selectedRowKeys.value,
-      }),
+        files: selectedRowKeys.value
+      })
     })
 
     message.success(`成功删除 ${selectedRowKeys.value.length} 个备份文件`)

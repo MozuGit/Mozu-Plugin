@@ -28,10 +28,10 @@ export function getConfigData() {
         password: '',
         totp: {
           ...panel.login?.totp,
-          secret: '',
-        },
-      },
-    },
+          secret: ''
+        }
+      }
+    }
   }
 }
 
@@ -45,7 +45,7 @@ export function setConfigData(data, { Result }) {
   if (!nested.panel.login.totp?.secret) {
     nested.panel.login.totp = {
       ...nested.panel.login.totp,
-      secret: Config.panel.login.totp?.secret || '',
+      secret: Config.panel.login.totp?.secret || ''
     }
   }
   const xiuxianError = validateXiuxianConfig(nested.xiuxian)
@@ -61,7 +61,7 @@ export function setConfigData(data, { Result }) {
     { dir: 'example', file: 'fayan', data: nested.example.fayan },
     { dir: 'example', file: 'like', data: nested.example.like },
     { dir: 'example', file: 'chosenOne', data: nested.example.chosenOne },
-    { dir: 'panel', file: 'login', data: nested.panel.login },
+    { dir: 'panel', file: 'login', data: nested.panel.login }
   ])
   handleXiuxianConfig(nested.xiuxian)
   return Result.ok({}, '保存成功喵~')
@@ -100,7 +100,7 @@ function handleXiuxianConfig(xiuxianData) {
     { file: 'setting', data: xiuxianData.setting },
     { file: 'sect', data: xiuxianData.sect },
     { file: 'title', data: xiuxianData.title },
-    { file: 'beast', data: xiuxianData.beast },
+    { file: 'beast', data: xiuxianData.beast }
   ]
   for (const { file, data } of configMappings) {
     if (data && typeof data === 'object') {
@@ -174,7 +174,7 @@ export const actions = {
     } catch (error) {
       return Result.error('强制关闭失败: ' + error.message)
     }
-  },
+  }
 }
 
 function hasRepeatedId(...args) {

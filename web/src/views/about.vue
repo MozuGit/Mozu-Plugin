@@ -221,7 +221,7 @@ const versionStatus = computed(() => {
       return {
         type: type.toLowerCase(),
         orderIndex: orderIndex >= 0 ? orderIndex : prereleaseOrder.length,
-        number: number,
+        number: number
       }
     }
     const info1 = getPrereleaseInfo(pre1)
@@ -275,7 +275,7 @@ const fetchAboutInfo = async () => {
   const token = localStorage.getItem('token')
   try {
     const headers = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     }
     if (token) {
       headers['Authorization'] = `Bearer ${token}`
@@ -283,7 +283,7 @@ const fetchAboutInfo = async () => {
 
     const res = await fetch('/api/about/getInfo', {
       method: 'GET',
-      headers,
+      headers
     })
 
     if (res.status === 401) {

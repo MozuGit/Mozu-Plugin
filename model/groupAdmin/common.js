@@ -29,5 +29,5 @@ export default {
       e.reply(['***', '**操作失败**', '>造成的原因如下：', '>' + msg.join('\n'), '***'].join('\n'))
     }
     return !msg.length
-  },
+  }
 }

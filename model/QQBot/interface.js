@@ -73,8 +73,8 @@ export default class QQBotApi {
       { openid, time },
       ...extra.map((item) => ({
         openid: item.openid,
-        time: item.time === undefined ? time : item.time,
-      })),
+        time: item.time === undefined ? time : item.time
+      }))
     ]
     const buildMember = (item) => {
       const t = item.time === undefined ? 0 : item.time
@@ -84,14 +84,14 @@ export default class QQBotApi {
       return {
         op: t === 0 ? 'del' : 'add',
         member_openid: item.openid.replace(this.bot.uin + ':', ''),
-        mute_expire_at: t === 0 ? '' : expireTime,
+        mute_expire_at: t === 0 ? '' : expireTime
       }
     }
     for (let i = 0; i < all.length; i += 20) {
       const members = all.slice(i, i + 20).map(buildMember)
       try {
         await this.bot.sdk.request.post(`/v2/groups/${this.group_id}/restrict_chat_setting`, {
-          members,
+          members
         })
       } catch (err) {
         return false
@@ -117,7 +117,7 @@ export default class QQBotApi {
       try {
         await this.bot.sdk.request.post(`/v2/groups/${this.group_id}/batch_remove_members`, {
           member_openids,
-          addBlack,
+          addBlack
         })
       } catch (err) {
         return false

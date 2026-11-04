@@ -8,7 +8,7 @@ export const getInfo = async (req, res) => {
     if (!presence) {
       return res.status(401).json({
         success: false,
-        message: 'token过期或无效',
+        message: 'token过期或无效'
       })
     }
     let data
@@ -29,8 +29,8 @@ export const getInfo = async (req, res) => {
       data: {
         version: Version.Plugin_Version,
         latestVersion: data.version || Version.Plugin_Version,
-        author: data.author || Version.Plugin_pkg.author,
-      },
+        author: data.author || Version.Plugin_pkg.author
+      }
     })
   } catch (error) {
     res.json({ success: false, message: error.message })

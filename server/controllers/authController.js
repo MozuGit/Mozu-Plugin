@@ -6,7 +6,7 @@ import {
   tokenKey,
   getBearerToken,
   isTokenValid,
-  revokeToken,
+  revokeToken
 } from '../../lib/panelAuth.js'
 
 import Redis from '#Redis'
@@ -55,7 +55,7 @@ export const handleLogin = async (req, res) => {
   } catch (error) {
     res.json({
       success: false,
-      message: '服务器内部错误',
+      message: '服务器内部错误'
     })
   }
 }
@@ -66,14 +66,14 @@ const handleGetCode = async (req, res) => {
   if (await Redis.get(`Mozu:panel:code:${ip}`)) {
     return res.json({
       success: false,
-      message: '获取验证码频繁，请稍后再试',
+      message: '获取验证码频繁，请稍后再试'
     })
   }
   const code = String(crypto.randomInt(0, 100000000)).padStart(8, '0')
   logger.info(logger.yellow(`[魔族陌面版][验证码][来自IP：${ip}] ${code}`))
   await Redis.set(`Mozu:panel:code:${ip}`, code, 'EX', 300)
   res.json({
-    success: true,
+    success: true
   })
 }
 
@@ -84,7 +84,7 @@ const handleGetCodeTTL = async (req, res) => {
   res.json({
     success: true,
     ttl,
-    totpRequired: isTotpEnabled(),
+    totpRequired: isTotpEnabled()
   })
 }
 
@@ -95,7 +95,7 @@ const handleResetPassword = async (req, res) => {
   if (!code || !newPassword) {
     return res.json({
       success: false,
-      message: '请提供验证码和新密码',
+      message: '请提供验证码和新密码'
     })
   }
 
@@ -109,7 +109,7 @@ const handleResetPassword = async (req, res) => {
     await Redis.del(attemptKey)
     return res.json({
       success: false,
-      message: '验证码连续错误，请重新获取验证码',
+      message: '验证码连续错误，请重新获取验证码'
     })
   }
 
@@ -117,7 +117,7 @@ const handleResetPassword = async (req, res) => {
   if (!savedCode || !safeEqual(String(code), String(savedCode))) {
     return res.json({
       success: false,
-      message: '验证码错误',
+      message: '验证码错误'
     })
   }
 
@@ -125,7 +125,7 @@ const handleResetPassword = async (req, res) => {
     return res.json({
       success: false,
       message: req.body.token ? 'TOTP 验证码错误' : '请输入 TOTP 动态验证码',
-      needTotp: true,
+      needTotp: true
     })
   }
 
@@ -133,7 +133,7 @@ const handleResetPassword = async (req, res) => {
   await Redis.del(`Mozu:panel:code:${ip}`)
   await Redis.del(attemptKey)
   res.json({
-    success: true,
+    success: true
   })
 }
 
@@ -142,7 +142,7 @@ const handleChangePassword = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({
       success: false,
-      message: '请求方法不支持',
+      message: '请求方法不支持'
     })
   }
 
@@ -150,7 +150,7 @@ const handleChangePassword = async (req, res) => {
   if (!auth.valid) {
     return res.status(401).json({
       success: false,
-      message: auth.error,
+      message: auth.error
     })
   }
 
@@ -159,13 +159,13 @@ const handleChangePassword = async (req, res) => {
   if (typeof newPassword !== 'string' || newPassword.length < 6) {
     return res.json({
       success: false,
-      message: '新密码至少需要 6 位',
+      message: '新密码至少需要 6 位'
     })
   }
   if (newPassword.length > 128) {
     return res.json({
       success: false,
-      message: '新密码不能超过 128 位',
+      message: '新密码不能超过 128 位'
     })
   }
 
@@ -175,7 +175,7 @@ const handleChangePassword = async (req, res) => {
   if (attempts >= 5) {
     return res.json({
       success: false,
-      message: '密码修改尝试次数过多，请稍后再试',
+      message: '密码修改尝试次数过多，请稍后再试'
     })
   }
 
@@ -189,7 +189,7 @@ const handleChangePassword = async (req, res) => {
       await increasePasswordAttempts(attemptKey)
       return res.json({
         success: false,
-        message: '当前密码错误',
+        message: '当前密码错误'
       })
     }
   }
@@ -198,14 +198,14 @@ const handleChangePassword = async (req, res) => {
     await increasePasswordAttempts(attemptKey)
     return res.json({
       success: false,
-      message: token ? 'TOTP 验证码错误' : '请输入 TOTP 动态验证码',
+      message: token ? 'TOTP 验证码错误' : '请输入 TOTP 动态验证码'
     })
   }
 
   if (configuredPassword && (await verifyPassword(newPassword, configuredPassword))) {
     return res.json({
       success: false,
-      message: '新密码不能与当前密码相同',
+      message: '新密码不能与当前密码相同'
     })
   }
 
@@ -213,7 +213,7 @@ const handleChangePassword = async (req, res) => {
   if (!saved) {
     return res.json({
       success: false,
-      message: '密码写入失败，请检查 config/panel 目录权限',
+      message: '密码写入失败，请检查 config/panel 目录权限'
     })
   }
 
@@ -239,8 +239,8 @@ const handleChangePassword = async (req, res) => {
     success: true,
     message: '密码修改成功，其他设备已退出登录',
     data: {
-      token: newToken,
-    },
+      token: newToken
+    }
   })
 }
 
@@ -264,14 +264,14 @@ const handleNormalLogin = async (req, res) => {
   if (!Config.panel.login.password) {
     return res.json({
       success: false,
-      message: '未设置密码',
+      message: '未设置密码'
     })
   }
 
   if (parseInt(await Redis.get(errorKey), 10) >= MAX_PASSWORD_ATTEMPTS) {
     return res.json({
       success: false,
-      message: '密码连续错误，请60秒后重试',
+      message: '密码连续错误，请60秒后重试'
     })
   }
 
@@ -288,20 +288,20 @@ const handleNormalLogin = async (req, res) => {
       success: true,
       message: '登录成功',
       data: {
-        token: token,
-      },
+        token: token
+      }
     })
   } else if (!passwordOk) {
     const attempts = await Redis.incr(errorKey)
     if (attempts === 1) await Redis.expire(errorKey, 60)
     res.json({
       success: false,
-      message: '密码错误',
+      message: '密码错误'
     })
   } else {
     res.json({
       success: false,
-      message: 'TOTP 验证码错误',
+      message: 'TOTP 验证码错误'
     })
   }
 }
@@ -313,7 +313,7 @@ const handleExitLogin = async (req, res) => {
   if (revoked) await revokeToken(token)
   res.json({
     success: true,
-    message: revoked ? '退出登录成功' : '已退出登录',
+    message: revoked ? '退出登录成功' : '已退出登录'
   })
 }
 
@@ -322,7 +322,7 @@ export const handle2FA = async (req, res) => {
   if (!auth.valid) {
     return res.status(401).json({
       success: false,
-      message: auth.error,
+      message: auth.error
     })
   }
   const { action } = req.query
@@ -350,12 +350,12 @@ export const handle2FA = async (req, res) => {
 
     return res.status(400).json({
       success: false,
-      message: '无效的操作',
+      message: '无效的操作'
     })
   } catch (error) {
     res.json({
       success: false,
-      message: error.message,
+      message: error.message
     })
   }
 }
@@ -364,8 +364,8 @@ const handleGetTotpStatus = async (req, res) => {
   res.json({
     success: true,
     data: {
-      enabled: isTotpEnabled(),
-    },
+      enabled: isTotpEnabled()
+    }
   })
 }
 
@@ -373,7 +373,7 @@ const handleCreateTotp = async (req, res) => {
   if (isTotpEnabled()) {
     return res.status(409).json({
       success: false,
-      message: 'TOTP 双因素认证已启用',
+      message: 'TOTP 双因素认证已启用'
     })
   }
   const secret = TwoFactorAuth.generateSecret()
@@ -382,8 +382,8 @@ const handleCreateTotp = async (req, res) => {
     success: true,
     data: {
       secret: secret.base32,
-      otpauth_url: secret.otpauth_url,
-    },
+      otpauth_url: secret.otpauth_url
+    }
   })
 }
 
@@ -391,34 +391,34 @@ const handleEnableTotp = async (req, res) => {
   if (isTotpEnabled()) {
     return res.status(409).json({
       success: false,
-      message: 'TOTP 双因素认证已启用',
+      message: 'TOTP 双因素认证已启用'
     })
   }
   const secret = await Redis.get('Mozu:panel:totp:secret')
   if (!secret) {
     return res.status(400).json({
       success: false,
-      message: '密钥未创建或已过期',
+      message: '密钥未创建或已过期'
     })
   }
   const ok = TwoFactorAuth.verifyToken(secret, req.body.token)
   if (!ok) {
     return res.json({
       success: false,
-      message: 'TOTP 验证码错误',
+      message: 'TOTP 验证码错误'
     })
   }
   const saved = saveTotpConfig(true, secret)
   if (!saved) {
     return res.json({
       success: false,
-      message: 'TOTP 配置写入失败，请检查 config/panel 目录权限',
+      message: 'TOTP 配置写入失败，请检查 config/panel 目录权限'
     })
   }
   await Redis.del('Mozu:panel:totp:secret')
   res.json({
     success: true,
-    message: 'TOTP 双因素认证启用成功',
+    message: 'TOTP 双因素认证启用成功'
   })
 }
 
@@ -426,26 +426,26 @@ const handleDeleteTotp = async (req, res) => {
   if (!isTotpEnabled()) {
     return res.json({
       success: false,
-      message: 'TOTP 双因素认证未启用',
+      message: 'TOTP 双因素认证未启用'
     })
   }
   const ok = TwoFactorAuth.verifyToken(Config.panel.login.totp.secret, req.body.token)
   if (!ok) {
     return res.json({
       success: false,
-      message: 'TOTP 验证码错误',
+      message: 'TOTP 验证码错误'
     })
   }
   const saved = saveTotpConfig(false, '')
   if (!saved) {
     return res.json({
       success: false,
-      message: 'TOTP 配置写入失败，请检查 config/panel 目录权限',
+      message: 'TOTP 配置写入失败，请检查 config/panel 目录权限'
     })
   }
   res.json({
     success: true,
-    message: 'TOTP 双因素认证关闭成功',
+    message: 'TOTP 双因素认证关闭成功'
   })
 }
 

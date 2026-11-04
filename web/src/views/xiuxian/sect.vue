@@ -113,13 +113,13 @@ const tableLocale = {
   triggerAsc: '',
   triggerDesc: '',
   cancelSort: '取消排序',
-  emptyText: '暂无宗门数据',
+  emptyText: '暂无宗门数据'
 }
 
 const apiRequest = async (url, options = {}) => {
   const token = localStorage.getItem('token')
   const headers = {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json'
   }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
@@ -128,8 +128,8 @@ const apiRequest = async (url, options = {}) => {
     ...options,
     headers: {
       ...headers,
-      ...options.headers,
-    },
+      ...options.headers
+    }
   }
   const res = await fetch(url, config)
   if (res.status === 401) {
@@ -160,7 +160,7 @@ const pagination = reactive({
   pageSize: 10,
   total: 0,
   showSizeChanger: false,
-  showTotal: (total) => `本页 ${sectList.value.length} 条，共 ${totalSectCount.value} 个宗门`,
+  showTotal: (total) => `本页 ${sectList.value.length} 条，共 ${totalSectCount.value} 个宗门`
 })
 
 const columns = [
@@ -169,50 +169,50 @@ const columns = [
     dataIndex: 'id',
     key: 'id',
     width: 100,
-    align: 'center',
+    align: 'center'
   },
   {
     title: '宗门名称',
     dataIndex: 'name',
     key: 'name',
     width: 200,
-    ellipsis: true,
+    ellipsis: true
   },
   {
     title: '等级',
     dataIndex: 'level',
     key: 'level',
     width: 100,
-    align: 'center',
+    align: 'center'
   },
   {
     title: '描述',
     dataIndex: 'desc',
     key: 'desc',
     width: 250,
-    ellipsis: true,
+    ellipsis: true
   },
   {
     title: '经验值',
     dataIndex: 'exp',
     key: 'exp',
     width: 120,
-    align: 'right',
+    align: 'right'
   },
   {
     title: '无需审核',
     dataIndex: 'noAudit',
     key: 'noAudit',
     width: 100,
-    align: 'center',
+    align: 'center'
   },
   {
     title: '操作',
     key: 'action',
     width: 100,
     align: 'center',
-    fixed: 'right',
-  },
+    fixed: 'right'
+  }
 ]
 
 const fetchSectList = async (page = 1, silent = false) => {
@@ -228,7 +228,7 @@ const fetchSectList = async (page = 1, silent = false) => {
     if (data) {
       sectList.value = (data.sects || []).map((sect) => ({
         ...sect,
-        noAudit: sect.noAudit !== undefined ? Number(sect.noAudit) : 0,
+        noAudit: sect.noAudit !== undefined ? Number(sect.noAudit) : 0
       }))
       totalSectCount.value = Number(data.sectCount) || 0
       pagination.total = totalSectCount.value
@@ -269,19 +269,19 @@ const formState = reactive({
   level: 1,
   desc: '',
   exp: 0,
-  noAudit: false,
+  noAudit: false
 })
 
 const formRules = {
   name: [{ required: true, message: '请输入宗门名称', trigger: 'blur' }],
   level: [
     { required: true, message: '请输入宗门等级', trigger: 'change' },
-    { type: 'number', min: 1, message: '等级不能小于1', trigger: 'change' },
+    { type: 'number', min: 1, message: '等级不能小于1', trigger: 'change' }
   ],
   exp: [
     { required: true, message: '请输入宗门经验值', trigger: 'change' },
-    { type: 'number', min: 0, message: '经验值不能为负数', trigger: 'change' },
-  ],
+    { type: 'number', min: 0, message: '经验值不能为负数', trigger: 'change' }
+  ]
 }
 
 const showEditModal = (record) => {
@@ -305,12 +305,12 @@ const handleSubmit = async () => {
       level: String(formState.level),
       desc: formState.desc || '未设置',
       exp: String(formState.exp),
-      noAudit: formState.noAudit ? 1 : 0,
+      noAudit: formState.noAudit ? 1 : 0
     }
 
     await apiRequest(`/api/xiuxian/sect?action=modify&sectid=${formState.id}`, {
       method: 'POST',
-      body: JSON.stringify(postData),
+      body: JSON.stringify(postData)
     })
 
     message.success('宗门信息修改成功')

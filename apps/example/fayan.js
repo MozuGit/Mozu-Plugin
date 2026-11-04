@@ -11,17 +11,17 @@ export class MozuFayan extends plugin {
       rule: [
         {
           reg: '^#?发言榜(日榜|月榜|周榜)?\s*(\d*)',
-          fnc: 'fayan',
+          fnc: 'fayan'
         },
         {
           reg: '^#?(清空|清除)(本群|群聊)发言(记录|榜)?$',
-          fnc: 'clearAll',
+          fnc: 'clearAll'
         },
         {
           reg: '^#?清除发言(记录|榜)?',
-          fnc: 'clearAt',
-        },
-      ],
+          fnc: 'clearAt'
+        }
+      ]
     })
   }
 
@@ -58,13 +58,13 @@ export class MozuFayan extends plugin {
             '日期：' + date,
             '***',
             '>暂无数据',
-            '***',
+            '***'
           ].join('\n')
         )
         const Button = segment.button([
           { text: '日榜', input: '发言榜日榜' },
           { text: '月榜', input: '发言榜月榜' },
-          { text: '周榜', input: '发言榜周榜' },
+          { text: '周榜', input: '发言榜周榜' }
         ])
         message = [segment.markdown(msg.join('\n')), Button]
       } else {
@@ -75,7 +75,7 @@ export class MozuFayan extends plugin {
             '数据仅供参考  请以实际发言为准',
             '日期：' + date,
             '--------',
-            '暂无数据',
+            '暂无数据'
           ].join('\n')
         )
         message = msg.join('\n')
@@ -94,7 +94,7 @@ export class MozuFayan extends plugin {
           '**本群发言榜' + type + '**',
           '>数据仅供参考  请以实际发言为准',
           '日期：' + date,
-          '***',
+          '***'
         ].join('\n')
       )
       for (let i = 0; i < list.length; i += 2) {
@@ -107,7 +107,7 @@ export class MozuFayan extends plugin {
       const Button = segment.button([
         { text: '日榜', input: '发言榜日榜' },
         { text: '月榜', input: '发言榜月榜' },
-        { text: '周榜', input: '发言榜周榜' },
+        { text: '周榜', input: '发言榜周榜' }
       ])
       message = [segment.markdown(msg.join('\n')), Button]
     } else {
@@ -147,7 +147,7 @@ export class MozuFayan extends plugin {
         [
           { text: '日榜', input: '发言榜日榜' },
           { text: '月榜', input: '发言榜月榜' },
-          { text: '周榜', input: '发言榜周榜' },
+          { text: '周榜', input: '发言榜周榜' }
         ]
       )
       await this.e.reply([message, Button])
@@ -171,7 +171,7 @@ export class MozuFayan extends plugin {
             '***',
             '**未获取到艾特数据**',
             '>正确格式：清除发言 @123',
-            '***',
+            '***'
           ].join('\n')
         )
         const Button = segment.button(
@@ -179,7 +179,7 @@ export class MozuFayan extends plugin {
           [
             { text: '日榜', input: '发言榜日榜' },
             { text: '月榜', input: '发言榜月榜' },
-            { text: '周榜', input: '发言榜周榜' },
+            { text: '周榜', input: '发言榜周榜' }
           ]
         )
         await this.e.reply([message, Button])
@@ -199,7 +199,7 @@ export class MozuFayan extends plugin {
           '***',
           '**清除发言成功**',
           '>已清除 <@' + AtQQ.replace(`${this.e.self_id}:`, '') + '> 的发言记录',
-          '***',
+          '***'
         ].join('\n')
       )
       const Button = segment.button(
@@ -207,7 +207,7 @@ export class MozuFayan extends plugin {
         [
           { text: '日榜', input: '发言榜日榜' },
           { text: '月榜', input: '发言榜月榜' },
-          { text: '周榜', input: '发言榜周榜' },
+          { text: '周榜', input: '发言榜周榜' }
         ]
       )
       await this.e.reply([message, Button])

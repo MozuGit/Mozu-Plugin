@@ -28,7 +28,7 @@ async function xiuxianText(msg, user_id, at, isMaster) {
           '**功能开发中，即将上线**',
           '>版本：' + Version.Plugin_Version,
           '>催一催作者：' + (await mqqapi.command('魔族陌', '3343712589', true)),
-          '***',
+          '***'
         ].join('\n')
       )
       Text.push(Button.author)
@@ -41,7 +41,7 @@ async function xiuxianText(msg, user_id, at, isMaster) {
         '***',
         '**系统错误，请稍后重试**',
         '>联系主人：' + (await mqqapi.command('魔族陌', '3343712589', true)),
-        '***',
+        '***'
       ].join('\n')
     )
     Text.push(Button.author)
@@ -68,7 +68,7 @@ const commandHandlers = {
             ...(await buildUserInfo(userInfo)),
             '***',
             ...(await buildRealmInfo(userInfo)),
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -96,7 +96,7 @@ const commandHandlers = {
             '>获得' + value.data.addls + '灵石',
             '***',
             ...(await buildUserInfo(userInfo)),
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -132,7 +132,7 @@ const commandHandlers = {
             '**每日签到奖励**',
             '>修为：' + value.data.addcult,
             '灵石：' + value.data.addls,
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -145,7 +145,7 @@ const commandHandlers = {
             '***',
             '**签到情况**',
             '>签到次数：' + userInfo.signNum + '天',
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -168,7 +168,7 @@ const commandHandlers = {
         '>灵根：' + (userInfo.sroot?.name || '无'),
         '灵根加成：' + (userInfo.sroot?.addition || 0) + ' %',
         '功法加成：' + userInfo.addition.art + ' %',
-        '***',
+        '***'
       ].join('\n')
     )
     Text.push(Button.xiuxian)
@@ -186,7 +186,7 @@ const commandHandlers = {
           '每闭关一小时获得' + Config.xiuxian.xiuxian.retreat.cult + '点修为',
           '闭关上限' + Config.xiuxian.xiuxian.retreat.max + '小时',
           '闭关上限后时间仍会累计，但收益不会计算',
-          '***',
+          '***'
         ].join('\n')
       )
     } else {
@@ -197,7 +197,7 @@ const commandHandlers = {
           '**你当前正在闭关中**',
           '>开始时间：' + formatTime(userInfo.retreat.startTime),
           '闭关时长：' + userInfo.retreat.runTime,
-          '***',
+          '***'
         ].join('\n')
       )
     }
@@ -216,7 +216,7 @@ const commandHandlers = {
           '每闭关一小时获得' + Config.xiuxian.xiuxian.retreat.cult + '点修为',
           '闭关上限' + Config.xiuxian.xiuxian.retreat.max + '小时',
           '闭关上限后时间仍会累计，但收益不会计算',
-          '***',
+          '***'
         ].join('\n')
       )
     } else {
@@ -230,7 +230,7 @@ const commandHandlers = {
           '***',
           '**现在闭关收益**',
           '>修为：' + userInfo.retreat.profit.cult,
-          '***',
+          '***'
         ].join('\n')
       )
     }
@@ -248,7 +248,7 @@ const commandHandlers = {
             '***',
             '**开始闭关**',
             '>开始时间：' + formatTime(userInfo.retreat.startTime),
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -260,7 +260,7 @@ const commandHandlers = {
             '**你当前正在闭关中**',
             '>开始时间：' + formatTime(userInfo.retreat.startTime),
             '闭关时长：' + userInfo.retreat.runTime,
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -284,7 +284,7 @@ const commandHandlers = {
             '***',
             '**闭关收益**',
             '>修为：' + value.data.addcult,
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -298,7 +298,7 @@ const commandHandlers = {
             '每闭关一小时获得' + Config.xiuxian.xiuxian.retreat.cult + '点修为',
             '闭关上限' + Config.xiuxian.xiuxian.retreat.max + '小时',
             '闭关上限后时间仍会累计，但收益不会计算',
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -315,7 +315,7 @@ const commandHandlers = {
         '**修仙者人数**',
         '>修仙者人数：' + value.data.count + ' 人',
         '修仙今日活跃：' + value.data.countDay + ' 人',
-        '***',
+        '***'
       ].join('\n')
     )
     Text.push(Button.xiuxian)
@@ -336,7 +336,7 @@ const commandHandlers = {
         '>排行榜仅展示前10名',
         '***',
         ...(await buildRank(value.data.ranks, '修为')),
-        value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n修为：${value.data.value}\n***` : ``,
+        value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n修为：${value.data.value}\n***` : ``
       ].join('\n')
     )
     Text.push(Button.rank)
@@ -352,7 +352,7 @@ const commandHandlers = {
         '>排行榜仅展示前10名',
         '***',
         ...(await buildRank(value.data.ranks, '灵石')),
-        value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n灵石：${value.data.value}\n***` : ``,
+        value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n灵石：${value.data.value}\n***` : ``
       ].join('\n')
     )
     Text.push(Button.rank)
@@ -368,7 +368,7 @@ const commandHandlers = {
         '>排行榜仅展示前10名',
         '***',
         ...(await buildRank(value.data.ranks, '战力')),
-        value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n战力：${value.data.value}\n***` : ``,
+        value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n战力：${value.data.value}\n***` : ``
       ].join('\n')
     )
     Text.push(Button.rank)
@@ -384,7 +384,7 @@ const commandHandlers = {
         '>排行榜仅展示前10名',
         '***',
         ...(await buildRank(value.data.ranks, '闭关时间')),
-        value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n闭关时间：${value.data.value}\n***` : ``,
+        value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n闭关时间：${value.data.value}\n***` : ``
       ].join('\n')
     )
     Text.push(Button.rank)
@@ -400,7 +400,7 @@ const commandHandlers = {
         '>排行榜仅展示前10名',
         '***',
         ...(await buildRank(value.data.ranks, '签到次数')),
-        value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n签到次数：${value.data.value}\n***` : ``,
+        value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n签到次数：${value.data.value}\n***` : ``
       ].join('\n')
     )
     Text.push(Button.rank)
@@ -417,7 +417,7 @@ const commandHandlers = {
         '仅主动发起随机切磋胜利统计',
         '***',
         ...(await buildRank(value.data.ranks, '胜利次数')),
-        value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n胜利次数：${value.data.value}\n***` : ``,
+        value.data.rank ? `**你的排名**\n>排名：第${value.data.rank}名\n胜利次数：${value.data.value}\n***` : ``
       ].join('\n')
     )
     Text.push(Button.rank)
@@ -442,7 +442,7 @@ const commandHandlers = {
                   ? '已过期'
                   : formatTime(title.validTime)),
             setTitleBtn,
-            '***',
+            '***'
           ].join('\n')
         )
       }
@@ -468,7 +468,7 @@ const commandHandlers = {
           (await mqqapi.command('查看妖兽', '查看妖兽' + i, true)) +
             '  ' +
             (await mqqapi.command('猎杀妖兽', '猎杀妖兽' + i, true)),
-          '***',
+          '***'
         ].join('\n')
       )
       i++
@@ -485,7 +485,7 @@ const commandHandlers = {
         const index = startIndex + idx
         const [viewCmd, exploreCmd] = await Promise.all([
           mqqapi.command('查看秘境', '查看秘境' + index, true),
-          mqqapi.command('探索秘境', '探索秘境' + index, true),
+          mqqapi.command('探索秘境', '探索秘境' + index, true)
         ])
         return ['**秘境：' + item.name + '**', viewCmd + '  ' + exploreCmd].join('\n')
       })
@@ -523,7 +523,7 @@ const commandHandlers = {
             ? ' **「已达成」**'
             : ''),
         ...hardText,
-        '***',
+        '***'
       ].join('\n')
     )
     Text.push(Button.secretRealm)
@@ -546,7 +546,7 @@ const commandHandlers = {
             '**获取灵根成功**',
             '>灵根：' + value.data.sroot.name,
             '灵根加成：' + value.data.sroot.addition + ' %',
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -558,7 +558,7 @@ const commandHandlers = {
             '**灵石不足**',
             '>获取灵根需要灵石：' + Config.xiuxian.sroot.obtain_sroot_ls,
             '当前灵石：' + userInfo.ls,
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -570,7 +570,7 @@ const commandHandlers = {
             '**已拥有灵根**',
             '>如需重新获取灵根',
             '请进行' + (await mqqapi.command('洗灵根', '洗灵根', true)),
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -602,7 +602,7 @@ const commandHandlers = {
             (userInfo.sectInfo.nextExp - userInfo.sectInfo.exp > 0
               ? '距离下一级还需' + (userInfo.sectInfo.nextExp - userInfo.sectInfo.exp) + '点经验'
               : '已满足' + (await mqqapi.command('升级', '宗门升级', true)) + '要求'),
-          '***',
+          '***'
         ].join('\n')
       )
     } else {
@@ -626,7 +626,7 @@ const commandHandlers = {
             '**宗门列表**',
             '>最多随机显示10个宗门',
             '***',
-            ...(await buildSectList(value.data.sectInfos)),
+            ...(await buildSectList(value.data.sectInfos))
           ].join('\n')
         )
         break
@@ -637,7 +637,7 @@ const commandHandlers = {
             '***',
             '**当前没有任何宗门**',
             '>' + (await mqqapi.command('点击创建宗门', '创建宗门')) + '',
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -660,7 +660,7 @@ const commandHandlers = {
             '**创建宗门失败**',
             '>创建宗门需要' + Config.xiuxian.sect.create_sect_ls + '灵石',
             '当前灵石：' + value.data.ls,
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -673,7 +673,7 @@ const commandHandlers = {
             '>恭喜，宗门创建成功',
             '***',
             ...(await buildUserInfo(userInfo)),
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -696,7 +696,7 @@ const commandHandlers = {
             '**宗门升级成功**',
             '>宗门等级：' + userInfo.sectInfo.level + ' / ' + Config.xiuxian.sect.sect_level.length,
             '宗门成员上限提升至 ' + userInfo.sectInfo.max + ' 人',
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -708,7 +708,7 @@ const commandHandlers = {
             '**宗门经验不足**',
             '>宗门经验：' + userInfo.sectInfo.exp + ' / ' + userInfo.sectInfo.nextExp,
             '距离下一级还需' + (userInfo.sectInfo.nextExp - userInfo.sectInfo.exp) + '点经验',
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -720,7 +720,7 @@ const commandHandlers = {
             '**宗门等级已满**',
             '>宗门等级：' + userInfo.sectInfo.level + ' / ' + Config.xiuxian.sect.sect_level.length,
             '无需再次升级宗门',
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -734,7 +734,7 @@ const commandHandlers = {
             '***',
             '**你还没加入宗门呢**',
             '>点击' + (await mqqapi.command('加入宗门')),
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -757,19 +757,19 @@ const commandHandlers = {
           [7, '长老'],
           [8, '大长老'],
           [9, '副宗主'],
-          [10, '宗主'],
+          [10, '宗主']
         ])
         let memberList = await Promise.all(
           members.map(async (item, index) => {
             if (index) {
               return [
                 '>**' + (await mqqapi.command('成员ID：' + item.id, '查询修仙者' + item.id)) + '**',
-                '职位：' + missionMap.get(item.permission),
+                '职位：' + missionMap.get(item.permission)
               ].join('\n')
             } else {
               return [
                 '**' + (await mqqapi.command('宗主ID：' + item.id, '查询修仙者' + item.id)) + '**',
-                '>职位：' + missionMap.get(item.permission),
+                '>职位：' + missionMap.get(item.permission)
               ].join('\n')
             }
           })
@@ -783,7 +783,7 @@ const commandHandlers = {
             '***',
             '**你还没加入宗门呢**',
             '>点击' + (await mqqapi.command('加入宗门')),
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -805,7 +805,7 @@ const commandHandlers = {
             '>获得修为：' + value.data.addcult,
             '获得灵石：' + value.data.addls,
             '获得宗门经验：' + value.data.sectExp,
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -819,7 +819,7 @@ const commandHandlers = {
             '***',
             '**你还没加入宗门呢**',
             '>点击' + (await mqqapi.command('加入宗门')),
-            '***',
+            '***'
           ].join('\n')
         )
         break
@@ -850,7 +850,7 @@ const commandHandlers = {
                   '**',
                 '**修为：' + member.cult + '**',
                 '**境界：' + member.realm + '**',
-                '***',
+                '***'
               ].join('\n')
             )
           }
@@ -864,13 +864,13 @@ const commandHandlers = {
             '***',
             '**你还没加入宗门呢**',
             '>点击' + (await mqqapi.command('加入宗门')),
-            '***',
+            '***'
           ].join('\n')
         )
         break
     }
     Text.push(Button.sectMember)
-  },
+  }
 }
 
 const prefixHandlers = [
@@ -910,7 +910,7 @@ const prefixHandlers = [
               ...realmUpInfoText,
               '***',
               ...(await buildRealmInfo(userInfo)),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -929,7 +929,7 @@ const prefixHandlers = [
                 ...(await buildRealmInfo(userInfo)),
                 '***',
                 '**' + (await mqqapi.command('突破太慢？试试一键突破', '一键突破', true)) + '**',
-                '***',
+                '***'
               ].join('\n')
             )
           } else if (value.data.state === 'failed') {
@@ -943,7 +943,7 @@ const prefixHandlers = [
                 ...(await buildRealmInfo(userInfo)),
                 '***',
                 '**' + (await mqqapi.command('突破太慢？试试一键突破', '一键突破', true)) + '**',
-                '***',
+                '***'
               ].join('\n')
             )
           }
@@ -957,7 +957,7 @@ const prefixHandlers = [
               '>**你的修为还不足以突破**',
               '***',
               ...(await buildRealmInfo(userInfo)),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -973,13 +973,13 @@ const prefixHandlers = [
               '>**无法再次突破**',
               '***',
               ...(await buildRealmInfo(userInfo)),
-              '***',
+              '***'
             ].join('\n')
           )
           break
       }
       Text.push(Button.xiuxian)
-    },
+    }
   },
   {
     prefix: /^#?切磋\s*\d*/,
@@ -1003,7 +1003,7 @@ const prefixHandlers = [
               '**' + (value.data.event_id === id ? '' : '对方') + '当前正在闭关**',
               '>暂时无法切磋',
               '找不到人切磋？试试' + (await mqqapi.command('随机切磋', '随机切磋', true)),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1015,7 +1015,7 @@ const prefixHandlers = [
               '**' + (value.data.event_id === id ? '你的' : '对方') + '修为不足5000**',
               '>暂时无法切磋',
               '找不到人切磋？试试' + (await mqqapi.command('随机切磋', '随机切磋', true)),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1027,7 +1027,7 @@ const prefixHandlers = [
               '**' + (value.data.event_id === id ? '当前' : '对方') + '正在CD中...**',
               '>**剩余' + value.data.pvp_cd + '秒**',
               '找不到人切磋？试试' + (await mqqapi.command('随机切磋', '随机切磋', true)),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1038,7 +1038,7 @@ const prefixHandlers = [
               '***',
               '**不能和自己切磋**',
               '找不到人切磋？试试' + (await mqqapi.command('随机切磋', '随机切磋', true)),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1050,7 +1050,7 @@ const prefixHandlers = [
               '**未找到该玩家**',
               '>请确认该玩家是否存在或注册',
               '找不到人切磋？试试' + (await mqqapi.command('随机切磋', '随机切磋', true)),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1066,7 +1066,7 @@ const prefixHandlers = [
               '>你的战力：' + value.data.powerA,
               '对方战力：' + value.data.powerB,
               '切磋成功概率：' + (value.data.finalWinRate * 100).toFixed(2) + '%',
-              '***',
+              '***'
             ].join('\n')
           )
           Text.push(
@@ -1080,12 +1080,12 @@ const prefixHandlers = [
               '**切磋结算**',
               '>你' + (value.data.winner ? '胜利：+' : '失败：-') + value.data.cultA + '点修为',
               '对方' + (value.data.winner ? '失败：-' : '胜利：+') + value.data.cultB + '点修为',
-              '***',
+              '***'
             ].join('\n')
           )
       }
       Text.push(Button.xiuxian)
-    },
+    }
   },
   {
     prefix: /^#?随机切磋$/,
@@ -1106,7 +1106,7 @@ const prefixHandlers = [
               '>你的战力：' + value.data.self_power,
               '对方战力：' + value.data.random_power,
               '切磋成功概率：' + (value.data.finalWinRate * 100).toFixed(2) + '%',
-              '***',
+              '***'
             ].join('\n')
           )
           Text.push(
@@ -1120,7 +1120,7 @@ const prefixHandlers = [
               '**切磋结算**',
               '>你' + (value.data.winner ? '胜利：+' : '失败：-') + value.data.cultAddSelf + '点修为',
               '对方' + (value.data.winner ? '失败：-' : '胜利：+') + value.data.cultAddRandom + '点修为',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1132,7 +1132,7 @@ const prefixHandlers = [
               '**随机切磋玩家不足**',
               '>符合随机切磋的玩家不足',
               '暂时无法随机切磋',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1151,7 +1151,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.xiuxian)
-    },
+    }
   },
   {
     prefix: /^#?查询修仙者\s*\d*/,
@@ -1182,14 +1182,14 @@ const prefixHandlers = [
             '>灵根：' + (userInfo.sroot?.name || '无'),
             '灵根加成：' + (userInfo.sroot?.addition || 0) + ' %',
             '功法加成：' + userInfo.addition.art + ' %',
-            '***',
+            '***'
           ].join('\n')
         )
       } else {
         Text.push(['<@' + user_id + '>', '***', '**未找到该玩家**', '>请确认该玩家是否存在或注册', '***'].join('\n'))
       }
       Text.push(Button.xiuxian)
-    },
+    }
   },
   {
     prefix: /^#?查看妖兽\s*\d*/,
@@ -1216,12 +1216,12 @@ const prefixHandlers = [
             '***',
             '**惩罚**',
             '>失败惩罚：' + '扣除' + beastInfo.punishment.cult + '点修为',
-            '***',
+            '***'
           ].join('\n')
         )
       }
       Text.push(Button.beast)
-    },
+    }
   },
   {
     prefix: /^#?猎杀妖兽\s*\d*/,
@@ -1246,7 +1246,7 @@ const prefixHandlers = [
                 '>你的战力：' + power,
                 '妖兽战力：' + beastInfo.power,
                 '猎杀成功概率：' + value.data.winRate + '%',
-                '***',
+                '***'
               ].join('\n')
             )
             switch (value.data.state) {
@@ -1261,7 +1261,7 @@ const prefixHandlers = [
                     '**奖励结算**',
                     '>获得修为：' + beastInfo.reward.cult,
                     '获得灵石：' + beastInfo.reward.ls,
-                    '***',
+                    '***'
                   ].join('\n')
                 )
                 break
@@ -1275,7 +1275,7 @@ const prefixHandlers = [
                     '***',
                     '**惩罚结算**',
                     '>损失修为：' + beastInfo.punishment.cult,
-                    '***',
+                    '***'
                   ].join('\n')
                 )
                 break
@@ -1294,7 +1294,7 @@ const prefixHandlers = [
         }
       }
       Text.push(Button.beast)
-    },
+    }
   },
   {
     prefix: /^#?查看秘境\s*\d*/,
@@ -1335,12 +1335,12 @@ const prefixHandlers = [
             '',
             '>##**功法**',
             ...arts,
-            '***',
+            '***'
           ].join('\n')
         )
       }
       Text.push(Button.secretRealm)
-    },
+    }
   },
   {
     prefix: /^#?探索秘境(十次|百次)?\s*\d*/,
@@ -1379,7 +1379,7 @@ const prefixHandlers = [
                 '***',
                 '**探索结果**',
                 ...(dropText.length !== 0 ? dropText : ['>什么都没有拿到']),
-                '***',
+                '***'
               ].join('\n')
             )
             break
@@ -1392,7 +1392,7 @@ const prefixHandlers = [
                 '>你的灵石不足',
                 '需要灵石：' + value.data.need_ls,
                 '当前灵石：' + userInfo.ls,
-                '***',
+                '***'
               ].join('\n')
             )
             break
@@ -1406,7 +1406,7 @@ const prefixHandlers = [
                 '需要境界：' +
                   Config.xiuxian.Realm.Realms[Config.xiuxian.drop.secretRealm_limit[secretRealmInfo.level] - 1].name,
                 '当前境界：' + userInfo.realm.realmName,
-                '***',
+                '***'
               ].join('\n')
             )
             break
@@ -1416,7 +1416,7 @@ const prefixHandlers = [
         }
       }
       Text.push(Button.secretRealm)
-    },
+    }
   },
   {
     prefix: /^#?丹药背包\s*\d*/,
@@ -1434,7 +1434,7 @@ const prefixHandlers = [
             (await mqqapi.command('使用丹药', '使用丹药' + pill.id + ' 数量:1')) +
               '   ' +
               (await mqqapi.command('出售丹药', '出售丹药' + pill.id + ' 数量:1')),
-            '***',
+            '***'
           ].join('\n')
         )
       }
@@ -1455,11 +1455,11 @@ const prefixHandlers = [
             ? pillsText.length >= count * 5
               ? pillsText.slice(count * 5, count * 5 + 5)
               : ['>**没有更多物品了**', '***']
-            : ['>**什么丹药都没有**', '***']),
+            : ['>**什么丹药都没有**', '***'])
         ].join('\n')
       )
       Text.push(Button.pill)
-    },
+    }
   },
   {
     prefix: /^#?功法背包\s*\d*/,
@@ -1477,7 +1477,7 @@ const prefixHandlers = [
             (await mqqapi.command('学习功法', '学习功法' + art.id, true)) +
               '   ' +
               (await mqqapi.command('出售功法', '出售功法' + art.id + ' 数量:1')),
-            '***',
+            '***'
           ].join('\n')
         )
       }
@@ -1498,11 +1498,11 @@ const prefixHandlers = [
             ? artsText.length >= count * 5
               ? artsText.slice(count * 5, count * 5 + 5)
               : ['>**没有更多物品了**', '***']
-            : ['>**什么功法都没有**', '***']),
+            : ['>**什么功法都没有**', '***'])
         ].join('\n')
       )
       Text.push(Button.art)
-    },
+    }
   },
   {
     prefix: /^#?(?:一键)?使用丹药\s*(\d*)(?:\s*数量[:：]\s*(\d+))?/,
@@ -1529,7 +1529,7 @@ const prefixHandlers = [
               '>使用数量：' + useCount,
               '增加修为：' + value.data.addcult,
               '***',
-              ...(usePillsText.length ? usePillsText : ['>什么丹药也没有']),
+              ...(usePillsText.length ? usePillsText : ['>什么丹药也没有'])
             ].join('\n')
           )
           break
@@ -1542,7 +1542,7 @@ const prefixHandlers = [
               '>使用丹药：' + value.data.pill.name,
               '使用数量：' + count,
               '增加修为：' + value.data.addcult,
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1555,7 +1555,7 @@ const prefixHandlers = [
               '>丹药：' + value.data.pill.name,
               '使用数量：' + count,
               '丹药数量：' + value.data.pill.count,
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1567,7 +1567,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.pill)
-    },
+    }
   },
   {
     prefix: /^#?(?:一键)?出售丹药\s*(\d*)(?:\s*数量[:：]\s*(\d+))?/,
@@ -1594,7 +1594,7 @@ const prefixHandlers = [
               '>出售数量：' + sellCount,
               '获得灵石：' + value.data.addls,
               '***',
-              ...(sellPillsText.length ? sellPillsText : ['>什么丹药也没有']),
+              ...(sellPillsText.length ? sellPillsText : ['>什么丹药也没有'])
             ].join('\n')
           )
           break
@@ -1607,7 +1607,7 @@ const prefixHandlers = [
               '>出售丹药：' + value.data.pill.name,
               '出售数量：' + count,
               '获得灵石：' + value.data.addls,
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1620,7 +1620,7 @@ const prefixHandlers = [
               '>丹药：' + value.data.pill.name,
               '出售数量：' + count,
               '丹药数量：' + value.data.pill.count,
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1632,7 +1632,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.pill)
-    },
+    }
   },
   {
     prefix: /^#?(?:一键)?学习功法\s*(\d*)/,
@@ -1672,7 +1672,7 @@ const prefixHandlers = [
               ...(haslearnArtsText.length || learnArtsInsText.length || learnArtsText.length
                 ? ['']
                 : ['>什么功法也没有']),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1688,7 +1688,7 @@ const prefixHandlers = [
               '>功法学习' + (value.data.state ? '成功' : '失败'),
               value.data.state
                 ? '功法加成：' + value.data.artInfo.addition + ' %'
-                : '修为：-' + value.data.artInfo.deduct_cult,
+                : '修为：-' + value.data.artInfo.deduct_cult
             ].join('\n')
           )
           break
@@ -1703,7 +1703,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.art)
-    },
+    }
   },
   {
     prefix: /^#?(?:一键)?出售功法\s*(\d*)(?:\s*数量[:：]\s*(\d+))?/,
@@ -1730,7 +1730,7 @@ const prefixHandlers = [
               '>出售数量：' + sellCount,
               '获得灵石：' + value.data.addls,
               '***',
-              ...(sellArtsText.length ? sellArtsText : ['>什么功法也没有']),
+              ...(sellArtsText.length ? sellArtsText : ['>什么功法也没有'])
             ].join('\n')
           )
           break
@@ -1743,7 +1743,7 @@ const prefixHandlers = [
               '>出售功法：' + value.data.art.name,
               '出售数量：' + count,
               '获得灵石：' + value.data.addls,
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1756,7 +1756,7 @@ const prefixHandlers = [
               '>功法：' + value.data.art.name,
               '出售数量：' + count,
               '功法数量：' + value.data.art.count,
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1768,7 +1768,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.art)
-    },
+    }
   },
   {
     prefix: /^#?洗灵根(十次)?/,
@@ -1783,7 +1783,7 @@ const prefixHandlers = [
           ['five_elements', '五行灵根'],
           ['advanced', '高级灵根'],
           ['supreme', '极品灵根'],
-          ['mozumo', await laTex.colorize('至臻灵根', false, ['purple'])],
+          ['mozumo', await laTex.colorize('至臻灵根', false, ['purple'])]
         ])
         for (let sroot of value.data.washsroot) {
           srootText.push(
@@ -1792,7 +1792,7 @@ const prefixHandlers = [
               '>灵根：' + (sroot.level === 'mozumo' ? await laTex.colorize(sroot.name, false, ['purple']) : sroot.name),
               '加成：' + sroot.addition + ' %',
               await mqqapi.command('[点击替换]', '替换灵根' + index++, true),
-              '***',
+              '***'
             ].join('\n')
           )
         }
@@ -1810,7 +1810,7 @@ const prefixHandlers = [
               '加成：' + value.data.sroot.addition + ' %',
               await mqqapi.command('[取消替换]', '取消替换灵根', true),
               '***',
-              ...srootText,
+              ...srootText
             ].join('\n')
           )
           break
@@ -1825,7 +1825,7 @@ const prefixHandlers = [
               '加成：' + value.data.sroot.addition + ' %',
               await mqqapi.command('[取消替换]', '取消替换灵根', true),
               '***',
-              ...srootText,
+              ...srootText
             ].join('\n')
           )
           break
@@ -1837,7 +1837,7 @@ const prefixHandlers = [
               '**灵石不足**',
               '>灵石：' + userInfo.ls,
               '需要灵石：' + Config.xiuxian.sroot.wash_sroot_ls * count,
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1848,7 +1848,7 @@ const prefixHandlers = [
               '***',
               '**你还未拥有灵根**',
               '>请先' + (await mqqapi.command('获取灵根', '获取灵根', true)),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1857,7 +1857,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.sroot)
-    },
+    }
   },
   {
     prefix: /^#?(取消)?替换灵根\s*\d*/,
@@ -1873,7 +1873,7 @@ const prefixHandlers = [
               '**替换灵根成功**',
               '>当前灵根：' + value.data.sroot.name,
               '加成：' + value.data.sroot.addition + ' %',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1890,7 +1890,7 @@ const prefixHandlers = [
               '***',
               '**请先进行洗灵根**',
               '>点击' + (await mqqapi.command('洗灵根', '洗灵根', true)),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1901,7 +1901,7 @@ const prefixHandlers = [
               '***',
               '**你还未拥有灵根**',
               '>请先' + (await mqqapi.command('获取灵根', '获取灵根', true)),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -1910,7 +1910,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.sroot)
-    },
+    }
   },
   {
     prefix: /^#?查询宗门\s*\d*/,
@@ -1946,14 +1946,14 @@ const prefixHandlers = [
               (sectInfo.nextExp - sectInfo.exp > 0
                 ? '距离下一级还需' + (sectInfo.nextExp - sectInfo.exp) + '点经验'
                 : '已满足' + (await mqqapi.command('升级', '宗门升级', true)) + '要求'),
-            '***',
+            '***'
           ].join('\n')
         )
       } else {
         Text.push(['<@' + user_id + '>', '***', '**未找到该宗门**', '>请确认该宗门是否存在或创建', '***'].join('\n'))
       }
       Text.push(Button.sect)
-    },
+    }
   },
   {
     prefix: /^#?加入宗门\s*\d*/,
@@ -1984,7 +1984,7 @@ const prefixHandlers = [
               '***',
               '**你要加入的宗门人数已满**',
               '>**宗门人数：' + value.data.memberNum + ' / ' + value.data.memberMax + '**',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2003,7 +2003,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.sect)
-    },
+    }
   },
   {
     prefix: /^#?(确认)?退出宗门$/,
@@ -2022,7 +2022,7 @@ const prefixHandlers = [
                 '**退出宗门失败**',
                 '>宗主无法退出宗门',
                 '请先' + (await mqqapi.command('转让宗门')),
-                '***',
+                '***'
               ].join('\n')
             )
             break
@@ -2033,7 +2033,7 @@ const prefixHandlers = [
                 '***',
                 '**你还没加入宗门呢**',
                 '>点击' + (await mqqapi.command('加入宗门')),
-                '***',
+                '***'
               ].join('\n')
             )
             break
@@ -2045,7 +2045,7 @@ const prefixHandlers = [
         )
         Text.push(Button.sectExit)
       }
-    },
+    }
   },
   {
     prefix: /^#?(确认)?转让宗门\s*\d*/,
@@ -2071,7 +2071,7 @@ const prefixHandlers = [
               '***',
               '**宗门转让成功**',
               '>转让ID：' + (await mqqapi.command(transfer_id, '查询修仙者' + transfer_id, true)),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2082,7 +2082,7 @@ const prefixHandlers = [
               '***',
               '**请再次确认转让宗门给ID：' + transfer_id + '**',
               '>点击' + (await mqqapi.command('确认转让宗门', '确认转让宗门' + transfer_id)),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2099,13 +2099,13 @@ const prefixHandlers = [
               '***',
               '**你还没加入宗门呢**',
               '>点击' + (await mqqapi.command('加入宗门')),
-              '***',
+              '***'
             ].join('\n')
           )
           break
       }
       Text.push(Button.sectAdmin)
-    },
+    }
   },
   {
     prefix: /^#?(全部)?(同意|拒绝)宗门成员\s*\d*/,
@@ -2136,7 +2136,7 @@ const prefixHandlers = [
               '\`\`\` 同意成员列表',
               '同意玩家ID：' + value.data.addMembers.join('\n同意玩家ID：'),
               '\`\`\`',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2151,7 +2151,7 @@ const prefixHandlers = [
               '\`\`\` 拒绝成员列表',
               '拒绝玩家ID：' + value.data.refusedMembers.join('\n拒绝玩家ID：'),
               '\`\`\`',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2181,7 +2181,7 @@ const prefixHandlers = [
               '***',
               '**宗门人数已满**',
               '>请先' + (await mqqapi.command('升级宗门', '宗门升级', true)) + '提升人数上限',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2195,13 +2195,13 @@ const prefixHandlers = [
               '***',
               '**你还没加入宗门呢**',
               '>点击' + (await mqqapi.command('加入宗门')),
-              '***',
+              '***'
             ].join('\n')
           )
           break
       }
       Text.push(Button.sectMember)
-    },
+    }
   },
   {
     prefix: /^#?宗门供奉\s*\d*/,
@@ -2218,7 +2218,7 @@ const prefixHandlers = [
               '>灵石：-' + value.data.addContribution,
               '宗门经验：+' + value.data.addExp,
               '宗门贡献：+' + value.data.addContribution,
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2231,7 +2231,7 @@ const prefixHandlers = [
               '>你的灵石不足',
               '供奉灵石数量：' + value.data.ls,
               '当前灵石：' + userInfo.ls,
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2244,7 +2244,7 @@ const prefixHandlers = [
               '>供奉灵石数量格式错误',
               '供奉灵石需10的倍数且大于0',
               '正确格式：宗门供奉1000',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2255,13 +2255,13 @@ const prefixHandlers = [
               '***',
               '**你还没加入宗门呢**',
               '>点击' + (await mqqapi.command('加入宗门')),
-              '***',
+              '***'
             ].join('\n')
           )
           break
       }
       Text.push(Button.sect)
-    },
+    }
   },
   {
     prefix: /^#?设置宗门(无需|需要)审核/,
@@ -2275,7 +2275,7 @@ const prefixHandlers = [
               '***',
               '**设置宗门审核成功**',
               '>当前宗门加入方式：' + (msg.includes('无需') ? '无需审核' : '需要审核'),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2289,13 +2289,13 @@ const prefixHandlers = [
               '***',
               '**你还没加入宗门呢**',
               '>点击' + (await mqqapi.command('加入宗门')),
-              '***',
+              '***'
             ].join('\n')
           )
           break
       }
       Text.push(Button.sectAdmin)
-    },
+    }
   },
   {
     prefix: /^#?设置宗门名称([\s\S]*)/,
@@ -2309,7 +2309,7 @@ const prefixHandlers = [
               '***',
               '**设置宗门名称成功**',
               '>宗门名称：' + msg.replace(/#?设置宗门名称/, '').trim(),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2321,7 +2321,7 @@ const prefixHandlers = [
               '**宗门名称审核中**',
               '>已发送宗门名称审核',
               '届时可以随时修改宗门名称',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2333,7 +2333,7 @@ const prefixHandlers = [
               '**设置宗门名称失败**',
               '>请修改宗门名称',
               '宗门名称中包含违禁词或违规',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2344,7 +2344,7 @@ const prefixHandlers = [
               '***',
               '**设置宗门名称失败**',
               '>宗门名称最多 ' + Config.xiuxian.sect.sect_validation.name.max + ' 个字',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2355,7 +2355,7 @@ const prefixHandlers = [
               '***',
               '**设置宗门名称失败**',
               '>宗门名称至少 ' + Config.xiuxian.sect.sect_validation.name.min + ' 个字',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2372,13 +2372,13 @@ const prefixHandlers = [
               '***',
               '**你还没加入宗门呢**',
               '>点击' + (await mqqapi.command('加入宗门')),
-              '***',
+              '***'
             ].join('\n')
           )
           break
       }
       Text.push(Button.sectAdmin)
-    },
+    }
   },
   {
     prefix: /^#?设置宗门简介([\s\S]*)/,
@@ -2392,7 +2392,7 @@ const prefixHandlers = [
               '***',
               '**设置宗门简介成功**',
               '>宗门简介：' + msg.replace(/#?设置宗门简介/, '').trim(),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2404,7 +2404,7 @@ const prefixHandlers = [
               '**宗门简介审核中**',
               '>已发送宗门简介审核',
               '届时可以随时修改宗门简介',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2416,7 +2416,7 @@ const prefixHandlers = [
               '**设置宗门简介失败**',
               '>请修改宗门简介',
               '宗门简介中包含违禁词或违规',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2427,7 +2427,7 @@ const prefixHandlers = [
               '***',
               '**设置宗门简介失败**',
               '>宗门简介最多 ' + Config.xiuxian.sect.sect_validation.desc.max + ' 个字',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2438,7 +2438,7 @@ const prefixHandlers = [
               '***',
               '**设置宗门简介失败**',
               '>宗门简介至少 ' + Config.xiuxian.sect.sect_validation.desc.min + ' 个字',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2455,13 +2455,13 @@ const prefixHandlers = [
               '***',
               '**你还没加入宗门呢**',
               '>点击' + (await mqqapi.command('加入宗门')),
-              '***',
+              '***'
             ].join('\n')
           )
           break
       }
       Text.push(Button.sectAdmin)
-    },
+    }
   },
   {
     prefix: /^#?宗门名称审核(全部)?(通过|拒绝)?\s*\d*/,
@@ -2483,7 +2483,7 @@ const prefixHandlers = [
               '**宗门名称审核' + match[1] + '**',
               '>操作成功！',
               match[1] + '宗门ID：' + match[2],
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2500,7 +2500,7 @@ const prefixHandlers = [
                 (await mqqapi.command('[审核通过]', '宗门名称审核通过' + ID, true)) +
                   '      ' +
                   (await mqqapi.command('[审核驳回]', '宗门名称审核拒绝' + ID, true)),
-                '***',
+                '***'
               ].join('\n')
             )
           }
@@ -2510,7 +2510,7 @@ const prefixHandlers = [
               '***',
               '**宗门名称审核**',
               '***',
-              ...(sectNameAuditListText.length ? sectNameAuditListText : ['>暂无待审核信息', '***']),
+              ...(sectNameAuditListText.length ? sectNameAuditListText : ['>暂无待审核信息', '***'])
             ].join('\n')
           )
           break
@@ -2519,7 +2519,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.sectAuditName)
-    },
+    }
   },
   {
     prefix: /^#?宗门简介审核(全部)?(通过|拒绝)?\s*\d*/,
@@ -2541,7 +2541,7 @@ const prefixHandlers = [
               '**宗门简介审核' + match[1] + '**',
               '>操作成功！',
               match[1] + '宗门ID：' + match[2],
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2558,7 +2558,7 @@ const prefixHandlers = [
                 (await mqqapi.command('[审核通过]', '宗门简介审核通过' + ID, true)) +
                   '      ' +
                   (await mqqapi.command('[审核驳回]', '宗门简介审核拒绝' + ID, true)),
-                '***',
+                '***'
               ].join('\n')
             )
           }
@@ -2568,7 +2568,7 @@ const prefixHandlers = [
               '***',
               '**宗门简介审核**',
               '***',
-              ...(sectNameAuditListText.length ? sectNameAuditListText : ['>暂无待审核信息', '***']),
+              ...(sectNameAuditListText.length ? sectNameAuditListText : ['>暂无待审核信息', '***'])
             ].join('\n')
           )
           break
@@ -2577,7 +2577,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.sectAuditDesc)
-    },
+    }
   },
   {
     prefix: /^#?重置宗门(名称|简介)\s*\d*/,
@@ -2595,7 +2595,7 @@ const prefixHandlers = [
               '**重置宗门' + type + '成功**',
               '>宗门ID：' + sectId,
               type === '名称' ? '宗门名称：修仙宗门' : '宗门简介：未设置',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2607,7 +2607,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.author)
-    },
+    }
   },
   {
     prefix: /^#?设置性别/,
@@ -2625,7 +2625,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.xiuxian)
-    },
+    }
   },
   {
     prefix: /^#?设置称号\s*\d*/,
@@ -2642,7 +2642,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.title)
-    },
+    }
   },
   {
     prefix: /^#?生成(通用)?兑换码(.*)/,
@@ -2659,7 +2659,7 @@ const prefixHandlers = [
               '\`\`\` 兑换码列表',
               value.data.cdks.join('\n'),
               '\`\`\`',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2668,7 +2668,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.cdk)
-    },
+    }
   },
   {
     prefix: /^#?删除(全部)?兑换码/,
@@ -2685,7 +2685,7 @@ const prefixHandlers = [
               '\`\`\` 兑换码列表',
               value.data.cdkList.join('\n'),
               '\`\`\`',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2699,7 +2699,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.cdk)
-    },
+    }
   },
   {
     prefix: /^#?使用兑换码(.*)/,
@@ -2718,7 +2718,7 @@ const prefixHandlers = [
               '>**已被强制设置为以下数值**',
               '修为：' + value.data.cult,
               '灵石：' + value.data.ls,
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2737,7 +2737,7 @@ const prefixHandlers = [
               ...(lsList.length !== 0 ? ['灵石' + lsList.join('\n灵石')] : []),
               cultList.length === 0 && lsList.length === 0 ? '奖励被小草神吃掉了喵~' : [],
               '\`\`\`',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2749,7 +2749,7 @@ const prefixHandlers = [
               value.data.useId ? '**兑换码已被使用**' : '**兑换码不可重复使用**',
               ...(value.data.useId ? ['>使用ID：' + (await xiuxian.init(value.data.useId)).data.id] : []),
               (value.data.useId ? '' : '>') + '使用时间：' + formatTime(value.data.useTime),
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2758,7 +2758,7 @@ const prefixHandlers = [
           break
       }
       Text.push(Button.xiuxian)
-    },
+    }
   },
   {
     prefix: /^#?切换ID/,
@@ -2787,7 +2787,7 @@ const prefixHandlers = [
                 '  <==>  ' +
                 (await mqqapi.command(switch_id, '查询修仙者' + switch_id)) +
                 '**',
-              '***',
+              '***'
             ].join('\n')
           )
           break
@@ -2798,8 +2798,8 @@ const prefixHandlers = [
           Text.push(['<@' + user_id + '>', '***', '**权限不足**', '>请确认你是否有足够的权限', '***'].join('\n'))
           break
       }
-    },
-  },
+    }
+  }
 ]
 
 export { xiuxianText }
@@ -2810,7 +2810,7 @@ async function buildHeader(user_id, id) {
     '***',
     '**ID：' + id + '**',
     '**' + (await mqqapi.command('切磋', '切磋' + id)) + '**',
-    '***',
+    '***'
   ]
 }
 
@@ -2822,7 +2822,7 @@ async function buildUserInfo(userInfo) {
       (userInfo.sectInfo.id !== 0
         ? await mqqapi.command('宗门：' + userInfo.sectInfo.name + '    ID：' + userInfo.sectInfo.id, '我的宗门', true)
         : await mqqapi.command('未加入宗门', '加入宗门')) +
-      '**',
+      '**'
   ]
 }
 
@@ -2836,7 +2836,7 @@ async function buildRealmInfo(userInfo) {
       : '距离下一境界：' +
         (userInfo.realm.realmNeedExp === 0
           ? '已满足' + (await mqqapi.command('突破', '突破', true)) + '条件'
-          : '还需' + userInfo.realm.realmNeedExp + '点修为'),
+          : '还需' + userInfo.realm.realmNeedExp + '点修为')
   ]
 }
 
@@ -2849,7 +2849,7 @@ async function buildRank(ranks, index) {
         '**' + index + '：' + (index === '闭关时间' ? secondsToTimeText(item.value) : item.value) + '**',
         '**称号：' + item.title + '**',
         '**' + (await mqqapi.command('切磋', '切磋' + item.id)) + '**',
-        '***',
+        '***'
       ].join('\n')
     )
   }
@@ -2866,7 +2866,7 @@ async function buildSectList(sectInfos) {
         '人数：' + item.memberNum + ' / ' + item.memberMax,
         '简介：' + item.desc,
         await mqqapi.command('点击加入宗门', '加入宗门' + item.id),
-        '***',
+        '***'
       ].join('\n')
     )
   }
@@ -2879,7 +2879,7 @@ async function retreatText() {
     '**当前正在闭关中...**',
     '>如需取消闭关请点击',
     '**' + (await mqqapi.command('结束闭关', '结束闭关', true)) + '**',
-    '***',
+    '***'
   ].join('\n')
 }
 
@@ -2892,7 +2892,7 @@ function mergeItems(arr) {
       map.set(item.id, {
         id: item.id,
         name: item.name,
-        count: 1,
+        count: 1
       })
     }
   })

@@ -17,16 +17,16 @@ export class MozuXiuxianBackup extends plugin {
       rule: [
         {
           reg: '#?(?:魔族陌)?修仙备份(?:还原)?(.*)$',
-          fnc: 'xiuxianBackup',
-        },
+          fnc: 'xiuxianBackup'
+        }
       ],
       task: [
         {
           cron: Config.xiuxian.setting.cronBackup || '0 0 * * * *',
           name: '修仙定时备份',
-          fnc: () => this.cronBackup(),
-        },
-      ],
+          fnc: () => this.cronBackup()
+        }
+      ]
     })
   }
 
@@ -45,7 +45,7 @@ export class MozuXiuxianBackup extends plugin {
       if (fs.existsSync(filePath)) {
         const result = await restoreKeys(filePath, {
           purge: true,
-          pattern: 'Mozu:xiuxian:*',
+          pattern: 'Mozu:xiuxian:*'
         })
         const message = [
           '<@' + this.e.user_id.replace(`${this.e.self_id}:`, '') + '>',
@@ -53,7 +53,7 @@ export class MozuXiuxianBackup extends plugin {
           '**修仙备份还原成功**',
           '>还原' + (typeof result === 'number' ? result + '个键' : '失败，请查看后台日志'),
           '来自文件' + path.join(Version.Plugin_Name, 'backup', 'xiuxian', fileName),
-          '***',
+          '***'
         ].join('\n')
         this.e.reply([message, Button.backup])
       } else {
@@ -75,7 +75,7 @@ export class MozuXiuxianBackup extends plugin {
               .slice(0, parseInt(Config.xiuxian.setting.maxBackupFile, 10) || 10)
               .join('**\n>**') +
             '**',
-          '***',
+          '***'
         ].join('\n')
         this.e.reply([message, Button.backup])
       }
@@ -90,7 +90,7 @@ export class MozuXiuxianBackup extends plugin {
         '**修仙备份成功**',
         '>备份' + (typeof result === 'number' ? result + '个键到：' : '失败，请查看后台日志：'),
         path.join(Version.Plugin_Name, 'backup', 'xiuxian', fileName),
-        '***',
+        '***'
       ].join('\n')
       this.e.reply([message, Button.backup])
       if (Config.xiuxian.setting.maxBackupFile > 0) {

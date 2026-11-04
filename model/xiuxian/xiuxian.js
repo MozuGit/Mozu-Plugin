@@ -24,7 +24,7 @@ if redis.call('EXISTS', infoKey) == 0 then
   redis.call('HSET', infoKey, unpack(argv))
 end
 return { tonumber(id), created }
-`,
+`
 })
 
 const PLAYER_INFO_KEY = 'Mozu:xiuxian:playerInfo' //玩家信息KEY
@@ -63,7 +63,7 @@ export default {
     )
     return {
       event: created ? 'user_init' : 'user_login',
-      data: { id: parseInt(id, 10) },
+      data: { id: parseInt(id, 10) }
     }
   },
 
@@ -129,7 +129,7 @@ export default {
         const art = artsMap.get(id)
         return addition + (art ? art.addition : 0)
       }, 0),
-      sroot: sroot?.addition || 0,
+      sroot: sroot?.addition || 0
     }
 
     const realmName =
@@ -148,7 +148,7 @@ export default {
       sectInfo = await this.getSectInfo(sectId)
     } else {
       sectInfo = {
-        id: 0,
+        id: 0
       }
     }
 
@@ -156,12 +156,12 @@ export default {
       realm: parseInt(realm, 10),
       realmName,
       realmName2,
-      realmNeedExp,
+      realmNeedExp
     }
     const retreat = {
       startTime: retreatStartTime,
       runTime: retreatRunTime,
-      profit: getProfit(Math.floor(Date.now() / 1000) - retreatStartTime),
+      profit: getProfit(Math.floor(Date.now() / 1000) - retreatStartTime)
     }
 
     return {
@@ -176,7 +176,7 @@ export default {
       addition,
       sectInfo,
       retreat,
-      power,
+      power
     }
   },
 
@@ -195,7 +195,7 @@ export default {
       Map[item.id] = {
         name: item.name,
         cult: item.cult,
-        sell_ls: item.sell_ls,
+        sell_ls: item.sell_ls
       }
     })
     arts.forEach((item) => {
@@ -204,7 +204,7 @@ export default {
         rate: item.rate,
         deduct_cult: item.deduct_cult,
         addition: item.addition,
-        sell_ls: item.sell_ls,
+        sell_ls: item.sell_ls
       }
     })
     pillsData = pillsData
@@ -213,7 +213,7 @@ export default {
         ...item,
         name: Map[item.id].name,
         cult: Map[item.id].cult,
-        sell_ls: Map[item.id].sell_ls,
+        sell_ls: Map[item.id].sell_ls
       }))
       .sort((a, b) => a.id - b.id)
     artsData = artsData
@@ -224,12 +224,12 @@ export default {
         rate: Map[item.id].rate,
         deduct_cult: Map[item.id].deduct_cult,
         addition: Map[item.id].addition,
-        sell_ls: Map[item.id].sell_ls,
+        sell_ls: Map[item.id].sell_ls
       }))
       .sort((a, b) => a.id - b.id)
     return {
       pills: pillsData,
-      arts: artsData,
+      arts: artsData
     }
   },
 
@@ -264,7 +264,7 @@ export default {
         Config.xiuxian.sect.sect_level.length > parseInt(level, 10)
           ? Config.xiuxian.sect.sect_level[level - 1].memberMax
           : Config.xiuxian.sect.sect_level[Config.xiuxian.sect.sect_level.length - 1].memberMax,
-      nextExp,
+      nextExp
     }
   },
 
@@ -310,8 +310,8 @@ export default {
       event: 'get_player_count',
       data: {
         count: count,
-        countDay: countDay,
-      },
+        countDay: countDay
+      }
     }
   },
 
@@ -328,7 +328,7 @@ export default {
     retreatStart = parseInt(retreatStart, 10) || 0
     if (retreatStart !== 0) {
       return {
-        event: 'in_retreat',
+        event: 'in_retreat'
       }
     }
     if (
@@ -339,22 +339,22 @@ export default {
       return {
         event: 'xiulian_cd',
         data: {
-          outTime,
-        },
+          outTime
+        }
       }
     }
     const addcult = crypto.randomInt(Config.xiuxian.xiuxian.mincult, Config.xiuxian.xiuxian.maxcult + 1)
     cult += addcult
     Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
       修为: cult,
-      上次修炼时间: Math.floor(Date.now() / 1000),
+      上次修炼时间: Math.floor(Date.now() / 1000)
     })
     return {
       event: 'xiulian_end',
       data: {
         cult,
-        addcult,
-      },
+        addcult
+      }
     }
   },
 
@@ -371,7 +371,7 @@ export default {
     retreatStart = parseInt(retreatStart, 10) || 0
     if (retreatStart !== 0) {
       return {
-        event: 'in_retreat',
+        event: 'in_retreat'
       }
     }
     if (
@@ -382,22 +382,22 @@ export default {
       return {
         event: 'kaicai_cd',
         data: {
-          outTime,
-        },
+          outTime
+        }
       }
     }
     let addls = crypto.randomInt(Config.xiuxian.xiuxian.minls, Config.xiuxian.xiuxian.maxls + 1)
     ls += addls
     Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
       灵石: ls,
-      上次开采时间: Math.floor(Date.now() / 1000),
+      上次开采时间: Math.floor(Date.now() / 1000)
     })
     return {
       event: 'kaicai_end',
       data: {
         ls,
-        addls,
-      },
+        addls
+      }
     }
   },
 
@@ -418,7 +418,7 @@ export default {
     const today = gettoday()
     if (lastDay && lastDay === today) {
       return {
-        event: 'is_signed',
+        event: 'is_signed'
       }
     }
     cult = parseInt(cult, 10) + addcult
@@ -428,14 +428,14 @@ export default {
       修为: cult,
       灵石: ls,
       签到次数: signCount,
-      上次签到时间: today,
+      上次签到时间: today
     })
     return {
       event: 'sign_in_success',
       data: {
         addcult,
-        addls,
-      },
+        addls
+      }
     }
   },
 
@@ -449,7 +449,7 @@ export default {
     const retreatStart = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '闭关时间'), 10) || 0
     if (retreatStart !== 0) {
       return {
-        event: 'in_retreat',
+        event: 'in_retreat'
       }
     }
     let [cult, realm] = await Redis.hmget('Mozu:xiuxian:playerInfo:' + id, '修为', '境界')
@@ -458,7 +458,7 @@ export default {
     const Realms = Config.xiuxian.Realm.Realms
     if (realm >= Realms.length) {
       return {
-        event: 'realm_max',
+        event: 'realm_max'
       }
     }
     if (upAll) {
@@ -471,12 +471,12 @@ export default {
             realmUpInfo.push({
               state: 'failed',
               failed_cult: realmUpFailed.failed_cult,
-              count: realmUpFailed.count,
+              count: realmUpFailed.count
             })
             realmUpFailed = undefined
           }
           realmUpInfo.push({
-            state: 'realm_max',
+            state: 'realm_max'
           })
           break
         }
@@ -485,13 +485,13 @@ export default {
             realmUpInfo.push({
               state: 'failed',
               failed_cult: realmUpFailed.failed_cult,
-              count: realmUpFailed.count,
+              count: realmUpFailed.count
             })
             realmUpFailed = undefined
           }
           realmUpInfo.push({
             state: 'cult_lack',
-            value: Realms[realm].value,
+            value: Realms[realm].value
           })
           break
         }
@@ -500,14 +500,14 @@ export default {
             realmUpInfo.push({
               state: 'failed',
               failed_cult: realmUpFailed.failed_cult,
-              count: realmUpFailed.count,
+              count: realmUpFailed.count
             })
             realmUpFailed = undefined
           }
           realm++
           realmUpInfo.push({
             state: 'success',
-            realm: Realms[realm - 1].name,
+            realm: Realms[realm - 1].name
           })
         } else {
           const failed_cult = Realms[realm].failed
@@ -516,7 +516,7 @@ export default {
           if (!realmUpFailed) {
             realmUpFailed = {
               failed_cult: failed_cult,
-              count: 1,
+              count: 1
             }
           } else {
             realmUpFailed.failed_cult = realmUpFailed.failed_cult + failed_cult
@@ -526,14 +526,14 @@ export default {
       }
       Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
         境界: realm,
-        修为: cult,
+        修为: cult
       })
       return {
         event: 'realm_up_all',
         data: {
           realmUpInfo: realmUpInfo,
-          cult: cultAll,
-        },
+          cult: cultAll
+        }
       }
     } else {
       if (cult >= Realms[realm].value) {
@@ -544,8 +544,8 @@ export default {
             data: {
               state: 'success',
               rate: Realms[realm].success,
-              cult: Realms[realm].failed,
-            },
+              cult: Realms[realm].failed
+            }
           }
         } else {
           const cultFailed = cult - Realms[realm].failed
@@ -555,13 +555,13 @@ export default {
             data: {
               state: 'failed',
               rate: Realms[realm].success,
-              cult: Realms[realm].failed,
-            },
+              cult: Realms[realm].failed
+            }
           }
         }
       } else {
         return {
-          event: 'cult_lack',
+          event: 'cult_lack'
         }
       }
     }
@@ -581,12 +581,12 @@ export default {
       return {
         event: 'start_retreat',
         data: {
-          time,
-        },
+          time
+        }
       }
     } else {
       return {
-        event: 'in_retreat',
+        event: 'in_retreat'
       }
     }
   },
@@ -603,14 +603,14 @@ export default {
     const time = Math.floor(Date.now() / 1000) - retreatStart
     if (retreatStart === 0) {
       return {
-        event: 'not_retreat',
+        event: 'not_retreat'
       }
     } else {
       const profit = getProfit(time)
       cult = cult + profit.cult
       Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
         修为: cult,
-        闭关时间: 0,
+        闭关时间: 0
       })
       this.getPower(id) //刷新战力
       return {
@@ -618,8 +618,8 @@ export default {
         data: {
           addcult: getProfit(time).cult,
           retreatStart,
-          retreatRunTime: getStringTime(time),
-        },
+          retreatRunTime: getStringTime(time)
+        }
       }
     }
   },
@@ -634,15 +634,15 @@ export default {
   async pvp(id, id2, isMaster) {
     if (id === id2) {
       return {
-        event: 'self_pvp',
+        event: 'self_pvp'
       }
     }
     if ((await Redis.exists(`${PLAYER_INFO_KEY}:${id2}`)) === 0) {
       return {
         event: 'not_id',
         data: {
-          event_id: id2,
-        },
+          event_id: id2
+        }
       }
     }
     let [cult, retreatStart, pvp_cd] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '闭关时间', '切磋冷却')
@@ -653,16 +653,16 @@ export default {
       return {
         event: 'in_retreat',
         data: {
-          event_id: id,
-        },
+          event_id: id
+        }
       }
     } else if (cult < 5000) {
       return {
         event: 'cult_lack',
         data: {
           event_id: id,
-          cult: cult,
-        },
+          cult: cult
+        }
       }
     } else if (
       Math.floor(Date.now() / 1000) - pvp_cd <= Config.xiuxian.xiuxian.pvp.atk_cd &&
@@ -672,8 +672,8 @@ export default {
         event: 'pvp_cd',
         data: {
           event_id: id,
-          pvp_cd: Config.xiuxian.xiuxian.pvp.atk_cd - (Math.floor(Date.now() / 1000) - pvp_cd),
-        },
+          pvp_cd: Config.xiuxian.xiuxian.pvp.atk_cd - (Math.floor(Date.now() / 1000) - pvp_cd)
+        }
       }
     }
     ;[cult, retreatStart, pvp_cd] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id2}`, '修为', '闭关时间', '被切磋冷却')
@@ -684,16 +684,16 @@ export default {
       return {
         event: 'in_retreat',
         data: {
-          event_id: id2,
-        },
+          event_id: id2
+        }
       }
     } else if (cult < 5000) {
       return {
         event: 'lack_cult',
         data: {
           event_id: id2,
-          cult: cult,
-        },
+          cult: cult
+        }
       }
     } else if (
       Math.floor(Date.now() / 1000) - pvp_cd <= Config.xiuxian.xiuxian.pvp.def_cd &&
@@ -703,8 +703,8 @@ export default {
         event: 'pvp_cd',
         data: {
           event_id: id2,
-          pvp_cd: Config.xiuxian.xiuxian.pvp.def_cd - (Math.floor(Date.now() / 1000) - pvp_cd),
-        },
+          pvp_cd: Config.xiuxian.xiuxian.pvp.def_cd - (Math.floor(Date.now() / 1000) - pvp_cd)
+        }
       }
     }
     const powerA = await this.getPower(id)
@@ -722,20 +722,20 @@ export default {
     if (isAWin) {
       Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
         修为: cultA + cultAddA,
-        切磋冷却: Math.floor(Date.now() / 1000),
+        切磋冷却: Math.floor(Date.now() / 1000)
       })
       Redis.hmset(`${PLAYER_INFO_KEY}:${id2}`, {
         修为: cultB - cultAddB,
-        被切磋冷却: Math.floor(Date.now() / 1000),
+        被切磋冷却: Math.floor(Date.now() / 1000)
       })
     } else {
       Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
         修为: cultA - cultAddA,
-        切磋冷却: Math.floor(Date.now() / 1000),
+        切磋冷却: Math.floor(Date.now() / 1000)
       })
       Redis.hmset(`${PLAYER_INFO_KEY}:${id2}`, {
         修为: cultB + cultAddB,
-        被切磋冷却: Math.floor(Date.now() / 1000),
+        被切磋冷却: Math.floor(Date.now() / 1000)
       })
     }
     return {
@@ -746,8 +746,8 @@ export default {
         powerB,
         cultA: cultAddA,
         cultB: cultAddB,
-        finalWinRate,
-      },
+        finalWinRate
+      }
     }
   },
 
@@ -764,15 +764,15 @@ export default {
     pvp_cd = parseInt(pvp_cd, 10) || 0
     if (retreatStart !== 0) {
       return {
-        event: 'in_retreat',
+        event: 'in_retreat'
       }
     }
     if (cult < 5000) {
       return {
         event: 'cult_lack',
         data: {
-          cult: cult,
-        },
+          cult: cult
+        }
       }
     }
     if (
@@ -782,8 +782,8 @@ export default {
       return {
         event: 'pvp_cd',
         data: {
-          pvp_cd: Config.xiuxian.xiuxian.pvp.atk_cd - (Math.floor(Date.now() / 1000) - pvp_cd),
-        },
+          pvp_cd: Config.xiuxian.xiuxian.pvp.atk_cd - (Math.floor(Date.now() / 1000) - pvp_cd)
+        }
       }
     }
     const result = await Redis.zrange('Mozu:xiuxian:random:pvp', 0, -1, 'WITHSCORES')
@@ -797,7 +797,7 @@ export default {
     }
     if (!playerEntries.length) {
       return {
-        event: 'player_lack',
+        event: 'player_lack'
       }
     }
     let randomPlayer = null
@@ -870,7 +870,7 @@ export default {
         const idx = i * 2
         playersInRange.push({
           id: playerEntries[idx],
-          score: playerEntries[idx + 1],
+          score: playerEntries[idx + 1]
         })
       }
       const randomIndex = Math.floor(Math.random() * playersInRange.length)
@@ -890,20 +890,20 @@ export default {
       await Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
         修为: self_cult + cultAddSelf,
         切磋冷却: Math.floor(Date.now() / 1000),
-        切磋次数: (parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '切磋次数'), 10) || 0) + 1,
+        切磋次数: (parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '切磋次数'), 10) || 0) + 1
       })
       await Redis.hmset(`${PLAYER_INFO_KEY}:${selectedPlayer.id}`, {
         修为: random_cult - cultAddRandom,
-        被切磋冷却: Math.floor(Date.now() / 1000),
+        被切磋冷却: Math.floor(Date.now() / 1000)
       })
     } else {
       await Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
         修为: self_cult - cultAddSelf,
-        切磋冷却: Math.floor(Date.now() / 1000),
+        切磋冷却: Math.floor(Date.now() / 1000)
       })
       await Redis.hmset(`${PLAYER_INFO_KEY}:${selectedPlayer.id}`, {
         修为: random_cult + cultAddRandom,
-        被切磋冷却: Math.floor(Date.now() / 1000),
+        被切磋冷却: Math.floor(Date.now() / 1000)
       })
     }
     this.getPower(id)
@@ -917,8 +917,8 @@ export default {
         random_power: selectedPlayer.score,
         cultAddSelf,
         cultAddRandom,
-        finalWinRate,
-      },
+        finalWinRate
+      }
     }
   },
 
@@ -978,7 +978,7 @@ export default {
             players.push({
               id: i,
               value: value,
-              title: title,
+              title: title
             })
           }
         }
@@ -1012,7 +1012,7 @@ export default {
             players.push({
               id: i,
               value: value,
-              title: title,
+              title: title
             })
           }
         }
@@ -1038,7 +1038,7 @@ export default {
             players.push({
               id: i,
               value: value,
-              title: title,
+              title: title
             })
           }
         }
@@ -1063,7 +1063,7 @@ export default {
             players.push({
               id: i,
               value: value,
-              title: title,
+              title: title
             })
           }
         }
@@ -1075,15 +1075,15 @@ export default {
       rank: index + 1,
       id: player.id,
       value: player.value,
-      title: player.title,
+      title: player.title
     }))
     const targetPlayer = players.find((p) => p.id === id)
     if (!targetPlayer) {
       return {
         event: 'success',
         data: {
-          ranks: allRanks,
-        },
+          ranks: allRanks
+        }
       }
     }
     const rank = players.findIndex((p) => p.id === id) + 1
@@ -1092,8 +1092,8 @@ export default {
       data: {
         rank: rank,
         ranks: allRanks,
-        value: targetPlayer.value,
-      },
+        value: targetPlayer.value
+      }
     }
   },
 
@@ -1118,7 +1118,7 @@ export default {
     retreatStart = parseInt(retreatStart, 10) || 0
     if (retreatStart !== 0) {
       return {
-        event: 'in_retreat',
+        event: 'in_retreat'
       }
     }
     if (
@@ -1129,8 +1129,8 @@ export default {
       return {
         event: 'hunt_beast_cd',
         data: {
-          outTime,
-        },
+          outTime
+        }
       }
     }
     const power = await this.getPower(id)
@@ -1146,27 +1146,27 @@ export default {
       Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
         修为: cult,
         灵石: ls,
-        上次猎杀妖兽时间: Math.floor(Date.now() / 1000),
+        上次猎杀妖兽时间: Math.floor(Date.now() / 1000)
       })
       return {
         event: 'hunt_beast',
         data: {
           state: 'success',
-          winRate: (finalWinRate * 100).toFixed(2),
-        },
+          winRate: (finalWinRate * 100).toFixed(2)
+        }
       }
     } else {
       cult = Math.max(0, cult - beastInfo.punishment.cult)
       Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
         修为: cult,
-        上次猎杀妖兽时间: Math.floor(Date.now() / 1000),
+        上次猎杀妖兽时间: Math.floor(Date.now() / 1000)
       })
       return {
         event: 'hunt_beast',
         data: {
           state: 'failure',
-          winRate: (finalWinRate * 100).toFixed(2),
-        },
+          winRate: (finalWinRate * 100).toFixed(2)
+        }
       }
     }
   },
@@ -1186,20 +1186,20 @@ export default {
     retreatStart = parseInt(retreatStart, 10) || 0
     if (retreatStart !== 0) {
       return {
-        event: 'in_retreat',
+        event: 'in_retreat'
       }
     }
     if (realm < limitRealm) {
       return {
-        event: 'limit_realm',
+        event: 'limit_realm'
       }
     }
     if (ls < secretRealmInfo.cost_ls * count) {
       return {
         event: 'lack_ls',
         data: {
-          need_ls: secretRealmInfo.cost_ls * count,
-        },
+          need_ls: secretRealmInfo.cost_ls * count
+        }
       }
     }
     let pills = []
@@ -1236,7 +1236,7 @@ export default {
       }
       Redis.hmset(`${PLAYER_BAG_KEY}:${id}`, {
         丹药: JSON.stringify(pillsData),
-        功法: JSON.stringify(artsData),
+        功法: JSON.stringify(artsData)
       })
     }
     return {
@@ -1244,8 +1244,8 @@ export default {
       data: {
         need_ls: secretRealmInfo.cost_ls * count,
         pills: pills,
-        arts: arts,
-      },
+        arts: arts
+      }
     }
   },
 
@@ -1263,7 +1263,7 @@ export default {
     retreatStart = parseInt(retreatStart, 10) || 0
     if (retreatStart !== 0) {
       return {
-        event: 'in_retreat',
+        event: 'in_retreat'
       }
     }
     if (pillAll) {
@@ -1274,7 +1274,7 @@ export default {
           id: item.id,
           name: item.name,
           cultAll: item.cult * item.count,
-          count: item.count,
+          count: item.count
         })
         return (acc += item.cult * item.count)
       }, 0)
@@ -1284,8 +1284,8 @@ export default {
         event: 'use_pill_all',
         data: {
           addcult: addcult,
-          usePills: usePills.sort((a, b) => a.id - b.id),
-        },
+          usePills: usePills.sort((a, b) => a.id - b.id)
+        }
       }
     } else {
       const pills = Config.xiuxian.drop.pills
@@ -1308,25 +1308,25 @@ export default {
               data: {
                 addcult: addcult,
                 count: pill.count,
-                pill: pillInfo,
-              },
+                pill: pillInfo
+              }
             }
           } else {
             return {
               event: 'lack_pill_count',
               data: {
-                pill: { ...pillInfo, count: pill.count },
-              },
+                pill: { ...pillInfo, count: pill.count }
+              }
             }
           }
         } else {
           return {
-            event: 'no_pill',
+            event: 'no_pill'
           }
         }
       } else {
         return {
-          event: 'no_pill',
+          event: 'no_pill'
         }
       }
     }
@@ -1346,7 +1346,7 @@ export default {
     retreatStart = parseInt(retreatStart, 10) || 0
     if (retreatStart !== 0) {
       return {
-        event: 'in_retreat',
+        event: 'in_retreat'
       }
     }
     if (pillAll) {
@@ -1357,7 +1357,7 @@ export default {
           id: item.id,
           name: item.name,
           lsAll: item.sell_ls * item.count,
-          count: item.count,
+          count: item.count
         })
         return (acc += item.sell_ls * item.count)
       }, 0)
@@ -1367,8 +1367,8 @@ export default {
         event: 'sell_pill_all',
         data: {
           addls: addls,
-          sellPills: sellPills.sort((a, b) => a.id - b.id),
-        },
+          sellPills: sellPills.sort((a, b) => a.id - b.id)
+        }
       }
     } else {
       const pills = Config.xiuxian.drop.pills
@@ -1391,25 +1391,25 @@ export default {
               data: {
                 addls: addls,
                 count: pill.count,
-                pill: pillInfo,
-              },
+                pill: pillInfo
+              }
             }
           } else {
             return {
               event: 'lack_pill_count',
               data: {
-                pill: { ...pillInfo, count: pill.count },
-              },
+                pill: { ...pillInfo, count: pill.count }
+              }
             }
           }
         } else {
           return {
-            event: 'no_pill',
+            event: 'no_pill'
           }
         }
       } else {
         return {
-          event: 'no_pill',
+          event: 'no_pill'
         }
       }
     }
@@ -1429,7 +1429,7 @@ export default {
     retreatStart = parseInt(retreatStart, 10) || 0
     if (retreatStart !== 0) {
       return {
-        event: 'in_retreat',
+        event: 'in_retreat'
       }
     }
     if (artAll) {
@@ -1451,14 +1451,14 @@ export default {
               arts.add(art.id)
               learnArts.push({
                 id: art.id,
-                addition: artInfo.addition,
+                addition: artInfo.addition
               })
               break
             } else {
               learnArtsIns.push({
                 id: art.id,
                 count: 1,
-                deduct_cult: artInfo.deduct_cult,
+                deduct_cult: artInfo.deduct_cult
               })
               deduct_cult += artInfo.deduct_cult
             }
@@ -1474,7 +1474,7 @@ export default {
       }
       Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
         功法列表: JSON.stringify([...arts]),
-        修为: cult - deduct_cult,
+        修为: cult - deduct_cult
       })
       Redis.hset(`${PLAYER_BAG_KEY}:${id}`, '功法', JSON.stringify(artsData))
       return {
@@ -1482,13 +1482,13 @@ export default {
         data: {
           haslearnArts: haslearnArts.sort((a, b) => a.id - b.id),
           learnArts: learnArts.sort((a, b) => a.id - b.id),
-          learnArtsIns: learnArtsIns.sort((a, b) => a.id - b.id),
-        },
+          learnArtsIns: learnArtsIns.sort((a, b) => a.id - b.id)
+        }
       }
     } else {
       if (arts.has(artId)) {
         return {
-          event: 'learned_art',
+          event: 'learned_art'
         }
       }
       const artsData = JSON.parse((await Redis.hget(`${PLAYER_BAG_KEY}:${id}`, '功法')) || '[]')
@@ -1511,17 +1511,17 @@ export default {
             event: 'learn_art',
             data: {
               state,
-              artInfo,
-            },
+              artInfo
+            }
           }
         } else {
           return {
-            event: 'no_art',
+            event: 'no_art'
           }
         }
       } else {
         return {
-          event: 'no_art',
+          event: 'no_art'
         }
       }
     }
@@ -1541,7 +1541,7 @@ export default {
     retreatStart = parseInt(retreatStart, 10) || 0
     if (retreatStart !== 0) {
       return {
-        event: 'in_retreat',
+        event: 'in_retreat'
       }
     }
     if (artAll) {
@@ -1552,7 +1552,7 @@ export default {
           id: item.id,
           name: item.name,
           lsAll: item.sell_ls * item.count,
-          count: item.count,
+          count: item.count
         })
         return (acc += item.sell_ls * item.count)
       }, 0)
@@ -1562,8 +1562,8 @@ export default {
         event: 'sell_art_all',
         data: {
           addls: addls,
-          sellArts: sellArt.sort((a, b) => a.id - b.id),
-        },
+          sellArts: sellArt.sort((a, b) => a.id - b.id)
+        }
       }
     } else {
       const arts = Config.xiuxian.drop.arts
@@ -1586,25 +1586,25 @@ export default {
               data: {
                 addls: addls,
                 count: art.count,
-                art: artInfo,
-              },
+                art: artInfo
+              }
             }
           } else {
             return {
               event: 'lack_art_count',
               data: {
-                art: { ...artInfo, count: art.count },
-              },
+                art: { ...artInfo, count: art.count }
+              }
             }
           }
         } else {
           return {
-            event: 'no_art',
+            event: 'no_art'
           }
         }
       } else {
         return {
-          event: 'no_art',
+          event: 'no_art'
         }
       }
     }
@@ -1622,7 +1622,7 @@ export default {
     retreatStart = parseInt(retreatStart, 10) || 0
     if (retreatStart !== 0) {
       return {
-        event: 'in_retreat',
+        event: 'in_retreat'
       }
     }
     if (!sroot) {
@@ -1631,22 +1631,22 @@ export default {
         sroot = srootList[crypto.randomInt(0, srootList.length)]
         Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
           灵石: ls - Config.xiuxian.sroot.obtain_sroot_ls,
-          灵根: sroot.id,
+          灵根: sroot.id
         })
         return {
           event: 'obtain_sroot',
           data: {
-            sroot: sroot,
-          },
+            sroot: sroot
+          }
         }
       } else {
         return {
-          event: 'lack_ls',
+          event: 'lack_ls'
         }
       }
     } else {
       return {
-        event: 'is_sroot',
+        event: 'is_sroot'
       }
     }
   },
@@ -1671,7 +1671,7 @@ export default {
     retreatStart = parseInt(retreatStart, 10) || 0
     if (retreatStart !== 0) {
       return {
-        event: 'in_retreat',
+        event: 'in_retreat'
       }
     }
     if (sroot) {
@@ -1712,18 +1712,18 @@ export default {
           }
           Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
             灵石: ls - Config.xiuxian.sroot.wash_sroot_ls * count,
-            洗灵根: JSON.stringify(washsroot),
+            洗灵根: JSON.stringify(washsroot)
           })
           return {
             event: 'wash_sroot',
             data: {
               sroot: Config.xiuxian.sroot.sroot.find((s) => s.id == sroot),
-              washsroot: washsroot,
-            },
+              washsroot: washsroot
+            }
           }
         } else {
           return {
-            event: 'lack_ls',
+            event: 'lack_ls'
           }
         }
       } else {
@@ -1731,13 +1731,13 @@ export default {
           event: 'select_sroot',
           data: {
             sroot: Config.xiuxian.sroot.sroot.find((s) => s.id == sroot),
-            washsroot: washsroot,
-          },
+            washsroot: washsroot
+          }
         }
       }
     } else {
       return {
-        event: 'not_sroot',
+        event: 'not_sroot'
       }
     }
   },
@@ -1755,7 +1755,7 @@ export default {
     retreatStart = parseInt(retreatStart, 10) || 0
     if (retreatStart !== 0) {
       return {
-        event: 'in_retreat',
+        event: 'in_retreat'
       }
     }
     if (sroot) {
@@ -1765,33 +1765,33 @@ export default {
             sroot = washsroot[srootIndex - 1]
             Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
               灵根: sroot.id,
-              洗灵根: '[]',
+              洗灵根: '[]'
             })
             return {
               event: 'replace_sroot',
               data: {
-                sroot: sroot,
-              },
+                sroot: sroot
+              }
             }
           } else {
             return {
-              event: 'invaild_sroot',
+              event: 'invaild_sroot'
             }
           }
         } else {
           Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '洗灵根', '[]')
           return {
-            event: 'cancel_replace_sroot',
+            event: 'cancel_replace_sroot'
           }
         }
       } else {
         return {
-          event: 'not_select_sroot',
+          event: 'not_select_sroot'
         }
       }
     } else {
       return {
-        event: 'not_sroot',
+        event: 'not_sroot'
       }
     }
   },
@@ -1808,15 +1808,15 @@ export default {
     retreatStart = parseInt(retreatStart, 10) || 0
     if (retreatStart !== 0) {
       return {
-        event: 'in_retreat',
+        event: 'in_retreat'
       }
     }
     if (sectId !== 0) {
       return {
         event: 'in_sect',
         data: {
-          sectId,
-        },
+          sectId
+        }
       }
     }
     if (ls >= Config.xiuxian.sect.create_sect_ls) {
@@ -1828,24 +1828,24 @@ export default {
         宗门宗主: id,
         宗门经验: 0,
         宗门等级: 1,
-        宗门成员等级: JSON.stringify([{ id: id, permission: 10 }]),
+        宗门成员等级: JSON.stringify([{ id: id, permission: 10 }])
       })
       Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
         灵石: ls - Config.xiuxian.sect.create_sect_ls,
-        宗门ID: sectCount,
+        宗门ID: sectCount
       })
       return {
         event: 'create_sect',
         data: {
-          sectId: sectCount,
-        },
+          sectId: sectCount
+        }
       }
     } else {
       return {
         event: 'lack_ls',
         data: {
-          ls,
-        },
+          ls
+        }
       }
     }
   },
@@ -1859,7 +1859,7 @@ export default {
     let sectId = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID'), 10) || 0
     if (sectId === 0) {
       return {
-        event: 'no_sect',
+        event: 'no_sect'
       }
     }
     let memberPermission = JSON.parse(await Redis.hget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员等级'))
@@ -1867,8 +1867,8 @@ export default {
     return {
       event: 'members_list',
       data: {
-        members: memberPermission,
-      },
+        members: memberPermission
+      }
     }
   },
 
@@ -1884,13 +1884,13 @@ export default {
       return {
         event: 'in_sect',
         data: {
-          sectId,
-        },
+          sectId
+        }
       }
     }
     if ((await Redis.exists(`${SECT_INFO_KEY}:${joinID}`)) === 0) {
       return {
-        event: 'not_sectid',
+        event: 'not_sectid'
       }
     }
     let [level, members, memberPermission, noAudit] = await Redis.hmget(
@@ -1911,8 +1911,8 @@ export default {
         event: 'member_full',
         data: {
           memberNum,
-          memberMax,
-        },
+          memberMax
+        }
       }
     }
     if (noAudit) {
@@ -1921,21 +1921,21 @@ export default {
       memberPermission.push({ id: id, permission: 1 })
       await Redis.hmset(`${SECT_INFO_KEY}:${joinID}`, {
         宗门成员: JSON.stringify([...members]),
-        宗门成员等级: JSON.stringify(memberPermission),
+        宗门成员等级: JSON.stringify(memberPermission)
       })
       await Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '宗门ID', joinID)
       return {
         event: 'join_sect_success',
         data: {
-          sectId: joinID,
-        },
+          sectId: joinID
+        }
       }
     } else {
       let memberAudit = new Set(JSON.parse((await Redis.hget(`${SECT_INFO_KEY}:${joinID}`, '待审核成员')) || '[]'))
       memberAudit.add(id)
       await Redis.hset(`${SECT_INFO_KEY}:${joinID}`, '待审核成员', JSON.stringify([...memberAudit]))
       return {
-        event: 'join_sect_audit',
+        event: 'join_sect_audit'
       }
     }
   },
@@ -1949,7 +1949,7 @@ export default {
     const sectId = parseInt(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID'), 10)
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return {
-        event: 'no_sect',
+        event: 'no_sect'
       }
     }
     let [exp, level, membersPermission] = await Redis.hmget(
@@ -1963,7 +1963,7 @@ export default {
     membersPermission = JSON.parse(membersPermission)
     if (membersPermission.find((item) => item.id === id)?.permission < 7) {
       return {
-        event: 'no_permission',
+        event: 'no_permission'
       }
     }
     if (Config.xiuxian.sect.sect_level.length > level) {
@@ -1972,22 +1972,22 @@ export default {
         if (Config.xiuxian.sect.sect_up_reset) {
           Redis.hmset(`${SECT_INFO_KEY}:${sectId}`, {
             宗门经验: 0,
-            宗门等级: level,
+            宗门等级: level
           })
         } else {
           Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门等级', level)
         }
         return {
-          event: 'sect_level_up',
+          event: 'sect_level_up'
         }
       } else {
         return {
-          event: 'sect_exp_lack',
+          event: 'sect_exp_lack'
         }
       }
     } else {
       return {
-        event: 'sect_level_max',
+        event: 'sect_level_max'
       }
     }
   },
@@ -2007,7 +2007,7 @@ export default {
     )
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return {
-        event: 'no_sect',
+        event: 'no_sect'
       }
     }
     let [exp, level] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门经验', '宗门等级')
@@ -2017,7 +2017,7 @@ export default {
     const today = gettoday()
     if (lastDay && lastDay === today) {
       return {
-        event: 'is_signed',
+        event: 'is_signed'
       }
     }
     cult = parseInt(cult, 10) + addcult
@@ -2026,7 +2026,7 @@ export default {
     await Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
       修为: cult,
       灵石: ls,
-      宗门上次签到时间: today,
+      宗门上次签到时间: today
     })
     await Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门经验', exp)
     return {
@@ -2034,8 +2034,8 @@ export default {
       data: {
         addcult,
         addls,
-        sectExp,
-      },
+        sectExp
+      }
     }
   },
 
@@ -2054,7 +2054,7 @@ export default {
     }
     if (sectList.length === 0) {
       return {
-        event: 'not_sects',
+        event: 'not_sects'
       }
     }
     const pipeline = Redis.pipeline()
@@ -2071,14 +2071,14 @@ export default {
         memberNum: JSON.parse(results[i][1][2]).length,
         owner: results[i][1][3],
         level: results[i][1][4],
-        memberMax: Config.xiuxian.sect.sect_level[results[i][1][4] - 1].memberMax,
+        memberMax: Config.xiuxian.sect.sect_level[results[i][1][4] - 1].memberMax
       })
     }
     return {
       event: 'get_list_sect_success',
       data: {
-        sectInfos,
-      },
+        sectInfos
+      }
     }
   },
 
@@ -2091,7 +2091,7 @@ export default {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return {
-        event: 'no_sect',
+        event: 'no_sect'
       }
     }
     let [membersPermission, memberAudit] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员等级', '待审核成员')
@@ -2099,7 +2099,7 @@ export default {
     memberAudit = JSON.parse(memberAudit || '[]')
     if (membersPermission.find((item) => item.id === id)?.permission < 7) {
       return {
-        event: 'no_permission',
+        event: 'no_permission'
       }
     }
     const pipeline = Redis.pipeline()
@@ -2113,14 +2113,14 @@ export default {
       membersList.push({
         id: memberAudit[i],
         cult: values[0],
-        realm: Config.xiuxian.Realm.Realms[values[1] - 1]?.name || '无',
+        realm: Config.xiuxian.Realm.Realms[values[1] - 1]?.name || '无'
       })
     }
     return {
       event: 'audit_list',
       data: {
-        membersList: membersList || [],
-      },
+        membersList: membersList || []
+      }
     }
   },
 
@@ -2136,7 +2136,7 @@ export default {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return {
-        event: 'no_sect',
+        event: 'no_sect'
       }
     }
     let [level, members, membersPermission, memberAudit] = await Redis.hmget(
@@ -2153,18 +2153,18 @@ export default {
     memberAudit = JSON.parse(memberAudit || '[]')
     if (membersPermission.find((item) => item.id === id)?.permission < 7) {
       return {
-        event: 'no_permission',
+        event: 'no_permission'
       }
     }
     if (memberNum >= memberMax && approved) {
       return {
-        event: 'member_max',
+        event: 'member_max'
       }
     }
     if (auditAll) {
       if (memberAudit.length === 0) {
         return {
-          event: 'no_member_audit',
+          event: 'no_member_audit'
         }
       }
       if (approved) {
@@ -2194,23 +2194,23 @@ export default {
         pipeline.hmset(`${SECT_INFO_KEY}:${sectId}`, {
           宗门成员: JSON.stringify(members),
           待审核成员: JSON.stringify(memberAudit),
-          宗门成员等级: JSON.stringify(membersPermission),
+          宗门成员等级: JSON.stringify(membersPermission)
         })
         await pipeline.exec()
         return {
           event: 'sect_audit_all_agreed',
           data: {
             addMembers: addMembers,
-            hasSect: hasSect.length,
-          },
+            hasSect: hasSect.length
+          }
         }
       } else {
         await Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '待审核成员', '[]')
         return {
           event: 'sect_audit_all_refused',
           data: {
-            refusedMembers: memberAudit,
-          },
+            refusedMembers: memberAudit
+          }
         }
       }
     } else {
@@ -2224,7 +2224,7 @@ export default {
               JSON.stringify(memberAudit.filter((item) => item !== auditId))
             )
             return {
-              event: 'member_has_sect',
+              event: 'member_has_sect'
             }
           }
           members.push(auditId)
@@ -2233,14 +2233,14 @@ export default {
           await Redis.hmset(`${SECT_INFO_KEY}:${sectId}`, {
             宗门成员: JSON.stringify(members),
             待审核成员: JSON.stringify(memberAudit.filter((item) => item !== auditId)),
-            宗门成员等级: JSON.stringify(membersPermission),
+            宗门成员等级: JSON.stringify(membersPermission)
           })
           return {
-            event: 'member_agreed',
+            event: 'member_agreed'
           }
         } else {
           return {
-            event: 'not_member',
+            event: 'not_member'
           }
         }
       } else {
@@ -2251,11 +2251,11 @@ export default {
             JSON.stringify(memberAudit.filter((item) => item !== auditId))
           )
           return {
-            event: 'member_refused',
+            event: 'member_refused'
           }
         } else {
           return {
-            event: 'not_member',
+            event: 'not_member'
           }
         }
       }
@@ -2271,7 +2271,7 @@ export default {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return {
-        event: 'no_sect',
+        event: 'no_sect'
       }
     }
     let [members, memberPermission] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员', '宗门成员等级')
@@ -2283,15 +2283,15 @@ export default {
       memberPermission = memberPermission.filter((member) => member.id !== id)
       Redis.hmset(`${SECT_INFO_KEY}:${sectId}`, {
         宗门成员: JSON.stringify(members),
-        宗门成员等级: JSON.stringify(memberPermission),
+        宗门成员等级: JSON.stringify(memberPermission)
       })
       Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '宗门ID', '0')
       return {
-        event: 'sect_exit',
+        event: 'sect_exit'
       }
     } else {
       return {
-        event: 'sect_owner',
+        event: 'sect_owner'
       }
     }
   },
@@ -2307,7 +2307,7 @@ export default {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return {
-        event: 'no_sect',
+        event: 'no_sect'
       }
     }
     let [members, memberPermission] = await Redis.hmget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员', '宗门成员等级')
@@ -2316,7 +2316,7 @@ export default {
     if (memberPermission.find((member) => member.id === id)?.permission === 10) {
       if (!members.includes(parseInt(transfer_id, 10))) {
         return {
-          event: 'not_transfer_id',
+          event: 'not_transfer_id'
         }
       }
       if (confirmed) {
@@ -2326,19 +2326,19 @@ export default {
         transfer_member.permission = 10
         Redis.hmset(`${SECT_INFO_KEY}:${sectId}`, {
           宗门宗主: transfer_id,
-          宗门成员等级: JSON.stringify(memberPermission),
+          宗门成员等级: JSON.stringify(memberPermission)
         })
         return {
-          event: 'sect_transfer',
+          event: 'sect_transfer'
         }
       } else {
         return {
-          event: 'no_confirmed',
+          event: 'no_confirmed'
         }
       }
     } else {
       return {
-        event: 'no_permission',
+        event: 'no_permission'
       }
     }
   },
@@ -2355,15 +2355,15 @@ export default {
     lsNum = parseInt(lsNum, 10)
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return {
-        event: 'no_sect',
+        event: 'no_sect'
       }
     }
     if (ls < lsNum) {
       return {
         event: 'lack_ls',
         data: {
-          ls: lsNum,
-        },
+          ls: lsNum
+        }
       }
     }
     if (lsNum >= 0 && lsNum % 10 === 0) {
@@ -2379,19 +2379,19 @@ export default {
       }
       Redis.hmset(`${SECT_INFO_KEY}:${sectId}`, {
         宗门经验: exp,
-        宗门贡献: JSON.stringify(memberContribution),
+        宗门贡献: JSON.stringify(memberContribution)
       })
       Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '灵石', ls)
       return {
         event: 'sect_enshrined',
         data: {
           addExp: lsNum / 10,
-          addContribution: lsNum,
-        },
+          addContribution: lsNum
+        }
       }
     } else {
       return {
-        event: 'invalid_lsNum',
+        event: 'invalid_lsNum'
       }
     }
   },
@@ -2406,7 +2406,7 @@ export default {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return {
-        event: 'no_sect',
+        event: 'no_sect'
       }
     }
     let products = JSON.parse(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门商品购买数量'))
@@ -2418,8 +2418,8 @@ export default {
     return {
       event: 'sect_store',
       data: {
-        products: products,
-      },
+        products: products
+      }
     }
   },
 
@@ -2433,18 +2433,18 @@ export default {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return {
-        event: 'no_sect',
+        event: 'no_sect'
       }
     }
     const membersPermission = JSON.parse(await Redis.hget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员等级'))
     if (membersPermission.find((item) => item.id === id)?.permission >= 9) {
       Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '无需审核状态', noAudit ? 1 : 0)
       return {
-        event: 'sect_set_audit_success',
+        event: 'sect_set_audit_success'
       }
     } else {
       return {
-        event: 'no_permission',
+        event: 'no_permission'
       }
     }
   },
@@ -2459,7 +2459,7 @@ export default {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return {
-        event: 'no_sect',
+        event: 'no_sect'
       }
     }
     const memberPermission = JSON.parse(await Redis.hget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员等级'))
@@ -2477,24 +2477,24 @@ export default {
                   notify.sectAuditName(sectId, sectName, true)
                   Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', sectName)
                   return {
-                    event: 'sect_set_name_success',
+                    event: 'sect_set_name_success'
                   }
                 } else if (value === '是') {
                   return {
-                    event: 'sect_set_name_illegal',
+                    event: 'sect_set_name_illegal'
                   }
                 }
               default:
                 Redis.hset(`Mozu:xiuxian:audit:sect:name`, sectId, sectName)
                 await notify.sectAuditName(sectId, sectName)
                 return {
-                  event: 'sect_name_audit',
+                  event: 'sect_name_audit'
                 }
               case 2:
                 for (const key of Config.xiuxian.sect.sect_validation.audit.keywords) {
                   if (sectName.includes(key)) {
                     return {
-                      event: 'sect_set_name_illegal',
+                      event: 'sect_set_name_illegal'
                     }
                   }
                 }
@@ -2502,27 +2502,27 @@ export default {
               case 3:
                 Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', sectName)
                 return {
-                  event: 'sect_set_name_success',
+                  event: 'sect_set_name_success'
                 }
             }
           } else {
             return {
-              event: 'min_name',
+              event: 'min_name'
             }
           }
         } else {
           return {
-            event: 'max_name',
+            event: 'max_name'
           }
         }
       } else {
         return {
-          event: 'not_allowed_newline',
+          event: 'not_allowed_newline'
         }
       }
     } else {
       return {
-        event: 'no_permission',
+        event: 'no_permission'
       }
     }
   },
@@ -2537,7 +2537,7 @@ export default {
     const sectId = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '宗门ID')
     if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
       return {
-        event: 'no_sect',
+        event: 'no_sect'
       }
     }
     const memberPermission = JSON.parse(await Redis.hget(`${SECT_INFO_KEY}:${sectId}`, '宗门成员等级'))
@@ -2555,24 +2555,24 @@ export default {
                   notify.sectAuditDesc(sectId, sectDesc, true)
                   Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门简介', sectDesc)
                   return {
-                    event: 'sect_set_desc_success',
+                    event: 'sect_set_desc_success'
                   }
                 } else if (value === '是') {
                   return {
-                    event: 'sect_set_desc_illegal',
+                    event: 'sect_set_desc_illegal'
                   }
                 }
               default:
                 Redis.hset(`Mozu:xiuxian:audit:sect:desc`, sectId, sectDesc)
                 await notify.sectAuditDesc(sectId, sectDesc)
                 return {
-                  event: 'sect_desc_audit',
+                  event: 'sect_desc_audit'
                 }
               case 2:
                 for (const key of Config.xiuxian.sect.sect_validation.audit.keywords) {
                   if (sectDesc.includes(key)) {
                     return {
-                      event: 'sect_set_desc_illegal',
+                      event: 'sect_set_desc_illegal'
                     }
                   }
                 }
@@ -2580,27 +2580,27 @@ export default {
               case 3:
                 Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门简介', sectDesc)
                 return {
-                  event: 'sect_set_desc_success',
+                  event: 'sect_set_desc_success'
                 }
             }
           } else {
             return {
-              event: 'min_desc',
+              event: 'min_desc'
             }
           }
         } else {
           return {
-            event: 'max_desc',
+            event: 'max_desc'
           }
         }
       } else {
         return {
-          event: 'not_allowed_newline',
+          event: 'not_allowed_newline'
         }
       }
     } else {
       return {
-        event: 'no_permission',
+        event: 'no_permission'
       }
     }
   },
@@ -2629,18 +2629,18 @@ export default {
             pipeline.del('Mozu:xiuxian:audit:sect:name')
             await pipeline.exec()
             return {
-              event: 'sect_name_audit_all_success',
+              event: 'sect_name_audit_all_success'
             }
           } else {
             if (sectId in sectAuditName) {
               if (approved === 1) Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门名称', sectAuditName[sectId])
               Redis.hdel('Mozu:xiuxian:audit:sect:name', sectId)
               return {
-                event: 'sect_name_audit_success',
+                event: 'sect_name_audit_success'
               }
             } else {
               return {
-                event: 'not_sect_id',
+                event: 'not_sect_id'
               }
             }
           }
@@ -2648,13 +2648,13 @@ export default {
           return {
             event: 'sect_name_audit_list',
             data: {
-              sectAuditName: sectAuditName,
-            },
+              sectAuditName: sectAuditName
+            }
           }
       }
     } else {
       return {
-        event: 'no_permission',
+        event: 'no_permission'
       }
     }
   },
@@ -2683,18 +2683,18 @@ export default {
             pipeline.del('Mozu:xiuxian:audit:sect:desc')
             await pipeline.exec()
             return {
-              event: 'sect_desc_audit_all_success',
+              event: 'sect_desc_audit_all_success'
             }
           } else {
             if (sectId in sectAuditDesc) {
               if (approved === 1) Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门简介', sectAuditDesc[sectId] || '无')
               Redis.hdel('Mozu:xiuxian:audit:sect:desc', sectId)
               return {
-                event: 'sect_desc_audit_success',
+                event: 'sect_desc_audit_success'
               }
             } else {
               return {
-                event: 'not_sect_id',
+                event: 'not_sect_id'
               }
             }
           }
@@ -2702,13 +2702,13 @@ export default {
           return {
             event: 'sect_desc_audit_list',
             data: {
-              sectAuditDesc: sectAuditDesc,
-            },
+              sectAuditDesc: sectAuditDesc
+            }
           }
       }
     } else {
       return {
-        event: 'no_permission',
+        event: 'no_permission'
       }
     }
   },
@@ -2724,7 +2724,7 @@ export default {
     if (isMaster) {
       if ((await Redis.exists(`${SECT_INFO_KEY}:${sectId}`)) === 0) {
         return {
-          event: 'no_sect',
+          event: 'no_sect'
         }
       }
       if (type === '名称') {
@@ -2733,11 +2733,11 @@ export default {
         Redis.hset(`${SECT_INFO_KEY}:${sectId}`, '宗门简介', '未设置')
       }
       return {
-        event: 'sect_reset',
+        event: 'sect_reset'
       }
     } else {
       return {
-        event: 'no_permission',
+        event: 'no_permission'
       }
     }
   },
@@ -2752,20 +2752,20 @@ export default {
     const sex = await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '性别')
     if (sex !== '未设置') {
       return {
-        event: 'in_is_sex',
+        event: 'in_is_sex'
       }
     }
     if (sexType !== '男' && sexType !== '女') {
       return {
-        event: 'invalid_sex',
+        event: 'invalid_sex'
       }
     }
     Redis.hset(`${PLAYER_INFO_KEY}:${id}`, '性别', sexType)
     return {
       event: 'set_sex_success',
       data: {
-        sex: sexType,
-      },
+        sex: sexType
+      }
     }
   },
 
@@ -2781,7 +2781,7 @@ export default {
     titleIndex = parseInt(titleIndex, 10)
     if (!Number.isInteger(titleIndex) || titleIndex < 1 || titleIndex > titles.length) {
       return {
-        event: 'invalid_title',
+        event: 'invalid_title'
       }
     }
     title = titles[titleIndex - 1]?.title || '无'
@@ -2789,8 +2789,8 @@ export default {
     return {
       event: 'set_title_success',
       data: {
-        title: title,
-      },
+        title: title
+      }
     }
   },
 
@@ -2803,7 +2803,7 @@ export default {
   async genCdkey(msg, isMaster) {
     if (!isMaster) {
       return {
-        event: 'no_permissions',
+        event: 'no_permissions'
       }
     }
     const quantities = [...msg.matchAll(/数量:(\d+)/g)].map((m) => parseInt(m[1], 10))
@@ -2813,7 +2813,7 @@ export default {
       genera: msg.includes('通用'),
       forceSetting: msg.includes('强制设置'),
       cultList: [...msg.matchAll(/修为:(-?\d+)/g)].map((m) => parseInt(m[1], 10)),
-      lsList: [...msg.matchAll(/灵石:(-?\d+)/g)].map((m) => parseInt(m[1], 10)),
+      lsList: [...msg.matchAll(/灵石:(-?\d+)/g)].map((m) => parseInt(m[1], 10))
     }
     const cdkSet = new Set()
     if (cdkText.length) {
@@ -2835,8 +2835,8 @@ export default {
     return {
       event: 'gen_cdk_success',
       data: {
-        cdks,
-      },
+        cdks
+      }
     }
   },
 
@@ -2849,7 +2849,7 @@ export default {
   async delCdkey(msg, isMaster) {
     if (!isMaster) {
       return {
-        event: 'no_permissions',
+        event: 'no_permissions'
       }
     }
     if (msg.includes('全部')) {
@@ -2863,14 +2863,14 @@ export default {
       return {
         event: 'del_cdks',
         data: {
-          cdkList: cdks,
-        },
+          cdkList: cdks
+        }
       }
     } else {
       let cdkText = msg.replace(/删除兑换码\s*/i, '').trim()
       if (!cdkText) {
         return {
-          event: 'invalid_cdks',
+          event: 'invalid_cdks'
         }
       }
       let cdkList = cdkText
@@ -2879,7 +2879,7 @@ export default {
         .filter((cdk) => cdk.length > 0)
       if (!cdkList.length) {
         return {
-          event: 'invalid_cdks',
+          event: 'invalid_cdks'
         }
       }
       cdkList = [...new Set(cdkList)]
@@ -2891,8 +2891,8 @@ export default {
       return {
         event: 'del_cdks',
         data: {
-          cdkList,
-        },
+          cdkList
+        }
       }
     }
   },
@@ -2907,7 +2907,7 @@ export default {
   async useCdkey(id, user_id, cdk) {
     if ((await Redis.exists(`Mozu:xiuxian:cdk:${cdk}`)) === 0) {
       return {
-        event: 'invalid_cdk',
+        event: 'invalid_cdk'
       }
     }
     let [value, used, useId, useTime] = await Redis.hmget(
@@ -2929,8 +2929,8 @@ export default {
         event: 'cdk_used',
         data: {
           useId,
-          useTime,
-        },
+          useTime
+        }
       }
     } else if (value.genera) {
       useId = JSON.parse(useId) || []
@@ -2940,39 +2940,39 @@ export default {
         return {
           event: 'cdk_used',
           data: {
-            useTime: useTime[index],
-          },
+            useTime: useTime[index]
+          }
         }
       } else {
         useId.push(user_id)
         useTime.push(Math.floor(Date.now() / 1000))
         Redis.hmset(`Mozu:xiuxian:cdk:${cdk}`, {
           使用ID: JSON.stringify(useId),
-          使用时间: JSON.stringify(useTime),
+          使用时间: JSON.stringify(useTime)
         })
         if (value.forceSetting) {
           Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
             修为: addcult || cult,
-            灵石: addls || ls,
+            灵石: addls || ls
           })
           return {
             event: 'cdk_use_force_success',
             data: {
               cult: addcult || cult,
-              ls: addls || ls,
-            },
+              ls: addls || ls
+            }
           }
         } else {
           Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
             修为: addcult + cult,
-            灵石: addls + ls,
+            灵石: addls + ls
           })
           return {
             event: 'cdk_use_success',
             data: {
               cult: value.cultList,
-              ls: value.lsList,
-            },
+              ls: value.lsList
+            }
           }
         }
       }
@@ -2980,31 +2980,31 @@ export default {
       Redis.hmset(`Mozu:xiuxian:cdk:${cdk}`, {
         使用状态: 1,
         使用ID: user_id,
-        使用时间: Math.floor(Date.now() / 1000),
+        使用时间: Math.floor(Date.now() / 1000)
       })
       if (value.forceSetting) {
         Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
           修为: addcult || cult,
-          灵石: addls || ls,
+          灵石: addls || ls
         })
         return {
           event: 'cdk_use_force_success',
           data: {
             cult: addcult || cult,
-            ls: addls || ls,
-          },
+            ls: addls || ls
+          }
         }
       } else {
         Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
           修为: addcult + cult,
-          灵石: addls + ls,
+          灵石: addls + ls
         })
         return {
           event: 'cdk_use_success',
           data: {
             cult: value.cultList,
-            ls: value.lsList,
-          },
+            ls: value.lsList
+          }
         }
       }
     }
@@ -3022,7 +3022,7 @@ export default {
   async switchId(id, switch_id, isMaster) {
     if (!isMaster) {
       return {
-        event: 'no_permissions',
+        event: 'no_permissions'
       }
     }
     if ((await Redis.exists(`${PLAYER_INFO_KEY}:${switch_id}`)) !== 0) {
@@ -3042,14 +3042,14 @@ export default {
 
       await multi.exec()
       return {
-        event: 'switch_success',
+        event: 'switch_success'
       }
     } else {
       return {
-        event: 'not_switch_id',
+        event: 'not_switch_id'
       }
     }
-  },
+  }
 }
 
 function gettoday() {

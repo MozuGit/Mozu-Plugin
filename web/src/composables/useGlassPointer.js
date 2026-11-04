@@ -56,7 +56,7 @@ export function useGlassPointer(options = {}) {
 
     pending = {
       x: ((event.clientX - rect.left) / rect.width) * 100,
-      y: ((event.clientY - rect.top) / rect.height) * 100,
+      y: ((event.clientY - rect.top) / rect.height) * 100
     }
 
     // rAF 节流：一帧内多次 pointermove 只写一次样式

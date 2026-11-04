@@ -33,7 +33,7 @@ const Time_unit = {
   MONTH: 2592000,
   年: 31536000,
   Y: 31536000,
-  YEAR: 31536000,
+  YEAR: 31536000
 }
 const TimeUnitReg = Object.keys(Time_unit).join('|')
 
@@ -50,25 +50,25 @@ export class MozuGroupAdmin extends plugin {
       rule: [
         {
           reg: `^#禁言\s?(([A-Z0-9]+)\s)?(${Numreg})?(${TimeUnitReg})?`,
-          fnc: 'muteMember',
+          fnc: 'muteMember'
         },
         {
           reg: '^#解禁',
-          fnc: 'noMuteMember',
+          fnc: 'noMuteMember'
         },
         {
           reg: '^#踢黑?$',
-          fnc: 'kickMember',
+          fnc: 'kickMember'
         },
         {
           reg: '^#解除全部禁言$',
-          fnc: 'relieveAllMute',
+          fnc: 'relieveAllMute'
         },
         {
           reg: Autisticreg,
-          fnc: 'Autistic',
-        },
-      ],
+          fnc: 'Autistic'
+        }
+      ]
     })
   }
 
@@ -99,7 +99,7 @@ export class MozuGroupAdmin extends plugin {
             '***',
             '**禁言列表**',
             ...muteText,
-            '***',
+            '***'
           ].join('\n')
         )
       )
@@ -119,7 +119,7 @@ export class MozuGroupAdmin extends plugin {
     const muteMap = new Map(
       (await Ga.getMuteList()).map((item) => [
         item.member_openid,
-        { username: item.username, muteTime: item.mute_expire_at },
+        { username: item.username, muteTime: item.mute_expire_at }
       ])
     )
     const muteList = ats.map((at) => {
@@ -128,7 +128,7 @@ export class MozuGroupAdmin extends plugin {
         openid: at.member_openid,
         time: 0,
         username: info?.username || at.username,
-        muteTime: info?.muteTime,
+        muteTime: info?.muteTime
       }
     })
     const ok = await Ga.muteMembers(muteList)
@@ -138,7 +138,7 @@ export class MozuGroupAdmin extends plugin {
         muteText.push(
           [
             '>群员：**' + (await mqqapi.command(mute.username, mute.openid)) + '**',
-            '禁言时间剩余：' + (mute.muteTime ? await mqqapi.command(timeDiff(mute.muteTime), mute.muteTime) : '未知'),
+            '禁言时间剩余：' + (mute.muteTime ? await mqqapi.command(timeDiff(mute.muteTime), mute.muteTime) : '未知')
           ].join('\n')
         )
       }
@@ -178,7 +178,7 @@ export class MozuGroupAdmin extends plugin {
       openid: item.member_openid,
       time: 0,
       username: item.username,
-      muteTime: item.mute_expire_at,
+      muteTime: item.mute_expire_at
     }))
     if (muteList.length) {
       const ok = await Ga.muteMembers(muteList)
@@ -187,7 +187,7 @@ export class MozuGroupAdmin extends plugin {
         muteText.push(
           [
             '>群员：**' + (await mqqapi.command(mute.username, mute.openid)) + '**',
-            '禁言时间剩余：' + (await mqqapi.command(timeDiff(mute.muteTime), mute.muteTime)),
+            '禁言时间剩余：' + (await mqqapi.command(timeDiff(mute.muteTime), mute.muteTime))
           ].join('\n')
         )
       }

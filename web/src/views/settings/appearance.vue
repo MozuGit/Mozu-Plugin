@@ -237,7 +237,7 @@ import {
   HighlightOutlined,
   InfoCircleOutlined,
   PictureOutlined,
-  ReloadOutlined,
+  ReloadOutlined
 } from '@ant-design/icons-vue'
 import {
   ACCENT_COLORS,
@@ -247,7 +247,7 @@ import {
   GLASS_STYLES,
   MOTION_STYLES,
   THEME_PRESETS,
-  useAppearance,
+  useAppearance
 } from '../../composables/useAppearance'
 
 const { appearance, preset: currentPreset, accent: currentAccent, resetAppearance } = useAppearance()

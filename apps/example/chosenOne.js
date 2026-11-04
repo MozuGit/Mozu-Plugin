@@ -12,9 +12,9 @@ export class MozuChosenOne extends plugin {
       rule: [
         {
           reg: '^#?天选之人$',
-          fnc: 'chosenOne',
-        },
-      ],
+          fnc: 'chosenOne'
+        }
+      ]
     })
   }
 

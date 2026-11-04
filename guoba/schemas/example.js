@@ -1,7 +1,7 @@
 export default [
   {
     label: '功能插件',
-    component: 'SOFT_GROUP_BEGIN',
+    component: 'SOFT_GROUP_BEGIN'
   },
   {
     component: 'Divider',
@@ -11,22 +11,22 @@ export default [
       style: {
         fontWeight: 'bold',
         color: 'rgb(76, 113, 201)',
-        fontSize: '16px',
+        fontSize: '16px'
       },
       orientation: 'left',
-      plain: true,
-    },
+      plain: true
+    }
   },
   {
     field: 'example.fayan.enable',
     label: '发言统计开关',
-    component: 'Switch',
+    component: 'Switch'
   },
   {
     field: 'example.fayan.sendMarkdown',
     label: '使用Markdown发送',
     bottomHelpMessage: '是否使用Markdown发送，仅QQBot生效',
-    component: 'Switch',
+    component: 'Switch'
   },
   {
     field: 'example.fayan.count',
@@ -38,9 +38,9 @@ export default [
       placeholder: '请输入数字',
       min: 1,
       style: {
-        width: '162px',
-      },
-    },
+        width: '162px'
+      }
+    }
   },
   {
     component: 'Divider',
@@ -50,27 +50,27 @@ export default [
       style: {
         fontWeight: 'bold',
         color: 'rgb(76, 113, 201)',
-        fontSize: '16px',
+        fontSize: '16px'
       },
       orientation: 'left',
-      plain: true,
-    },
+      plain: true
+    }
   },
   {
     field: 'example.makeMessage.enable',
     label: '伪造聊天开关',
-    component: 'Switch',
+    component: 'Switch'
   },
   {
     field: 'example.makeMessage.onlyMaster',
     label: '仅主人使用',
-    component: 'Switch',
+    component: 'Switch'
   },
   {
     field: 'example.makeMessage.whiteQQList',
     label: '白名单QQ',
     bottomHelpMessage: '防止白名单QQ被伪造',
-    component: 'GSelectFriend',
+    component: 'GSelectFriend'
   },
   {
     field: 'example.makeMessage.repeatCount',
@@ -82,9 +82,9 @@ export default [
       placeholder: '请输入默认复读次数',
       min: 0,
       style: {
-        width: '162px',
-      },
-    },
+        width: '162px'
+      }
+    }
   },
   {
     component: 'Divider',
@@ -94,22 +94,22 @@ export default [
       style: {
         fontWeight: 'bold',
         color: 'rgb(76, 113, 201)',
-        fontSize: '16px',
+        fontSize: '16px'
       },
       orientation: 'left',
-      plain: true,
-    },
+      plain: true
+    }
   },
   {
     field: 'example.chosenOne.enable',
     label: '天选之人开关',
-    component: 'Switch',
+    component: 'Switch'
   },
   {
     field: 'example.chosenOne.self_add_rate',
     label: '发起人概率',
     helpMessage: '发起人增加被选中的概率',
-    component: 'Switch',
+    component: 'Switch'
   },
   {
     component: 'Divider',
@@ -119,30 +119,30 @@ export default [
       style: {
         fontWeight: 'bold',
         color: 'rgb(76, 113, 201)',
-        fontSize: '16px',
+        fontSize: '16px'
       },
       orientation: 'left',
-      plain: true,
-    },
+      plain: true
+    }
   },
   {
     field: 'example.like.enable',
     label: '定时点赞开关',
-    component: 'Switch',
+    component: 'Switch'
   },
   {
     field: 'example.like.cron',
     label: '定时点赞cron',
     component: 'EasyCron',
     componentProps: {
-      placeholder: '*表示任意，?表示不指定（月日和星期互斥）',
-    },
+      placeholder: '*表示任意，?表示不指定（月日和星期互斥）'
+    }
   },
   {
     field: 'example.like.targets',
     label: '点赞目标',
     bottomHelpMessage: '机器人定时点赞的目标QQ',
-    component: 'GSelectFriend',
+    component: 'GSelectFriend'
   },
   {
     field: 'example.like.batchCount',
@@ -153,9 +153,9 @@ export default [
       placeholder: '请输入批次',
       min: 0,
       style: {
-        width: '120px',
-      },
-    },
+        width: '120px'
+      }
+    }
   },
   {
     field: 'example.like.times',
@@ -166,9 +166,9 @@ export default [
       placeholder: '请输入次数',
       min: 1,
       style: {
-        width: '120px',
-      },
-    },
+        width: '120px'
+      }
+    }
   },
   {
     field: 'example.like.interval',
@@ -180,8 +180,8 @@ export default [
       min: 0,
       step: 100,
       style: {
-        width: '162px',
-      },
-    },
-  },
+        width: '162px'
+      }
+    }
+  }
 ]
