@@ -1,7 +1,7 @@
 <template>
-  <div class="settings-page">
-    <header class="settings-hero">
-      <span class="settings-hero__icon">
+  <div class="page-shell">
+    <header class="page-hero">
+      <span class="page-hero__icon">
         <SettingOutlined />
       </span>
       <div>
@@ -10,25 +10,25 @@
       </div>
     </header>
 
-    <nav class="settings-nav" role="tablist" aria-label="设置分类">
+    <nav class="page-nav" role="tablist" aria-label="设置分类">
       <button
         v-for="tab in tabs"
         :key="tab.key"
         type="button"
-        class="settings-nav__tab"
+        class="page-nav__tab"
         :class="{ active: activeKey === tab.key }"
         role="tab"
         :aria-selected="activeKey === tab.key"
         @click="navigate(tab)"
       >
-        <component :is="tab.icon" class="settings-nav__icon" />
+        <component :is="tab.icon" class="page-nav__icon" />
         <span>{{ tab.label }}</span>
       </button>
     </nav>
 
-    <div class="settings-content">
+    <div class="page-content">
       <router-view v-slot="{ Component }">
-        <transition name="settings-fade" mode="out-in">
+        <transition name="page-fade" mode="out-in">
           <component :is="Component" :key="route.name" />
         </transition>
       </router-view>

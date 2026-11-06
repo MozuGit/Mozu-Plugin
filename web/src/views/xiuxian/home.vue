@@ -1,72 +1,117 @@
 <template>
-  <div class="dashboard-container">
-    <a-card class="fade-in-card" :bordered="false">
-      <template #title>
-        <span>魔族陌修仙</span>
-      </template>
-      <template #extra>
-        <a-button type="text" :loading="refreshing" @click="refreshBasicData" class="refresh-btn">
+  <div class="panel-page home-page">
+    <div class="panel-heading">
+      <div class="panel-heading__main">
+        <span class="panel-heading__icon">
+          <DashboardOutlined />
+        </span>
+        <div>
+          <h2>数据概览</h2>
+          <p>修仙人数、宗门规模与近期活跃趋势</p>
+        </div>
+      </div>
+      <div class="panel-heading__actions">
+        <span v-if="lastUpdated" class="panel-meta">更新于 {{ lastUpdated }}</span>
+        <a-button class="refresh-btn" :loading="refreshing" @click="refreshBasicData">
           <template #icon>
-            <reload-outlined :spin="refreshing" />
+            <ReloadOutlined />
           </template>
+          刷新
         </a-button>
-      </template>
-      <a-row :gutter="[16, 16]">
-        <a-col :xs="24" :sm="8">
-          <a-statistic title="修仙人数" :value="displayPlayerCount" class="statistic-item">
-            <template #suffix>
-              <span style="font-size: 16px; color: #52c41a">人</span>
-            </template>
-          </a-statistic>
-        </a-col>
-        <a-col :xs="24" :sm="8">
-          <a-statistic title="宗门数量" :value="displaySectCount" class="statistic-item">
-            <template #suffix>
-              <span style="font-size: 16px; color: #1890ff">个</span>
-            </template>
-          </a-statistic>
-        </a-col>
-        <a-col :xs="24" :sm="8">
-          <a-statistic title="昨日新增（新注册）" :value="displayYesterdayNewPlayers" class="statistic-item">
-            <template #suffix>
-              <span style="font-size: 16px; color: #fa8c16">人</span>
-            </template>
-          </a-statistic>
-        </a-col>
-      </a-row>
-    </a-card>
+      </div>
+    </div>
 
-    <a-card class="fade-in-card trend-card" :bordered="false" style="margin-top: 16px">
-      <template #title>
-        <span>修仙活跃分析</span>
-      </template>
-      <template #extra>
-        <a-segmented
-          v-model:value="activeRange"
-          :options="rangeOptions"
-          :disabled="rangeLoading"
-          class="range-segmented"
-        />
-      </template>
-      <a-row :gutter="[16, 16]" style="margin-bottom: 20px">
-        <a-col :xs="24" :sm="12">
-          <a-statistic title="今日活跃人数" :value="displayTodayActive" class="statistic-item active-statistic">
-            <template #suffix>
-              <span style="font-size: 16px; color: #0891b2">人</span>
-            </template>
-          </a-statistic>
-        </a-col>
-        <a-col :xs="24" :sm="12">
-          <a-statistic :title="avgTitle" :value="displayAvgActive" class="statistic-item avg-statistic">
-            <template #suffix>
-              <span style="font-size: 16px; color: #722ed1">人</span>
-            </template>
-          </a-statistic>
-        </a-col>
-      </a-row>
+    <section class="panel-section lg-glass">
+      <div class="section-head">
+        <span class="section-icon">
+          <TeamOutlined />
+        </span>
+        <div class="section-head__copy">
+          <h3>修仙概况</h3>
+          <p>当前修仙人数、宗门数量与昨日新增注册</p>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="metric-grid">
+          <div class="metric">
+            <a-statistic title="修仙人数" :value="displayPlayerCount">
+              <template #suffix>
+                <span class="metric-unit metric-unit--mint">人</span>
+              </template>
+            </a-statistic>
+          </div>
+          <div class="metric">
+            <a-statistic title="宗门数量" :value="displaySectCount">
+              <template #suffix>
+                <span class="metric-unit metric-unit--blue">个</span>
+              </template>
+            </a-statistic>
+          </div>
+          <div class="metric">
+            <a-statistic title="昨日新增（新注册）" :value="displayYesterdayNewPlayers">
+              <template #suffix>
+                <span class="metric-unit metric-unit--pink">人</span>
+              </template>
+            </a-statistic>
+          </div>
+        </div>
+      </div>
+    </section>
 
-      <div ref="chartRef" class="chart-container" @click="handleContainerClick" @touchend="handleContainerTouch"></div>
-    </a-card>
+    <section class="panel-section lg-glass">
+      <div class="section-head">
+        <span class="section-icon">
+          <LineChartOutlined />
+        </span>
+        <div class="section-head__copy">
+          <h3>修仙活跃分析</h3>
+          <p>点击图表节点，查看对应日期的活跃玩家列表</p>
+        </div>
+        <div class="section-actions">
+          <div class="pill-group" role="group" aria-label="统计范围">
+            <button
+              v-for="option in rangeOptions"
+              :key="option.value"
+              type="button"
+              class="pill"
+              :class="{ active: activeRange === option.value }"
+              :disabled="rangeLoading"
+              @click="activeRange = option.value"
+            >
+              {{ option.label }}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="metric-grid metric-grid--2">
+          <div class="metric">
+            <a-statistic title="今日活跃人数" :value="displayTodayActive">
+              <template #suffix>
+                <span class="metric-unit metric-unit--cyan">人</span>
+              </template>
+            </a-statistic>
+          </div>
+          <div class="metric">
+            <a-statistic :title="avgTitle" :value="displayAvgActive">
+              <template #suffix>
+                <span class="metric-unit metric-unit--violet">人</span>
+              </template>
+            </a-statistic>
+          </div>
+        </div>
+
+        <div
+          ref="chartRef"
+          class="chart-container"
+          @click="handleContainerClick"
+          @touchstart="handleContainerTouchStart"
+          @touchmove="handleContainerTouchMove"
+          @touchend="handleContainerTouch"
+        ></div>
+        <p v-if="chartScrollable" class="chart-hint">左右滑动图表，查看更早的数据</p>
+      </div>
+    </section>
 
     <a-modal
       v-model:open="modalVisible"
@@ -85,7 +130,7 @@
           <a-statistic
             title="总活跃人数"
             :value="sortedPlayerList.length"
-            :value-style="{ color: '#c2820b', fontSize: '24px' }"
+            :value-style="{ color: 'var(--lg-brand)', fontSize: '24px', fontWeight: 600 }"
           />
         </div>
         <div class="table-wrapper">
@@ -123,8 +168,11 @@
 import { ref, onMounted, nextTick, onBeforeUnmount, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { CopyOutlined, ReloadOutlined } from '@ant-design/icons-vue'
+import { CopyOutlined, DashboardOutlined, LineChartOutlined, ReloadOutlined, TeamOutlined } from '@ant-design/icons-vue'
 import * as echarts from 'echarts'
+import { useAppearance } from '../../composables/useAppearance'
+
+const { appearance } = useAppearance()
 
 const playerCount = ref(0)
 const sectCount = ref(0)
@@ -141,10 +189,17 @@ const displayTodayActive = ref(0)
 const displayAvgActive = ref(0)
 const loading = ref(false)
 const refreshing = ref(false)
+const lastUpdated = ref('')
+const chartScrollable = ref(false)
 const chartRef = ref(null)
 let chartInstance = null
 let requestSeq = 0
 let resizeTimer = null
+let touchStartPoint = null
+let panState = null
+let lastTouchAt = 0
+
+const MOBILE_VISIBLE_POINTS = 7
 
 const rangeOptions = [
   { label: '近7天', value: 7 },
@@ -312,6 +367,7 @@ const showPlayerList = (index) => {
 }
 
 const handleContainerClick = (event) => {
+  if (Date.now() - lastTouchAt < 500) return
   if (!chartInstance || !chartRef.value) return
 
   const rect = chartRef.value.getBoundingClientRect()
@@ -328,11 +384,88 @@ const handleContainerClick = (event) => {
   }
 }
 
+const handleContainerTouchStart = (event) => {
+  panState = null
+  if (event.touches.length !== 1) {
+    touchStartPoint = null
+    return
+  }
+
+  const touch = event.touches[0]
+  touchStartPoint = { x: touch.clientX, y: touch.clientY }
+
+  if (!chartScrollable.value || !chartInstance) return
+
+  const total = activeTrend.value.length
+  const visible = Math.min(total, MOBILE_VISIBLE_POINTS)
+  const dataZoom = chartInstance.getOption().dataZoom?.[0]
+  const rawStart = typeof dataZoom?.startValue === 'number' ? dataZoom.startValue : total - visible
+  const currentStart = Math.min(Math.max(rawStart, 0), Math.max(0, total - visible))
+
+  panState = {
+    startX: touch.clientX,
+    startY: touch.clientY,
+    windowStart: currentStart,
+    windowEnd: currentStart + visible - 1,
+    nextStart: currentStart,
+    panning: false
+  }
+}
+
+const handleContainerTouchMove = (event) => {
+  if (!panState || !chartInstance || event.touches.length !== 1) return
+
+  const touch = event.touches[0]
+  const dx = touch.clientX - panState.startX
+  const dy = touch.clientY - panState.startY
+
+  if (!panState.panning) {
+    if (Math.abs(dx) < 10 || Math.abs(dx) <= Math.abs(dy) * 1.1) return
+    panState.panning = true
+  }
+
+  if (event.cancelable) event.preventDefault()
+
+  const total = activeTrend.value.length
+  const visible = panState.windowEnd - panState.windowStart + 1
+  let plotWidth = chartInstance.getWidth() * 0.93
+
+  try {
+    const rect = chartInstance.getModel().getComponent('grid').coordinateSystem.getRect()
+    if (rect?.width) plotWidth = rect.width
+  } catch {}
+
+  const pointsPerPixel = visible / Math.max(1, plotWidth)
+  const nextStart = Math.min(
+    Math.max(Math.round(panState.windowStart - dx * pointsPerPixel), 0),
+    Math.max(0, total - visible)
+  )
+
+  if (nextStart === panState.nextStart) return
+  panState.nextStart = nextStart
+  chartInstance.dispatchAction({
+    type: 'dataZoom',
+    dataZoomIndex: 0,
+    startValue: nextStart,
+    endValue: nextStart + visible - 1
+  })
+}
+
 const handleContainerTouch = (event) => {
   if (!chartInstance || !chartRef.value) return
 
   const touch = event.changedTouches[0]
   if (!touch) return
+
+  lastTouchAt = Date.now()
+
+  const start = touchStartPoint
+  const wasPanning = panState?.panning
+  touchStartPoint = null
+  panState = null
+
+  if (wasPanning || !start) return
+  if (Math.hypot(touch.clientX - start.x, touch.clientY - start.y) > 8) return
 
   const rect = chartRef.value.getBoundingClientRect()
   const x = touch.clientX - rect.left
@@ -352,6 +485,24 @@ const handleContainerTouch = (event) => {
   }, 50)
 }
 
+const readCssVar = (name, fallback) => {
+  if (typeof window === 'undefined') return fallback
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  return value || fallback
+}
+
+const hexToRgba = (color, alpha) => {
+  const hex = String(color).replace('#', '')
+  const normalized = hex.length === 3 ? [...hex].map((char) => char.repeat(2)).join('') : hex
+  if (normalized.length !== 6) return color
+  const value = Number.parseInt(normalized, 16)
+  if (Number.isNaN(value)) return color
+  const r = (value >> 16) & 255
+  const g = (value >> 8) & 255
+  const b = value & 255
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
 const updateChart = (data) => {
   if (!chartInstance) {
     initChart()
@@ -359,10 +510,23 @@ const updateChart = (data) => {
 
   if (!chartInstance) return
 
+  panState = null
+
+  const brand = readCssVar('--lg-brand', '#667eea')
+  const brandDeep = readCssVar('--lg-brand-deep', '#764ba2')
+  const text = readCssVar('--lg-text', 'rgba(16, 22, 40, 0.88)')
+  const textMuted = readCssVar('--lg-text-muted', 'rgba(16, 22, 40, 0.56)')
+  const hairline = readCssVar('--lg-hairline', 'rgba(125, 145, 185, 0.18)')
+  const surfaceSolid = readCssVar('--lg-surface-solid', 'rgba(247, 250, 255, 0.96)')
+  const fontFamily = readCssVar('--lg-font', 'sans-serif')
+
   const isMonthly = activeRange.value === 365
   const isCompact = window.innerWidth <= 768
   const dates = data.map((item) => item.label || item.date)
   const values = data.map((item) => item.active)
+  const visiblePoints = isCompact ? Math.min(data.length, MOBILE_VISIBLE_POINTS) : data.length
+  const canPan = isCompact && data.length > visiblePoints
+  chartScrollable.value = canPan
   const maxValue = Math.max(0, ...values)
   let yMax
   if (maxValue <= 10) {
@@ -395,6 +559,24 @@ const updateChart = (data) => {
 
   const option = {
     animation: true,
+    textStyle: {
+      fontFamily
+    },
+    dataZoom: canPan
+      ? [
+          {
+            type: 'inside',
+            xAxisIndex: 0,
+            startValue: Math.max(0, data.length - visiblePoints),
+            endValue: data.length - 1,
+            zoomOnPinch: false,
+            zoomOnMouseWheel: false,
+            moveOnMouseWheel: false,
+            moveOnMouseMove: false,
+            throttle: 50
+          }
+        ]
+      : [],
     tooltip: {
       trigger: 'axis',
       confine: true,
@@ -404,17 +586,20 @@ const updateChart = (data) => {
         const isMonthPoint = point?.type === 'month'
         const title = isMonthPoint ? point.date : param.name
         const label = isMonthPoint ? '月活跃人数' : '活跃人数'
-        return `<div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">${title}</div>
-                <div style="font-size: 13px; color: #0e7490;">${label}：<strong>${param.value}</strong> 人</div>
-                <div style="font-size: 12px; color: #999; margin-top: 4px;">点击查看详细列表</div>`
+        return `<div style="font-size: 14px; font-weight: 600; margin-bottom: 4px; color: ${text};">${title}</div>
+                <div style="font-size: 13px; color: ${brand};">${label}：<strong>${param.value}</strong> 人</div>
+                <div style="font-size: 12px; color: ${textMuted}; margin-top: 4px;">点击查看详细列表</div>`
       },
-      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      borderColor: '#f0f0f0',
+      backgroundColor: surfaceSolid,
+      borderColor: hairline,
       borderWidth: 1,
       padding: [12, 16],
       textStyle: {
-        color: '#333'
-      }
+        color: text,
+        fontFamily
+      },
+      extraCssText:
+        'backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-radius: 12px; box-shadow: 0 12px 32px rgba(39, 52, 105, 0.18);'
     },
     grid: {
       left: '3%',
@@ -428,11 +613,11 @@ const updateChart = (data) => {
       data: dates,
       axisLine: {
         lineStyle: {
-          color: '#e8e8e8'
+          color: hairline
         }
       },
       axisLabel: {
-        color: '#666',
+        color: textMuted,
         fontSize: isMonthly ? 11 : 12,
         fontWeight: 500,
         interval: 'auto',
@@ -443,6 +628,7 @@ const updateChart = (data) => {
         }
       },
       axisTick: {
+        show: false,
         alignWithLabel: true
       },
       boundaryGap: false
@@ -454,12 +640,12 @@ const updateChart = (data) => {
       interval: interval,
       splitLine: {
         lineStyle: {
-          color: '#f0f0f0',
+          color: hairline,
           type: 'dashed'
         }
       },
       axisLabel: {
-        color: '#666',
+        color: textMuted,
         fontSize: 12,
         formatter: (value) => {
           if (value >= 1000) {
@@ -470,7 +656,7 @@ const updateChart = (data) => {
       },
       name: isMonthly ? '月活跃人数' : '活跃人数',
       nameTextStyle: {
-        color: '#999',
+        color: textMuted,
         fontSize: 12
       }
     },
@@ -484,7 +670,10 @@ const updateChart = (data) => {
         symbolSize: data.length > 20 ? 8 : 12,
         lineStyle: {
           width: 3,
-          color: '#0891b2'
+          color: brand,
+          shadowBlur: 10,
+          shadowColor: hexToRgba(brand, 0.24),
+          shadowOffsetY: 5
         },
         areaStyle: {
           color: {
@@ -496,17 +685,17 @@ const updateChart = (data) => {
             colorStops: [
               {
                 offset: 0,
-                color: 'rgba(8, 145, 178, 0.32)'
+                color: hexToRgba(brand, 0.3)
               },
               {
                 offset: 1,
-                color: 'rgba(8, 145, 178, 0.02)'
+                color: hexToRgba(brandDeep, 0.02)
               }
             ]
           }
         },
         itemStyle: {
-          color: '#0891b2',
+          color: brand,
           borderColor: '#fff',
           borderWidth: 2
         },
@@ -514,13 +703,18 @@ const updateChart = (data) => {
           focus: 'series',
           lineStyle: {
             width: 4
+          },
+          itemStyle: {
+            borderWidth: 3,
+            shadowBlur: 12,
+            shadowColor: hexToRgba(brand, 0.45)
           }
         },
         label: {
           show: data.length <= 14 && !(isMonthly && isCompact),
           position: 'top',
           distance: 8,
-          color: '#0e7490',
+          color: brandDeep,
           fontSize: 12,
           fontWeight: 600,
           formatter: (params) => {
@@ -631,6 +825,11 @@ const fetchData = async (isSilent = false, range = activeRange.value, animateOve
     todayActiveCount.value = newTodayActive
     avgActiveCount.value = newAvgActive
     activeTrend.value = trendArray
+    lastUpdated.value = new Date().toLocaleTimeString('zh-CN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    })
 
     if (animateOverview) {
       const animationDuration = isSilent ? 800 : 1500
@@ -707,6 +906,16 @@ watch(activeRange, async (range, previous) => {
   }
 })
 
+watch(
+  appearance,
+  () => {
+    if (chartInstance && activeTrend.value.length > 0) {
+      updateChart(activeTrend.value)
+    }
+  },
+  { deep: true }
+)
+
 const refreshBasicData = async () => {
   if (refreshing.value) return
   await fetchData(true, activeRange.value, true)
@@ -739,94 +948,91 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.dashboard-container {
-  width: 100%;
+.home-page {
   -webkit-tap-highlight-color: transparent;
 }
 
-.trend-card {
-  animation-delay: 0.2s;
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.statistic-item,
-.active-statistic,
-.avg-statistic {
-  animation: slideInItem 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  opacity: 0;
-  transform: translateX(-20px);
+.metric-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.statistic-item:nth-child(1) {
-  animation-delay: 0.15s;
+.metric {
+  min-width: 0;
+  padding: 2px 24px;
+  border-left: 1px solid var(--lg-hairline);
 }
 
-.statistic-item:nth-child(2) {
-  animation-delay: 0.35s;
+.metric:first-child {
+  padding-left: 0;
+  border-left: 0;
 }
 
-.statistic-item:nth-child(3) {
-  animation-delay: 0.55s;
+.metric:last-child {
+  padding-right: 0;
 }
 
-.active-statistic {
-  animation-delay: 0.3s;
+.metric :deep(.ant-statistic-title) {
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--lg-text-muted);
 }
 
-.avg-statistic {
-  animation-delay: 0.5s;
-}
-
-:deep(.ant-statistic-title) {
-  font-size: 16px;
-  color: var(--lg-text-secondary);
-}
-
-:deep(.ant-statistic-content) {
-  font-size: 28px;
+.metric :deep(.ant-statistic-content) {
+  font-size: 32px;
+  line-height: 1.15;
   font-weight: 600;
   color: var(--lg-text);
+  font-variant-numeric: tabular-nums;
 }
 
-.trend-card :deep(.ant-card-head-title) {
-  color: #3b6fd4;
-  font-size: 17px;
+.metric-unit {
+  margin-left: 4px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.trend-card :deep(.ant-card-head-wrapper) {
-  flex-wrap: wrap;
-  row-gap: 8px;
+.metric-unit--mint {
+  color: rgb(var(--lg-aurora-mint));
 }
 
-.range-segmented {
-  background: rgba(255, 255, 255, 0.45);
+.metric-unit--blue {
+  color: rgb(var(--lg-aurora-blue));
 }
 
-.range-segmented :deep(.ant-segmented-item) {
-  color: var(--lg-text-secondary);
-  font-size: 13px;
+.metric-unit--pink {
+  color: rgb(var(--lg-aurora-pink));
 }
 
-.range-segmented :deep(.ant-segmented-item-selected) {
-  background: linear-gradient(135deg, rgba(var(--lg-aurora-violet), 0.22), rgba(var(--lg-aurora-cyan), 0.18));
-  color: #1a73e8;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+.metric-unit--cyan {
+  color: rgb(var(--lg-aurora-cyan));
+}
+
+.metric-unit--violet {
+  color: rgb(var(--lg-aurora-violet));
 }
 
 .chart-container {
   width: 100%;
   height: 280px;
+  margin-top: 22px;
   cursor: pointer;
   position: relative;
   -webkit-tap-highlight-color: transparent;
   pointer-events: auto;
+  touch-action: pan-y;
 }
 
-.chart-container:hover {
-  opacity: 0.95;
-}
-
-.chart-container :deep(canvas) {
-  pointer-events: none !important;
+.chart-hint {
+  margin: 4px 2px 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  text-align: right;
+  color: var(--lg-text-muted);
 }
 
 .player-modal :deep(.ant-modal-header) {
@@ -838,7 +1044,7 @@ onBeforeUnmount(() => {
 .player-modal :deep(.ant-modal-title) {
   font-size: 18px;
   font-weight: 600;
-  color: #3b6fd4;
+  color: var(--lg-text);
 }
 
 .player-modal :deep(.ant-modal-body) {
@@ -900,7 +1106,7 @@ onBeforeUnmount(() => {
 .player-table :deep(.ant-tag-purple) {
   background: rgba(var(--lg-aurora-violet), 0.14);
   border-color: rgba(var(--lg-aurora-violet), 0.42);
-  color: #6b46c1;
+  color: var(--lg-brand);
   font-size: 13px;
   padding: 4px 12px;
   border-radius: 6px;
@@ -942,70 +1148,46 @@ onBeforeUnmount(() => {
 }
 
 .refresh-btn {
-  color: var(--lg-text-muted);
-  transition: all 0.3s ease;
-  border-radius: 50%;
-  width: 36px;
   height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  -webkit-tap-highlight-color: transparent;
+  border-radius: 10px;
 }
 
-.refresh-btn:hover {
-  color: #3b6fd4;
-  background: rgba(var(--lg-aurora-cyan), 0.16);
+.refresh-btn :deep(.anticon) {
+  transition: transform 0.3s ease;
+}
+
+.refresh-btn:not(.ant-btn-loading):hover :deep(.anticon) {
   transform: rotate(180deg);
 }
 
-.refresh-btn:active {
-  transform: rotate(360deg) scale(0.9);
-}
-
-:deep(.ant-card-head) {
-  min-height: 56px;
-}
-
-:deep(.ant-card-extra) {
-  padding: 0;
-}
-
-:deep(.ant-card-head-title) {
-  font-size: 17px;
-  font-weight: 600;
-}
-
 @media (max-width: 768px) {
-  :deep(.ant-statistic-content) {
-    font-size: 24px;
+  .metric-grid,
+  .metric-grid--2 {
+    grid-template-columns: 1fr;
   }
 
-  :deep(.ant-statistic-title) {
-    font-size: 14px;
+  .metric {
+    padding: 12px 0;
+    border-left: 0;
+    border-top: 1px solid var(--lg-hairline);
+  }
+
+  .metric:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .metric:last-child {
+    padding-bottom: 0;
+  }
+
+  .metric :deep(.ant-statistic-content) {
+    font-size: 26px;
   }
 
   .chart-container {
-    height: 200px;
-  }
-
-  .trend-card :deep(.ant-card-head-wrapper) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .trend-card :deep(.ant-card-extra) {
-    margin-inline-start: 0;
-    max-width: 100%;
-  }
-
-  .range-segmented :deep(.ant-segmented-item) {
-    font-size: 12px;
-  }
-
-  .range-segmented :deep(.ant-segmented-item-label) {
-    padding: 0 7px;
+    height: 210px;
+    margin-top: 16px;
   }
 
   .player-modal :deep(.ant-modal) {
@@ -1044,13 +1226,9 @@ onBeforeUnmount(() => {
   }
 
   .refresh-btn {
-    width: 32px;
-    height: 32px;
-  }
-
-  :deep(.ant-card-head) {
-    min-height: 48px;
-    padding: 0 16px;
+    height: 34px;
+    padding: 0 10px;
+    font-size: 12px;
   }
 }
 </style>

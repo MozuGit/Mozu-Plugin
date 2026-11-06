@@ -1,5 +1,5 @@
 <template>
-  <div class="settings-panel-page security-page">
+  <div class="panel-page security-page">
     <div class="panel-heading">
       <div class="panel-heading__main">
         <span class="panel-heading__icon">
@@ -12,7 +12,7 @@
       </div>
     </div>
 
-    <section class="settings-section lg-glass">
+    <section class="panel-section lg-glass">
       <div class="section-head">
         <span class="section-icon">
           <SafetyCertificateOutlined />
@@ -27,8 +27,8 @@
         <a-tag class="account-tag">admin</a-tag>
       </div>
 
-      <div class="settings-rows security-rows">
-        <div class="settings-row">
+      <div class="panel-rows security-rows">
+        <div class="panel-row">
           <div class="row-copy">
             <div class="row-title">访问密码</div>
             <div class="row-desc">修改后其他设备上的登录会话将立即失效。</div>
@@ -43,7 +43,7 @@
           </div>
         </div>
 
-        <div class="settings-row">
+        <div class="panel-row">
           <div class="row-copy">
             <div class="row-title">退出登录</div>
             <div class="row-desc">清除当前浏览器保存的登录令牌。</div>
@@ -57,7 +57,7 @@
       </div>
     </section>
 
-    <section class="settings-section lg-glass">
+    <section class="panel-section lg-glass">
       <div class="section-head">
         <span class="section-icon">
           <KeyOutlined />
@@ -68,8 +68,8 @@
         </div>
       </div>
 
-      <div class="settings-rows security-rows">
-        <div class="settings-row">
+      <div class="panel-rows security-rows">
+        <div class="panel-row">
           <div class="row-copy">
             <div class="row-title">Authenticator</div>
             <div class="row-desc">扫描二维码或手动输入密钥，再用 6 位验证码确认。</div>
@@ -92,7 +92,7 @@
       </p>
     </section>
 
-    <p class="settings-footnote">
+    <p class="page-footnote">
       <SafetyCertificateOutlined />
       密码与双重验证配置会直接写入服务器配置文件，修改后立即生效。
     </p>

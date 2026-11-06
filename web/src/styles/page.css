@@ -1,11 +1,11 @@
-/* ---------- 面板设置：顶部导航与分区 ---------- */
-.settings-page {
+/* ---------- 页面骨架 ---------- */
+.page-shell {
   width: 100%;
   max-width: 1060px;
   margin: 0 auto;
 }
 
-.settings-hero {
+.page-hero {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -13,7 +13,7 @@
   padding: 0 2px;
 }
 
-.settings-hero__icon {
+.page-hero__icon {
   width: 46px;
   height: 46px;
   flex-shrink: 0;
@@ -29,7 +29,7 @@
     0 6px 20px rgba(39, 52, 105, 0.12);
 }
 
-.settings-hero h1 {
+.page-hero h1 {
   margin: 0;
   font-size: 23px;
   line-height: 1.25;
@@ -37,23 +37,29 @@
   color: var(--lg-text);
 }
 
-.settings-hero p {
+.page-hero p {
   margin: 4px 0 0;
   font-size: 13px;
   color: var(--lg-text-muted);
 }
 
-.settings-nav {
+/* 胶囊导航 */
+.page-nav {
   position: sticky;
   top: 16px;
   z-index: 20;
   display: flex;
   gap: 6px;
   width: max-content;
+  max-width: 100%;
   min-width: 320px;
   padding: 6px;
   margin-bottom: 20px;
   border-radius: 16px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
   background: var(--lg-surface-strong);
   background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.12) 100%);
   -webkit-backdrop-filter: blur(var(--lg-blur-strong)) saturate(var(--lg-saturate));
@@ -64,8 +70,12 @@
     0 8px 28px rgba(39, 52, 105, 0.12);
 }
 
-.settings-nav__tab {
-  flex: 1;
+.page-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.page-nav__tab {
+  flex: 1 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -83,12 +93,12 @@
   white-space: nowrap;
 }
 
-.settings-nav__tab:hover {
+.page-nav__tab:hover {
   background: rgba(255, 255, 255, 0.46);
   color: var(--lg-brand);
 }
 
-.settings-nav__tab.active {
+.page-nav__tab.active {
   background: linear-gradient(135deg, rgba(var(--lg-aurora-violet), 0.24), rgba(var(--lg-aurora-cyan), 0.18));
   color: var(--lg-brand);
   box-shadow:
@@ -96,35 +106,34 @@
     0 2px 12px rgba(var(--lg-aurora-violet), 0.2);
 }
 
-.settings-nav__tab:focus-visible {
+.page-nav__tab:focus-visible {
   outline: 2px solid rgba(var(--lg-aurora-violet), 0.55);
   outline-offset: 2px;
 }
 
-.settings-nav__icon {
+.page-nav__icon {
   font-size: 16px;
 }
 
-.settings-content {
+.page-content {
   min-height: 240px;
 }
 
-/* 切换分类时的轻量过渡 */
-.settings-fade-enter-active,
-.settings-fade-leave-active {
+.page-fade-enter-active,
+.page-fade-leave-active {
   transition:
     opacity 0.18s ease,
     transform 0.18s ease;
 }
 
-.settings-fade-enter-from,
-.settings-fade-leave-to {
+.page-fade-enter-from,
+.page-fade-leave-to {
   opacity: 0;
   transform: translateY(6px);
 }
 
-/* ---------- 分类页通用 ---------- */
-.settings-panel-page {
+/* ---------- 分区页通用 ---------- */
+.panel-page {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -173,13 +182,28 @@
   color: var(--lg-text-muted);
 }
 
-.settings-section {
+.panel-heading__actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.panel-meta {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--lg-text-muted);
+  white-space: nowrap;
+}
+
+.panel-section {
   padding: 22px 24px;
   border-radius: var(--lg-radius-lg);
 }
 
 .section-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   gap: 12px;
 }
@@ -227,15 +251,36 @@
   border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
+.section-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.section-note {
+  align-self: center;
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--lg-text-muted);
+  background: rgba(255, 255, 255, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
+}
+
 .section-body {
   margin-top: 18px;
 }
 
-.settings-rows {
+.panel-rows {
   margin-top: 8px;
 }
 
-.settings-row {
+.panel-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -244,7 +289,7 @@
   border-top: 1px solid var(--lg-hairline);
 }
 
-.settings-row:first-child {
+.panel-row:first-child {
   border-top: 0;
 }
 
@@ -312,12 +357,17 @@
   box-shadow: 0 2px 8px rgba(var(--lg-aurora-violet), 0.24);
 }
 
+.pill:disabled {
+  cursor: not-allowed;
+  opacity: 0.56;
+}
+
 .pill:focus-visible {
   outline: 2px solid rgba(var(--lg-aurora-violet), 0.55);
   outline-offset: 2px;
 }
 
-.settings-footnote {
+.page-footnote {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -328,27 +378,27 @@
 }
 
 @media (max-width: 768px) {
-  .settings-hero {
+  .page-hero {
     gap: 12px;
     margin-bottom: 14px;
   }
 
-  .settings-hero__icon {
+  .page-hero__icon {
     width: 42px;
     height: 42px;
     border-radius: 13px;
     font-size: 19px;
   }
 
-  .settings-hero h1 {
+  .page-hero h1 {
     font-size: 20px;
   }
 
-  .settings-hero p {
+  .page-hero p {
     font-size: 12px;
   }
 
-  .settings-nav {
+  .page-nav {
     top: 12px;
     width: 100%;
     min-width: 0;
@@ -356,18 +406,19 @@
     border-radius: 14px;
   }
 
-  .settings-nav__tab {
+  .page-nav__tab {
     min-height: 40px;
     padding: 8px 14px;
     font-size: 13.5px;
   }
 
-  .settings-panel-page {
+  .panel-page {
     gap: 14px;
   }
 
   .panel-heading {
     align-items: flex-start;
+    flex-wrap: wrap;
   }
 
   .panel-heading h2 {
@@ -378,12 +429,18 @@
     font-size: 12px;
   }
 
-  .settings-section {
+  .panel-heading__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .panel-section {
     padding: 18px 16px;
     border-radius: var(--lg-radius);
   }
 
   .section-head {
+    flex-wrap: wrap;
     gap: 10px;
   }
 
@@ -391,7 +448,30 @@
     font-size: 15px;
   }
 
-  .settings-row {
+  .section-note {
+    display: none;
+  }
+
+  .section-actions {
+    width: 100%;
+    margin-left: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .section-actions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .section-actions .pill-group {
+    width: 100%;
+  }
+
+  .section-actions .pill {
+    flex: 1 0 auto;
+  }
+
+  .panel-row {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
@@ -412,7 +492,7 @@
     text-align: center;
   }
 
-  .settings-footnote {
+  .page-footnote {
     padding-bottom: 2px;
   }
 }

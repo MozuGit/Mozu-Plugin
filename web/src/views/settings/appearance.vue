@@ -1,5 +1,5 @@
 <template>
-  <div class="settings-panel-page appearance-page">
+  <div class="panel-page appearance-page">
     <div class="panel-heading">
       <div class="panel-heading__main">
         <span class="panel-heading__icon">
@@ -20,7 +20,7 @@
       </a-popconfirm>
     </div>
 
-    <section class="settings-section lg-glass">
+    <section class="panel-section lg-glass">
       <div class="section-head">
         <span class="section-icon">
           <BgColorsOutlined />
@@ -56,7 +56,7 @@
       </div>
     </section>
 
-    <section class="settings-section lg-glass">
+    <section class="panel-section lg-glass">
       <div class="section-head">
         <span class="section-icon">
           <HighlightOutlined />
@@ -89,7 +89,7 @@
       </div>
     </section>
 
-    <section class="settings-section lg-glass">
+    <section class="panel-section lg-glass">
       <div class="section-head">
         <span class="section-icon">
           <PictureOutlined />
@@ -123,7 +123,7 @@
       </div>
     </section>
 
-    <section class="settings-section lg-glass">
+    <section class="panel-section lg-glass">
       <div class="section-head">
         <span class="section-icon">
           <FontSizeOutlined />
@@ -134,8 +134,8 @@
         </div>
       </div>
 
-      <div class="settings-rows">
-        <div class="settings-row">
+      <div class="panel-rows">
+        <div class="panel-row">
           <div class="row-copy">
             <div class="row-title">界面字体</div>
             <div class="row-desc">默认跟随系统字体，也可以切换为插件内置的 Loli 字体</div>
@@ -156,7 +156,7 @@
           </div>
         </div>
 
-        <div class="settings-row">
+        <div class="panel-row">
           <div class="row-copy">
             <div class="row-title">界面圆角</div>
             <div class="row-desc">统一调整卡片、弹窗与控件的圆角幅度</div>
@@ -177,7 +177,7 @@
           </div>
         </div>
 
-        <div class="settings-row">
+        <div class="panel-row">
           <div class="row-copy">
             <div class="row-title">玻璃质感</div>
             <div class="row-desc">通透更轻盈，柔雾更朦胧，实色则更容易阅读</div>
@@ -198,7 +198,7 @@
           </div>
         </div>
 
-        <div class="settings-row">
+        <div class="panel-row">
           <div class="row-copy">
             <div class="row-title">界面动效</div>
             <div class="row-desc">减弱或关闭光晕、悬浮与入场动画，适合偏好安静界面的用户</div>
@@ -221,7 +221,7 @@
       </div>
     </section>
 
-    <p class="settings-footnote">
+    <p class="page-footnote">
       <InfoCircleOutlined />
       外观偏好保存在当前浏览器，切换设备后需要重新调整
     </p>
@@ -262,19 +262,6 @@ const handleReset = () => {
 .reset-btn {
   height: 36px;
   border-radius: 10px;
-}
-
-.section-note {
-  align-self: center;
-  flex-shrink: 0;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  line-height: 1.4;
-  color: var(--lg-text-muted);
-  background: rgba(255, 255, 255, 0.38);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  white-space: nowrap;
 }
 
 /* 主题配色 */
@@ -510,10 +497,6 @@ const handleReset = () => {
     height: 34px;
     padding: 0 10px;
     font-size: 12px;
-  }
-
-  .section-note {
-    display: none;
   }
 
   .preset-grid {

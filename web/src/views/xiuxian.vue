@@ -1,72 +1,37 @@
 <template>
-  <div class="dashboard-container">
-    <div class="quick-nav lg-glass lg-glass__specular">
-      <a-space :size="12" class="nav-scroll-container">
-        <a-button
-          :type="currentPage === 'home' ? 'primary' : 'default'"
-          :class="{ active: currentPage === 'home' }"
-          @click="navigateTo('home')"
-        >
-          <template #icon>
-            <HomeOutlined />
-          </template>
-          首页
-        </a-button>
-        <a-button
-          :type="currentPage === 'config' ? 'primary' : 'default'"
-          :class="{ active: currentPage === 'config' }"
-          @click="navigateTo('config')"
-        >
-          <template #icon>
-            <setting-outlined />
-          </template>
-          修仙配置
-        </a-button>
-        <a-button
-          :type="currentPage === 'cdk' ? 'primary' : 'default'"
-          :class="{ active: currentPage === 'cdk' }"
-          @click="navigateTo('cdk')"
-        >
-          <template #icon>
-            <gift-outlined />
-          </template>
-          兑换码操作
-        </a-button>
-        <a-button
-          :type="currentPage === 'player' ? 'primary' : 'default'"
-          :class="{ active: currentPage === 'player' }"
-          @click="navigateTo('player')"
-        >
-          <template #icon>
-            <team-outlined />
-          </template>
-          玩家管理
-        </a-button>
-        <a-button
-          :type="currentPage === 'sect' ? 'primary' : 'default'"
-          :class="{ active: currentPage === 'sect' }"
-          @click="navigateTo('sect')"
-        >
-          <template #icon>
-            <CompassOutlined />
-          </template>
-          宗门管理
-        </a-button>
-        <a-button
-          :type="currentPage === 'backup' ? 'primary' : 'default'"
-          :class="{ active: currentPage === 'backup' }"
-          @click="navigateTo('backup')"
-        >
-          <template #icon>
-            <cloud-server-outlined />
-          </template>
-          修仙备份
-        </a-button>
-      </a-space>
-    </div>
+  <div class="page-shell">
+    <header class="page-hero">
+      <span class="page-hero__icon">
+        <AppstoreOutlined />
+      </span>
+      <div>
+        <h1>魔族陌修仙</h1>
+        <p>查看修仙数据，管理玩家、宗门与兑换码</p>
+      </div>
+    </header>
 
-    <div class="content-area">
-      <router-view />
+    <nav class="page-nav" role="tablist" aria-label="修仙功能">
+      <button
+        v-for="tab in tabs"
+        :key="tab.key"
+        type="button"
+        class="page-nav__tab"
+        :class="{ active: activeKey === tab.key }"
+        role="tab"
+        :aria-selected="activeKey === tab.key"
+        @click="navigate(tab)"
+      >
+        <component :is="tab.icon" class="page-nav__icon" />
+        <span>{{ tab.label }}</span>
+      </button>
+    </nav>
+
+    <div class="page-content">
+      <router-view v-slot="{ Component }">
+        <transition name="page-fade" mode="out-in">
+          <component :is="Component" :key="route.name" />
+        </transition>
+      </router-view>
     </div>
   </div>
 </template>
@@ -75,6 +40,7 @@
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
+  AppstoreOutlined,
   HomeOutlined,
   CloudServerOutlined,
   SettingOutlined,
@@ -86,132 +52,27 @@ import {
 const router = useRouter()
 const route = useRoute()
 
-const currentPage = computed(() => {
+const tabs = [
+  { key: 'home', label: '首页', path: '/xiuxian', icon: HomeOutlined },
+  { key: 'config', label: '修仙配置', path: '/xiuxian/config', icon: SettingOutlined },
+  { key: 'cdk', label: '兑换码操作', path: '/xiuxian/cdk', icon: GiftOutlined },
+  { key: 'player', label: '玩家管理', path: '/xiuxian/player', icon: TeamOutlined },
+  { key: 'sect', label: '宗门管理', path: '/xiuxian/sect', icon: CompassOutlined },
+  { key: 'backup', label: '修仙备份', path: '/xiuxian/backup', icon: CloudServerOutlined }
+]
+
+const activeKey = computed(() => {
   const path = route.path
   if (path === '/xiuxian' || path === '/xiuxian/') return 'home'
-  if (path.includes('/xiuxian/backup')) return 'backup'
-  if (path.includes('/xiuxian/config')) return 'config'
-  if (path.includes('/xiuxian/cdk')) return 'cdk'
-  if (path.includes('/xiuxian/player')) return 'player'
-  if (path.includes('/xiuxian/sect')) return 'sect'
-  return 'home'
+  const current = tabs.find((tab) => tab.key !== 'home' && path.startsWith(tab.path))
+  return current?.key || 'home'
 })
 
-const navigateTo = (page) => {
-  let targetPath = '/xiuxian'
-  switch (page) {
-    case 'home':
-      targetPath = '/xiuxian'
-      break
-    case 'backup':
-      targetPath = '/xiuxian/backup'
-      break
-    case 'config':
-      targetPath = '/xiuxian/config'
-      break
-    case 'cdk':
-      targetPath = '/xiuxian/cdk'
-      break
-    case 'player':
-      targetPath = '/xiuxian/player'
-      break
-    case 'sect':
-      targetPath = '/xiuxian/sect'
-      break
-  }
-
-  if (route.path !== targetPath) {
-    router.push(targetPath)
+const navigate = (tab) => {
+  if (route.path !== tab.path) {
+    router.push(tab.path).then(() => {
+      window.scrollTo({ top: 0, behavior: 'auto' })
+    })
   }
 }
 </script>
-
-<style scoped>
-.dashboard-container {
-  width: 100%;
-}
-
-.quick-nav {
-  margin-bottom: 24px;
-  padding: 6px 12px;
-  border-radius: var(--lg-radius);
-  overflow: hidden;
-  animation: slideInFromLeft 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-}
-
-.nav-scroll-container {
-  display: flex;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding: 8px 4px;
-}
-
-.nav-scroll-container::-webkit-scrollbar {
-  display: none;
-}
-
-.nav-scroll-container > * {
-  flex-shrink: 0;
-}
-
-.quick-nav .ant-btn {
-  height: 40px;
-  border-radius: var(--lg-radius-sm);
-  font-size: 14px;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0;
-  white-space: nowrap;
-  min-width: fit-content;
-}
-
-.quick-nav .ant-btn:not(.ant-btn-primary) {
-  background: rgba(255, 255, 255, 0.42);
-  border-color: rgba(255, 255, 255, 0.6);
-  color: var(--lg-text-secondary);
-}
-
-.quick-nav .ant-btn:not(.ant-btn-primary):hover {
-  background: rgba(var(--lg-aurora-cyan), 0.18);
-  border-color: rgba(var(--lg-aurora-cyan), 0.55);
-  color: #1a73e8;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 12px rgba(var(--lg-aurora-cyan), 0.28);
-}
-
-.quick-nav .ant-btn.active {
-  background: linear-gradient(135deg, rgba(var(--lg-aurora-violet), 0.22), rgba(var(--lg-aurora-cyan), 0.18));
-  border-color: rgba(var(--lg-aurora-violet), 0.55);
-  color: var(--lg-brand);
-  font-weight: 600;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 2px 12px rgba(var(--lg-aurora-violet), 0.26);
-}
-
-.content-area {
-  width: 100%;
-}
-
-@media (max-width: 768px) {
-  .quick-nav {
-    padding: 4px 8px;
-    margin-bottom: 16px;
-  }
-
-  .quick-nav .ant-btn {
-    height: 36px;
-    font-size: 13px;
-    padding: 4px 12px;
-  }
-
-  .nav-scroll-container {
-    gap: 8px !important;
-  }
-}
-</style>
