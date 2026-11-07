@@ -101,7 +101,21 @@
           </div>
         </div>
 
-        <div ref="chartRef" class="chart-container" @click="handleContainerClick"></div>
+        <div class="chart-layout">
+          <div v-if="chartScrollable" class="chart-yaxis" aria-hidden="true">
+            <span v-for="tick in yAxisTicks" :key="tick.value" :style="{ top: `${tick.top}px` }">
+              {{ tick.label }}
+            </span>
+          </div>
+          <div ref="chartScrollRef" class="chart-scroll">
+            <div
+              ref="chartRef"
+              class="chart-container"
+              @pointerdown="handleChartPointerDown"
+              @click="handleContainerClick"
+            ></div>
+          </div>
+        </div>
         <p v-if="chartScrollable" class="chart-hint">{{ chartHint }}</p>
       </div>
     </section>
@@ -186,14 +200,17 @@ const lastUpdated = ref('')
 const chartScrollable = ref(false)
 const chartHint = ref('')
 const chartRef = ref(null)
+const chartScrollRef = ref(null)
+const yAxisTicks = ref([])
 let chartInstance = null
 let requestSeq = 0
 let resizeTimer = null
-let touchStartPoint = null
-let panState = null
-let lastTouchAt = 0
+let lastScrollAt = 0
+let tapStartPoint = null
+let tooltipSuppressed = false
+let tooltipTimer = null
 
-const MOBILE_VISIBLE_POINTS = 7
+const MOBILE_POINT_WIDTH = 40
 
 const rangeOptions = [
   { label: '近7天', value: 7 },
@@ -360,8 +377,61 @@ const showPlayerList = (index) => {
   fetchActivePlayers(point)
 }
 
+const handleChartPointerDown = (event) => {
+  tapStartPoint = {
+    x: event.clientX,
+    y: event.clientY,
+    scrollLeft: chartScrollRef.value?.scrollLeft ?? 0
+  }
+}
+
+const handleChartScroll = () => {
+  lastScrollAt = Date.now()
+  syncChartHint()
+  suppressChartTooltip()
+}
+
+const suppressChartTooltip = () => {
+  if (!chartInstance || !chartScrollable.value) return
+
+  if (!tooltipSuppressed) {
+    tooltipSuppressed = true
+    chartInstance.dispatchAction({ type: 'hideTip' })
+    chartInstance.setOption({ tooltip: { show: false } })
+  }
+
+  clearTimeout(tooltipTimer)
+  tooltipTimer = setTimeout(() => {
+    tooltipSuppressed = false
+    if (chartInstance) {
+      chartInstance.setOption({ tooltip: { show: true } })
+    }
+  }, 180)
+}
+
+const buildChartHint = (scrollLeft, scrollWidth, clientWidth) => {
+  const maxLeft = scrollWidth - clientWidth
+  if (maxLeft <= 2) return ''
+  if (scrollLeft >= maxLeft - 2) return '向右滑动图表 查看更早数据'
+  if (scrollLeft <= 2) return '向左滑动图表 查看后续数据'
+  return '左右滑动图表 查看完整趋势'
+}
+
+const syncChartHint = () => {
+  const el = chartScrollRef.value
+  chartHint.value = el ? buildChartHint(el.scrollLeft, el.scrollWidth, el.clientWidth) : ''
+}
+
 const handleContainerClick = (event) => {
-  if (Date.now() - lastTouchAt < 500) return
+  if (Date.now() - lastScrollAt < 300) return
+
+  if (tapStartPoint) {
+    const moved = Math.hypot(event.clientX - tapStartPoint.x, event.clientY - tapStartPoint.y)
+    const scrolled = Math.abs((chartScrollRef.value?.scrollLeft ?? 0) - tapStartPoint.scrollLeft)
+    tapStartPoint = null
+    if (moved > 8 || scrolled > 1) return
+  }
+
   if (!chartInstance || !chartRef.value) return
 
   const rect = chartRef.value.getBoundingClientRect()
@@ -376,131 +446,6 @@ const handleContainerClick = (event) => {
       showPlayerList(xIndex)
     }
   }
-}
-
-const handleContainerTouchStart = (event) => {
-  panState = null
-  if (event.touches.length !== 1) {
-    touchStartPoint = null
-    return
-  }
-
-  const touch = event.touches[0]
-  touchStartPoint = { x: touch.clientX, y: touch.clientY }
-
-  if (!chartScrollable.value || !chartInstance) return
-
-  const total = activeTrend.value.length
-  const visible = Math.min(total, MOBILE_VISIBLE_POINTS)
-  const dataZoom = chartInstance.getOption().dataZoom?.[0]
-  const rawStart = typeof dataZoom?.startValue === 'number' ? dataZoom.startValue : total - visible
-  const currentStart = Math.min(Math.max(rawStart, 0), Math.max(0, total - visible))
-
-  panState = {
-    startX: touch.clientX,
-    startY: touch.clientY,
-    windowStart: currentStart,
-    windowEnd: currentStart + visible - 1,
-    nextStart: currentStart,
-    panning: false
-  }
-}
-
-const handleContainerTouchMove = (event) => {
-  if (!panState || !chartInstance || event.touches.length !== 1) return
-
-  const touch = event.touches[0]
-  const dx = touch.clientX - panState.startX
-  const dy = touch.clientY - panState.startY
-
-  if (!panState.panning) {
-    if (Math.abs(dx) < 10 || Math.abs(dx) <= Math.abs(dy) * 1.1) return
-    panState.panning = true
-  }
-
-  if (event.cancelable) event.preventDefault()
-
-  const total = activeTrend.value.length
-  const visible = panState.windowEnd - panState.windowStart + 1
-  let plotWidth = chartInstance.getWidth() * 0.93
-
-  try {
-    const rect = chartInstance.getModel().getComponent('grid').coordinateSystem.getRect()
-    if (rect?.width) plotWidth = rect.width
-  } catch {}
-
-  const pointsPerPixel = visible / Math.max(1, plotWidth)
-  const nextStart = Math.min(
-    Math.max(Math.round(panState.windowStart - dx * pointsPerPixel), 0),
-    Math.max(0, total - visible)
-  )
-
-  if (nextStart === panState.nextStart) return
-  panState.nextStart = nextStart
-  chartInstance.dispatchAction({
-    type: 'dataZoom',
-    dataZoomIndex: 0,
-    startValue: nextStart,
-    endValue: nextStart + visible - 1
-  })
-  chartHint.value = buildChartHint(nextStart, total, visible)
-}
-
-const handleContainerTouch = (event) => {
-  if (!chartInstance || !chartRef.value) return
-
-  const touch = event.changedTouches[0]
-  if (!touch) return
-
-  lastTouchAt = Date.now()
-
-  const start = touchStartPoint
-  const wasPanning = panState?.panning
-  touchStartPoint = null
-  panState = null
-
-  if (wasPanning || !start) return
-  if (Math.hypot(touch.clientX - start.x, touch.clientY - start.y) > 8) return
-
-  const rect = chartRef.value.getBoundingClientRect()
-  const x = touch.clientX - rect.left
-  const y = touch.clientY - rect.top
-
-  setTimeout(() => {
-    if (!chartInstance) return
-
-    const pointInGrid = chartInstance.convertFromPixel('grid', [x, y])
-
-    if (pointInGrid && pointInGrid[0] !== undefined && pointInGrid[0] !== null) {
-      const xIndex = Math.round(pointInGrid[0])
-      if (xIndex >= 0 && xIndex < activeTrend.value.length) {
-        showPlayerList(xIndex)
-      }
-    }
-  }, 50)
-}
-
-const handleContainerTouchCancel = () => {
-  touchStartPoint = null
-  panState = null
-}
-
-const bindChartTouch = () => {
-  const el = chartRef.value
-  if (!el) return
-  el.addEventListener('touchstart', handleContainerTouchStart, { capture: true, passive: true })
-  el.addEventListener('touchmove', handleContainerTouchMove, { capture: true, passive: false })
-  el.addEventListener('touchend', handleContainerTouch, { capture: true, passive: true })
-  el.addEventListener('touchcancel', handleContainerTouchCancel, { capture: true, passive: true })
-}
-
-const unbindChartTouch = () => {
-  const el = chartRef.value
-  if (!el) return
-  el.removeEventListener('touchstart', handleContainerTouchStart, true)
-  el.removeEventListener('touchmove', handleContainerTouchMove, true)
-  el.removeEventListener('touchend', handleContainerTouch, true)
-  el.removeEventListener('touchcancel', handleContainerTouchCancel, true)
 }
 
 const readCssVar = (name, fallback) => {
@@ -529,12 +474,6 @@ const isPanCapable = () => {
   return window.innerWidth <= 1024 && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
 }
 
-const buildChartHint = (start, total, visible) => {
-  if (start <= 0) return '向左滑动图表 查看最新数据'
-  if (start + visible >= total) return '向右滑动图表 查看更早数据'
-  return '左右滑动图表 查看完整趋势'
-}
-
 const updateChart = (data) => {
   if (!chartInstance) {
     initChart()
@@ -542,7 +481,8 @@ const updateChart = (data) => {
 
   if (!chartInstance) return
 
-  panState = null
+  clearTimeout(tooltipTimer)
+  tooltipSuppressed = false
 
   const brand = readCssVar('--lg-brand', '#667eea')
   const brandDeep = readCssVar('--lg-brand-deep', '#764ba2')
@@ -554,14 +494,21 @@ const updateChart = (data) => {
 
   const isMonthly = activeRange.value === 365
   const isCompact = window.innerWidth <= 768
-  const panCapable = isPanCapable()
+  const touchLayout = isPanCapable()
+  const chartEl = chartRef.value
+  const scrollEl = chartScrollRef.value
+  const availableWidth = scrollEl?.clientWidth || chartEl?.clientWidth || 0
+  const naturalWidth = data.length * MOBILE_POINT_WIDTH
+  const canScroll = touchLayout && availableWidth > 0 && naturalWidth > availableWidth + 2
+  chartScrollable.value = canScroll
+  chartHint.value = canScroll ? '向右滑动图表 查看更早数据' : ''
+
+  if (chartEl) {
+    chartEl.style.width = canScroll ? `${naturalWidth}px` : '100%'
+  }
+
   const dates = data.map((item) => item.label || item.date)
   const values = data.map((item) => item.active)
-  const visiblePoints = panCapable ? Math.min(data.length, MOBILE_VISIBLE_POINTS) : data.length
-  const canPan = panCapable && data.length > visiblePoints
-  const initialStart = Math.max(0, data.length - visiblePoints)
-  chartScrollable.value = canPan
-  chartHint.value = canPan ? buildChartHint(initialStart, data.length, visiblePoints) : ''
   const maxValue = Math.max(0, ...values)
   let yMax
   if (maxValue <= 10) {
@@ -592,26 +539,29 @@ const updateChart = (data) => {
     interval = Math.ceil(yMax / 10)
   }
 
+  const chartHeight = chartEl?.clientHeight || (isCompact ? 210 : 280)
+  const axisTop = 18
+  const axisBottom = 34
+  const plotHeight = Math.max(1, chartHeight - axisTop - axisBottom)
+  const ticks = []
+
+  if (canScroll) {
+    for (let value = 0; value <= yMax; value += interval) {
+      ticks.push({
+        value,
+        label: value >= 1000 ? `${(value / 1000).toFixed(1)}k` : `${Math.round(value)}`,
+        top: axisTop + (1 - value / yMax) * plotHeight
+      })
+    }
+  }
+
+  yAxisTicks.value = ticks
+
   const option = {
     animation: true,
     textStyle: {
       fontFamily
     },
-    dataZoom: canPan
-      ? [
-          {
-            type: 'inside',
-            xAxisIndex: 0,
-            startValue: initialStart,
-            endValue: data.length - 1,
-            zoomOnPinch: false,
-            zoomOnMouseWheel: false,
-            moveOnMouseWheel: false,
-            moveOnMouseMove: false,
-            throttle: 50
-          }
-        ]
-      : [],
     tooltip: {
       trigger: 'axis',
       confine: true,
@@ -636,13 +586,9 @@ const updateChart = (data) => {
       extraCssText:
         'backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-radius: 12px; box-shadow: 0 12px 32px rgba(39, 52, 105, 0.18);'
     },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '8%',
-      top: '15%',
-      containLabel: true
-    },
+    grid: canScroll
+      ? { left: 18, right: 18, top: axisTop, bottom: axisBottom }
+      : { left: '3%', right: '4%', bottom: '8%', top: '15%', containLabel: true },
     xAxis: {
       type: 'category',
       data: dates,
@@ -673,6 +619,12 @@ const updateChart = (data) => {
       min: yMin,
       max: yMax,
       interval: interval,
+      axisLine: {
+        show: !canScroll
+      },
+      axisTick: {
+        show: !canScroll
+      },
       splitLine: {
         lineStyle: {
           color: hairline,
@@ -680,6 +632,7 @@ const updateChart = (data) => {
         }
       },
       axisLabel: {
+        show: !canScroll,
         color: textMuted,
         fontSize: 12,
         formatter: (value) => {
@@ -689,7 +642,7 @@ const updateChart = (data) => {
           return Math.round(value)
         }
       },
-      name: isMonthly ? '月活跃人数' : '活跃人数',
+      name: canScroll ? '' : isMonthly ? '月活跃人数' : '活跃人数',
       nameTextStyle: {
         color: textMuted,
         fontSize: 12
@@ -764,6 +717,17 @@ const updateChart = (data) => {
 
   chartInstance.setOption(option, true)
   chartInstance.resize()
+
+  nextTick(() => {
+    const el = chartScrollRef.value
+    if (canScroll && el) {
+      const maxLeft = el.scrollWidth - el.clientWidth
+      if (el.scrollLeft <= 2 || el.scrollLeft >= maxLeft - 2) {
+        el.scrollLeft = maxLeft
+      }
+    }
+    syncChartHint()
+  })
 }
 
 const normalizeTrend = (payload) => {
@@ -968,13 +932,14 @@ const handleResize = () => {
 }
 
 onMounted(() => {
-  bindChartTouch()
+  chartScrollRef.value?.addEventListener('scroll', handleChartScroll, { passive: true })
   fetchData()
   window.addEventListener('resize', handleResize)
 })
 
 onBeforeUnmount(() => {
-  unbindChartTouch()
+  chartScrollRef.value?.removeEventListener('scroll', handleChartScroll)
+  clearTimeout(tooltipTimer)
   window.removeEventListener('resize', handleResize)
   clearTimeout(resizeTimer)
   if (chartInstance) {
@@ -1053,15 +1018,51 @@ onBeforeUnmount(() => {
   color: rgb(var(--lg-aurora-violet));
 }
 
+.chart-layout {
+  display: flex;
+  align-items: stretch;
+  margin-top: 22px;
+}
+
+.chart-scroll {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.chart-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.chart-yaxis {
+  position: relative;
+  flex: 0 0 38px;
+  width: 38px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.chart-yaxis span {
+  position: absolute;
+  right: 6px;
+  transform: translateY(-50%);
+  font-size: 11px;
+  line-height: 1;
+  color: var(--lg-text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .chart-container {
   width: 100%;
   height: 280px;
-  margin-top: 22px;
   cursor: pointer;
   position: relative;
   -webkit-tap-highlight-color: transparent;
-  pointer-events: auto;
-  touch-action: pan-y;
 }
 
 .chart-hint {
@@ -1222,9 +1223,12 @@ onBeforeUnmount(() => {
     font-size: 26px;
   }
 
+  .chart-layout {
+    margin-top: 16px;
+  }
+
   .chart-container {
     height: 210px;
-    margin-top: 16px;
   }
 
   .player-modal :deep(.ant-modal) {
