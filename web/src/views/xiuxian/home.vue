@@ -65,7 +65,7 @@
         </span>
         <div class="section-head__copy">
           <h3>修仙活跃分析</h3>
-          <p>点击图表节点，查看对应日期的活跃玩家列表</p>
+          <p>点击图表节点 查看对应日期的活跃玩家列表</p>
         </div>
         <div class="section-actions">
           <div class="pill-group" role="group" aria-label="统计范围">
@@ -101,15 +101,8 @@
           </div>
         </div>
 
-        <div
-          ref="chartRef"
-          class="chart-container"
-          @click="handleContainerClick"
-          @touchstart="handleContainerTouchStart"
-          @touchmove="handleContainerTouchMove"
-          @touchend="handleContainerTouch"
-        ></div>
-        <p v-if="chartScrollable" class="chart-hint">左右滑动图表，查看更早的数据</p>
+        <div ref="chartRef" class="chart-container" @click="handleContainerClick"></div>
+        <p v-if="chartScrollable" class="chart-hint">{{ chartHint }}</p>
       </div>
     </section>
 
@@ -191,6 +184,7 @@ const loading = ref(false)
 const refreshing = ref(false)
 const lastUpdated = ref('')
 const chartScrollable = ref(false)
+const chartHint = ref('')
 const chartRef = ref(null)
 let chartInstance = null
 let requestSeq = 0
@@ -449,6 +443,7 @@ const handleContainerTouchMove = (event) => {
     startValue: nextStart,
     endValue: nextStart + visible - 1
   })
+  chartHint.value = buildChartHint(nextStart, total, visible)
 }
 
 const handleContainerTouch = (event) => {
@@ -485,6 +480,29 @@ const handleContainerTouch = (event) => {
   }, 50)
 }
 
+const handleContainerTouchCancel = () => {
+  touchStartPoint = null
+  panState = null
+}
+
+const bindChartTouch = () => {
+  const el = chartRef.value
+  if (!el) return
+  el.addEventListener('touchstart', handleContainerTouchStart, { capture: true, passive: true })
+  el.addEventListener('touchmove', handleContainerTouchMove, { capture: true, passive: false })
+  el.addEventListener('touchend', handleContainerTouch, { capture: true, passive: true })
+  el.addEventListener('touchcancel', handleContainerTouchCancel, { capture: true, passive: true })
+}
+
+const unbindChartTouch = () => {
+  const el = chartRef.value
+  if (!el) return
+  el.removeEventListener('touchstart', handleContainerTouchStart, true)
+  el.removeEventListener('touchmove', handleContainerTouchMove, true)
+  el.removeEventListener('touchend', handleContainerTouch, true)
+  el.removeEventListener('touchcancel', handleContainerTouchCancel, true)
+}
+
 const readCssVar = (name, fallback) => {
   if (typeof window === 'undefined') return fallback
   const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
@@ -501,6 +519,20 @@ const hexToRgba = (color, alpha) => {
   const g = (value >> 8) & 255
   const b = value & 255
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+const isPanCapable = () => {
+  if (typeof window === 'undefined') return false
+  if (window.matchMedia?.('(pointer: coarse)').matches || window.matchMedia?.('(hover: none)').matches) {
+    return true
+  }
+  return window.innerWidth <= 1024 && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+}
+
+const buildChartHint = (start, total, visible) => {
+  if (start <= 0) return '向左滑动图表 查看最新数据'
+  if (start + visible >= total) return '向右滑动图表 查看更早数据'
+  return '左右滑动图表 查看完整趋势'
 }
 
 const updateChart = (data) => {
@@ -522,11 +554,14 @@ const updateChart = (data) => {
 
   const isMonthly = activeRange.value === 365
   const isCompact = window.innerWidth <= 768
+  const panCapable = isPanCapable()
   const dates = data.map((item) => item.label || item.date)
   const values = data.map((item) => item.active)
-  const visiblePoints = isCompact ? Math.min(data.length, MOBILE_VISIBLE_POINTS) : data.length
-  const canPan = isCompact && data.length > visiblePoints
+  const visiblePoints = panCapable ? Math.min(data.length, MOBILE_VISIBLE_POINTS) : data.length
+  const canPan = panCapable && data.length > visiblePoints
+  const initialStart = Math.max(0, data.length - visiblePoints)
   chartScrollable.value = canPan
+  chartHint.value = canPan ? buildChartHint(initialStart, data.length, visiblePoints) : ''
   const maxValue = Math.max(0, ...values)
   let yMax
   if (maxValue <= 10) {
@@ -567,7 +602,7 @@ const updateChart = (data) => {
           {
             type: 'inside',
             xAxisIndex: 0,
-            startValue: Math.max(0, data.length - visiblePoints),
+            startValue: initialStart,
             endValue: data.length - 1,
             zoomOnPinch: false,
             zoomOnMouseWheel: false,
@@ -877,7 +912,7 @@ const fetchData = async (isSilent = false, range = activeRange.value, animateOve
     return true
   } catch (error) {
     if (isSilent) {
-      message.error('刷新失败，请重试')
+      message.error('刷新失败 请重试')
     } else {
       message.error('获取数据失败:', error)
     }
@@ -933,11 +968,13 @@ const handleResize = () => {
 }
 
 onMounted(() => {
+  bindChartTouch()
   fetchData()
   window.addEventListener('resize', handleResize)
 })
 
 onBeforeUnmount(() => {
+  unbindChartTouch()
   window.removeEventListener('resize', handleResize)
   clearTimeout(resizeTimer)
   if (chartInstance) {
