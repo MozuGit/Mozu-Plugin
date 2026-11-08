@@ -18,8 +18,35 @@ class Cfg {
   constructor() {
     this.configCache = {}
     this.watcher = {}
-    this.dirCfgNames = ['config', 'xiuxian', 'groupAdmin', 'example', 'panel']
     this.initCfg()
+  }
+
+  /** 配置根目录 */
+  get cfgRoot() {
+    return path.join(Version.Plugin_Path, 'config')
+  }
+
+  /** 自动获取全部配置文件夹 */
+  get dirCfgNames() {
+    const root = this.cfgRoot
+    if (!fs.existsSync(root)) {
+      return []
+    }
+    return fs
+      .readdirSync(root, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && !entry.name.startsWith('.'))
+      .map((entry) => entry.name)
+      .filter((name) => this.isDirectory(path.join(root, name, 'default')) || this.isDirectory(path.join(root, name, 'config')))
+      .sort()
+  }
+
+  /** 判断路径是否为文件夹 */
+  isDirectory(dirPath) {
+    try {
+      return fs.statSync(dirPath).isDirectory()
+    } catch {
+      return false
+    }
   }
 
   /** 初始化配置 */
