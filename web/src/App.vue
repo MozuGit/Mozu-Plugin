@@ -82,11 +82,22 @@ import { useRouter, useRoute } from 'vue-router'
 import { AppstoreOutlined, SettingOutlined, MenuOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
 import { useGlassPointer } from './composables/useGlassPointer'
 import { useAppearance } from './composables/useAppearance'
+import { useMobile } from './composables/useMobile'
 
 const router = useRouter()
 const route = useRoute()
 
 const { accentColor, fontStack, radiusToken } = useAppearance()
+const { isMobile } = useMobile()
+const collapsed = ref(false)
+
+watch(
+  isMobile,
+  (value) => {
+    collapsed.value = value
+  },
+  { immediate: true }
+)
 
 // 全局字体与强调色跟随外观设置
 const themeConfig = computed(() => ({
@@ -99,30 +110,19 @@ const themeConfig = computed(() => ({
   }
 }))
 
-const isMobile = ref(false)
-const checkMobile = () => {
-  isMobile.value = window.innerWidth <= 768
-  collapsed.value = isMobile.value
-}
-
 let glassPointer = null
 
 onMounted(() => {
-  checkMobile()
-  window.addEventListener('resize', checkMobile)
-
   glassPointer = useGlassPointer()
 
   document.body.classList.add('lg-body')
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', checkMobile)
   glassPointer?.destroy()
   document.body.classList.remove('lg-body')
 })
 
-const collapsed = ref(isMobile.value)
 const selectedKeys = ref([])
 
 const validRouteNames = [

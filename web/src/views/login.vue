@@ -154,6 +154,7 @@ import { reactive, ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { LockOutlined, SafetyOutlined, SafetyCertificateOutlined, ArrowLeftOutlined } from '@ant-design/icons-vue'
+import { requestRaw } from '../api/http'
 
 const router = useRouter()
 
@@ -221,11 +222,10 @@ function openResetPanel() {
 
 async function fetchTTL() {
   try {
-    const res = await fetch('/api/login?action=get_code_ttl', {
+    const data = await requestRaw('/api/login?action=get_code_ttl', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
+      auth: false
     })
-    const data = await res.json()
     if (data.success) {
       resetTotpRequired.value = data.totpRequired === true
       if (data.ttl > 0) {
@@ -261,12 +261,11 @@ async function handleLogin() {
       }
       payload.token = form.token
     }
-    const res = await fetch('/api/login', {
+    const data = await requestRaw('/api/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      auth: false,
+      body: payload
     })
-    const data = await res.json()
 
     if (data.success) {
       localStorage.setItem('token', data.data.token)
@@ -295,11 +294,10 @@ async function handleGetCode() {
   if (countdown.value > 0 || sendingCode.value) return
   sendingCode.value = true
   try {
-    const res = await fetch('/api/login?action=get_code', {
+    const data = await requestRaw('/api/login?action=get_code', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
+      auth: false
     })
-    const data = await res.json()
     if (data.success) {
       message.success('验证码已发送')
       await fetchTTL()
@@ -335,16 +333,15 @@ async function handleResetPassword() {
   resetting.value = true
   try {
     const hashedPassword = await hashSHA256(resetForm.newPassword)
-    const res = await fetch('/api/login?action=reset_password', {
+    const data = await requestRaw('/api/login?action=reset_password', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+      auth: false,
+      body: {
         code: resetForm.code,
         newPassword: hashedPassword,
         token: resetForm.token
-      })
+      }
     })
-    const data = await res.json()
     if (data.success) {
       message.success('密码重置成功，请重新登录')
       closeResetPanel()

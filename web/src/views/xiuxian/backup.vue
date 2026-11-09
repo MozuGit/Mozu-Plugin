@@ -123,81 +123,18 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
 import { DeleteOutlined, SyncOutlined, CloudUploadOutlined, HistoryOutlined } from '@ant-design/icons-vue'
+import { request } from '../../api/http'
+import { useAuthGuard } from '../../composables/useAuthGuard'
+import { useVisibilityRefresh } from '../../composables/useVisibilityRefresh'
+import { useSessionCache } from '../../composables/useSessionCache'
+import { createTableLocale } from '../../constants/table'
 
-const router = useRouter()
-
-const CACHE_KEY = 'xiuxian_backup_list_cache'
-const CACHE_TIME_KEY = 'xiuxian_backup_list_cache_time'
-const CACHE_DURATION = 5 * 60 * 1000
-
-const tableLocale = {
-  triggerAsc: '',
-  triggerDesc: '',
-  cancelSort: '取消排序'
-}
-
-const apiRequest = async (url, options = {}) => {
-  const token = localStorage.getItem('token')
-  const headers = {
-    'Content-Type': 'application/json'
-  }
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`
-  }
-  const config = {
-    ...options,
-    headers: {
-      ...headers,
-      ...options.headers
-    }
-  }
-  const res = await fetch(url, config)
-  if (res.status === 401) {
-    message.error('token过期或无效')
-    localStorage.removeItem('token')
-    router.push('/login')
-    document.title = '魔族陌 - 登录'
-    throw new Error('未授权')
-  }
-  const data = await res.json()
-  if (data.success && data.data) {
-    return data.data
-  } else if (data.success) {
-    return data
-  } else {
-    throw new Error(data.message || '操作失败')
-  }
-}
-
-const getCachedData = () => {
-  try {
-    const cached = sessionStorage.getItem(CACHE_KEY)
-    const cacheTime = sessionStorage.getItem(CACHE_TIME_KEY)
-    if (cached && cacheTime) {
-      const now = Date.now()
-      const cachedTime = parseInt(cacheTime)
-      if (now - cachedTime < CACHE_DURATION) {
-        return JSON.parse(cached)
-      }
-    }
-  } catch (error) {
-    console.error('读取缓存失败:', error)
-  }
-  return null
-}
-
-const setCachedData = (data) => {
-  try {
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify(data))
-    sessionStorage.setItem(CACHE_TIME_KEY, Date.now().toString())
-  } catch (error) {
-    console.error('设置缓存失败:', error)
-  }
-}
+const { ensureAuth } = useAuthGuard()
+const { read: getCachedData, write: setCachedData } = useSessionCache('xiuxian_backup_list_cache')
+const tableLocale = createTableLocale()
 
 const loading = ref(false)
 const backupList = ref([])
@@ -235,9 +172,9 @@ const fetchBackupList = async (silent = false) => {
     isUpdating.value = true
   }
   try {
-    const data = await apiRequest('/api/xiuxian/backup?action=getlist')
+    const data = await request('/api/xiuxian/backup?action=getlist')
     let parsedList = []
-    if (data.backups && Array.isArray(data.backups)) {
+    if (data?.backups && Array.isArray(data.backups)) {
       parsedList = data.backups.map((filename) => ({
         filename: filename.replace(/\.json$/, '')
       }))
@@ -280,7 +217,7 @@ const executeRestore = async () => {
 
   restoreLoading.value = true
   try {
-    await apiRequest(
+    await request(
       `/api/xiuxian/backup?action=restore&filename=${encodeURIComponent(currentRestoreFile.value.filename)}`
     )
     message.success(`还原备份 ${currentRestoreFile.value.filename} 成功`)
@@ -310,7 +247,7 @@ const executeSingleDelete = async () => {
 
   deleteLoading.value = true
   try {
-    await apiRequest('/api/xiuxian/backup?action=delete', {
+    await request('/api/xiuxian/backup?action=delete', {
       method: 'POST',
       body: JSON.stringify({
         files: [currentDeleteFile.value.filename]
@@ -343,7 +280,7 @@ const showBatchDeleteConfirm = () => {
 const executeBatchDelete = async () => {
   batchDeleteLoading.value = true
   try {
-    await apiRequest('/api/xiuxian/backup?action=delete', {
+    await request('/api/xiuxian/backup?action=delete', {
       method: 'POST',
       body: JSON.stringify({
         files: selectedRowKeys.value
@@ -382,7 +319,7 @@ const handleCreateBackup = async () => {
     if (backupFilename.value.trim()) {
       url += `&filename=${encodeURIComponent(backupFilename.value.trim())}`
     }
-    await apiRequest(url)
+    await request(url)
     message.success('备份创建成功')
     backupModalVisible.value = false
     fetchBackupList(true)
@@ -395,20 +332,12 @@ const handleCreateBackup = async () => {
   }
 }
 
-const handleVisibilityChange = () => {
-  if (document.visibilityState === 'visible') {
-    fetchBackupList(true)
-  }
-}
+useVisibilityRefresh(() => {
+  fetchBackupList(true)
+})
 
 onMounted(() => {
-  const token = localStorage.getItem('token')
-  if (!token) {
-    message.warning('请先登录')
-    router.push('/login')
-    document.title = '魔族陌 - 登录'
-    return
-  }
+  if (!ensureAuth()) return
 
   const cached = getCachedData()
   if (cached && cached.length > 0) {
@@ -417,11 +346,6 @@ onMounted(() => {
   } else {
     fetchBackupList(false)
   }
-  document.addEventListener('visibilitychange', handleVisibilityChange)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 </script>
 

@@ -173,10 +173,10 @@
 
 <script setup>
 import { ref, onMounted, nextTick, onBeforeUnmount, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { CopyOutlined, DashboardOutlined, LineChartOutlined, ReloadOutlined, TeamOutlined } from '@ant-design/icons-vue'
 import * as echarts from 'echarts'
+import { request, isUnauthorized } from '../../api/http'
 import { useAppearance } from '../../composables/useAppearance'
 
 const { appearance } = useAppearance()
@@ -233,8 +233,6 @@ const selectedPointType = ref('day')
 const modalTitle = computed(() => {
   return `${selectedDate.value} ${selectedPointType.value === 'month' ? '月活跃玩家列表' : '活跃玩家列表'}`
 })
-
-const router = useRouter()
 
 const sortedPlayerList = computed(() => {
   return [...playerList.value].sort((a, b) => {
@@ -323,32 +321,18 @@ const getFullDate = (offset) => {
 
 const fetchActivePlayers = async (point) => {
   playerLoading.value = true
-  const token = localStorage.getItem('token')
   const query =
     point.type === 'month' ? `month=${encodeURIComponent(point.date)}` : `date=${encodeURIComponent(point.date)}`
   try {
-    const res = await fetch(`/api/xiuxian/get_active_players?${query}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-    if (res.status === 401) {
-      message.error('token过期或无效')
-      localStorage.removeItem('token')
-      router.push('/login')
-      return
-    }
-    const data = await res.json()
-    if (data.success) {
-      playerList.value = data.data.players.map((item) => ({
-        openid: item[0],
-        playerId: item[1]
-      }))
-    } else {
-      message.error(data.message || '获取活跃玩家失败')
-    }
+    const data = await request(`/api/xiuxian/get_active_players?${query}`)
+    playerList.value = (data?.players || []).map((item) => ({
+      openid: item[0],
+      playerId: item[1]
+    }))
   } catch (error) {
-    message.error('获取活跃玩家失败:', error)
+    if (!isUnauthorized(error)) {
+      message.error(error.message || '获取活跃玩家失败')
+    }
   } finally {
     playerLoading.value = false
   }
@@ -777,28 +761,10 @@ const fetchData = async (isSilent = false, range = activeRange.value, animateOve
   rangeLoading.value = true
 
   const seq = ++requestSeq
-  const token = localStorage.getItem('token')
   try {
-    const res = await fetch(`/api/xiuxian/getInfo?range=${range}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-    if (res.status === 401) {
-      message.error('token过期或无效')
-      localStorage.removeItem('token')
-      router.push('/login')
-      document.title = '魔族陌 - 登录'
-      return false
-    }
-    const data = await res.json()
-    if (!data.success) {
-      message.error(data.message || '获取数据失败')
-      return false
-    }
+    const payload = (await request(`/api/xiuxian/getInfo?range=${range}`)) || {}
     if (seq !== requestSeq) return false
 
-    const payload = data.data || {}
     const newPlayerCount = Math.round(payload.playerCount || 0)
     const newSectCount = Math.round(payload.sectCount || 0)
     const newYesterdayNewPlayers = Math.round(payload.yesterdayNewPlayers || 0)
@@ -875,10 +841,12 @@ const fetchData = async (isSilent = false, range = activeRange.value, animateOve
     }
     return true
   } catch (error) {
-    if (isSilent) {
-      message.error('刷新失败 请重试')
-    } else {
-      message.error('获取数据失败:', error)
+    if (!isUnauthorized(error)) {
+      if (isSilent) {
+        message.error(error.message || '刷新失败 请重试')
+      } else {
+        message.error(error.message || '获取数据失败')
+      }
     }
     return false
   } finally {

@@ -1,1 +1,1 @@
-import{K as e,L as t,P as n,d as r,u as i}from"./index2.js";import{r as a}from"./index.js";var o={};function s(a,o){let s=t(`a-card`);return n(),r(s,{title:`插件主页`},{default:e(()=>[...o[0]||=[i(`p`,null,`插件主页`,-1)]]),_:1})}var c=a(o,[[`render`,s]]);export{c as default};
+import{K as e,L as t,P as n,d as r,u as i}from"./index2.js";import{s as a}from"./index.js";var o={};function s(a,o){let s=t(`a-card`);return n(),r(s,{title:`插件主页`},{default:e(()=>[...o[0]||=[i(`p`,null,`插件主页`,-1)]]),_:1})}var c=a(o,[[`render`,s]]);export{c as default};

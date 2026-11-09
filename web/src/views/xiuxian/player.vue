@@ -295,7 +295,6 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 import {
@@ -307,15 +306,13 @@ import {
   SearchOutlined,
   ReloadOutlined
 } from '@ant-design/icons-vue'
+import { request } from '../../api/http'
+import { useAuthGuard } from '../../composables/useAuthGuard'
+import { useVisibilityRefresh } from '../../composables/useVisibilityRefresh'
+import { createTableLocale } from '../../constants/table'
 
-const router = useRouter()
-
-const tableLocale = {
-  triggerAsc: '',
-  triggerDesc: '',
-  cancelSort: '取消排序',
-  emptyText: '暂无玩家数据'
-}
+const { ensureAuth } = useAuthGuard()
+const tableLocale = createTableLocale('暂无玩家数据')
 
 const debounce = (fn, delay = 300) => {
   let timer = null
@@ -324,39 +321,6 @@ const debounce = (fn, delay = 300) => {
     timer = setTimeout(() => {
       fn.apply(this, args)
     }, delay)
-  }
-}
-
-const apiRequest = async (url, options = {}) => {
-  const token = localStorage.getItem('token')
-  const headers = {
-    'Content-Type': 'application/json'
-  }
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`
-  }
-  const config = {
-    ...options,
-    headers: {
-      ...headers,
-      ...options.headers
-    }
-  }
-  const res = await fetch(url, config)
-  if (res.status === 401) {
-    message.error('token过期或无效')
-    localStorage.removeItem('token')
-    router.push('/login')
-    document.title = '魔族陌 - 登录'
-    throw new Error('未授权')
-  }
-  const data = await res.json()
-  if (data.success && data.data !== undefined) {
-    return data.data
-  } else if (data.success) {
-    return data
-  } else {
-    throw new Error(data.message || '操作失败')
   }
 }
 
@@ -541,7 +505,7 @@ const columns = [
 
 const fetchRealmMap = async () => {
   try {
-    const data = await apiRequest('/api/xiuxian/player?action=getrealm')
+    const data = await request('/api/xiuxian/player?action=getrealm')
     if (data && typeof data === 'object') {
       realmMap.value = data
       const options = Object.entries(data).map(([key, value]) => ({
@@ -557,7 +521,7 @@ const fetchRealmMap = async () => {
 
 const fetchSrootMap = async () => {
   try {
-    const data = await apiRequest('/api/xiuxian/player?action=getsroot')
+    const data = await request('/api/xiuxian/player?action=getsroot')
     if (data && Array.isArray(data)) {
       srootMap.value = {}
       data.forEach((item) => {
@@ -587,7 +551,7 @@ const getSrootName = (srootValue) => {
 }
 
 const fetchPageData = async (page) => {
-  const data = await apiRequest(`/api/xiuxian/player?action=getlist&page=${page}`)
+  const data = await request(`/api/xiuxian/player?action=getlist&page=${page}`)
   return data
 }
 
@@ -1044,7 +1008,7 @@ const handleSubmit = async () => {
         validTime: Number(t.validTime)
       }))
     }
-    const response = await apiRequest(`/api/xiuxian/player?action=modify&id=${formState.id}`, {
+    const response = await request(`/api/xiuxian/player?action=modify&id=${formState.id}`, {
       method: 'POST',
       body: JSON.stringify(postData)
     })
@@ -1070,36 +1034,25 @@ const handleCancel = () => {
   formRef.value?.resetFields()
 }
 
-const handleVisibilityChange = () => {
-  if (document.visibilityState === 'visible') {
-    if (isPartialLoaded.value) {
-      return
-    }
-    if (isSearchMode.value && loadedCount.value >= totalPlayerCount.value) {
-      loadAllData()
-    } else {
-      fetchPlayerList(currentPage.value, true)
-    }
-  }
-}
-
-onMounted(async () => {
-  const token = localStorage.getItem('token')
-  if (!token) {
-    message.warning('请先登录')
-    router.push('/login')
-    document.title = '魔族陌 - 登录'
+useVisibilityRefresh(() => {
+  if (isPartialLoaded.value) {
     return
   }
+  if (isSearchMode.value && loadedCount.value >= totalPlayerCount.value) {
+    loadAllData()
+  } else {
+    fetchPlayerList(currentPage.value, true)
+  }
+})
+
+onMounted(async () => {
+  if (!ensureAuth()) return
 
   await Promise.all([fetchRealmMap(), fetchSrootMap()])
   fetchPlayerList(1, false)
-
-  document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
 onUnmounted(() => {
-  document.removeEventListener('visibilitychange', handleVisibilityChange)
   isLoadingAll.value = false
 })
 </script>

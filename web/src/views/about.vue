@@ -173,9 +173,8 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { message } from 'ant-design-vue'
-import { useRouter } from 'vue-router'
+import { request, isUnauthorized } from '../api/http'
 
-const router = useRouter()
 const loading = ref(true)
 const pluginVersion = ref('')
 const latestVersion = ref('')
@@ -272,41 +271,18 @@ const versionTagClass = computed(() => {
 
 const fetchAboutInfo = async () => {
   loading.value = true
-  const token = localStorage.getItem('token')
   try {
-    const headers = {
-      'Content-Type': 'application/json'
-    }
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`
-    }
+    const info = await request('/api/about/getInfo')
+    pluginVersion.value = info?.version || info?.currentVersion || ''
+    latestVersion.value = info?.latestVersion || ''
 
-    const res = await fetch('/api/about/getInfo', {
-      method: 'GET',
-      headers
-    })
-
-    if (res.status === 401) {
-      message.error('token过期或无效')
-      localStorage.removeItem('token')
-      router.push('/login')
-      document.title = '魔族陌 - 登录'
-      return
-    }
-
-    const data = await res.json()
-
-    if (data.success && data.data) {
-      const info = data.data
-      pluginVersion.value = info.version || info.currentVersion || ''
-      latestVersion.value = info.latestVersion || ''
-
-      if (info.author) {
-        authorName.value = info.author
-      }
+    if (info?.author) {
+      authorName.value = info.author
     }
   } catch (error) {
-    message.error('获取插件信息失败')
+    if (!isUnauthorized(error)) {
+      message.error(error.message || '获取插件信息失败')
+    }
   } finally {
     loading.value = false
   }

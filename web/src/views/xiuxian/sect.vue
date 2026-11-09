@@ -102,52 +102,16 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
 import { TeamOutlined, EditOutlined, SyncOutlined } from '@ant-design/icons-vue'
+import { request } from '../../api/http'
+import { useAuthGuard } from '../../composables/useAuthGuard'
+import { useVisibilityRefresh } from '../../composables/useVisibilityRefresh'
+import { createTableLocale } from '../../constants/table'
 
-const router = useRouter()
-
-const tableLocale = {
-  triggerAsc: '',
-  triggerDesc: '',
-  cancelSort: '取消排序',
-  emptyText: '暂无宗门数据'
-}
-
-const apiRequest = async (url, options = {}) => {
-  const token = localStorage.getItem('token')
-  const headers = {
-    'Content-Type': 'application/json'
-  }
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`
-  }
-  const config = {
-    ...options,
-    headers: {
-      ...headers,
-      ...options.headers
-    }
-  }
-  const res = await fetch(url, config)
-  if (res.status === 401) {
-    message.error('token过期或无效')
-    localStorage.removeItem('token')
-    router.push('/login')
-    document.title = '魔族陌 - 登录'
-    throw new Error('未授权')
-  }
-  const data = await res.json()
-  if (data.success && data.data !== undefined) {
-    return data.data
-  } else if (data.success) {
-    return data
-  } else {
-    throw new Error(data.message || '操作失败')
-  }
-}
+const { ensureAuth } = useAuthGuard()
+const tableLocale = createTableLocale('暂无宗门数据')
 
 const loading = ref(false)
 const isUpdating = ref(false)
@@ -223,7 +187,7 @@ const fetchSectList = async (page = 1, silent = false) => {
   }
 
   try {
-    const data = await apiRequest(`/api/xiuxian/sect?action=getlist&page=${page - 1}`)
+    const data = await request(`/api/xiuxian/sect?action=getlist&page=${page - 1}`)
 
     if (data) {
       sectList.value = (data.sects || []).map((sect) => ({
@@ -308,7 +272,7 @@ const handleSubmit = async () => {
       noAudit: formState.noAudit ? 1 : 0
     }
 
-    await apiRequest(`/api/xiuxian/sect?action=modify&sectid=${formState.id}`, {
+    await request(`/api/xiuxian/sect?action=modify&sectid=${formState.id}`, {
       method: 'POST',
       body: JSON.stringify(postData)
     })
@@ -333,27 +297,13 @@ const handleCancel = () => {
   formRef.value?.resetFields()
 }
 
-const handleVisibilityChange = () => {
-  if (document.visibilityState === 'visible') {
-    fetchSectList(pagination.current, true)
-  }
-}
-
-onMounted(async () => {
-  const token = localStorage.getItem('token')
-  if (!token) {
-    message.warning('请先登录')
-    router.push('/login')
-    document.title = '魔族陌 - 登录'
-    return
-  }
-
-  fetchSectList(1, false)
-  document.addEventListener('visibilitychange', handleVisibilityChange)
+useVisibilityRefresh(() => {
+  fetchSectList(pagination.current, true)
 })
 
-onUnmounted(() => {
-  document.removeEventListener('visibilitychange', handleVisibilityChange)
+onMounted(() => {
+  if (!ensureAuth()) return
+  fetchSectList(1, false)
 })
 </script>
 

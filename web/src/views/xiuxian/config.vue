@@ -589,11 +589,12 @@
 
 <script setup>
 import { ref, reactive, onMounted, onActivated, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { SaveOutlined, ReloadOutlined, EditOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import { requestRaw } from '../../api/http'
+import { useAuthGuard } from '../../composables/useAuthGuard'
 
-const router = useRouter()
+const { ensureAuth } = useAuthGuard()
 
 const configElementsCache = ref(null)
 
@@ -640,37 +641,6 @@ const arrayItemEditLoading = ref(false)
 const currentEditItemIndex = ref(-1)
 const isNewArrayItem = ref(false)
 
-const apiRequest = async (url, options = {}) => {
-  const token = localStorage.getItem('token')
-  const headers = {
-    'Content-Type': 'application/json'
-  }
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`
-  }
-  const config = {
-    ...options,
-    headers: {
-      ...headers,
-      ...options.headers
-    }
-  }
-
-  try {
-    const res = await fetch(url, config)
-
-    if (res.status === 401) {
-      message.error('token过期或无效')
-      localStorage.removeItem('token')
-      router.push('/login')
-      throw new Error('未授权')
-    }
-
-    const data = await res.json()
-    return data
-  } catch (error) {}
-}
-
 const fetchConfigElements = async () => {
   if (configElementsCache.value) {
     elements.value = configElementsCache.value
@@ -678,9 +648,9 @@ const fetchConfigElements = async () => {
   }
 
   try {
-    const response = await apiRequest('/api/xiuxian/config?action=get_config_elements')
+    const response = await requestRaw('/api/xiuxian/config?action=get_config_elements')
 
-    if (response.success && response.data?.elements) {
+    if (response?.success && response.data?.elements) {
       const elementsData = response.data.elements
       configElementsCache.value = elementsData
       elements.value = elementsData
@@ -698,9 +668,9 @@ const fetchConfigElements = async () => {
 
 const fetchConfigValues = async () => {
   try {
-    const response = await apiRequest('/api/xiuxian/config?action=get_config')
+    const response = await requestRaw('/api/xiuxian/config?action=get_config')
 
-    if (response.success) {
+    if (response?.success) {
       const config = response.data?.config || response.data || {}
       return config
     }
@@ -1280,11 +1250,11 @@ const handleResetConfirm = async () => {
   resetLoading.value = true
 
   try {
-    const response = await apiRequest('/api/xiuxian/config?action=reset', {
+    const response = await requestRaw('/api/xiuxian/config?action=reset', {
       method: 'POST'
     })
 
-    if (response.success) {
+    if (response?.success) {
       message.success(response.message)
       resetModalVisible.value = false
       await loadAllData(true)
@@ -1328,12 +1298,12 @@ const handleSave = async () => {
       current[actualKeys[actualKeys.length - 1]] = deepClone(formData[key])
     })
 
-    const response = await apiRequest('/api/xiuxian/config?action=save_config', {
+    const response = await requestRaw('/api/xiuxian/config?action=save_config', {
       method: 'POST',
       body: JSON.stringify(saveData)
     })
 
-    if (response.success) {
+    if (response?.success) {
       message.success(response.message || '配置保存成功')
     } else {
       message.error(response.message || '保存失败')
@@ -1349,8 +1319,8 @@ const handleSave = async () => {
 
 const fetchGroups = async () => {
   try {
-    const response = await apiRequest('/api/xiuxian/config?action=get_groups')
-    if (response.success && response.data?.groups) {
+    const response = await requestRaw('/api/xiuxian/config?action=get_groups')
+    if (response?.success && response.data?.groups) {
       groupOptions.value = response.data.groups.map((g) => ({
         label: g.name || g.groupId,
         value: g.groupId
@@ -1366,12 +1336,7 @@ onActivated(() => {
 })
 
 onMounted(async () => {
-  const token = localStorage.getItem('token')
-  if (!token) {
-    message.warning('请先登录')
-    router.push('/login')
-    return
-  }
+  if (!ensureAuth()) return
 
   await fetchGroups()
   await loadAllData()

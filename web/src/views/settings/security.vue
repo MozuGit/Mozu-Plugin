@@ -305,12 +305,15 @@ import {
   SafetyOutlined,
   StopOutlined
 } from '@ant-design/icons-vue'
+import { requestRaw, isUnauthorized } from '../../api/http'
+import { useMobile } from '../../composables/useMobile'
 
 const router = useRouter()
+const { isMobile } = useMobile()
 
-const isMobile = ref(false)
-const checkMobile = () => {
-  isMobile.value = window.innerWidth <= 768
+const showRequestError = (error) => {
+  if (isUnauthorized(error)) return
+  message.error(error.message || '网络错误，请重试')
 }
 
 const tfaLoading = ref(true)
@@ -336,53 +339,17 @@ const passwordForm = reactive({
   token: ''
 })
 
-const apiRequest = async (url, options = {}) => {
-  const authToken = localStorage.getItem('token')
-  const headers = {
-    'Content-Type': 'application/json'
-  }
-  if (authToken) {
-    headers['Authorization'] = `Bearer ${authToken}`
-  }
-
-  const config = {
-    ...options,
-    headers: {
-      ...headers,
-      ...options.headers
-    }
-  }
-
-  try {
-    const res = await fetch(url, config)
-
-    if (res.status === 401) {
-      message.error('token过期或无效')
-      localStorage.removeItem('token')
-      router.push('/login')
-      throw new Error('未授权')
-    }
-
-    return await res.json()
-  } catch (error) {
-    if (error.message !== '未授权') {
-      message.error('网络错误，请重试')
-    }
-    throw error
-  }
-}
-
 const fetchTfaStatus = async () => {
   tfaLoading.value = true
   try {
-    const response = await apiRequest('/api/login/tfa?action=status')
+    const response = await requestRaw('/api/login/tfa?action=status')
     if (response.success) {
       tfaEnabled.value = response.data?.enabled === true
     } else {
       message.error(response.message || '获取双重验证状态失败')
     }
-  } catch {
-    // apiRequest 已提示
+  } catch (error) {
+    showRequestError(error)
   } finally {
     tfaLoading.value = false
   }
@@ -466,7 +433,7 @@ const copySecret = async () => {
 const handleCreate = async () => {
   creating.value = true
   try {
-    const response = await apiRequest('/api/login/tfa?action=create', { method: 'POST' })
+    const response = await requestRaw('/api/login/tfa?action=create', { method: 'POST' })
     if (!totpVisible.value) return
     if (!response.success) {
       return message.error(response.message || '生成密钥失败')
@@ -489,8 +456,8 @@ const handleCreate = async () => {
     }
 
     message.success('密钥生成成功，请使用验证器 App 扫描')
-  } catch {
-    // apiRequest 已提示
+  } catch (error) {
+    showRequestError(error)
   } finally {
     creating.value = false
   }
@@ -503,7 +470,7 @@ const handleEnable = async () => {
 
   enabling.value = true
   try {
-    const response = await apiRequest('/api/login/tfa?action=enable', {
+    const response = await requestRaw('/api/login/tfa?action=enable', {
       method: 'POST',
       body: JSON.stringify({ token: enableForm.token.trim() })
     })
@@ -519,8 +486,8 @@ const handleEnable = async () => {
         resetPending()
       }
     }
-  } catch {
-    // apiRequest 已提示
+  } catch (error) {
+    showRequestError(error)
   } finally {
     enabling.value = false
   }
@@ -533,7 +500,7 @@ const handleDisable = async () => {
 
   disabling.value = true
   try {
-    const response = await apiRequest('/api/login/tfa?action=delete', {
+    const response = await requestRaw('/api/login/tfa?action=delete', {
       method: 'POST',
       body: JSON.stringify({ token: disableToken.value.trim() })
     })
@@ -546,8 +513,8 @@ const handleDisable = async () => {
     } else {
       message.error(response.message || '关闭失败')
     }
-  } catch {
-    // apiRequest 已提示
+  } catch (error) {
+    showRequestError(error)
   } finally {
     disabling.value = false
   }
@@ -582,7 +549,7 @@ const handleChangePassword = async () => {
 
   passwordSaving.value = true
   try {
-    const response = await apiRequest('/api/login?action=change_password', {
+    const response = await requestRaw('/api/login?action=change_password', {
       method: 'POST',
       body: JSON.stringify({
         currentPassword: passwordForm.currentPassword,
@@ -601,8 +568,8 @@ const handleChangePassword = async () => {
     } else {
       message.error(response.message || '密码修改失败')
     }
-  } catch {
-    // apiRequest 已提示
+  } catch (error) {
+    showRequestError(error)
   } finally {
     passwordSaving.value = false
   }
@@ -626,13 +593,10 @@ const handleLogout = async () => {
 }
 
 onMounted(() => {
-  checkMobile()
-  window.addEventListener('resize', checkMobile)
   fetchTfaStatus()
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', checkMobile)
   clearCountdown()
 })
 </script>

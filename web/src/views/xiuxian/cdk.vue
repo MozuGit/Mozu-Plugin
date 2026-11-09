@@ -503,29 +503,21 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SyncOutlined } from '@ant-design/icons-vue'
 import dayjs from 'dayjs'
+import { request } from '../../api/http'
+import { useAuthGuard } from '../../composables/useAuthGuard'
+import { useVisibilityRefresh } from '../../composables/useVisibilityRefresh'
+import { useSessionCache } from '../../composables/useSessionCache'
+import { useMobile } from '../../composables/useMobile'
+import { createTableLocale } from '../../constants/table'
 
-const router = useRouter()
-
-const CACHE_KEY = 'xiuxian_cdk_list_cache'
-const CACHE_TIME_KEY = 'xiuxian_cdk_list_cache_time'
-const CACHE_DURATION = 5 * 60 * 1000
-
-const isMobile = ref(false)
-
-const checkMobile = () => {
-  isMobile.value = window.innerWidth <= 768
-}
-
-const tableLocale = {
-  triggerAsc: '',
-  triggerDesc: '',
-  cancelSort: '取消排序'
-}
+const { ensureAuth } = useAuthGuard()
+const { read: getCachedData, write: setCachedData } = useSessionCache('xiuxian_cdk_list_cache')
+const { isMobile } = useMobile()
+const tableLocale = createTableLocale()
 
 const usageTableColumns = [
   {
@@ -617,39 +609,6 @@ const batchDeleteList = computed(() => {
   return cdkList.value.filter((item) => selectedRowKeys.value.includes(item.name))
 })
 
-const apiRequest = async (url, options = {}) => {
-  const token = localStorage.getItem('token')
-  const headers = {
-    'Content-Type': 'application/json'
-  }
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`
-  }
-  const config = {
-    ...options,
-    headers: {
-      ...headers,
-      ...options.headers
-    }
-  }
-  const res = await fetch(url, config)
-  if (res.status === 401) {
-    message.error('token过期或无效')
-    localStorage.removeItem('token')
-    router.push('/login')
-    document.title = '魔族陌 - 登录'
-    throw new Error('未授权')
-  }
-  const data = await res.json()
-  if (data.success && data.data) {
-    return data.data
-  } else if (data.success) {
-    return data
-  } else {
-    throw new Error(data.message || '操作失败')
-  }
-}
-
 const parseCdkValue = (cdk) => {
   let parsedValue = {}
   if (typeof cdk.value === 'string') {
@@ -710,32 +669,6 @@ const parseCdkValue = (cdk) => {
     useIdList: useIdList,
     useTime: Array.isArray(useTime) ? '' : String(useTime),
     useTimeList: useTimeList
-  }
-}
-
-const getCachedData = () => {
-  try {
-    const cached = sessionStorage.getItem(CACHE_KEY)
-    const cacheTime = sessionStorage.getItem(CACHE_TIME_KEY)
-    if (cached && cacheTime) {
-      const now = Date.now()
-      const cachedTime = parseInt(cacheTime)
-      if (now - cachedTime < CACHE_DURATION) {
-        return JSON.parse(cached)
-      }
-    }
-  } catch (error) {
-    console.error('读取缓存失败:', error)
-  }
-  return null
-}
-
-const setCachedData = (data) => {
-  try {
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify(data))
-    sessionStorage.setItem(CACHE_TIME_KEY, Date.now().toString())
-  } catch (error) {
-    console.error('设置缓存失败:', error)
   }
 }
 
@@ -902,9 +835,9 @@ const fetchCdkList = async (silent = false) => {
     isUpdating.value = true
   }
   try {
-    const data = await apiRequest('/api/xiuxian/cdk?action=getlist')
+    const data = await request('/api/xiuxian/cdk?action=getlist')
     let parsedList = []
-    if (data.cdks && Array.isArray(data.cdks)) {
+    if (data?.cdks && Array.isArray(data.cdks)) {
       parsedList = data.cdks.map((cdk) => parseCdkValue(cdk))
     } else if (Array.isArray(data)) {
       parsedList = data.map((cdk) => parseCdkValue(cdk))
@@ -941,7 +874,7 @@ const showDeleteModal = (record) => {
 const confirmDelete = async () => {
   deleteLoading.value = true
   try {
-    await apiRequest('/api/xiuxian/cdk?action=delete', {
+    await request('/api/xiuxian/cdk?action=delete', {
       method: 'POST',
       body: JSON.stringify({
         list: [deleteTarget.value.name]
@@ -977,7 +910,7 @@ const showBatchDeleteModal = () => {
 const confirmBatchDelete = async () => {
   batchDeleteLoading.value = true
   try {
-    await apiRequest('/api/xiuxian/cdk?action=delete', {
+    await request('/api/xiuxian/cdk?action=delete', {
       method: 'POST',
       body: JSON.stringify({
         list: selectedRowKeys.value
@@ -1128,7 +1061,7 @@ const handleSubmit = async () => {
       }
     }
 
-    await apiRequest(url, {
+    await request(url, {
       method: 'POST',
       body: JSON.stringify(postData)
     })
@@ -1154,27 +1087,12 @@ const handleCancel = () => {
   formRef.value?.resetFields()
 }
 
-const handleVisibilityChange = () => {
-  if (document.visibilityState === 'visible') {
-    fetchCdkList(true)
-  }
-}
-
-const handleResize = () => {
-  checkMobile()
-}
+useVisibilityRefresh(() => {
+  fetchCdkList(true)
+})
 
 onMounted(() => {
-  checkMobile()
-  window.addEventListener('resize', handleResize)
-
-  const token = localStorage.getItem('token')
-  if (!token) {
-    message.warning('请先登录')
-    router.push('/login')
-    document.title = '魔族陌 - 登录'
-    return
-  }
+  if (!ensureAuth()) return
 
   const cached = getCachedData()
   if (cached && cached.length > 0) {
@@ -1183,12 +1101,6 @@ onMounted(() => {
   } else {
     fetchCdkList(false)
   }
-  document.addEventListener('visibilitychange', handleVisibilityChange)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
-  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 </script>
 
