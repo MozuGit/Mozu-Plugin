@@ -36,7 +36,10 @@ class Cfg {
       .readdirSync(root, { withFileTypes: true })
       .filter((entry) => entry.isDirectory() && !entry.name.startsWith('.'))
       .map((entry) => entry.name)
-      .filter((name) => this.isDirectory(path.join(root, name, 'default')) || this.isDirectory(path.join(root, name, 'config')))
+      .filter(
+        (name) =>
+          this.isDirectory(path.join(root, name, 'default')) || this.isDirectory(path.join(root, name, 'config'))
+      )
       .sort()
   }
 

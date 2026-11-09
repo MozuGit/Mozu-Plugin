@@ -427,9 +427,7 @@ async function hashSHA256(password) {
 }
 
 .logo-image {
-  animation: slideUp 0.8s ease-out forwards;
-  opacity: 0;
-  transform: translateY(80px);
+  animation: slideUp 0.8s ease-out both;
   margin-bottom: 20px;
 }
 
@@ -444,9 +442,7 @@ async function hashSHA256(password) {
 
 .slogan {
   text-align: center;
-  animation: slideUp 0.8s ease-out forwards;
-  opacity: 0;
-  transform: translateY(80px);
+  animation: slideUp 0.8s ease-out both;
 }
 
 .slogan .main-title {
@@ -456,8 +452,7 @@ async function hashSHA256(password) {
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   margin-bottom: 24px;
   letter-spacing: 4px;
-  animation: fadeIn 0.6s ease-out 0.3s forwards;
-  opacity: 0;
+  animation: fadeIn 0.6s ease-out 0.3s both;
 }
 
 .slogan .sub-title {
@@ -466,8 +461,7 @@ async function hashSHA256(password) {
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
   line-height: 1.6;
   letter-spacing: 2px;
-  animation: fadeIn 0.6s ease-out 0.6s forwards;
-  opacity: 0;
+  animation: fadeIn 0.6s ease-out 0.6s both;
 }
 
 @keyframes slideUp {

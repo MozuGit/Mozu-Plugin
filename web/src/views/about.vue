@@ -339,9 +339,7 @@ onMounted(() => {
   gap: 8px 12px;
   padding-bottom: 16px;
   border-bottom: 1px dashed var(--lg-hairline);
-  animation: slideInItem 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  opacity: 0;
-  transform: translateX(-20px);
+  animation: slideInItem 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 .info-item:first-child {
