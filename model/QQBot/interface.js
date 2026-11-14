@@ -77,7 +77,7 @@ export default class QQBotApi {
       }))
     ]
     const buildMember = (item) => {
-      const t = item.time === undefined ? 0 : item.time
+      const t = Number(item.time) || 0
       const expireTime = new Date((Math.floor(Date.now() / 1000) + t + 1 + 8 * 3600) * 1000)
         .toISOString()
         .replace('Z', '+08:00')
@@ -87,14 +87,21 @@ export default class QQBotApi {
         mute_expire_at: t === 0 ? '' : expireTime
       }
     }
-    for (let i = 0; i < all.length; i += 20) {
-      const members = all.slice(i, i + 20).map(buildMember)
-      try {
-        await this.bot.sdk.request.post(`/v2/groups/${this.group_id}/restrict_chat_setting`, {
-          members
-        })
-      } catch (err) {
-        return false
+    const members = all.map(buildMember)
+    const groups = [
+      members.filter((item) => item.op === 'del'),
+      members.filter((item) => item.op === 'add')
+    ]
+    for (const group of groups) {
+      for (let i = 0; i < group.length; i += 20) {
+        try {
+          await this.bot.sdk.request.post(`/v2/groups/${this.group_id}/restrict_chat_setting`, {
+            members: group.slice(i, i + 20)
+          })
+        } catch (err) {
+          logger.error('[魔族陌][Interface] ' + err)
+          return false
+        }
       }
     }
     return true
