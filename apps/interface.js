@@ -56,6 +56,13 @@ export class MozuInterface extends plugin {
       }
     }
 
+    //撤回群消息
+    if (!this.e.group.recallMsg) {
+      this.e.group.recallMsg = async (message_id) => {
+        return await api.recallMsg(message_id)
+      }
+    }
+
     //获取群禁言成员列表
     if (!this.e.group.getGroupMuteList) {
       this.e.group.getGroupMuteList = async () => {

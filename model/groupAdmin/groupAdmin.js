@@ -39,6 +39,15 @@ export default class GroupAdmin {
     }
     return await this.api.kickMember(members[0], addBlack, members.slice(1))
   }
+
+  /**
+   * 批量群撤回消息
+   * @param {...(string|string[])} messageIds - 消息 ID
+   * @returns {Promise<boolean>} 表示是否全部撤回成功
+   */
+  async recallMsg(...messageIds) {
+    return await this.api.recallMsg(...messageIds)
+  }
 }
 
 function normalizeMembers(members) {

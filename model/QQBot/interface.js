@@ -88,10 +88,7 @@ export default class QQBotApi {
       }
     }
     const members = all.map(buildMember)
-    const groups = [
-      members.filter((item) => item.op === 'del'),
-      members.filter((item) => item.op === 'add')
-    ]
+    const groups = [members.filter((item) => item.op === 'del'), members.filter((item) => item.op === 'add')]
     for (const group of groups) {
       for (let i = 0; i < group.length; i += 20) {
         try {
@@ -105,6 +102,48 @@ export default class QQBotApi {
       }
     }
     return true
+  }
+
+  /**
+   * 撤回群消息
+   * @param  {...any} message_id - 消息 ID
+   * @returns {Promise<boolean>} 返回操作成功或者失败
+   */
+  async recallMsg(...message_id) {
+    const ids = message_id.flat(Infinity).filter((id) => id !== null && id !== undefined && id !== '')
+    const failedIds = []
+    const batchSize = 10
+    const maxRetries = 3
+    const isRateLimitError = (err) => {
+      const status = err?.status ?? err?.statusCode ?? err?.code ?? err?.response?.status
+      return Number(status) === 429
+    }
+    for (let batchStart = 0; batchStart < ids.length; batchStart += batchSize) {
+      const batch = ids.slice(batchStart, batchStart + batchSize)
+      for (const id of batch) {
+        let recalled = false
+        for (let retry = 0; retry <= maxRetries; retry++) {
+          try {
+            await this.bot.sdk.request.delete(`/v2/groups/${this.group_id}/messages/${id}`)
+            recalled = true
+            break
+          } catch (err) {
+            logger.info(err)
+            if (!isRateLimitError(err) || retry === maxRetries) {
+              break
+            }
+            const retryAfter = err?.response?.headers?.['retry-after'] ?? err?.headers?.['retry-after']
+            const retryDelay = Number(retryAfter) ? Number(retryAfter) * 1000 : 1000 * 2 ** retry
+            await Bot.sleep(retryDelay)
+          }
+        }
+        if (!recalled) failedIds.push(id)
+      }
+      if (batchStart + batchSize < ids.length) {
+        await Bot.sleep(1000)
+      }
+    }
+    return failedIds.length === 0
   }
 
   /**
