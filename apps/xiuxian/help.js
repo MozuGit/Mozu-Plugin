@@ -10,7 +10,7 @@ export class MozuXiuxianHelp extends plugin {
       priority: Config.xiuxian.setting.priority,
       rule: [
         {
-          reg: '#?(魔族陌)?修仙帮助$',
+          reg: '#?(魔族陌)?修仙(帮助|菜单)$',
           fnc: 'xiuxianHelp'
         }
       ]
