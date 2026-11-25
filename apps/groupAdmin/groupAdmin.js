@@ -65,6 +65,10 @@ export class MozuGroupAdmin extends plugin {
           fnc: 'relieveAllMute'
         },
         {
+          reg: '^#?撤回(\\d+)?$',
+          fnc: 'recallMsg'
+        },
+        {
           reg: Autisticreg,
           fnc: 'Autistic'
         }
@@ -196,6 +200,26 @@ export class MozuGroupAdmin extends plugin {
           segment.markdown(['**解除全部禁言成功**', '***', '**解除禁言列表**', ...muteText, '***'].join('\n'))
         )
       }
+    }
+    return true
+  }
+
+  async recallMsg(e) {
+    if (!['QQBot'].includes(e?.bot?.adapter?.name) || !Config.groupAdmin.setting.enable || !this.e.group) return false
+    if (!common.checkPermission(e, 'admin', 'admin')) return true
+    const Ga = new GroupAdmin(e)
+    const number = parseInt(e.msg.match(/\d+/)?.[0]) || 0
+    if (number) {
+      const message_ids = await Redis.zrange(`Mozu:groupAdmin:${this.e.group_id}:message_id`, -number - 1, -2)
+      if (!message_ids.length) return true
+      await Ga.recallMsg(...message_ids.map((item) => JSON.parse(item).message_id))
+    } else {
+      const message_id = await Redis.hget(
+        `Mozu:groupAdmin:${this.e.group_id}:message_id_map`,
+        this.e.raw.msg_elements[0]?.msg_idx
+      )
+      if (!message_id) return false
+      await Ga.recallMsg([message_id, this.e.message_id])
     }
     return true
   }

@@ -128,7 +128,6 @@ export default class QQBotApi {
             recalled = true
             break
           } catch (err) {
-            logger.info(err)
             if (!isRateLimitError(err) || retry === maxRetries) {
               break
             }
