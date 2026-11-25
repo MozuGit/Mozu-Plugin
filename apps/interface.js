@@ -3,6 +3,10 @@ import Config from '#Config'
 import QQBotApi from '../model/QQBot/interface.js'
 import { mqqapi, laTex, qagent } from '../lib/protocol.js'
 
+function hasValue(target, key) {
+  return Boolean(target?.[key])
+}
+
 if (Config.config.Redis.global) global.Redis = Redis
 if (Config.config.interface.enable)
   global.Mozu = {
@@ -27,6 +31,27 @@ export class MozuInterface extends plugin {
     const api = new QQBotApi(e)
     const group_id = this.e.group_id.replace(bot.uin + ':', '')
 
+    //获取机器人详情
+    if (!hasValue(this.e, 'getBotInfo')) {
+      this.e.getBotInfo = async () => {
+        return await api.getBotInfo()
+      }
+    }
+
+    //获取用户基本信息
+    if (!hasValue(this.e.user, 'info')) {
+      this.e.getUserInfo = async (user_id) => {
+        return await api.getUserInfo(user_id)
+      }
+    }
+
+    //生成分享链接
+    if (!hasValue(this.e, 'generateUrl')) {
+      this.e.generateUrl = async (data) => {
+        return await api.generateUrl(data)
+      }
+    }
+
     //获取群基本信息
     let groupInfo = JSON.parse(await Redis.get(`Mozu:groupinfo:${group_id}`))
     if (!groupInfo) {
@@ -42,43 +67,64 @@ export class MozuInterface extends plugin {
     }
     if (groupBotState.member_role === 'admin') this.e.group.is_admin = true
 
-    if (!this.e.group.info) {
+    if (!hasValue(this.e.group, 'info')) {
       this.e.group.info = {
         ...groupInfo,
         group_bot_state: groupBotState
       }
     }
 
+    //获取群成员列表
+    if (!hasValue(this.e.group, 'getMemberList')) {
+      this.e.group.getMemberList = async () => {
+        return await api.getGroupMemberList()
+      }
+    }
+
+    //获取群成员信息
+    if (!hasValue(this.e.group, 'getMemberInfo')) {
+      this.e.group.getMemberInfo = async (openid) => {
+        return await api.getGroupMemberInfo(openid)
+      }
+    }
+
     //获取入群申请列表
-    if (!this.e.group.getJoinList) {
+    if (!hasValue(this.e.group, 'getJoinList')) {
       this.e.group.getJoinList = async () => {
         return await api.getGroupJoinList()
       }
     }
 
+    //入群申请审批
+    if (!hasValue(this.e.group, 'approve')) {
+      this.e.group.approve = async (openid, op, rejectMsg = '', addBlack = false) => {
+        return await api.approve(openid, op, rejectMsg, addBlack)
+      }
+    }
+
     //撤回群消息
-    if (!this.e.group.recallMsg) {
+    if (!hasValue(this.e.group, 'recallMsg')) {
       this.e.group.recallMsg = async (message_id) => {
         return await api.recallMsg(message_id)
       }
     }
 
     //获取群禁言成员列表
-    if (!this.e.group.getGroupMuteList) {
+    if (!hasValue(this.e.group, 'getGroupMuteList')) {
       this.e.group.getGroupMuteList = async () => {
         return await api.getGroupMuteInfo()
       }
     }
 
     //设置群成员禁言
-    if (!this.e.group.muteMember) {
+    if (!hasValue(this.e.group, 'muteMember')) {
       this.e.group.muteMember = async (openid, time = 0, obj = []) => {
         return await api.muteMember(openid, time, obj)
       }
     }
 
     //群成员移除
-    if (!this.e.group.kickMember) {
+    if (!hasValue(this.e.group, 'kickMember')) {
       this.e.group.kickMember = async (openid, addBlack = false, openids = []) => {
         return await api.kickMember(openid, addBlack, openids)
       }
