@@ -29,7 +29,9 @@
     <div class="page-content">
       <router-view v-slot="{ Component }">
         <transition name="page-fade" mode="out-in">
-          <component :is="Component" :key="route.name" />
+          <div :key="route.name" class="page-transition">
+            <component :is="Component" />
+          </div>
         </transition>
       </router-view>
     </div>
