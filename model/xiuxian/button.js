@@ -53,6 +53,24 @@ const Button = {
       ]
     )
   },
+  get fortwo() {
+    return segment.button(
+      [
+        { text: '发起双修+ID', input: prefix + '发起双修' },
+        { text: '接受双修+ID', input: prefix + '接受双修' }
+      ],
+      [
+        { text: '双修列表', input: prefix + '双修列表' },
+        { text: '查询修仙者', input: prefix + '查询修仙者' }
+      ],
+      [
+        { text: '修炼', input: prefix + '修炼' },
+        { text: '开采', input: prefix + '开采' },
+        { text: '信息', input: prefix + '修仙个人信息' },
+        { text: '签到', input: prefix + '修仙签到' }
+      ]
+    )
+  },
   get sect() {
     return segment.button(
       [

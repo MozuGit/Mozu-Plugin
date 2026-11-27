@@ -1913,6 +1913,172 @@ const prefixHandlers = [
     }
   },
   {
+    prefix: /^#?发起双修\s*\d*/,
+    handler: async (id, user_id, Text, msg, at, isMaster) => {
+      let targetID
+      if (at && !Array.isArray(at)) {
+        targetID = (await xiuxian.init(at)).data.id
+      } else {
+        targetID = parseInt((msg.match(/\d+/g) || []).join(''), 10)
+      }
+      const value = await xiuxian.beginForTwo(id, targetID, isMaster)
+      switch (value.event) {
+        case 'begin_fortwo':
+          Text.push(
+            [
+              '<@' + user_id + '>',
+              '***',
+              '**发起双修成功**',
+              '>已向ID：' + (await mqqapi.command(targetID, '查询修仙者' + targetID, true)) + '发起双修',
+              '对方可以通过' + (await mqqapi.command('接受双修', '接受双修' + id, true)) + '来同意双修',
+              '发起过期时间：' + Config.xiuxian.xiuxian.fortwo.expire_time + '秒',
+              '请等待对方同意',
+              '***'
+            ].join('\n')
+          )
+          break
+        case 'fortwo_cd':
+          Text.push(
+            ['<@' + user_id + '>', '***', '**当前正在CD中...**', '>剩余：' + value.data.outTime + '秒', '***'].join(
+              '\n'
+            )
+          )
+          break
+        case 'target_fortwo_cd':
+          Text.push(
+            ['<@' + user_id + '>', '***', '**对方当前正在CD中...**', '>剩余：' + value.data.outTime + '秒', '***'].join(
+              '\n'
+            )
+          )
+          break
+        case 'fortwo_max_count':
+          Text.push(['<@' + user_id + '>', '***', '**今日双修次数已达上限**', '>明天再来双修吧', '***'].join('\n'))
+          break
+        case 'target_fortwo_max_count':
+          Text.push(['<@' + user_id + '>', '***', '**对方今日双修次数已达上限**', '>明天再来双修吧', '***'].join('\n'))
+          break
+        case 'already_begin_fortwo':
+          Text.push(
+            ['<@' + user_id + '>', '***', '**你已向该玩家发起过双修**', '>请等待对方同意或过期', '***'].join('\n')
+          )
+          break
+        case 'self_fortwo':
+          Text.push(['<@' + user_id + '>', '***', '**不能向自己发起双修**', '***'].join('\n'))
+          break
+        case 'not_sex':
+          Text.push(
+            ['<@' + user_id + '>', '***', '**未设置性别**', '>请先' + (await mqqapi.command('设置性别')), '***'].join(
+              '\n'
+            )
+          )
+          break
+        case 'not_id':
+          Text.push(['<@' + user_id + '>', '***', '**找不到该玩家**', '>请确认该玩家是否存在或注册', '***'].join('\n'))
+          break
+        case 'fortwo_lock':
+          Text.push(['<@' + user_id + '>', '***', '**正在双修中**', '>请稍后再试', '***'].join('\n'))
+          break
+        case 'in_retreat':
+          Text.push(await retreatText())
+          break
+      }
+      Text.push(Button.fortwo)
+    }
+  },
+  {
+    prefix: /^#?(接受|同意)双修\s*\d*$|双修列表/,
+    handler: async (id, user_id, Text, msg, at, isMaster) => {
+      let targetID
+      if (at && !Array.isArray(at)) {
+        targetID = (await xiuxian.init(at)).data.id
+      } else {
+        targetID = parseInt((msg.match(/\d+/g) || []).join(''), 10)
+      }
+      const value = await xiuxian.acceptForTwo(id, msg.includes('列表') ? 0 : targetID, isMaster)
+      switch (value.event) {
+        case 'accept_fortwo':
+          Text.push(
+            [
+              '<@' + user_id + '>',
+              '***',
+              '**接受双修成功**',
+              '>已与ID：' + (await mqqapi.command(targetID, '查询修仙者' + targetID, true)) + '进行双修',
+              '***',
+              '**双修结果：' + (value.data.addCult > 0 ? '成功' : '失败') + '**',
+              '>你的ID：' +
+                (await mqqapi.command(id, '查询修仙者' + id, true)) +
+                (value.data.addCult > 0
+                  ? '获得修为：' + value.data.addCult
+                  : '扣除修为：' + Math.abs(value.data.addCult)),
+              '>对方ID：' +
+                (await mqqapi.command(targetID, '查询修仙者' + targetID, true)) +
+                (value.data.targetAddCult > 0
+                  ? '获得修为：' + value.data.targetAddCult
+                  : '扣除修为：' + Math.abs(value.data.targetAddCult)),
+              '***'
+            ].join('\n')
+          )
+          break
+        case 'fortwo_list':
+          let fortwoListText = []
+          for (const fortwo of value.data.fortwoList) {
+            const fortwoUserInfo = await xiuxian.getUserInfo(fortwo.id)
+            fortwoListText.push(
+              [
+                '>ID：' + fortwo.id,
+                '性别：' + fortwoUserInfo.sex,
+                '修为：' + fortwoUserInfo.cult,
+                '境界：' + fortwoUserInfo.realm.realmName,
+                await mqqapi.command('接受双修', '接受双修' + fortwo.id, true),
+                '***'
+              ].join('\n')
+            )
+          }
+          Text.push(
+            [
+              '<@' + user_id + '>',
+              '***',
+              '**双修列表**',
+              '>当前有以下玩家向你发起了双修',
+              '***',
+              ...(fortwoListText.length ? fortwoListText : ['>没有玩家向你发起双修', '***'])
+            ].join('\n')
+          )
+          break
+        case 'fortwo_cd':
+          Text.push(
+            ['<@' + user_id + '>', '***', '**当前正在CD中...**', '>剩余：' + value.data.outTime + '秒', '***'].join(
+              '\n'
+            )
+          )
+          break
+        case 'fortwo_max_count':
+          Text.push(['<@' + user_id + '>', '***', '**今日双修次数已达上限**', '>明天再来双修吧', '***'].join('\n'))
+          break
+        case 'not_sex':
+          Text.push(
+            ['<@' + user_id + '>', '***', '**未设置性别**', '>请先' + (await mqqapi.command('设置性别')), '***'].join(
+              '\n'
+            )
+          )
+          break
+        case 'not_fortwo':
+          Text.push(['<@' + user_id + '>', '***', '**该玩家未向你发起双修**', '***'].join('\n'))
+          break
+        case 'not_id':
+          Text.push(['<@' + user_id + '>', '***', '**找不到该玩家**', '>请确认该玩家是否存在或注册', '***'].join('\n'))
+          break
+        case 'fortwo_lock':
+          Text.push(['<@' + user_id + '>', '***', '**正在双修中**', '>请稍后再试', '***'].join('\n'))
+          break
+        case 'in_retreat':
+          Text.push(await retreatText())
+          break
+      }
+      Text.push(Button.fortwo)
+    }
+  },
+  {
     prefix: /^#?查询宗门\s*\d*/,
     handler: async (id, user_id, Text, msg, at) => {
       let query_id

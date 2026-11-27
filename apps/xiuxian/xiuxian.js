@@ -26,10 +26,11 @@ export class MozuXiuxian extends plugin {
       if (!Config.xiuxian.setting.whiteGroup.includes(this.e.group_id)) return false
     }
     const user_id = this.e.user_id.replace(`${this.e.self_id}:`, '')
+    const at = this.e?.at?.replace(`${this.e.self_id}:`, '')
     const message = await xiuxianText(
       this.e.msg.replace(/^#/, ''),
       user_id,
-      this.e?.at?.replace(`${this.e.self_id}:`, ''),
+      at === this.e.bot?.info?.union_openid ? null : at,
       this.e.isMaster
     )
     let lastText = null

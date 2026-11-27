@@ -415,6 +415,106 @@ export default [
     }
   },
   {
+    field: 'xiuxian.xiuxian.fortwo',
+    label: '双修配置',
+    component: 'GSubForm',
+    componentProps: {
+      modalProps: {
+        title: '修仙双修配置'
+      },
+      style: {
+        maxHeight: '100px',
+        overflowY: 'auto'
+      },
+      schemas: [
+        {
+          field: 'cd',
+          label: '双修冷却',
+          bottomHelpMessage: '双修冷却（单位：秒）',
+          component: 'InputNumber',
+          componentProps: {
+            placeholder: '请输入双修冷却时间',
+            min: 0,
+            step: 10,
+            style: {
+              width: '180px'
+            }
+          }
+        },
+        {
+          field: 'max_count',
+          label: '每日双修上限',
+          bottomHelpMessage: '每日双修上限（为0则无上限）',
+          component: 'InputNumber',
+          componentProps: {
+            placeholder: '请输入每日双修上限',
+            min: 0,
+            step: 1,
+            style: {
+              width: '180px'
+            }
+          }
+        },
+        {
+          field: 'expire_time',
+          label: '过期时间',
+          bottomHelpMessage: '双修邀请过期时间（单位：秒）',
+          component: 'InputNumber',
+          componentProps: {
+            placeholder: '请输入双修邀请过期时间',
+            min: 0,
+            step: 10,
+            style: {
+              width: '180px'
+            }
+          }
+        },
+        {
+          field: 'cult_reference',
+          label: '双修修为基准值',
+          bottomHelpMessage: '喵喵喵',
+          component: 'InputNumber',
+          componentProps: {
+            placeholder: '请输入双修修为基准值',
+            min: 0,
+            step: 10000,
+            style: {
+              width: '180px'
+            }
+          }
+        },
+        {
+          field: 'rate',
+          label: '双修成功率',
+          bottomHelpMessage: '双修成功概率（单位：%）',
+          component: 'InputNumber',
+          componentProps: {
+            placeholder: '请输入双修成功率',
+            min: 0,
+            max: 100,
+            style: {
+              width: '180px'
+            }
+          }
+        },
+        {
+          field: 'same_sex_rate',
+          label: '同性双修成功率',
+          bottomHelpMessage: '同性双修成功概率（单位：%）',
+          component: 'InputNumber',
+          componentProps: {
+            placeholder: '请输入双修成功率',
+            min: 0,
+            max: 100,
+            style: {
+              width: '180px'
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
     component: 'Divider',
     label: '修仙境界设置',
     componentProps: {

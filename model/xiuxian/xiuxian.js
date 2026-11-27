@@ -1797,6 +1797,276 @@ export default {
   },
 
   /**
+   * 发起双修
+   * @param {number} id - 修仙ID
+   * @param {number} targetId - 目标修仙ID
+   * @param {boolean} isMaster - 是否为主人
+   * @returns 发起双修结果
+   */
+  async beginForTwo(id, targetId, isMaster = false) {
+    if (Number(id) === Number(targetId)) {
+      return { event: 'self_fortwo' }
+    }
+
+    let [sex, retreatStart, twoInfo] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '性别', '闭关时间', '双修信息')
+    if (!sex || sex === '未设置') return { event: 'not_sex' }
+    retreatStart = parseInt(retreatStart, 10) || 0
+    twoInfo = safeParse(twoInfo)
+    if (retreatStart !== 0) return { event: 'in_retreat' }
+
+    if ((await Redis.exists(`${PLAYER_INFO_KEY}:${targetId}`)) === 0) {
+      return { event: 'not_id' }
+    }
+    if (
+      twoInfo.date === gettoday() &&
+      twoInfo.count >= Config.xiuxian.xiuxian.fortwo.max_count &&
+      !(isMaster && Config.xiuxian.setting.master_no_cd)
+    ) {
+      return { event: 'fortwo_max_count' }
+    }
+    const nowTime = Math.floor(Date.now() / 1000)
+    const lastTime = Number(twoInfo.lastTime) || 0
+    if (nowTime - lastTime <= Config.xiuxian.xiuxian.fortwo.cd && !(isMaster && Config.xiuxian.setting.master_no_cd)) {
+      return {
+        event: 'fortwo_cd',
+        data: { outTime: Config.xiuxian.xiuxian.fortwo.cd - (nowTime - lastTime) }
+      }
+    }
+    const lockKey = `Mozu:xiuxian:fortwo_lock:${targetId}`
+    const token = `${id}:${Date.now()}:${Math.random()}`
+    const locked = await Redis.set(lockKey, token, 'NX', 'EX', 5)
+    if (!locked) return { event: 'fortwo_lock' }
+    try {
+      const fresh = safeParse(await Redis.hget(`${PLAYER_INFO_KEY}:${targetId}`, '双修信息'))
+      if (
+        fresh.date === gettoday() &&
+        fresh.count >= Config.xiuxian.xiuxian.fortwo.max_count &&
+        !(isMaster && Config.xiuxian.setting.master_no_cd)
+      ) {
+        return { event: 'target_fortwo_max_count' }
+      }
+      const freshLast = Number(fresh.lastTime) || 0
+      if (
+        nowTime - freshLast <= Config.xiuxian.xiuxian.fortwo.cd &&
+        !(isMaster && Config.xiuxian.setting.master_no_cd)
+      ) {
+        return {
+          event: 'target_fortwo_cd',
+          data: { outTime: Config.xiuxian.xiuxian.fortwo.cd - (nowTime - freshLast) }
+        }
+      }
+      fresh.beginForTwoList = (fresh.beginForTwoList ?? []).filter((item) => item.expire_time > nowTime)
+      if (fresh.beginForTwoList.find((item) => item.id === id)) {
+        return { event: 'already_begin_fortwo' }
+      }
+      fresh.beginForTwoList.push({
+        id,
+        time: nowTime,
+        expire_time: nowTime + Config.xiuxian.xiuxian.fortwo.expire_time
+      })
+      await Redis.hmset(`${PLAYER_INFO_KEY}:${targetId}`, { 双修信息: JSON.stringify(fresh) })
+      return { event: 'begin_fortwo' }
+    } finally {
+      try {
+        const cur = await Redis.get(lockKey)
+        if (cur === token) await Redis.del(lockKey)
+      } catch (e) {}
+    }
+  },
+
+  /**
+   * 接受双修
+   * @param {number} id - 修仙ID
+   * @param {number} targetId - 目标修仙ID
+   * @param {boolean} isMaster - 是否为主人
+   * @returns 接受双修结果
+   */
+  async acceptForTwo(id, targetId = 0, isMaster = false) {
+    let [cult, sex, retreatStart, twoInfo] = await Redis.hmget(
+      `${PLAYER_INFO_KEY}:${id}`,
+      '修为',
+      '性别',
+      '闭关时间',
+      '双修信息'
+    )
+    if (!sex || sex === '未设置') return { event: 'not_sex' }
+    cult = parseInt(cult, 10) || 0
+    retreatStart = parseInt(retreatStart, 10) || 0
+    twoInfo = safeParse(twoInfo)
+    if (retreatStart !== 0) return { event: 'in_retreat' }
+    if (
+      twoInfo.date === gettoday() &&
+      twoInfo.count >= Config.xiuxian.xiuxian.fortwo.max_count &&
+      !(isMaster && Config.xiuxian.setting.master_no_cd)
+    ) {
+      return { event: 'fortwo_max_count' }
+    }
+    const nowTime = Math.floor(Date.now() / 1000)
+    const lastTime = Number(twoInfo.lastTime) || 0
+    if (nowTime - lastTime <= Config.xiuxian.xiuxian.fortwo.cd && !(isMaster && Config.xiuxian.setting.master_no_cd)) {
+      return {
+        event: 'fortwo_cd',
+        data: { outTime: Config.xiuxian.xiuxian.fortwo.cd - (nowTime - lastTime) }
+      }
+    }
+    if (!targetId) {
+      const lockKey = `Mozu:xiuxian:fortwo_lock:${id}`
+      const token = `${id}:${Date.now()}:${Math.random()}`
+      const locked = await Redis.set(lockKey, token, 'NX', 'EX', 5)
+      if (!locked) return { event: 'fortwo_lock' }
+      try {
+        const fresh = safeParse(await Redis.hget(`${PLAYER_INFO_KEY}:${id}`, '双修信息'))
+        fresh.beginForTwoList = (fresh.beginForTwoList ?? []).filter((item) => item.expire_time > nowTime)
+        await Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, { 双修信息: JSON.stringify(fresh) })
+        return { event: 'fortwo_list', data: { fortwoList: fresh.beginForTwoList } }
+      } finally {
+        try {
+          const cur = await Redis.get(lockKey)
+          if (cur === token) await Redis.del(lockKey)
+        } catch (e) {}
+      }
+    }
+    if ((await Redis.exists(`${PLAYER_INFO_KEY}:${targetId}`)) === 0) {
+      return { event: 'not_id' }
+    }
+    const sortedIds = [Number(id), Number(targetId)].sort((a, b) => a - b)
+    const lockKeys = sortedIds.map((x) => `Mozu:xiuxian:fortwo_lock:${x}`)
+    const token = `${id}:${targetId}:${Date.now()}:${Math.random()}`
+    const acquired = []
+    try {
+      for (const k of lockKeys) {
+        const ok = await Redis.set(k, token, 'NX', 'EX', 5)
+        if (!ok) {
+          for (const a of acquired) {
+            try {
+              const cur = await Redis.get(a)
+              if (cur === token) await Redis.del(a)
+            } catch (e) {}
+          }
+          return { event: 'fortwo_lock' }
+        }
+        acquired.push(k)
+      }
+      const [cultFresh, twoInfoFresh] = await Redis.hmget(`${PLAYER_INFO_KEY}:${id}`, '修为', '双修信息')
+      cult = parseInt(cultFresh, 10) || 0
+      twoInfo = safeParse(twoInfoFresh)
+      if (
+        twoInfo.date === gettoday() &&
+        twoInfo.count >= Config.xiuxian.xiuxian.fortwo.max_count &&
+        !(isMaster && Config.xiuxian.setting.master_no_cd)
+      ) {
+        return { event: 'fortwo_max_count' }
+      }
+      const lastFresh = Number(twoInfo.lastTime) || 0
+      if (
+        nowTime - lastFresh <= Config.xiuxian.xiuxian.fortwo.cd &&
+        !(isMaster && Config.xiuxian.setting.master_no_cd)
+      ) {
+        return {
+          event: 'fortwo_cd',
+          data: { outTime: Config.xiuxian.xiuxian.fortwo.cd - (nowTime - lastFresh) }
+        }
+      }
+      twoInfo.beginForTwoList ??= []
+      const targetIndex = twoInfo.beginForTwoList.findIndex((item) => item.id === targetId)
+      if (targetIndex === -1) return { event: 'not_fortwo' }
+      if (twoInfo.beginForTwoList[targetIndex].expire_time < nowTime) {
+        twoInfo.beginForTwoList.splice(targetIndex, 1)
+        await Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, { 双修信息: JSON.stringify(twoInfo) })
+        return { event: 'fortwo_expired' }
+      }
+      let [targetCult, targetSex, targetRetreatStart, targetTwoInfo] = await Redis.hmget(
+        `${PLAYER_INFO_KEY}:${targetId}`,
+        '修为',
+        '性别',
+        '闭关时间',
+        '双修信息'
+      )
+      targetCult = parseInt(targetCult, 10) || 0
+      targetRetreatStart = parseInt(targetRetreatStart, 10) || 0
+      targetTwoInfo = safeParse(targetTwoInfo)
+      if (targetRetreatStart !== 0) return { event: 'target_in_retreat' }
+      if (
+        targetTwoInfo.date === gettoday() &&
+        targetTwoInfo.count >= Config.xiuxian.xiuxian.fortwo.max_count &&
+        !(isMaster && Config.xiuxian.setting.master_no_cd)
+      ) {
+        return { event: 'target_fortwo_max_count' }
+      }
+      const targetLast = Number(targetTwoInfo.lastTime) || 0
+      if (
+        nowTime - targetLast <= Config.xiuxian.xiuxian.fortwo.cd &&
+        !(isMaster && Config.xiuxian.setting.master_no_cd)
+      ) {
+        return {
+          event: 'target_fortwo_cd',
+          data: { outTime: Config.xiuxian.xiuxian.fortwo.cd - (nowTime - targetLast) }
+        }
+      }
+      let rate = Config.xiuxian.xiuxian.fortwo.rate
+      if (sex === targetSex) rate = Config.xiuxian.xiuxian.fortwo.same_sex_rate
+      const calcTwoRatios = (c, t) => {
+        const total = c + t
+        if (total <= 0) return 50
+        const raw = (c / total) * 100
+        return Math.min(72, Math.max(28, raw))
+      }
+      let addCult = 0
+      let targetAddCult = 0
+      const ref = Config.xiuxian.xiuxian.fortwo.cult_reference
+      const min = Math.max(1, Math.floor(ref * 0.8))
+      const max = Math.max(min + 1, Math.floor(ref * 1.2))
+      const allAddCult = crypto.randomInt(min, max) * 2
+      if (crypto.randomInt(1, 101) <= rate) {
+        const myRatio = calcTwoRatios(cult, targetCult)
+        addCult = Math.floor((allAddCult * myRatio) / 100)
+        targetAddCult = allAddCult - addCult
+      } else {
+        const targetRatio = calcTwoRatios(targetCult, cult)
+        const share = Math.floor((allAddCult * targetRatio) / 100)
+        addCult = -share
+        targetAddCult = -(allAddCult - share)
+      }
+      const today = gettoday()
+      if (twoInfo.date !== today) {
+        twoInfo.date = today
+        twoInfo.count = 0
+      }
+      twoInfo.lastTime = nowTime
+      twoInfo.count++
+      twoInfo.beginForTwoList.splice(targetIndex, 1)
+
+      if (targetTwoInfo.date !== today) {
+        targetTwoInfo.date = today
+        targetTwoInfo.count = 0
+      }
+      targetTwoInfo.lastTime = nowTime
+      targetTwoInfo.count++
+
+      await Redis.hmset(`${PLAYER_INFO_KEY}:${id}`, {
+        修为: cult + addCult,
+        双修信息: JSON.stringify(twoInfo)
+      })
+      await Redis.hmset(`${PLAYER_INFO_KEY}:${targetId}`, {
+        修为: targetCult + targetAddCult,
+        双修信息: JSON.stringify(targetTwoInfo)
+      })
+
+      return {
+        event: 'accept_fortwo',
+        data: { addCult, targetAddCult }
+      }
+    } finally {
+      for (const k of acquired) {
+        try {
+          const cur = await Redis.get(k)
+          if (cur === token) await Redis.del(k)
+        } catch (e) {}
+      }
+    }
+  },
+
+  /**
    * 创建宗门
    * @param {number} id - 修仙ID
    * @returns 创建宗门结果
@@ -3089,4 +3359,12 @@ function genCdkString(length = 16) {
     result += cdk[bytes[i] % cdk.length]
   }
   return result
+}
+
+function safeParse(s) {
+  try {
+    return JSON.parse(s || '{}')
+  } catch {
+    return {}
+  }
 }

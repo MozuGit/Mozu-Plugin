@@ -31,5 +31,14 @@ pvp:
   atk_cd: 60   #发起方切磋冷却（单位：秒）
   def_cd: 120  #接受方切磋冷却（单位：秒）
 
+# 双修配置
+fortwo:
+  cd: 600  # 双修冷却（单位：秒）
+  max_count: 3  # 每日双修上限（为0则无上限）
+  expire_time: 180  # 双修邀请过期时间（单位：秒）
+  cult_reference: 100000  # 双修修为基准值
+  rate: 100  # 双修成功率（单位：%）
+  same_sex_rate: 50  # 同性双修成功率（单位：%）
+
 # 战力计算公式（修为：cult，境界：realm）
 powerFormula: "realm / 10 * cult / 100"
