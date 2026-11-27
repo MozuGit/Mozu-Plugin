@@ -838,7 +838,7 @@ export default [
                 required: true
               },
               {
-                field: 'max',
+                field: 'min',
                 label: '宗门名称长度下限',
                 bottomHelpMessage: '设置宗门名称下限',
                 component: 'InputNumber',
@@ -888,7 +888,7 @@ export default [
                 required: true
               },
               {
-                field: 'max',
+                field: 'min',
                 label: '宗门简介长度下限',
                 bottomHelpMessage: '设置简介名称下限',
                 component: 'InputNumber',

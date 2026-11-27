@@ -1,695 +1,593 @@
 <template>
-  <div class="config-container">
-    <a-card :bordered="false" class="fade-in-card">
-      <div class="card-header">
-        <span class="card-title">修仙配置</span>
-        <div class="header-actions">
-          <a-button type="primary" :loading="saving" @click="handleSave" class="save-btn">
-            <template #icon><save-outlined /></template>
-            保存配置
-          </a-button>
-          <a-button @click="handleRefresh" :loading="loading">
-            <template #icon><reload-outlined /></template>
+  <a-config-provider :auto-insert-space-in-button="false" :theme="configTheme">
+    <div class="panel-page config-page">
+      <div class="panel-heading">
+        <div class="panel-heading__main">
+          <span class="panel-heading__icon">
+            <SettingOutlined />
+          </span>
+          <div>
+            <h2>修仙配置</h2>
+            <p>修仙玩法、境界、妖兽、宗门与秘境参数</p>
+          </div>
+        </div>
+        <div class="panel-heading__actions">
+          <span v-if="lastLoadedAt" class="panel-meta">更新于 {{ lastLoadedAt }}</span>
+          <a-button class="refresh-btn" :loading="loading" @click="handleRefresh">
+            <template #icon>
+              <ReloadOutlined />
+            </template>
             刷新
           </a-button>
         </div>
       </div>
 
-      <div v-if="loading" class="loading-container">
-        <a-spin size="large" tip="加载配置中..." />
-      </div>
+      <section class="config-sheet">
+        <div v-if="loading" class="config-loading">
+          <a-skeleton active :paragraph="{ rows: 16 }" />
+        </div>
 
-      <div v-else-if="elements.length === 0" class="empty-container">
-        <a-empty description="暂无配置项" />
-      </div>
+        <div v-else-if="elements.length === 0" class="config-empty">
+          <a-empty description="暂无配置项" />
+        </div>
 
-      <div v-else class="config-form">
+        <div v-else class="config-body">
+          <section v-for="section in sections" :key="section.key" class="config-section">
+            <h3 v-if="section.title" class="config-section__title">{{ section.title }}</h3>
+
+            <div class="config-section__rows">
+              <template v-for="element in section.items" :key="element.field || element.label">
+                <div v-if="element.component === 'GButtons'" class="config-row">
+                  <div class="config-row__label">{{ element.label }}</div>
+                  <div class="config-row__control">
+                    <a-button danger @click="resetModalVisible = true">
+                      <template #icon>
+                        <DeleteOutlined />
+                      </template>
+                      重置
+                    </a-button>
+                  </div>
+                </div>
+
+                <div v-else-if="element.component === 'GSubForm'" class="config-row">
+                  <div class="config-row__label">
+                    <span v-if="element.required" class="config-required">*</span>{{ element.label }}
+                  </div>
+                  <div class="config-row__control">
+                    <div
+                      class="config-subform"
+                      :class="element.componentProps?.multiple ? 'config-subform--list' : 'config-subform--object'"
+                      role="button"
+                      tabindex="0"
+                      @click="openSubForm(element)"
+                      @keydown.enter.prevent="openSubForm(element)"
+                      @keydown.space.prevent="openSubForm(element)"
+                    >
+                      <template v-if="element.componentProps?.multiple">
+                        <span class="config-subform__count">
+                          已配置 <b>{{ arrayValue(element).length }}</b> 项
+                        </span>
+                      </template>
+                      <template v-else>
+                        <div v-if="hasObjectData(element)" class="config-subform__grid">
+                          <template v-for="sub in subSchemas(element)" :key="sub.field">
+                            <span class="config-subform__key">{{ sub.label }}</span>
+                            <span class="config-subform__value">{{
+                              previewField(objectValue(element)[sub.field], sub)
+                            }}</span>
+                          </template>
+                        </div>
+                        <span v-else class="config-subform__empty">未配置，点击编辑</span>
+                      </template>
+                      <span class="config-subform__edit"> <EditOutlined /> 编辑 </span>
+                    </div>
+                    <p v-if="element.bottomHelpMessage" class="config-hint">{{ element.bottomHelpMessage }}</p>
+                  </div>
+                </div>
+
+                <div v-else class="config-row">
+                  <div class="config-row__label">
+                    <span v-if="element.required" class="config-required">*</span>{{ element.label }}
+                  </div>
+                  <div class="config-row__control">
+                    <a-switch
+                      v-if="element.component === 'Switch'"
+                      :checked="!!formData[element.field]"
+                      @update:checked="(value) => (formData[element.field] = value)"
+                    />
+                    <a-input-number
+                      v-else-if="element.component === 'InputNumber'"
+                      v-model:value="formData[element.field]"
+                      v-bind="fieldProps(element)"
+                      :controls="false"
+                      :style="{ width: numberWidth(element) }"
+                    />
+                    <a-input
+                      v-else-if="element.component === 'Input'"
+                      v-model:value="formData[element.field]"
+                      v-bind="fieldProps(element)"
+                      allow-clear
+                    />
+                    <a-radio-group
+                      v-else-if="element.component === 'RadioGroup'"
+                      v-model:value="formData[element.field]"
+                      :options="element.componentProps?.options || []"
+                    />
+                    <a-select
+                      v-else-if="element.component === 'Select'"
+                      v-model:value="formData[element.field]"
+                      v-bind="fieldProps(element)"
+                      :options="element.componentProps?.options || []"
+                      allow-clear
+                      popup-class-name="config-select-popup"
+                      style="width: 100%"
+                    />
+                    <div v-else-if="element.component === 'GSelectGroup'" class="config-inline-field">
+                      <a-select
+                        :ref="(component) => setGroupRef(element.field, component)"
+                        v-model:value="formData[element.field]"
+                        :max-tag-count="4"
+                        :open="!!groupOpen[element.field]"
+                        :options="groupOptions"
+                        mode="multiple"
+                        placeholder="请选择群"
+                        popup-class-name="config-select-popup"
+                        @dropdownVisibleChange="(open) => (groupOpen[element.field] = open)"
+                      />
+                      <a-button type="primary" class="config-pick-btn" @click="openGroupSelect(element.field)">
+                        <template #icon>
+                          <SearchOutlined />
+                        </template>
+                        选择
+                      </a-button>
+                    </div>
+                    <a-select
+                      v-else-if="element.component === 'GTags'"
+                      v-model:value="formData[element.field]"
+                      mode="tags"
+                      placeholder="输入后按回车添加"
+                      popup-class-name="config-select-popup"
+                      style="width: 100%"
+                    />
+                    <div v-else-if="element.component === 'EasyCron'" class="config-inline-field">
+                      <a-input
+                        v-model:value="formData[element.field]"
+                        v-bind="fieldProps(element)"
+                        class="config-cron-input"
+                      />
+                      <a-dropdown trigger="click">
+                        <a-button class="config-cron-pick">
+                          <template #icon>
+                            <ClockCircleOutlined />
+                          </template>
+                          选择
+                        </a-button>
+                        <template #overlay>
+                          <a-menu @click="(info) => applyCron(element, info.key)">
+                            <a-menu-item v-for="preset in cronPresets" :key="preset.key">
+                              {{ preset.label }}
+                            </a-menu-item>
+                          </a-menu>
+                        </template>
+                      </a-dropdown>
+                    </div>
+                    <span v-else class="config-unsupported">暂不支持 {{ element.component }}</span>
+
+                    <p v-if="element.bottomHelpMessage" class="config-hint">{{ element.bottomHelpMessage }}</p>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </section>
+        </div>
+
+        <footer v-if="!loading && elements.length > 0" class="config-savebar">
+          <span class="config-savebar__state">
+            <span class="state-dot" :class="{ 'is-dirty': dirty }"></span>
+            {{ dirty ? '有未保存的修改' : '配置已同步' }}
+          </span>
+          <a-button type="primary" size="large" class="config-save-btn" :loading="saving" @click="handleSave">
+            <template #icon>
+              <SaveOutlined />
+            </template>
+            保存配置
+          </a-button>
+        </footer>
+      </section>
+    </div>
+
+    <a-modal
+      v-model:open="editorVisible"
+      class="config-editor-modal"
+      :destroy-on-close="true"
+      :mask-closable="false"
+      :width="editorWidth"
+      @cancel="closeEditor"
+    >
+      <template #title>
+        <div class="editor-head">
+          <span class="editor-head__title">{{ currentFrame?.title || '配置' }}</span>
+          <span v-if="editorTrail" class="editor-head__trail">{{ editorTrail }}</span>
+        </div>
+      </template>
+
+      <div v-if="currentFrame" class="editor-body">
+        <div v-if="currentFrame.kind === 'array'" class="editor-array">
+          <div class="editor-array__meta">共 {{ currentFrame.data.length }} 项配置</div>
+
+          <div v-if="currentFrame.data.length === 0" class="editor-array__empty">
+            <a-empty description="暂无配置，点击下方添加" />
+          </div>
+
+          <div
+            v-for="(item, index) in currentFrame.data"
+            :key="`${index}-${item?.id ?? item?.name ?? ''}`"
+            class="editor-array__item"
+          >
+            <div class="editor-array__main">
+              <span class="editor-array__index">{{ index + 1 }}</span>
+              <div class="editor-array__copy">
+                <div class="editor-array__name">{{ arrayItemName(item, index) }}</div>
+                <div class="editor-array__summary">{{ arrayItemSummary(item) }}</div>
+              </div>
+            </div>
+            <div class="editor-array__actions">
+              <a-button size="small" type="text" @click="editArrayItem(index)">
+                <EditOutlined />
+                编辑
+              </a-button>
+              <a-popconfirm
+                cancel-text="取消"
+                ok-text="删除"
+                title="确定删除这一项吗？"
+                @confirm="removeArrayItem(index)"
+              >
+                <a-button danger size="small" type="text">
+                  <DeleteOutlined />
+                </a-button>
+              </a-popconfirm>
+            </div>
+          </div>
+
+          <a-button block class="editor-array__add" @click="addArrayItem">
+            <template #icon>
+              <PlusOutlined />
+            </template>
+            添加配置
+          </a-button>
+        </div>
+
         <a-form
-          ref="formRef"
-          :model="formData"
-          :label-col="{ span: 6 }"
-          :wrapper-col="{ span: 18 }"
+          v-else
+          :key="editorFormKey"
+          ref="editorFormRef"
+          :label-col="editorLabelCol"
+          :model="currentFrame.data"
+          :wrapper-col="editorWrapperCol"
           layout="horizontal"
         >
-          <template v-for="element in elements" :key="element.field || element.label">
-            <div v-if="element.component === 'SOFT_GROUP_BEGIN'" class="group-title">
-              {{ element.label }}
-            </div>
-
-            <div v-else-if="element.component === 'Divider'" class="divider-wrapper">
-              <a-divider
-                :orientation="element.componentProps?.orientation || 'left'"
-                :plain="element.componentProps?.plain !== false"
+          <template v-for="schema in currentFrame.schemas" :key="schema.field">
+            <a-form-item v-if="schema.component === 'GSubForm'" :extra="schema.bottomHelpMessage" :label="schema.label">
+              <div
+                class="config-subform"
+                :class="schema.componentProps?.multiple ? 'config-subform--list' : 'config-subform--object'"
+                role="button"
+                tabindex="0"
+                @click="openNestedSubForm(schema)"
+                @keydown.enter.prevent="openNestedSubForm(schema)"
+                @keydown.space.prevent="openNestedSubForm(schema)"
               >
-                {{ element.label }}
-              </a-divider>
-            </div>
-
-            <a-form-item v-else-if="element.component === 'GButtons'" :label="element.label" class="config-item">
-              <a-button
-                v-for="(btn, btnIdx) in element.componentProps?.buttons"
-                :key="btnIdx"
-                :type="btn.type || 'default'"
-                :danger="btn.danger"
-                @click="handleButtonAction(btn)"
-                style="margin-right: 8px"
-              >
-                {{ btn.label }}
-              </a-button>
-            </a-form-item>
-
-            <a-form-item
-              v-else-if="element.component === 'GSubForm'"
-              :label="element.label"
-              :help="element.bottomHelpMessage"
-              class="config-item subform-form-item"
-            >
-              <div class="subform-card" @click="openSubForm(element)">
-                <template v-if="element.componentProps?.multiple">
-                  <div class="card-preview">
-                    <div class="array-count-preview">
-                      <span class="count-number">{{ getArrayData(element.field).length }}</span>
-                      <span class="count-text">项</span>
-                    </div>
-                  </div>
+                <template v-if="schema.componentProps?.multiple">
+                  <span class="config-subform__count">
+                    已配置 <b>{{ frameArrayCount(schema) }}</b> 项
+                  </span>
                 </template>
-
                 <template v-else>
-                  <div
-                    v-if="getObjectData(element.field) && Object.keys(getObjectData(element.field)).length > 0"
-                    class="card-preview"
-                  >
-                    <div
-                      v-for="schema in (element.componentProps?.schemas || []).slice(0, 3)"
-                      :key="schema.field"
-                      class="preview-item"
-                    >
-                      <span class="preview-label">{{ schema.label }}:</span>
-                      <span class="preview-value">{{
-                        formatPreviewValue(getObjectData(element.field)[schema.field], schema)
+                  <div v-if="frameHasObjectData(schema)" class="config-subform__grid">
+                    <template v-for="sub in subSchemas(schema)" :key="sub.field">
+                      <span class="config-subform__key">{{ sub.label }}</span>
+                      <span class="config-subform__value">{{
+                        previewField((currentFrame.data[schema.field] || {})[sub.field], sub)
                       }}</span>
-                    </div>
-                    <div v-if="(element.componentProps?.schemas || []).length > 3" class="preview-more">
-                      还有 {{ element.componentProps.schemas.length - 3 }} 项...
-                    </div>
+                    </template>
                   </div>
-                  <div v-else class="card-empty">点击配置</div>
+                  <span v-else class="config-subform__empty">未配置，点击编辑</span>
                 </template>
-
-                <div class="card-hint"><edit-outlined /> 点击编辑</div>
+                <span class="config-subform__edit"> <EditOutlined /> 编辑 </span>
               </div>
             </a-form-item>
 
             <a-form-item
               v-else
-              :label="element.label"
-              :help="element.bottomHelpMessage"
-              :required="element.required"
-              class="config-item"
+              :extra="schema.bottomHelpMessage"
+              :label="schema.label"
+              :name="schema.field"
+              :rules="rulesFor(schema)"
             >
-              <template v-if="isNestedObjectType(element)">
-                <div class="subform-card" @click="openNestedSubForm(element)">
-                  <div
-                    v-if="getObjectData(element.field) && Object.keys(getObjectData(element.field)).length > 0"
-                    class="card-preview"
-                  >
-                    <div
-                      v-for="schema in (getNestedSchemas(element) || []).slice(0, 3)"
-                      :key="schema.field"
-                      class="preview-item"
-                    >
-                      <span class="preview-label">{{ schema.label }}:</span>
-                      <span class="preview-value">{{
-                        formatPreviewValue(getObjectData(element.field)[schema.field], schema)
-                      }}</span>
-                    </div>
-                    <div v-if="(getNestedSchemas(element) || []).length > 3" class="preview-more">
-                      还有 {{ getNestedSchemas(element).length - 3 }} 项...
-                    </div>
-                  </div>
-                  <div v-else class="card-empty">点击配置</div>
-                  <div class="card-hint"><edit-outlined /> 点击编辑</div>
-                </div>
-              </template>
-
-              <template v-else>
-                <a-switch v-if="element.component === 'Switch'" v-model:checked="formData[element.field]" />
-                <a-input-number
-                  v-else-if="element.component === 'InputNumber'"
-                  v-model:value="formData[element.field]"
-                  v-bind="element.componentProps"
-                  style="width: 100%"
-                />
-                <a-input
-                  v-else-if="element.component === 'Input'"
-                  v-model:value="formData[element.field]"
-                  v-bind="element.componentProps"
-                />
-                <a-radio-group v-else-if="element.component === 'RadioGroup'" v-model:value="formData[element.field]">
-                  <a-radio v-for="opt in element.componentProps?.options" :key="opt.value" :value="opt.value">
-                    {{ opt.label }}
-                  </a-radio>
-                </a-radio-group>
+              <a-switch v-if="schema.component === 'Switch'" v-model:checked="currentFrame.data[schema.field]" />
+              <a-input-number
+                v-else-if="schema.component === 'InputNumber'"
+                v-model:value="currentFrame.data[schema.field]"
+                v-bind="fieldProps(schema)"
+                :controls="false"
+                :style="{ width: numberWidth(schema) }"
+              />
+              <a-input
+                v-else-if="schema.component === 'Input'"
+                v-model:value="currentFrame.data[schema.field]"
+                v-bind="fieldProps(schema)"
+                allow-clear
+              />
+              <a-radio-group
+                v-else-if="schema.component === 'RadioGroup'"
+                v-model:value="currentFrame.data[schema.field]"
+                :options="schema.componentProps?.options || []"
+              />
+              <a-select
+                v-else-if="schema.component === 'Select'"
+                v-model:value="currentFrame.data[schema.field]"
+                v-bind="fieldProps(schema)"
+                :options="schema.componentProps?.options || []"
+                allow-clear
+                popup-class-name="config-select-popup"
+                style="width: 100%"
+              />
+              <div v-else-if="schema.component === 'GSelectGroup'" class="config-inline-field">
                 <a-select
-                  v-else-if="element.component === 'Select'"
-                  v-model:value="formData[element.field]"
-                  v-bind="element.componentProps"
-                  style="width: 100%"
-                />
-                <a-select
-                  v-else-if="element.component === 'GSelectGroup'"
-                  v-model:value="formData[element.field]"
+                  :ref="(component) => setGroupRef(`editor:${schema.field}`, component)"
+                  v-model:value="currentFrame.data[schema.field]"
+                  :max-tag-count="4"
+                  :open="!!groupOpen[`editor:${schema.field}`]"
+                  :options="groupOptions"
                   mode="multiple"
                   placeholder="请选择群"
-                  style="width: 100%"
-                >
-                  <a-select-option v-for="group in groupOptions" :key="group.value" :value="group.value">
-                    {{ group.label }}
-                  </a-select-option>
-                </a-select>
-                <a-select
-                  v-else-if="element.component === 'GTags'"
-                  v-model:value="formData[element.field]"
-                  mode="tags"
-                  placeholder="输入后按回车添加"
-                  style="width: 100%"
+                  popup-class-name="config-select-popup"
+                  @dropdownVisibleChange="(open) => (groupOpen[`editor:${schema.field}`] = open)"
                 />
-                <a-input
-                  v-else-if="element.component === 'EasyCron'"
-                  v-model:value="formData[element.field]"
-                  v-bind="element.componentProps"
-                  placeholder="*表示任意，?表示不指定（月日和星期互斥）"
-                />
-              </template>
-            </a-form-item>
-          </template>
-        </a-form>
-      </div>
-    </a-card>
-
-    <a-modal
-      v-model:visible="subFormVisible"
-      :title="subFormTitle"
-      ok-text="确定"
-      cancel-text="取消"
-      @ok="handleSubFormSave"
-      @cancel="subFormVisible = false"
-      :confirm-loading="subFormLoading"
-      width="600px"
-      :destroyOnClose="true"
-    >
-      <div v-if="currentSubFormSchemas && currentSubFormSchemas.length > 0" class="sub-form">
-        <a-form
-          ref="subFormInnerRef"
-          :model="subFormData"
-          :label-col="{ span: 8 }"
-          :wrapper-col="{ span: 16 }"
-          layout="horizontal"
-        >
-          <template v-for="schema in currentSubFormSchemas" :key="schema.field">
-            <a-form-item
-              v-if="schema.component === 'GSubForm' || isNestedObjectType(schema)"
-              :label="schema.label"
-              :help="schema.bottomHelpMessage"
-            >
-              <div class="subform-card subform-card-inner" @click="openNestedSubSubForm(schema)">
-                <div
-                  v-if="subFormData[schema.field] && Object.keys(subFormData[schema.field]).length > 0"
-                  class="card-preview"
-                >
-                  <div
-                    v-for="subSchema in (getNestedSchemas(schema) || []).slice(0, 3)"
-                    :key="subSchema.field"
-                    class="preview-item"
-                  >
-                    <span class="preview-label">{{ subSchema.label }}:</span>
-                    <span class="preview-value">{{
-                      formatPreviewValue(subFormData[schema.field]?.[subSchema.field], subSchema)
-                    }}</span>
-                  </div>
-                </div>
-                <div v-else class="card-empty">点击配置</div>
-                <div class="card-hint"><edit-outlined /> 点击编辑</div>
-              </div>
-            </a-form-item>
-
-            <a-form-item
-              v-else
-              :label="schema.label"
-              :required="schema.required"
-              :help="schema.bottomHelpMessage"
-              :rules="getFormItemRules(schema)"
-              :name="schema.field"
-            >
-              <a-switch v-if="schema.component === 'Switch'" v-model:checked="subFormData[schema.field]" />
-              <a-input-number
-                v-else-if="schema.component === 'InputNumber'"
-                v-model:value="subFormData[schema.field]"
-                v-bind="schema.componentProps"
-                style="width: 100%"
-              />
-              <a-input
-                v-else-if="schema.component === 'Input'"
-                v-model:value="subFormData[schema.field]"
-                v-bind="schema.componentProps"
-              />
-              <a-radio-group v-else-if="schema.component === 'RadioGroup'" v-model:value="subFormData[schema.field]">
-                <a-radio v-for="opt in schema.componentProps?.options" :key="opt.value" :value="opt.value">
-                  {{ opt.label }}
-                </a-radio>
-              </a-radio-group>
-              <a-select
-                v-else-if="schema.component === 'Select'"
-                v-model:value="subFormData[schema.field]"
-                v-bind="schema.componentProps"
-                style="width: 100%"
-              />
-              <a-select
-                v-else-if="schema.component === 'GTags'"
-                v-model:value="subFormData[schema.field]"
-                mode="tags"
-                style="width: 100%"
-              />
-              <a-select
-                v-else-if="schema.component === 'GSelectGroup'"
-                v-model:value="subFormData[schema.field]"
-                mode="multiple"
-                style="width: 100%"
-              >
-                <a-select-option v-for="group in groupOptions" :key="group.value" :value="group.value">
-                  {{ group.label }}
-                </a-select-option>
-              </a-select>
-              <a-input
-                v-else-if="schema.component === 'EasyCron'"
-                v-model:value="subFormData[schema.field]"
-                placeholder="*表示任意，?表示不指定"
-              />
-            </a-form-item>
-          </template>
-        </a-form>
-      </div>
-      <div v-else class="sub-form-empty">
-        <a-empty description="暂无配置项" />
-      </div>
-    </a-modal>
-
-    <a-modal
-      v-model:visible="nestedSubFormVisible"
-      :title="nestedSubFormTitle"
-      ok-text="确定"
-      cancel-text="取消"
-      @ok="handleNestedSubFormSave"
-      @cancel="nestedSubFormVisible = false"
-      :confirm-loading="nestedSubFormLoading"
-      width="600px"
-      :destroyOnClose="true"
-    >
-      <div v-if="currentNestedSchemas && currentNestedSchemas.length > 0" class="sub-form">
-        <a-form
-          ref="nestedFormInnerRef"
-          :model="nestedSubFormData"
-          :label-col="{ span: 8 }"
-          :wrapper-col="{ span: 16 }"
-          layout="horizontal"
-        >
-          <template v-for="schema in currentNestedSchemas" :key="schema.field">
-            <a-form-item
-              v-if="schema.component === 'GSubForm' || isNestedObjectType(schema)"
-              :label="schema.label"
-              :help="schema.bottomHelpMessage"
-            >
-              <div class="subform-card subform-card-inner" @click="openDeepNestedSubForm(schema, nestedSubFormData)">
-                <div
-                  v-if="nestedSubFormData[schema.field] && Object.keys(nestedSubFormData[schema.field]).length > 0"
-                  class="card-preview"
-                >
-                  <div
-                    v-for="subSchema in (getNestedSchemas(schema) || []).slice(0, 3)"
-                    :key="subSchema.field"
-                    class="preview-item"
-                  >
-                    <span class="preview-label">{{ subSchema.label }}:</span>
-                    <span class="preview-value">{{
-                      formatPreviewValue(nestedSubFormData[schema.field]?.[subSchema.field], subSchema)
-                    }}</span>
-                  </div>
-                </div>
-                <div v-else class="card-empty">点击配置</div>
-                <div class="card-hint"><edit-outlined /> 点击编辑</div>
-              </div>
-            </a-form-item>
-
-            <a-form-item
-              v-else
-              :label="schema.label"
-              :required="schema.required"
-              :help="schema.bottomHelpMessage"
-              :rules="getFormItemRules(schema)"
-              :name="schema.field"
-            >
-              <a-switch v-if="schema.component === 'Switch'" v-model:checked="nestedSubFormData[schema.field]" />
-              <a-input-number
-                v-else-if="schema.component === 'InputNumber'"
-                v-model:value="nestedSubFormData[schema.field]"
-                v-bind="schema.componentProps"
-                style="width: 100%"
-              />
-              <a-input
-                v-else-if="schema.component === 'Input'"
-                v-model:value="nestedSubFormData[schema.field]"
-                v-bind="schema.componentProps"
-              />
-              <a-radio-group
-                v-else-if="schema.component === 'RadioGroup'"
-                v-model:value="nestedSubFormData[schema.field]"
-              >
-                <a-radio v-for="opt in schema.componentProps?.options" :key="opt.value" :value="opt.value">
-                  {{ opt.label }}
-                </a-radio>
-              </a-radio-group>
-              <a-select
-                v-else-if="schema.component === 'Select'"
-                v-model:value="nestedSubFormData[schema.field]"
-                v-bind="schema.componentProps"
-                style="width: 100%"
-              />
-              <a-select
-                v-else-if="schema.component === 'GTags'"
-                v-model:value="nestedSubFormData[schema.field]"
-                mode="tags"
-                style="width: 100%"
-              />
-              <a-select
-                v-else-if="schema.component === 'GSelectGroup'"
-                v-model:value="nestedSubFormData[schema.field]"
-                mode="multiple"
-                style="width: 100%"
-              >
-                <a-select-option v-for="group in groupOptions" :key="group.value" :value="group.value">
-                  {{ group.label }}
-                </a-select-option>
-              </a-select>
-              <a-input
-                v-else-if="schema.component === 'EasyCron'"
-                v-model:value="nestedSubFormData[schema.field]"
-                placeholder="*表示任意，?表示不指定"
-              />
-            </a-form-item>
-          </template>
-        </a-form>
-      </div>
-      <div v-else class="sub-form-empty">
-        <a-empty description="暂无配置项" />
-      </div>
-    </a-modal>
-
-    <a-modal
-      v-model:visible="arraySubFormVisible"
-      :title="arraySubFormTitle"
-      :ok-text="null"
-      :cancel-text="null"
-      :footer="null"
-      width="700px"
-      :destroyOnClose="true"
-    >
-      <div v-if="currentArraySubFormSchemas && currentArraySubFormSchemas.length > 0" class="array-modal-container">
-        <div class="array-scroll-area">
-          <div v-if="arraySubFormData.length === 0" class="array-empty">
-            <a-empty description="暂无数据，点击下方添加" />
-          </div>
-
-          <div v-for="(item, itemIdx) in arraySubFormData" :key="itemIdx" class="array-item-card">
-            <div class="array-item-header">
-              <span class="array-item-title">{{ item.name || getArrayItemDisplayName(item) }}</span>
-              <div class="array-item-actions">
-                <a-button type="link" size="small" @click="editArrayItem(itemIdx)"> <edit-outlined /> 编辑 </a-button>
-                <a-button type="text" danger size="small" @click="removeArrayItem(itemIdx)">
-                  <delete-outlined />
+                <a-button type="primary" class="config-pick-btn" @click="openGroupSelect(`editor:${schema.field}`)">
+                  <template #icon>
+                    <SearchOutlined />
+                  </template>
+                  选择
                 </a-button>
               </div>
-            </div>
-            <div class="array-item-preview">
-              <div
-                v-for="schema in (currentArraySubFormSchemas || []).slice(0, 3)"
-                :key="schema.field"
-                class="preview-item"
-              >
-                <span class="preview-label">{{ schema.label }}:</span>
-                <span class="preview-value">{{ formatPreviewValue(item[schema.field], schema) }}</span>
-              </div>
-              <div v-if="(currentArraySubFormSchemas || []).length > 3" class="preview-more">
-                还有 {{ currentArraySubFormSchemas.length - 3 }} 项...
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="array-footer">
-          <a-button type="primary" @click="addArrayItemAndEdit" class="array-add-btn">
-            <template #icon><plus-outlined /></template>
-            添加
-          </a-button>
-          <a-button type="primary" @click="handleArrayConfirm" style="margin-left: 8px"> 确定 </a-button>
-        </div>
-      </div>
-      <div v-else class="sub-form-empty">
-        <a-empty description="暂无配置项" />
-      </div>
-    </a-modal>
-
-    <a-modal
-      v-model:visible="arrayItemEditVisible"
-      :title="arrayItemEditTitle"
-      ok-text="确定"
-      cancel-text="取消"
-      @ok="handleArrayItemEditSave"
-      @cancel="handleArrayItemEditCancel"
-      :confirm-loading="arrayItemEditLoading"
-      width="600px"
-      :destroyOnClose="true"
-    >
-      <div v-if="currentArrayItemSchemas && currentArrayItemSchemas.length > 0" class="sub-form">
-        <a-form
-          ref="arrayItemFormInnerRef"
-          :model="arrayItemEditData"
-          :label-col="{ span: 8 }"
-          :wrapper-col="{ span: 16 }"
-          layout="horizontal"
-        >
-          <template v-for="schema in currentArrayItemSchemas" :key="schema.field">
-            <a-form-item
-              v-if="schema.component === 'GSubForm' || isNestedObjectType(schema)"
-              :label="schema.label"
-              :help="schema.bottomHelpMessage"
-            >
-              <div
-                class="subform-card subform-card-inner"
-                @click="openNestedSubSubFormForArray(schema, arrayItemEditData)"
-              >
-                <div
-                  v-if="arrayItemEditData[schema.field] && Object.keys(arrayItemEditData[schema.field]).length > 0"
-                  class="card-preview"
-                >
-                  <div
-                    v-for="subSchema in (getNestedSchemas(schema) || []).slice(0, 3)"
-                    :key="subSchema.field"
-                    class="preview-item"
-                  >
-                    <span class="preview-label">{{ subSchema.label }}:</span>
-                    <span class="preview-value">{{
-                      formatPreviewValue(arrayItemEditData[schema.field]?.[subSchema.field], subSchema)
-                    }}</span>
-                  </div>
-                </div>
-                <div v-else class="card-empty">点击配置</div>
-                <div class="card-hint"><edit-outlined /> 点击编辑</div>
-              </div>
-            </a-form-item>
-
-            <a-form-item
-              v-else
-              :label="schema.label"
-              :required="schema.required"
-              :help="schema.bottomHelpMessage"
-              :rules="getFormItemRules(schema)"
-              :name="schema.field"
-            >
-              <a-switch v-if="schema.component === 'Switch'" v-model:checked="arrayItemEditData[schema.field]" />
-              <a-input-number
-                v-else-if="schema.component === 'InputNumber'"
-                v-model:value="arrayItemEditData[schema.field]"
-                v-bind="schema.componentProps"
-                style="width: 100%"
-              />
-              <a-input
-                v-else-if="schema.component === 'Input'"
-                v-model:value="arrayItemEditData[schema.field]"
-                v-bind="schema.componentProps"
-              />
-              <a-radio-group
-                v-else-if="schema.component === 'RadioGroup'"
-                v-model:value="arrayItemEditData[schema.field]"
-              >
-                <a-radio v-for="opt in schema.componentProps?.options" :key="opt.value" :value="opt.value">
-                  {{ opt.label }}
-                </a-radio>
-              </a-radio-group>
-              <a-select
-                v-else-if="schema.component === 'Select'"
-                v-model:value="arrayItemEditData[schema.field]"
-                v-bind="schema.componentProps"
-                style="width: 100%"
-              />
               <a-select
                 v-else-if="schema.component === 'GTags'"
-                v-model:value="arrayItemEditData[schema.field]"
+                v-model:value="currentFrame.data[schema.field]"
                 mode="tags"
+                placeholder="输入后按回车添加"
+                popup-class-name="config-select-popup"
                 style="width: 100%"
               />
-              <a-input
-                v-else-if="schema.component === 'EasyCron'"
-                v-model:value="arrayItemEditData[schema.field]"
-                placeholder="*表示任意，?表示不指定"
-              />
-              <a-select
-                v-else-if="schema.component === 'GSelectGroup'"
-                v-model:value="arrayItemEditData[schema.field]"
-                mode="multiple"
-                style="width: 100%"
-              >
-                <a-select-option v-for="group in groupOptions" :key="group.value" :value="group.value">
-                  {{ group.label }}
-                </a-select-option>
-              </a-select>
+              <div v-else-if="schema.component === 'EasyCron'" class="config-inline-field">
+                <a-input
+                  v-model:value="currentFrame.data[schema.field]"
+                  v-bind="fieldProps(schema)"
+                  class="config-cron-input"
+                />
+                <a-dropdown trigger="click">
+                  <a-button class="config-cron-pick">
+                    <template #icon>
+                      <ClockCircleOutlined />
+                    </template>
+                    选择
+                  </a-button>
+                  <template #overlay>
+                    <a-menu @click="(info) => (currentFrame.data[schema.field] = info.key)">
+                      <a-menu-item v-for="preset in cronPresets" :key="preset.key">
+                        {{ preset.label }}
+                      </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
+              </div>
+              <span v-else class="config-unsupported">暂不支持 {{ schema.component }}</span>
             </a-form-item>
           </template>
         </a-form>
       </div>
-      <div v-else class="sub-form-empty">
-        <a-empty description="暂无配置项" />
-      </div>
+
+      <template #footer>
+        <div class="editor-footer">
+          <a-button @click="handleEditorCancel">
+            <template v-if="editorStack.length > 1" #icon>
+              <ArrowLeftOutlined />
+            </template>
+            {{ editorStack.length > 1 ? '返回' : '取消' }}
+          </a-button>
+          <a-button type="primary" @click="submitEditor">
+            {{ currentFrame?.kind === 'array' ? '保存' : '确定' }}
+          </a-button>
+        </div>
+      </template>
     </a-modal>
 
     <a-modal
-      v-model:visible="resetModalVisible"
-      title="确认重置"
-      ok-text="确认重置"
+      v-model:open="resetModalVisible"
       cancel-text="取消"
-      ok-danger
-      @ok="handleResetConfirm"
+      ok-text="确认重置"
+      title="确认重置"
       @cancel="resetModalVisible = false"
-      :confirm-loading="resetLoading"
+      @ok="handleResetConfirm"
     >
-      <p style="font-size: 16px; color: #ff4d4f; font-weight: bold">⚠️ 确认重置所有修仙配置吗？</p>
-      <p style="color: #666">此操作不可撤销！所有配置将恢复为默认值。</p>
+      <p class="reset-warning">⚠️ 确认重置所有修仙配置吗？</p>
+      <p class="reset-desc">此操作不可撤销，所有配置将恢复为默认值。</p>
+      <template #footer>
+        <div class="editor-footer">
+          <a-button @click="resetModalVisible = false">取消</a-button>
+          <a-button :loading="resetLoading" danger type="primary" @click="handleResetConfirm">确认重置</a-button>
+        </div>
+      </template>
     </a-modal>
-  </div>
+  </a-config-provider>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onActivated, nextTick } from 'vue'
-import { message } from 'ant-design-vue'
-import { SaveOutlined, ReloadOutlined, EditOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import { computed, nextTick, onActivated, onMounted, reactive, ref, watch } from 'vue'
+import { message, Modal } from 'ant-design-vue'
+import {
+  ArrowLeftOutlined,
+  ClockCircleOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SaveOutlined,
+  SearchOutlined,
+  SettingOutlined
+} from '@ant-design/icons-vue'
 import { requestRaw } from '../../api/http'
 import { useAuthGuard } from '../../composables/useAuthGuard'
+import { useMobile } from '../../composables/useMobile'
 
 const { ensureAuth } = useAuthGuard()
+const { isMobile } = useMobile()
 
-const configElementsCache = ref(null)
+const configTheme = {
+  token: {
+    colorPrimary: '#4a7df0',
+    colorInfo: '#4a7df0',
+    colorLink: '#4a7df0',
+    borderRadius: 4,
+    controlHeight: 34,
+    fontSize: 14
+  }
+}
 
+const cronPresets = [
+  { key: '0 0 * * * *', label: '每小时整点' },
+  { key: '0 0 0 * * *', label: '每天 00:00' },
+  { key: '0 0 8 * * *', label: '每天 08:00' },
+  { key: '0 0 0 * * 1', label: '每周一 00:00' },
+  { key: '0 0 0 1 * *', label: '每月 1 日 00:00' }
+]
+
+const elements = ref([])
 const loading = ref(false)
 const saving = ref(false)
-const elements = ref([])
+const lastLoadedAt = ref('')
+const dirty = ref(false)
+const configElementsCache = ref(null)
 const formData = reactive({})
-const formRef = ref()
 
-const subFormInnerRef = ref()
-const nestedFormInnerRef = ref()
-const arrayItemFormInnerRef = ref()
+const groupOptions = ref([])
+const groupOpen = reactive({})
+const groupSelectRefs = new Map()
 
 const resetModalVisible = ref(false)
 const resetLoading = ref(false)
 
-const groupOptions = ref([])
+const editorVisible = ref(false)
+const editorStack = reactive([])
+const editorFormRef = ref()
 
-const subFormVisible = ref(false)
-const subFormTitle = ref('')
-const subFormData = reactive({})
-const currentSubFormSchemas = ref([])
-const subFormLoading = ref(false)
-const currentElement = ref(null)
+let savedSnapshot = ''
 
-const nestedSubFormVisible = ref(false)
-const nestedSubFormTitle = ref('')
-const nestedSubFormData = reactive({})
-const currentNestedSchemas = ref([])
-const nestedSubFormLoading = ref(false)
-const currentNestedElement = ref(null)
+const currentFrame = computed(() => editorStack[editorStack.length - 1] || null)
+const editorWidth = computed(() => (currentFrame.value?.kind === 'array' ? 760 : 640))
+const editorLabelCol = computed(() => (isMobile.value ? { span: 24 } : { style: { width: '156px' } }))
+const editorWrapperCol = computed(() => (isMobile.value ? { span: 24 } : { style: { flex: '1 1 auto' } }))
+const editorTrail = computed(() =>
+  editorStack
+    .slice(0, -1)
+    .map((frame) => frame.title)
+    .filter(Boolean)
+    .join(' / ')
+)
+const editorFormKey = computed(
+  () => `${editorStack.length}:${currentFrame.value?.kind || ''}:${currentFrame.value?.title || ''}`
+)
 
-const arraySubFormVisible = ref(false)
-const arraySubFormTitle = ref('')
-const arraySubFormData = ref([])
-const currentArraySubFormSchemas = ref([])
-const currentArrayElement = ref(null)
+const sections = computed(() => {
+  const result = []
+  let current = null
 
-const arrayItemEditVisible = ref(false)
-const arrayItemEditTitle = ref('')
-const arrayItemEditData = reactive({})
-const currentArrayItemSchemas = ref([])
-const arrayItemEditLoading = ref(false)
-const currentEditItemIndex = ref(-1)
-const isNewArrayItem = ref(false)
+  for (const element of elements.value) {
+    if (element.component === 'SOFT_GROUP_BEGIN') continue
 
-const fetchConfigElements = async () => {
-  if (configElementsCache.value) {
-    elements.value = configElementsCache.value
-    return configElementsCache.value
+    if (element.component === 'Divider') {
+      current = { key: `${element.label}-${result.length}`, title: element.label, items: [] }
+      result.push(current)
+      continue
+    }
+
+    if (!current) {
+      current = { key: `section-${result.length}`, title: '', items: [] }
+      result.push(current)
+    }
+    current.items.push(element)
   }
 
-  try {
-    const response = await requestRaw('/api/xiuxian/config?action=get_config_elements')
+  return result
+})
 
-    if (response?.success && response.data?.elements) {
-      const elementsData = response.data.elements
-      configElementsCache.value = elementsData
-      elements.value = elementsData
-      return elementsData
-    }
+watch(
+  formData,
+  () => {
+    dirty.value = JSON.stringify(formData) !== savedSnapshot
+  },
+  { deep: true }
+)
 
-    return []
-  } catch (error) {
-    if (error.message !== '未授权') {
-      message.error('获取配置模板失败: ' + error.message)
-    }
-    return []
+const nowLabel = () =>
+  new Date().toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    hour12: false,
+    minute: '2-digit'
+  })
+
+const deepClone = (value) => {
+  if (value === null || value === undefined) return value
+  if (typeof value !== 'object') return value
+  return JSON.parse(JSON.stringify(value))
+}
+
+const isPlainObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value)
+
+function defaultValue(schema) {
+  switch (schema?.component) {
+    case 'Switch':
+      return false
+    case 'InputNumber':
+      return null
+    case 'RadioGroup':
+      return schema.componentProps?.options?.[0]?.value ?? null
+    case 'GSelectGroup':
+    case 'GTags':
+      return []
+    case 'GSubForm':
+      return schema.componentProps?.multiple ? [] : buildDefaults(subSchemas(schema))
+    default:
+      return ''
   }
 }
 
-const fetchConfigValues = async () => {
-  try {
-    const response = await requestRaw('/api/xiuxian/config?action=get_config')
-
-    if (response?.success) {
-      const config = response.data?.config || response.data || {}
-      return config
-    }
-
-    return {}
-  } catch (error) {
-    if (error.message !== '未授权') {
-      message.error('获取配置失败: ' + error.message)
-    }
-    return {}
+function buildDefaults(schemas = []) {
+  const data = {}
+  for (const schema of schemas) {
+    if (schema.field) data[schema.field] = defaultValue(schema)
   }
+  return data
 }
 
-const getNestedValue = (obj, path) => {
-  if (!obj || !path) return undefined
+const withDefaults = (schemas, value) => {
+  const data = buildDefaults(schemas)
+  if (!isPlainObject(value)) return data
+
+  for (const [key, item] of Object.entries(value)) {
+    data[key] = deepClone(item)
+  }
+  return data
+}
+
+const subSchemas = (schema) => schema?.componentProps?.schemas || []
+
+const getNestedValue = (object, path) => {
+  if (!object || !path) return undefined
 
   const keys = path.split('.')
+  let value = object
 
-  let value = obj
   for (const key of keys) {
     if (value === null || value === undefined) break
     if (typeof value !== 'object') return undefined
@@ -699,978 +597,1463 @@ const getNestedValue = (obj, path) => {
   if (value !== undefined) return value
 
   if (keys.length > 1 && keys[0] === 'xiuxian') {
-    const newPath = keys.slice(1).join('.')
-    return getNestedValue(obj, newPath)
+    return getNestedValue(object, keys.slice(1).join('.'))
   }
 
   return undefined
 }
 
-const getDefaultValue = (element) => {
-  switch (element.component) {
-    case 'Switch':
-      return false
-    case 'InputNumber':
-      return null
-    case 'RadioGroup':
-      return element.componentProps?.options?.[0]?.value ?? null
-    case 'GSelectGroup':
-    case 'GTags':
-      return []
-    case 'GSubForm':
-      return element.componentProps?.multiple ? [] : {}
-    default:
-      return ''
+const initFormData = (config) => {
+  Object.keys(formData).forEach((key) => delete formData[key])
+
+  for (const element of elements.value) {
+    if (!element.field || !element.component) continue
+    if (['GButtons', 'SOFT_GROUP_BEGIN', 'Divider'].includes(element.component)) continue
+
+    const raw = getNestedValue(config, element.field)
+
+    if (element.component === 'GSubForm') {
+      if (element.componentProps?.multiple) {
+        formData[element.field] = Array.isArray(raw) ? deepClone(raw) : []
+      } else {
+        formData[element.field] = isPlainObject(raw) ? deepClone(raw) : buildDefaults(subSchemas(element))
+      }
+      continue
+    }
+
+    formData[element.field] = raw === undefined ? defaultValue(element) : deepClone(raw)
   }
+
+  savedSnapshot = JSON.stringify(formData)
+  dirty.value = false
 }
 
-const deepClone = (obj) => {
-  if (obj === null || obj === undefined) return obj
-  return JSON.parse(JSON.stringify(obj))
-}
+const fetchConfigElements = async () => {
+  if (configElementsCache.value) return configElementsCache.value
 
-const getFormItemRules = (schema) => {
-  if (!schema.required) return []
+  const response = await requestRaw('/api/xiuxian/config?action=get_config_elements')
 
-  const rules = [{ required: true, message: `${schema.label}不能为空` }]
-
-  if (schema.component === 'InputNumber') {
-    rules.push({ type: 'number', message: `${schema.label}必须为数字` })
-  }
-
-  if (schema.componentProps?.min !== undefined) {
-    rules.push({
-      type: 'number',
-      min: schema.componentProps.min,
-      message: `${schema.label}最小值为${schema.componentProps.min}`
-    })
-  }
-  if (schema.componentProps?.max !== undefined) {
-    rules.push({
-      type: 'number',
-      max: schema.componentProps.max,
-      message: `${schema.label}最大值为${schema.componentProps.max}`
-    })
-  }
-
-  return rules
-}
-
-const isNestedObjectType = (element) => {
-  if (element.componentProps?.schemas && element.componentProps.schemas.length > 0) {
-    return true
-  }
-
-  if (element.field) {
-    const childElements = elements.value.filter((el) => {
-      if (!el.field) return false
-      const elKeys = el.field.split('.')
-      const currentKeys = element.field.split('.')
-      return (
-        elKeys.length === currentKeys.length + 1 &&
-        el.field.startsWith(element.field + '.') &&
-        el.component !== 'SOFT_GROUP_BEGIN' &&
-        el.component !== 'Divider' &&
-        el.component !== 'GSubForm'
-      )
-    })
-    return childElements.length > 0
-  }
-
-  return false
-}
-
-const getNestedSchemas = (element) => {
-  if (element.componentProps?.schemas && element.componentProps.schemas.length > 0) {
-    return element.componentProps.schemas
-  }
-
-  if (element.field) {
-    return elements.value
-      .filter((el) => {
-        if (!el.field) return false
-        const elKeys = el.field.split('.')
-        const currentKeys = element.field.split('.')
-        return (
-          elKeys.length === currentKeys.length + 1 &&
-          el.field.startsWith(element.field + '.') &&
-          el.component !== 'SOFT_GROUP_BEGIN' &&
-          el.component !== 'Divider' &&
-          el.component !== 'GSubForm'
-        )
-      })
-      .map((el) => ({
-        field: el.field.split('.').pop(),
-        label: el.label,
-        component: el.component,
-        componentProps: el.componentProps,
-        required: el.required,
-        bottomHelpMessage: el.bottomHelpMessage
-      }))
+  if (response?.success && Array.isArray(response.data?.elements)) {
+    configElementsCache.value = response.data.elements
+    return response.data.elements
   }
 
   return []
 }
 
-const initFormData = (elementsList, config) => {
-  const keys = Object.keys(formData)
-  keys.forEach((key) => delete formData[key])
+const fetchConfigValues = async () => {
+  const response = await requestRaw('/api/xiuxian/config?action=get_config')
 
-  elementsList.forEach((element) => {
-    if (!element.field || element.component === 'SOFT_GROUP_BEGIN' || element.component === 'Divider') {
-      return
-    }
+  if (response?.success) {
+    return response.data?.config || response.data || {}
+  }
 
-    const configValue = getNestedValue(config, element.field)
-
-    if (configValue !== undefined) {
-      if (typeof configValue === 'object' && configValue !== null) {
-        formData[element.field] = deepClone(configValue)
-      } else {
-        formData[element.field] = configValue
-      }
-    } else {
-      formData[element.field] = getDefaultValue(element)
-    }
-  })
+  return {}
 }
 
-const loadAllData = async (forceLoadElements = false) => {
+const loadAllData = async ({ force = false } = {}) => {
   loading.value = true
 
   try {
-    if (forceLoadElements) {
-      configElementsCache.value = null
-    }
+    if (force) configElementsCache.value = null
 
-    const elementsData = await fetchConfigElements()
+    const [elementsData, config] = await Promise.all([fetchConfigElements(), fetchConfigValues()])
 
-    if (elementsData.length === 0) {
-      loading.value = false
-      return
-    }
-
-    const config = await fetchConfigValues()
-    initFormData(elementsData, config || {})
+    elements.value = elementsData || []
+    initFormData(config || {})
+    lastLoadedAt.value = nowLabel()
   } catch (error) {
+    if (error?.message !== '未授权') {
+      message.error(`加载修仙配置失败：${error?.message || '未知错误'}`)
+    }
   } finally {
     loading.value = false
   }
 }
 
-const refreshConfigValues = async () => {
+const refreshConfigValues = async (silent = false) => {
+  if (!elements.value.length) return
+
   loading.value = true
 
   try {
     const config = await fetchConfigValues()
-    if (elements.value.length > 0 && config) {
-      initFormData(elements.value, config)
-    }
+    initFormData(config || {})
+    lastLoadedAt.value = nowLabel()
+    if (!silent) message.success('配置已刷新')
   } catch (error) {
+    if (error?.message !== '未授权') {
+      message.error(`刷新配置失败：${error?.message || '未知错误'}`)
+    }
   } finally {
     loading.value = false
   }
 }
 
 const handleRefresh = () => {
-  refreshConfigValues()
+  if (loading.value) return
+
+  if (!dirty.value) {
+    refreshConfigValues()
+    return
+  }
+
+  Modal.confirm({
+    cancelText: '取消',
+    content: '刷新会重新读取服务端配置，当前未保存的修改将丢失。',
+    okText: '刷新',
+    onOk: () => refreshConfigValues(),
+    title: '放弃未保存的修改？'
+  })
 }
 
-const getArrayData = (field) => {
-  const data = formData[field]
-  return Array.isArray(data) ? data : []
+const fieldProps = (schema) => {
+  const { multiple, options, style, ...rest } = schema?.componentProps || {}
+  return rest
 }
 
-const getObjectData = (field) => {
-  const data = formData[field]
-  return data && typeof data === 'object' && !Array.isArray(data) ? data : {}
+const numberWidth = (schema) => schema?.componentProps?.style?.width || '180px'
+
+const subfieldLabel = (schema) => schema?.label || '该项'
+
+const rulesFor = (schema) => {
+  const rules = []
+  const label = subfieldLabel(schema)
+
+  if (schema?.required) {
+    rules.push({
+      required: true,
+      message: `请填写${label}`,
+      ...(schema.component === 'InputNumber' ? { type: 'number' } : {})
+    })
+  }
+
+  if (schema?.component === 'InputNumber') {
+    const min = schema.componentProps?.min
+    const max = schema.componentProps?.max
+
+    if (min !== undefined || max !== undefined) {
+      rules.push({
+        validator: (_, value) => {
+          if (value === null || value === undefined) return Promise.resolve()
+          if (typeof value !== 'number' || Number.isNaN(value)) {
+            return Promise.reject(new Error(`${label}必须是数字`))
+          }
+          if (min !== undefined && value < min) {
+            return Promise.reject(new Error(`${label}不能小于 ${min}`))
+          }
+          if (max !== undefined && value > max) {
+            return Promise.reject(new Error(`${label}不能大于 ${max}`))
+          }
+          return Promise.resolve()
+        },
+        trigger: 'blur'
+      })
+    }
+  }
+
+  return rules
 }
 
-const formatPreviewValue = (value, schema) => {
-  if (value === undefined || value === null || value === '') return '-'
+const previewField = (value, schema) => {
+  if (schema?.component === 'Switch') return value ? '开启' : '关闭'
 
-  if (schema?.component === 'Switch') {
-    return value ? '开启' : '关闭'
+  if (schema?.component === 'RadioGroup' || schema?.component === 'Select') {
+    const options = schema.componentProps?.options || []
+    const matched = options.find((option) => String(option.value) === String(value))
+    if (matched) return matched.label
+    return value === undefined || value === null || value === '' ? '—' : String(value)
   }
 
-  if (schema?.component === 'RadioGroup') {
-    const option = schema.componentProps?.options?.find((opt) => opt.value === value)
-    return option?.label || String(value)
+  if (schema?.component === 'GSubForm') {
+    if (schema.componentProps?.multiple) {
+      return `已配置 ${Array.isArray(value) ? value.length : 0} 项`
+    }
+    if (isPlainObject(value)) {
+      return Object.keys(value).length ? JSON.stringify(value) : '—'
+    }
   }
 
-  if (Array.isArray(value)) {
-    if (value.length === 0) return '-'
-    return value.slice(0, 3).join(', ') + (value.length > 3 ? ` +${value.length - 3}...` : '')
-  }
-
-  if (typeof value === 'object') {
-    return JSON.stringify(value).substring(0, 50) + '...'
-  }
+  if (value === null || value === undefined || value === '') return '—'
+  if (Array.isArray(value)) return value.length ? value.join('，') : '—'
+  if (isPlainObject(value)) return JSON.stringify(value)
+  if (typeof value === 'boolean') return value ? '开启' : '关闭'
 
   return String(value)
 }
 
-const getArrayItemDisplayName = (item) => {
-  if (item.name) return item.name
-  if (item.id) return String(item.id)
-  if (item.title) return item.title
-  for (const key in item) {
-    if (typeof item[key] === 'string' && item[key]) {
-      return item[key].length > 20 ? item[key].substring(0, 20) + '...' : item[key]
-    }
-  }
-  return '未命名'
+const arrayValue = (element) => (Array.isArray(formData[element.field]) ? formData[element.field] : [])
+const objectValue = (element) => (isPlainObject(formData[element.field]) ? formData[element.field] : {})
+const hasObjectData = (element) => Object.keys(objectValue(element)).length > 0
+
+const arrayItemName = (item, index) => {
+  const name = item?.name ?? item?.title ?? item?.id
+  return name === undefined || name === null || name === '' ? `第 ${index + 1} 项` : String(name)
 }
 
-const copyReactiveObject = (source, target) => {
-  Object.keys(target).forEach((key) => delete target[key])
-  Object.entries(source).forEach(([key, value]) => {
-    target[key] = deepClone(value)
-  })
-}
+const arrayItemSummary = (item) => {
+  if (!currentFrame.value?.schemas) return '暂无详细配置'
 
-const openNestedSubForm = (element) => {
-  currentNestedElement.value = element
-  nestedSubFormTitle.value = element.label || '配置'
+  const parts = []
 
-  const schemas = getNestedSchemas(element)
-  currentNestedSchemas.value = schemas
-
-  Object.keys(nestedSubFormData).forEach((key) => delete nestedSubFormData[key])
-
-  const existingData = getObjectData(element.field)
-
-  nextTick(() => {
-    if (schemas.length > 0) {
-      schemas.forEach((schema) => {
-        if (schema.field) {
-          const value = existingData[schema.field]
-          if (value !== undefined) {
-            nestedSubFormData[schema.field] = deepClone(value)
-          } else {
-            nestedSubFormData[schema.field] = getDefaultValue(schema)
-          }
-        }
-      })
-    }
-  })
-
-  nestedSubFormVisible.value = true
-}
-
-const handleNestedSubFormSave = async () => {
-  if (nestedFormInnerRef.value) {
-    try {
-      await nestedFormInnerRef.value.validate()
-    } catch (error) {
-      return
-    }
+  for (const schema of currentFrame.value.schemas) {
+    if (['name', 'title', 'id'].includes(schema.field)) continue
+    const text = previewField(item?.[schema.field], schema)
+    if (text !== '—') parts.push(`${schema.label} ${text}`)
+    if (parts.length === 2) break
   }
 
-  nestedSubFormLoading.value = true
-
-  try {
-    const newData = deepClone(nestedSubFormData)
-    const element = currentNestedElement.value
-
-    if (element.parent === 'subForm') {
-      subFormData[element.field] = newData
-    } else if (element.parent === 'arrayItem') {
-      arrayItemEditData[element.field] = newData
-    } else if (element.parent === 'deep') {
-      if (element.parentData) {
-        element.parentData[element.field] = newData
-      }
-    } else {
-      formData[element.field] = newData
-    }
-
-    nestedSubFormVisible.value = false
-  } catch (error) {
-    message.error('保存失败: ' + error.message)
-  } finally {
-    nestedSubFormLoading.value = false
-  }
+  return parts.length ? parts.join(' · ') : '暂无详细配置'
 }
 
-const openNestedSubSubForm = (schema) => {
-  currentNestedElement.value = { field: schema.field, label: schema.label, parent: 'subForm', parentData: subFormData }
-  nestedSubFormTitle.value = schema.label || '配置'
-
-  const schemas = getNestedSchemas(schema)
-  currentNestedSchemas.value = schemas
-
-  Object.keys(nestedSubFormData).forEach((key) => delete nestedSubFormData[key])
-
-  const existingData = subFormData[schema.field] || {}
-
-  nextTick(() => {
-    if (schemas.length > 0) {
-      schemas.forEach((s) => {
-        if (s.field) {
-          const value = existingData[s.field]
-          if (value !== undefined) {
-            nestedSubFormData[s.field] = deepClone(value)
-          } else {
-            nestedSubFormData[s.field] = getDefaultValue(s)
-          }
-        }
-      })
-    }
-  })
-
-  nestedSubFormVisible.value = true
+const frameArrayCount = (schema) => {
+  const value = currentFrame.value?.data?.[schema.field]
+  return Array.isArray(value) ? value.length : 0
 }
 
-const openNestedSubSubFormForArray = (schema, parentData) => {
-  currentNestedElement.value = { field: schema.field, label: schema.label, parent: 'arrayItem', parentData: parentData }
-  nestedSubFormTitle.value = schema.label || '配置'
-
-  const schemas = getNestedSchemas(schema)
-  currentNestedSchemas.value = schemas
-
-  Object.keys(nestedSubFormData).forEach((key) => delete nestedSubFormData[key])
-
-  const existingData = parentData[schema.field] || {}
-
-  nextTick(() => {
-    if (schemas.length > 0) {
-      schemas.forEach((s) => {
-        if (s.field) {
-          const value = existingData[s.field]
-          if (value !== undefined) {
-            nestedSubFormData[s.field] = deepClone(value)
-          } else {
-            nestedSubFormData[s.field] = getDefaultValue(s)
-          }
-        }
-      })
-    }
-  })
-
-  nestedSubFormVisible.value = true
+const frameHasObjectData = (schema) => {
+  const value = currentFrame.value?.data?.[schema.field]
+  return isPlainObject(value) && Object.keys(value).length > 0
 }
 
-const openDeepNestedSubForm = (schema, parentData) => {
-  currentNestedElement.value = { field: schema.field, label: schema.label, parent: 'deep', parentData: parentData }
-  nestedSubFormTitle.value = schema.label || '配置'
-
-  const schemas = getNestedSchemas(schema)
-  currentNestedSchemas.value = schemas
-
-  Object.keys(nestedSubFormData).forEach((key) => delete nestedSubFormData[key])
-
-  const existingData = parentData[schema.field] || {}
-
-  nextTick(() => {
-    if (schemas.length > 0) {
-      schemas.forEach((s) => {
-        if (s.field) {
-          const value = existingData[s.field]
-          if (value !== undefined) {
-            nestedSubFormData[s.field] = deepClone(value)
-          } else {
-            nestedSubFormData[s.field] = getDefaultValue(s)
-          }
-        }
-      })
-    }
-  })
-
-  nestedSubFormVisible.value = true
+const pushEditor = (frame) => {
+  editorStack.push(frame)
+  editorVisible.value = true
 }
 
 const openSubForm = (element) => {
+  const field = element.field
+  const schemas = subSchemas(element)
+  const title = element.componentProps?.modalProps?.title || element.label || '配置'
+
   if (element.componentProps?.multiple) {
-    openArraySubForm(element)
+    pushEditor({
+      apply: (value) => {
+        formData[field] = deepClone(value)
+      },
+      data: deepClone(arrayValue(element)),
+      kind: 'array',
+      schemas,
+      title
+    })
     return
   }
 
-  currentElement.value = element
-  subFormTitle.value = element.componentProps?.modalProps?.title || element.label || '配置'
-
-  const schemas = element.componentProps?.schemas || []
-  currentSubFormSchemas.value = schemas
-
-  Object.keys(subFormData).forEach((key) => delete subFormData[key])
-
-  const existingData = getObjectData(element.field)
-
-  nextTick(() => {
-    if (schemas.length > 0) {
-      schemas.forEach((schema) => {
-        if (schema.field) {
-          const value = existingData[schema.field]
-          if (value !== undefined) {
-            subFormData[schema.field] = deepClone(value)
-          } else {
-            subFormData[schema.field] = getDefaultValue(schema)
-          }
-        }
-      })
-    }
+  pushEditor({
+    apply: (value) => {
+      formData[field] = deepClone(value)
+    },
+    data: withDefaults(schemas, formData[field]),
+    kind: 'object',
+    schemas,
+    title
   })
-
-  subFormVisible.value = true
 }
 
-const handleSubFormSave = async () => {
-  if (subFormInnerRef.value) {
-    try {
-      await subFormInnerRef.value.validate()
-    } catch (error) {
-      return
-    }
+const openNestedSubForm = (schema) => {
+  const frame = currentFrame.value
+  if (!frame || !isPlainObject(frame.data)) return
+
+  const schemas = subSchemas(schema)
+  const title = schema.componentProps?.modalProps?.title || schema.label || '配置'
+
+  if (schema.componentProps?.multiple) {
+    const current = Array.isArray(frame.data[schema.field]) ? frame.data[schema.field] : []
+    pushEditor({
+      apply: (value) => {
+        frame.data[schema.field] = deepClone(value)
+      },
+      data: deepClone(current),
+      kind: 'array',
+      schemas,
+      title
+    })
+    return
   }
 
-  subFormLoading.value = true
-
-  try {
-    const field = currentElement.value.field
-    const newData = deepClone(subFormData)
-    formData[field] = newData
-    subFormVisible.value = false
-  } catch (error) {
-    message.error('保存失败: ' + error.message)
-  } finally {
-    subFormLoading.value = false
-  }
-}
-
-const openArraySubForm = (element) => {
-  currentArrayElement.value = element
-  arraySubFormTitle.value = element.componentProps?.modalProps?.title || element.label || '配置'
-
-  const schemas = element.componentProps?.schemas || []
-  currentArraySubFormSchemas.value = schemas
-
-  const data = formData[element.field]
-  arraySubFormData.value = Array.isArray(data) ? deepClone(data) : []
-
-  arraySubFormVisible.value = true
-}
-
-const addArrayItemAndEdit = () => {
-  const newItem = {}
-  currentArraySubFormSchemas.value.forEach((schema) => {
-    if (schema.field) {
-      newItem[schema.field] = getDefaultValue(schema)
-    }
+  pushEditor({
+    apply: (value) => {
+      frame.data[schema.field] = deepClone(value)
+    },
+    data: withDefaults(schemas, frame.data[schema.field]),
+    kind: 'object',
+    schemas,
+    title
   })
-  arraySubFormData.value.push(newItem)
+}
 
-  isNewArrayItem.value = true
+const editArrayItem = (index, options = {}) => {
+  const frame = currentFrame.value
+  if (!frame || frame.kind !== 'array') return
 
-  const newIndex = arraySubFormData.value.length - 1
-  editArrayItem(newIndex)
+  const item = frame.data[index]
+  const schemas = frame.schemas
+
+  pushEditor({
+    apply: (value) => {
+      frame.data[index] = deepClone(value)
+    },
+    data: withDefaults(schemas, item),
+    isNew: Boolean(options.isNew),
+    kind: 'object',
+    newIndex: index,
+    schemas,
+    title: arrayItemName(item, index)
+  })
+}
+
+const addArrayItem = () => {
+  const frame = currentFrame.value
+  if (!frame || frame.kind !== 'array') return
+
+  frame.data.push(buildDefaults(frame.schemas))
+  editArrayItem(frame.data.length - 1, { isNew: true })
 }
 
 const removeArrayItem = (index) => {
-  arraySubFormData.value.splice(index, 1)
+  const frame = currentFrame.value
+  if (!frame || frame.kind !== 'array') return
+  frame.data.splice(index, 1)
 }
 
-const handleArrayConfirm = () => {
-  const field = currentArrayElement.value.field
-  formData[field] = deepClone(arraySubFormData.value)
-  arraySubFormVisible.value = false
-}
+const submitEditor = async () => {
+  const frame = currentFrame.value
+  if (!frame) return
 
-const editArrayItem = (index) => {
-  currentEditItemIndex.value = index
-  arrayItemEditTitle.value = '编辑项目'
-  currentArrayItemSchemas.value = currentArraySubFormSchemas.value
-
-  Object.keys(arrayItemEditData).forEach((key) => delete arrayItemEditData[key])
-
-  const itemData = arraySubFormData.value[index] || {}
-
-  nextTick(() => {
-    if (currentArrayItemSchemas.value.length > 0) {
-      currentArrayItemSchemas.value.forEach((schema) => {
-        if (schema.field) {
-          const value = itemData[schema.field]
-          if (value !== undefined) {
-            arrayItemEditData[schema.field] = deepClone(value)
-          } else {
-            arrayItemEditData[schema.field] = getDefaultValue(schema)
-          }
-        }
-      })
-    }
-  })
-
-  arrayItemEditVisible.value = true
-}
-
-const handleArrayItemEditSave = async () => {
-  if (arrayItemFormInnerRef.value) {
+  if (frame.kind === 'object') {
     try {
-      await arrayItemFormInnerRef.value.validate()
-    } catch (error) {
+      await editorFormRef.value?.validate()
+    } catch {
       return
     }
   }
 
-  arrayItemEditLoading.value = true
+  frame.apply(deepClone(frame.data))
+  editorStack.pop()
 
-  try {
-    const updatedItem = {}
-    Object.entries(arrayItemEditData).forEach(([key, value]) => {
-      updatedItem[key] = deepClone(value)
-    })
-
-    arraySubFormData.value[currentEditItemIndex.value] = updatedItem
-    isNewArrayItem.value = false
-
-    arrayItemEditVisible.value = false
-  } catch (error) {
-    message.error('保存失败: ' + error.message)
-  } finally {
-    arrayItemEditLoading.value = false
-  }
-}
-
-const handleArrayItemEditCancel = () => {
-  if (isNewArrayItem.value) {
-    arraySubFormData.value.splice(currentEditItemIndex.value, 1)
-    isNewArrayItem.value = false
-  }
-  arrayItemEditVisible.value = false
-}
-
-const handleButtonAction = async (btn) => {
-  if (btn.action === 'resetxxConfig') {
-    resetModalVisible.value = true
+  if (editorStack.length === 0) {
+    editorVisible.value = false
     return
   }
-  message.info(`执行动作: ${btn.action}`)
+
+  nextTick(() => editorFormRef.value?.clearValidate?.())
 }
 
-const handleResetConfirm = async () => {
-  resetLoading.value = true
+const handleEditorCancel = () => {
+  const frame = currentFrame.value
 
-  try {
-    const response = await requestRaw('/api/xiuxian/config?action=reset', {
-      method: 'POST'
-    })
-
-    if (response?.success) {
-      message.success(response.message)
-      resetModalVisible.value = false
-      await loadAllData(true)
-    } else {
-      message.error(response.message || '重置失败')
+  if (frame?.isNew && frame.kind === 'object') {
+    const parentFrame = editorStack[editorStack.length - 2]
+    if (parentFrame?.kind === 'array') {
+      parentFrame.data.splice(frame.newIndex, 1)
     }
-  } catch (error) {
-    if (error.message !== '未授权') {
-      message.error('重置失败: ' + error.message)
-    }
-  } finally {
-    resetLoading.value = false
   }
+
+  if (editorStack.length > 1) {
+    editorStack.pop()
+    nextTick(() => editorFormRef.value?.clearValidate?.())
+    return
+  }
+
+  closeEditor()
+}
+
+const closeEditor = () => {
+  editorVisible.value = false
+  editorStack.splice(0, editorStack.length)
+  nextTick(() => editorFormRef.value?.clearValidate?.())
+}
+
+const setGroupRef = (key, component) => {
+  if (component) groupSelectRefs.set(key, component)
+  else groupSelectRefs.delete(key)
+}
+
+const openGroupSelect = (key) => {
+  groupSelectRefs.get(key)?.focus?.()
+  groupOpen[key] = true
+}
+
+const applyCron = (element, key) => {
+  if (key) formData[element.field] = key
 }
 
 const handleSave = async () => {
+  if (saving.value) return
+
   saving.value = true
 
   try {
     const saveData = {}
-    Object.keys(formData).forEach((key) => {
-      if (key === 'actions') return
 
-      const keys = key.split('.')
-      if (keys.length === 1) {
-        saveData[key] = deepClone(formData[key])
-        return
-      }
-
+    for (const [field, value] of Object.entries(formData)) {
+      const keys = field.split('.')
       const actualKeys = keys[0] === 'xiuxian' ? keys.slice(1) : keys
-
       let current = saveData
-      for (let i = 0; i < actualKeys.length - 1; i++) {
-        const k = actualKeys[i]
-        if (!current[k] || typeof current[k] !== 'object' || Array.isArray(current[k])) {
-          current[k] = {}
+
+      for (let index = 0; index < actualKeys.length - 1; index++) {
+        const key = actualKeys[index]
+        if (!isPlainObject(current[key]) && !Array.isArray(current[key])) {
+          current[key] = {}
         }
-        current = current[k]
+        current = current[key]
       }
 
-      current[actualKeys[actualKeys.length - 1]] = deepClone(formData[key])
-    })
+      current[actualKeys[actualKeys.length - 1]] = deepClone(value)
+    }
+
+    const payloadSnapshot = JSON.stringify(formData)
 
     const response = await requestRaw('/api/xiuxian/config?action=save_config', {
-      method: 'POST',
-      body: JSON.stringify(saveData)
+      body: JSON.stringify(saveData),
+      method: 'POST'
     })
 
-    if (response?.success) {
-      message.success(response.message || '配置保存成功')
-    } else {
-      message.error(response.message || '保存失败')
+    if (!response?.success) {
+      message.error(response?.message || '保存失败')
+      return
     }
+
+    savedSnapshot = payloadSnapshot
+    dirty.value = JSON.stringify(formData) !== savedSnapshot
+    lastLoadedAt.value = nowLabel()
+    message.success(response.message || '配置保存成功')
   } catch (error) {
-    if (error.message !== '未授权') {
-      message.error('保存失败: ' + error.message)
+    if (error?.message !== '未授权') {
+      message.error(`保存失败：${error?.message || '未知错误'}`)
     }
   } finally {
     saving.value = false
   }
 }
 
+const handleResetConfirm = async () => {
+  if (resetLoading.value) return
+
+  resetLoading.value = true
+
+  try {
+    const response = await requestRaw('/api/xiuxian/config?action=reset', { method: 'POST' })
+
+    if (!response?.success) {
+      message.error(response?.message || '重置失败')
+      return
+    }
+
+    message.success(response.message || '重置成功')
+    resetModalVisible.value = false
+    await loadAllData({ force: true })
+  } catch (error) {
+    if (error?.message !== '未授权') {
+      message.error(`重置失败：${error?.message || '未知错误'}`)
+    }
+  } finally {
+    resetLoading.value = false
+  }
+}
+
 const fetchGroups = async () => {
   try {
     const response = await requestRaw('/api/xiuxian/config?action=get_groups')
-    if (response?.success && response.data?.groups) {
-      groupOptions.value = response.data.groups.map((g) => ({
-        label: g.name || g.groupId,
-        value: g.groupId
+
+    if (response?.success && Array.isArray(response.data?.groups)) {
+      groupOptions.value = response.data.groups.map((group) => ({
+        label: group.name || group.groupId,
+        value: group.groupId
       }))
     }
-  } catch (error) {}
+  } catch {}
 }
 
 onActivated(() => {
-  if (elements.value.length > 0) {
-    refreshConfigValues()
-  }
+  if (elements.value.length > 0 && !dirty.value) refreshConfigValues(true)
 })
 
 onMounted(async () => {
   if (!ensureAuth()) return
 
-  await fetchGroups()
-  await loadAllData()
+  await Promise.all([fetchGroups(), loadAllData()])
 })
 </script>
 
-<style scoped>
-.config-container {
+<style>
+.config-page {
+  --cfg-primary: #4a7df0;
+  --cfg-primary-deep: #3b6fd4;
+  --cfg-text: #303133;
+  --cfg-text-secondary: #5c6370;
+  --cfg-muted: #9aa0a8;
+  --cfg-hint: #b0b4bc;
+  --cfg-line: #e9ecf1;
+  --cfg-border: #dcdfe6;
+  --cfg-soft: #f7f9fc;
+}
+
+.config-sheet {
+  position: relative;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  border-radius: 16px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 16px 48px rgba(39, 52, 105, 0.12),
+    0 2px 8px rgba(16, 22, 40, 0.04);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(150%);
+}
+
+.config-loading,
+.config-empty {
+  padding: 34px 44px;
+}
+
+.config-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+}
+
+.config-body {
+  padding: 4px 44px 18px;
+}
+
+.config-section {
+  padding-bottom: 2px;
+}
+
+.config-section__title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 30px 0 18px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--cfg-primary-deep);
+}
+
+.config-section__title::before {
+  content: '';
+  width: 56px;
+  border-top: 1px solid var(--cfg-line);
+}
+
+.config-section__title::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--cfg-line);
+}
+
+.config-section:first-child .config-section__title {
+  margin-top: 22px;
+}
+
+.config-section__rows {
+  padding-bottom: 4px;
+}
+
+.config-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.config-row__label {
+  flex: 0 0 188px;
+  max-width: 188px;
+  padding: 7px 12px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--cfg-text);
+  text-align: right;
+}
+
+.config-row__label::after {
+  content: '：';
+}
+
+.config-required {
+  margin-right: 2px;
+  color: #f53f3f;
+  font-family: SimSun, sans-serif;
+}
+
+.config-row__control {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 780px;
+}
+
+.config-hint {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--cfg-hint);
+}
+
+.config-inline-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--lg-hairline);
+.config-inline-field .ant-select {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
-.card-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--lg-text);
+.config-inline-field .ant-btn {
+  flex: 0 0 auto;
 }
 
-.header-actions {
-  display: flex;
-  gap: 12px;
+.config-cron-input {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
-.save-btn {
-  background: var(--lg-brand-gradient);
-  border: none;
+.config-pick-btn.ant-btn {
+  height: 34px;
+  padding: 0 16px;
+  box-shadow: none;
 }
 
-.save-btn:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
+.config-sheet .ant-btn.config-cron-pick {
+  height: 34px;
+  color: var(--cfg-primary-deep) !important;
 }
 
-.loading-container,
-.empty-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 300px;
-}
-
-.config-form {
-  padding-top: 8px;
-}
-
-.group-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1a1a1a;
-  padding: 20px 0 12px 0;
-  margin-bottom: 8px;
-}
-
-.divider-wrapper {
-  margin: 12px 0;
-}
-
-.config-item {
-  margin-bottom: 8px;
-  padding: 8px 12px;
-  border-radius: var(--lg-radius-sm);
-  transition: background 0.2s ease;
-}
-
-.config-item:hover {
-  background: rgba(255, 255, 255, 0.42);
-}
-
-.config-help {
-  color: var(--lg-text-muted);
-  font-size: 12px;
-  margin-top: 4px;
-  margin-left: 4px;
-}
-
-.subform-form-item :deep(.ant-form-item-control-input) {
-  min-height: auto;
-}
-
-.subform-card {
-  display: inline-block;
-  min-width: 180px;
-  min-height: 60px;
-  border: 1px solid var(--lg-border-soft);
-  border-radius: var(--lg-radius-sm);
-  padding: 12px 36px 12px 16px;
-  background: rgba(255, 255, 255, 0.5);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.subform-card-inner {
-  min-width: 150px;
-}
-
-.subform-card:hover {
-  border-color: var(--lg-brand);
-  background: rgba(255, 255, 255, 0.68);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.75),
-    0 4px 16px rgba(102, 126, 234, 0.24);
-  transform: translateY(-2px);
-}
-
-.card-preview {
-  padding-right: 4px;
-}
-
-.array-count-preview {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  padding: 8px 0;
-}
-
-.count-number {
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--lg-brand);
-  line-height: 1;
-}
-
-.count-text {
-  font-size: 14px;
-  color: var(--lg-text-muted);
-  margin-left: 4px;
-}
-
-.preview-item {
-  display: flex;
-  align-items: baseline;
-  margin-bottom: 4px;
+.config-unsupported {
   font-size: 13px;
+  color: var(--cfg-muted);
+}
+
+.config-subform {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--cfg-border);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.config-subform--list {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 5px 14px;
+}
+
+.config-subform--object {
+  padding: 11px 14px;
+  background: var(--cfg-soft);
+  border-color: #edf0f4;
+}
+
+.config-subform:hover {
+  border-color: #a9c2f5;
+  box-shadow: 0 0 0 3px rgba(74, 125, 240, 0.06);
+}
+
+.config-subform:focus-visible {
+  border-color: var(--cfg-primary);
+  box-shadow: 0 0 0 3px rgba(74, 125, 240, 0.16);
+}
+
+.config-subform__count {
+  font-size: 13px;
+  color: var(--cfg-text);
+}
+
+.config-subform__count b {
+  font-weight: 600;
+}
+
+.config-subform__grid {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: 6px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.config-subform__key {
+  color: var(--cfg-muted);
   white-space: nowrap;
-}
-
-.preview-label {
-  color: var(--lg-text-secondary);
-  margin-right: 8px;
-  flex-shrink: 0;
-}
-
-.preview-value {
-  color: var(--lg-text);
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
 }
 
-.preview-more {
-  color: var(--lg-text-muted);
-  font-size: 12px;
-  margin-top: 4px;
+.config-subform__value {
+  color: var(--cfg-text-secondary);
+  word-break: break-all;
 }
 
-.card-empty {
-  color: var(--lg-text-muted);
-  font-size: 14px;
-  text-align: center;
-  padding: 12px 0;
+.config-subform__empty {
+  font-size: 13px;
+  color: var(--cfg-muted);
 }
 
-.card-hint {
+.config-subform__edit {
   position: absolute;
-  top: 8px;
+  top: 50%;
   right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 10px;
   font-size: 12px;
-  color: var(--lg-text-muted);
+  color: var(--cfg-primary);
+  background: inherit;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.18s ease;
+}
+
+.config-subform--object .config-subform__edit {
+  top: 10px;
+  right: 12px;
+  transform: none;
+}
+
+.config-subform:hover .config-subform__edit,
+.config-subform:focus-visible .config-subform__edit {
+  opacity: 1;
+}
+
+.config-savebar {
+  position: sticky;
+  bottom: 0;
+  z-index: 6;
   display: flex;
   align-items: center;
-  gap: 4px;
-  transition: color 0.3s;
-}
-
-.subform-card:hover .card-hint {
-  color: var(--lg-brand);
-}
-
-.sub-form {
-  max-height: 60vh;
-  overflow-y: auto;
-  padding: 8px 4px;
-}
-
-.sub-form-empty {
-  display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 200px;
+  min-height: 66px;
+  padding: 12px 44px;
+  background: rgba(255, 255, 255, 0.96);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+  border-top: 1px solid var(--cfg-line);
+  border-radius: 0 0 15px 15px;
 }
 
-.array-modal-container {
-  display: flex;
-  flex-direction: column;
-  height: 60vh;
-}
-
-.array-scroll-area {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px 4px;
-  margin-bottom: 0;
-}
-
-.array-empty {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-}
-
-.array-item-card {
-  background: rgba(255, 255, 255, 0.42);
-  border: 1px solid var(--lg-border-soft);
-  border-radius: var(--lg-radius-sm);
-  margin-bottom: 12px;
-  padding: 16px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  transition: all 0.3s ease;
-}
-
-.array-item-card:hover {
-  border-color: var(--lg-brand);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 2px 12px rgba(102, 126, 234, 0.2);
-}
-
-.array-item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px dashed var(--lg-hairline);
-}
-
-.array-item-title {
-  font-weight: 600;
-  color: var(--lg-text);
-  font-size: 14px;
-}
-
-.array-item-actions {
+.config-savebar__state {
+  position: absolute;
+  left: 44px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--cfg-muted);
 }
 
-.array-item-preview {
-  padding: 4px 0;
+.state-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #52c41a;
 }
 
-/* 模态框底部操作条：原来是实心白，会盖住模态框的玻璃 */
-.array-footer {
+.state-dot.is-dirty {
+  background: #faad14;
+}
+
+.config-save-btn.ant-btn {
+  min-width: 132px;
+  height: 38px;
+  font-weight: 500;
+  box-shadow: 0 5px 14px rgba(74, 125, 240, 0.24);
+}
+
+.config-save-btn.ant-btn:hover {
+  box-shadow: 0 7px 18px rgba(74, 125, 240, 0.3);
+}
+
+.config-sheet .ant-input,
+.config-sheet .ant-input-affix-wrapper,
+.config-sheet .ant-input-number,
+.config-sheet .ant-select:not(.ant-select-customize-input) .ant-select-selector {
+  color: var(--cfg-text) !important;
+  background: #fff !important;
+  border: 1px solid var(--cfg-border) !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+}
+
+.config-sheet .ant-input-number {
+  padding: 0 11px;
+}
+
+.config-sheet .ant-input-number-input {
+  color: var(--cfg-text) !important;
+  background: transparent !important;
+}
+
+.config-sheet .ant-select:not(.ant-select-customize-input) .ant-select-selector {
+  padding: 0 11px;
+}
+
+.config-sheet .ant-input::placeholder,
+.config-sheet .ant-select-selection-placeholder {
+  color: #b9bec7 !important;
+}
+
+.config-sheet .ant-input:hover,
+.config-sheet .ant-input-affix-wrapper:hover,
+.config-sheet .ant-input-number:hover,
+.config-sheet .ant-select:not(.ant-select-customize-input):hover .ant-select-selector {
+  border-color: #a9c2f5 !important;
+}
+
+.config-sheet .ant-input:focus,
+.config-sheet .ant-input-focused,
+.config-sheet .ant-input-affix-wrapper:focus,
+.config-sheet .ant-input-affix-wrapper-focused,
+.config-sheet .ant-input-affix-wrapper:focus-within,
+.config-sheet .ant-input-number-focused,
+.config-sheet .ant-select-focused:not(.ant-select-disabled):not(.ant-select-customize-input) .ant-select-selector {
+  background: #fff !important;
+  border-color: var(--cfg-primary) !important;
+  box-shadow: 0 0 0 2px rgba(74, 125, 240, 0.12) !important;
+}
+
+.config-sheet .ant-input-affix-wrapper .ant-input {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.config-sheet .ant-btn-default {
+  color: var(--cfg-text-secondary) !important;
+  background: #fff !important;
+  border: 1px solid var(--cfg-border) !important;
+  box-shadow: none !important;
+}
+
+.config-sheet .ant-btn-default:not(:disabled):hover {
+  color: var(--cfg-primary) !important;
+  background: #fff !important;
+  border-color: var(--cfg-primary) !important;
+  transform: none;
+  box-shadow: none !important;
+}
+
+.config-sheet .ant-btn-primary {
+  background: var(--cfg-primary) !important;
+  border-color: var(--cfg-primary) !important;
+  box-shadow: none;
+}
+
+.config-sheet .ant-btn-primary:not(:disabled):hover {
+  background: #3f6fdd !important;
+  border-color: #3f6fdd !important;
+}
+
+.config-sheet .ant-btn-dangerous.ant-btn-default {
+  color: #f53f3f !important;
+  border-color: #ffc2c2 !important;
+  background: #fff !important;
+}
+
+.config-sheet .ant-btn-dangerous.ant-btn-default:not(:disabled):hover {
+  color: #fff !important;
+  background: #f53f3f !important;
+  border-color: #f53f3f !important;
+}
+
+.config-sheet .ant-btn-dangerous.ant-btn-primary {
+  background: #f53f3f !important;
+  border-color: #f53f3f !important;
+}
+
+.config-sheet .ant-radio-group {
   display: flex;
-  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 2px 22px;
+  min-height: 34px;
   align-items: center;
-  padding: 16px 4px 4px;
-  border-top: 1px solid var(--lg-hairline);
-  background: transparent;
-  flex-shrink: 0;
 }
 
-.array-add-btn {
-  background: var(--lg-brand-gradient);
-  border: none;
+.config-sheet .ant-switch {
+  margin-top: 5px;
 }
 
-.array-add-btn:hover {
-  opacity: 0.9;
+.config-select-popup {
+  background: #fff !important;
+  border: 1px solid #eceef2 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 8px 24px rgba(24, 32, 60, 0.1) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
-:deep(.ant-form-item-label > label) {
+.config-select-popup .ant-select-item {
+  border-radius: 4px;
+}
+
+.config-select-popup .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  color: var(--cfg-primary-deep);
+  background: #eef4ff !important;
   font-weight: 500;
 }
 
-:deep(.ant-form-item-extra) {
-  color: #3b6fd4;
-  font-size: 12px;
+.config-select-popup .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background: #f4f8ff !important;
 }
 
-:deep(.ant-form-item-help) {
-  color: var(--lg-text-muted);
-  font-size: 12px;
+.reset-warning {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #f53f3f;
 }
 
-:deep(.ant-divider) {
-  margin: 16px 0;
+.reset-desc {
+  margin: 0;
+  font-size: 13px;
+  color: #8b909a;
 }
 
 @media (max-width: 768px) {
-  .card-header {
+  .config-body {
+    padding: 2px 18px 12px;
+  }
+
+  .config-loading,
+  .config-empty {
+    padding: 24px 18px;
+  }
+
+  .config-row {
     flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
+    margin-bottom: 16px;
   }
 
-  .header-actions {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .subform-card {
-    min-width: auto;
-  }
-
-  .array-modal-container {
-    height: auto;
-    max-height: 60vh;
-  }
-
-  :deep(.ant-form-item) {
-    flex-direction: column;
-  }
-
-  :deep(.ant-form-item-label) {
+  .config-row__label {
+    flex: 0 0 auto;
+    max-width: none;
+    padding: 0 0 6px;
     text-align: left;
-    padding-bottom: 4px;
   }
 
-  .array-footer {
-    flex-direction: column;
-    gap: 8px;
+  .config-row__control {
+    width: 100%;
+    max-width: none;
+  }
+
+  .config-section__title::before {
+    width: 24px;
+  }
+
+  .config-subform__grid {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  .config-subform__edit {
+    opacity: 0.55;
+  }
+
+  .config-savebar {
+    min-height: 60px;
+    padding: 10px 18px 10px 76px;
+    border-radius: 0 0 15px 15px;
+  }
+
+  .config-savebar__state {
+    display: none;
+  }
+
+  .config-save-btn.ant-btn {
+    width: auto;
+    min-width: 150px;
+  }
+}
+</style>
+
+<style>
+.config-editor-modal .ant-modal-content {
+  padding: 0 !important;
+  overflow: hidden;
+  background: #fff !important;
+  background-image: none !important;
+  border: 1px solid #eceef2;
+  border-radius: 12px !important;
+  box-shadow: 0 24px 64px rgba(24, 32, 60, 0.2) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.config-editor-modal .ant-modal-content::before,
+.config-editor-modal .ant-modal-content::after {
+  display: none !important;
+}
+
+.config-editor-modal .ant-modal-header {
+  margin: 0 !important;
+  padding: 18px 24px 14px !important;
+  background: #fff !important;
+  border-bottom: 1px solid #f0f2f5 !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+.config-editor-modal .ant-modal-title {
+  color: #1f2329 !important;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.config-editor-modal .ant-modal-close {
+  top: 16px;
+  right: 16px;
+  color: #9aa0a8;
+}
+
+.config-editor-modal .ant-modal-body {
+  max-height: 64vh;
+  padding: 20px 24px 8px !important;
+  overflow-y: auto;
+}
+
+.config-editor-modal .ant-modal-footer {
+  margin: 0 !important;
+  padding: 12px 24px !important;
+  background: #fff;
+  border-top: 1px solid #f0f2f5 !important;
+  border-radius: 0 0 12px 12px;
+}
+
+.config-editor-modal .ant-form-item {
+  margin-bottom: 18px;
+}
+
+.config-editor-modal .ant-form-item-label > label {
+  color: #303133 !important;
+  font-weight: 500;
+}
+
+.config-editor-modal .ant-form-item-extra {
+  padding-top: 4px;
+  color: #b0b4bc !important;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.config-editor-modal .ant-form-item-explain-error {
+  font-size: 12px;
+}
+
+.config-editor-modal .ant-input,
+.config-editor-modal .ant-input-affix-wrapper,
+.config-editor-modal .ant-input-number,
+.config-editor-modal .ant-select:not(.ant-select-customize-input) .ant-select-selector {
+  color: #303133 !important;
+  background: #fff !important;
+  border: 1px solid #dcdfe6 !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+}
+
+.config-editor-modal .ant-input-number {
+  padding: 0 11px;
+}
+
+.config-editor-modal .ant-input-number-input {
+  background: transparent !important;
+  color: #303133 !important;
+}
+
+.config-editor-modal .ant-input::placeholder,
+.config-editor-modal .ant-select-selection-placeholder {
+  color: #b9bec7 !important;
+}
+
+.config-editor-modal .ant-input:hover,
+.config-editor-modal .ant-input-affix-wrapper:hover,
+.config-editor-modal .ant-input-number:hover,
+.config-editor-modal .ant-select:not(.ant-select-customize-input):hover .ant-select-selector {
+  border-color: #a9c2f5 !important;
+}
+
+.config-editor-modal .ant-input:focus,
+.config-editor-modal .ant-input-focused,
+.config-editor-modal .ant-input-affix-wrapper:focus,
+.config-editor-modal .ant-input-affix-wrapper-focused,
+.config-editor-modal .ant-input-affix-wrapper:focus-within,
+.config-editor-modal .ant-input-number-focused,
+.config-editor-modal
+  .ant-select-focused:not(.ant-select-disabled):not(.ant-select-customize-input)
+  .ant-select-selector {
+  background: #fff !important;
+  border-color: #4a7df0 !important;
+  box-shadow: 0 0 0 2px rgba(74, 125, 240, 0.12) !important;
+}
+
+.config-editor-modal .ant-input-affix-wrapper .ant-input {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.config-editor-modal .ant-form-item-has-error .ant-input,
+.config-editor-modal .ant-form-item-has-error .ant-input-affix-wrapper,
+.config-editor-modal .ant-form-item-has-error .ant-input-number,
+.config-editor-modal .ant-form-item-has-error .ant-select:not(.ant-select-customize-input) .ant-select-selector {
+  border-color: #ff4d4f !important;
+}
+
+.config-editor-modal .ant-form-item-has-error .ant-input:focus,
+.config-editor-modal .ant-form-item-has-error .ant-input-affix-wrapper:focus,
+.config-editor-modal .ant-form-item-has-error .ant-input-number-focused,
+.config-editor-modal
+  .ant-form-item-has-error
+  .ant-select-focused:not(.ant-select-disabled):not(.ant-select-customize-input)
+  .ant-select-selector {
+  border-color: #ff4d4f !important;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.12) !important;
+}
+
+.config-editor-modal .ant-btn-default {
+  color: #4e5969 !important;
+  background: #fff !important;
+  border: 1px solid #dcdfe6 !important;
+  box-shadow: none !important;
+}
+
+.config-editor-modal .ant-btn-default:not(:disabled):hover {
+  color: #4a7df0 !important;
+  background: #fff !important;
+  border-color: #4a7df0 !important;
+  transform: none;
+  box-shadow: none !important;
+}
+
+.config-editor-modal .ant-btn-primary {
+  background: #4a7df0 !important;
+  border-color: #4a7df0 !important;
+  box-shadow: none;
+}
+
+.config-editor-modal .ant-btn-primary:not(:disabled):hover {
+  background: #3f6fdd !important;
+  border-color: #3f6fdd !important;
+}
+
+.config-editor-modal .ant-btn-dangerous.ant-btn-primary {
+  background: #f53f3f !important;
+  border-color: #f53f3f !important;
+}
+
+.config-editor-modal .ant-btn-text {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+.config-editor-modal .ant-btn-text:not(:disabled):hover {
+  background: #f4f6fa !important;
+}
+
+.config-editor-modal .ant-btn-dangerous.ant-btn-text {
+  color: #f53f3f !important;
+}
+
+.config-editor-modal .ant-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 22px;
+  min-height: 34px;
+  align-items: center;
+}
+
+.config-editor-modal .ant-switch {
+  margin-top: 5px;
+}
+
+.editor-head {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-right: 24px;
+}
+
+.editor-head__title {
+  color: #1f2329;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.editor-head__trail {
+  color: #a3a9b3;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.editor-body {
+  min-height: 80px;
+}
+
+.editor-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.editor-array__meta {
+  margin-bottom: 12px;
+  color: #9aa0a8;
+  font-size: 12.5px;
+}
+
+.editor-array__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  margin-bottom: 14px;
+  border: 1px dashed #e3e6eb;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.editor-array__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+  padding: 12px 14px;
+  background: #fcfdff;
+  border: 1px solid #eceef2;
+  border-radius: 8px;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.editor-array__item:hover {
+  border-color: #c9d8f7;
+  box-shadow: 0 3px 12px rgba(39, 52, 105, 0.06);
+}
+
+.editor-array__main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.editor-array__index {
+  display: grid;
+  flex: 0 0 26px;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #eef4ff;
+  color: #4a7df0;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.editor-array__copy {
+  min-width: 0;
+}
+
+.editor-array__name {
+  color: #303133;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.editor-array__summary {
+  max-width: 520px;
+  margin-top: 3px;
+  overflow: hidden;
+  color: #9aa0a8;
+  font-size: 12px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editor-array__actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 2px;
+}
+
+.editor-array__actions .ant-btn-text:not(.ant-btn-dangerous) {
+  color: #4a7df0;
+}
+
+.editor-array__add.ant-btn {
+  height: 38px;
+  margin-top: 4px;
+  color: #4a7df0 !important;
+  background: #fff !important;
+  border: 1px dashed #c8d3e6 !important;
+  box-shadow: none !important;
+}
+
+.editor-array__add.ant-btn:hover {
+  color: #3f6fdd !important;
+  background: #f7faff !important;
+  border-color: #4a7df0 !important;
+}
+
+.config-editor-modal .config-subform {
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.config-editor-modal .config-subform--object {
+  padding: 11px 14px;
+  background: #f7f9fc;
+  border-color: #edf0f4;
+}
+
+.config-editor-modal .config-subform--list {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 5px 14px;
+}
+
+.config-editor-modal .config-subform:hover {
+  border-color: #a9c2f5;
+  box-shadow: 0 0 0 3px rgba(74, 125, 240, 0.06);
+}
+
+.config-editor-modal .config-subform:focus-visible {
+  border-color: #4a7df0;
+  box-shadow: 0 0 0 3px rgba(74, 125, 240, 0.16);
+}
+
+.config-editor-modal .config-subform__count {
+  color: #303133;
+  font-size: 13px;
+}
+
+.config-editor-modal .config-subform__count b {
+  font-weight: 600;
+}
+
+.config-editor-modal .config-subform__grid {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 6px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.config-editor-modal .config-subform__key {
+  overflow: hidden;
+  color: #9aa0a8;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.config-editor-modal .config-subform__value {
+  color: #5c6370;
+  word-break: break-all;
+}
+
+.config-editor-modal .config-subform__empty {
+  color: #9aa0a8;
+  font-size: 13px;
+}
+
+.config-editor-modal .config-subform__edit {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 10px;
+  color: #4a7df0;
+  background: inherit;
+  font-size: 12px;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.18s ease;
+}
+
+.config-editor-modal .config-subform--object .config-subform__edit {
+  top: 10px;
+  right: 12px;
+  transform: none;
+}
+
+.config-editor-modal .config-subform:hover .config-subform__edit,
+.config-editor-modal .config-subform:focus-visible .config-subform__edit {
+  opacity: 1;
+}
+
+.config-editor-modal .config-inline-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.config-editor-modal .config-inline-field .ant-select {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.config-editor-modal .config-cron-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.config-editor-modal .config-pick-btn.ant-btn {
+  height: 34px;
+  padding: 0 16px;
+  box-shadow: none;
+}
+
+.config-editor-modal .ant-btn.config-cron-pick {
+  height: 34px;
+  color: #3b6fd4 !important;
+}
+
+.config-editor-modal .config-unsupported {
+  color: #9aa0a8;
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .config-editor-modal .ant-modal-body {
+    max-height: 68vh;
+    padding: 16px 16px 4px !important;
+  }
+
+  .config-editor-modal .ant-modal-header {
+    padding: 16px 16px 12px !important;
+  }
+
+  .config-editor-modal .ant-modal-footer {
+    padding: 10px 16px !important;
+  }
+
+  .editor-array__summary {
+    max-width: 180px;
   }
 }
 </style>

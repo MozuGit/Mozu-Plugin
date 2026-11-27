@@ -129,7 +129,7 @@ export default class QQBotApi {
       logger.error('[魔族陌][Interface] ' + err)
     }
     return result
-  } 
+  }
 
   /**
    * 获取群成员申请加入列表
